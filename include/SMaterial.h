@@ -5,7 +5,7 @@
 #ifndef __S_MATERIAL_H_INCLUDED__
 #define __S_MATERIAL_H_INCLUDED__
 
-#include "Color.h"
+#include "SColor.h"
 #include "ITexture.h"
 
 namespace irr
@@ -15,7 +15,8 @@ namespace video
 	//! Abstracted and easy to use standard material modes.
 	enum E_MATERIAL_TYPE
 	{
-		//! Standard solid material. Only first texture is used.
+		//! Standard solid material. Only first texture is used, which is
+		//! supposed to be the diffuse material.
 		EMT_SOLID = 0,					
 
 		//! A transparent material. Only the first texture is used.
@@ -34,7 +35,12 @@ namespace video
 		//! Material type with standard lightmap technique: 
 		//! There should be 2 textures: The first texture layer is a diffuse map,
 		//! the second is a light map. Vertex light is ignored.
-		EMT_LIGHTMAP,					
+		EMT_LIGHTMAP,				
+
+		//! Makes the material look like it was reflection the environment
+		//! around it. To make this possible, a texture called 'sphere map'
+		//! is used, which must be set as Texture1.
+		EMT_SPHERE_MAP,
 
 		//! This value is not used. it only forces this enumeration to compile in 32 bit. 
 		EMT_FORCE_32BIT = 0x7fffffff	
@@ -65,6 +71,9 @@ namespace video
 		//! Is bilinear filtering enabled? Default: true
 		EMF_BILINEAR_FILTER,
 
+		//! Clamp texture coordinates instead of wrapping them. Default: false
+		EMF_CLAMP_TEXTURE_COORDINATES,
+
 		//! This is not a flag, but a value indicating how much flags there are.
 		EMF_MATERIAL_FLAG_COUNT 
 	};
@@ -81,7 +90,8 @@ namespace video
 		EmissiveColor(0,0,0,0), SpecularColor(0,0,0,0), Texture1(0), Texture2(0),
 			MaterialType(EMT_SOLID), Wireframe(false), Lighting(true),
 			ZBuffer(true), ZWriteEnable(true), BackfaceCulling(true),
-			GouraudShading(true), Shininess(0.0f), BilinearFilter(true)
+			GouraudShading(true), Shininess(0.0f), BilinearFilter(true),
+			ClampTextureCooridnates(false)
 		{}
 
 		//! Type of the material. Specifies how everything is blended together
@@ -91,18 +101,18 @@ namespace video
 		//! The default is full white, meaning objects are completely globally illuminated.
 		//! Reduce this if you want to see diffuse or specular light effects, or change
 		//! the blend of colours to make the object have a base colour other than white.
-		Color AmbientColor;		
+		SColor AmbientColor;		
 
 		//! How much diffuse light coming from a light source is reflected by this material.
 		//! The default is full white.
-		Color DiffuseColor;		
+		SColor DiffuseColor;		
 
 		//! Light emitted by this material. Default is to emitt no light.
-		Color EmissiveColor;	
+		SColor EmissiveColor;	
 
 		//! How much specular light (highlights from a light) is reflected. 
 		//! The default is to reflect no specular light. 
-		Color SpecularColor;	
+		SColor SpecularColor;	
 
 		//! Value affecting the size of specular highlights.
 		f32 Shininess;			
@@ -149,7 +159,10 @@ namespace video
 				bool BackfaceCulling;				
 
 				//! Is bilinear filtering enabled? Default: true
-				bool BilinearFilter;				
+				bool BilinearFilter;	
+
+				//! Clamp texture coordinates instead of wrapping them. Default: false
+				bool ClampTextureCooridnates;
 			};
 
 			bool Flags[EMF_MATERIAL_FLAG_COUNT];
@@ -169,3 +182,4 @@ namespace video
 } // end namespace irr
 
 #endif
+

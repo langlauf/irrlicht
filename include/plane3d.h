@@ -5,6 +5,7 @@
 #ifndef __IRR_PLANE_3D_H_INCLUDED__
 #define __IRR_PLANE_3D_H_INCLUDED__
 
+#include "irrTypes.h"
 #include "irrmath.h"
 #include "vector3d.h"
 
@@ -23,8 +24,7 @@ enum EIntersectionRelation3D
 	ISREL3D_CLIPPED
 };
 
-
-//! Template plane class.
+//! Template plane class with some intersection testing methods.
 template <class T>
 class plane3d
 {
@@ -32,16 +32,16 @@ class plane3d
 
 		// Constructors
 
-		plane3d(): MPoint(0,0,0), Normal(0,1,0) {};
-		plane3d(const vector3d<T>& MPoint, const vector3d<T>& Normal) : MPoint(MPoint), Normal(Normal) {};
-		plane3d(T px, T py, T pz, T nx, T ny, T nz) : MPoint(px, py, pz), Normal(nx, ny, nz) {};
-		plane3d(const plane3d<T>& other) :MPoint(other.MPoint), Normal(other.Normal) {};
+		plane3d(): Normal(0,1,0) { recalculateD(vector3d<T>(0,0,0)); };
+		plane3d(const vector3d<T>& MPoint, const vector3d<T>& Normal) : Normal(Normal) { recalculateD(MPoint); };
+		plane3d(T px, T py, T pz, T nx, T ny, T nz) : Normal(nx, ny, nz) { recalculateD(vector3d<T>(px, py, pz)); };
+		plane3d(const plane3d<T>& other) :D(other.D), Normal(other.Normal) {};
 		plane3d(const vector3d<T>& point1, const vector3d<T>& point2, const vector3d<T>& point3)	{ setPlane(point1, point2, point3);	};
 
 		// operators
 
-		inline bool operator==(const plane3d<T>& other) const { return (MPoint==other.MPoint && Normal==other.Normal);};
-		inline bool operator!=(const plane3d<T>& other) const { return !(MPoint==other.MPoint && Normal==other.Normal);};
+		inline bool operator==(const plane3d<T>& other) const { return (D==other.D && Normal==other.Normal);};
+		inline bool operator!=(const plane3d<T>& other) const { return !(D==other.D && Normal==other.Normal);};
 
 		// functions
 
@@ -49,33 +49,39 @@ class plane3d
 		{
 			Normal = nvector;
 			Normal.normalize();
-			MPoint = point;
+			recalculateD(point);
 		}
 
-		//! creates the plane from 3 memberpoints
+		void setPlane(const vector3d<T>& nvect, T d)
+		{
+			Normal = nvect;
+			D = d;
+		}
+
 		void setPlane(const vector3d<T>& point1, const vector3d<T>& point2, const vector3d<T>& point3)
 		{
+			// creates the plane from 3 memberpoints
 			Normal = (point2 - point1).crossProduct(point3 - point1);
 			Normal.normalize();
 
-			MPoint = point1;
+			recalculateD(point1);
 		}
 
+
 		//! Returns an intersection with a 3d line.
-		//! If you are doing intersections very often with the
-		//! same planes, use plane3dex, it is faster.
 		//! \param lineVect: Vector of the line to intersect with.
 		//! \param linePoint: Point of the line to intersect with.
 		//! \param outIntersection: Place to store the intersection point, if there is one.
 		//! \return Returns true if there was an intersection, false if there was not.
-		bool getIntersectionWithLine(const vector3d<T>& linePoint, const vector3d<T>& lineVect, vector3d<T>& outIntersection) const
+		bool getIntersectionWithLine(const vector3d<T>& linePoint, const vector3d<T>& lineVect,
+					vector3d<T>& outIntersection) const
 		{
 			T t2 = Normal.dotProduct(lineVect);
 
 			if (t2 == 0)
 				return false;
 
-			T t = - (Normal.dotProduct(linePoint) - MPoint.dotProduct(Normal)) / t2;
+			T t =- (Normal.dotProduct(linePoint) + D) / t2;			
 			outIntersection = linePoint + (lineVect * t);
 			return true;
 		}
@@ -85,7 +91,8 @@ class plane3d
 		//! \param linePoint2: Point 2 of the line.
 		//! \param outIntersection: Place to store the intersection point, if there is one.
 		//! \return Returns true if there was an intersection, false if there was not.
-		bool getIntersectionWithLimitedLine(const vector3d<T>& linePoint1, const vector3d<T>& linePoint2, vector3d<T>& outIntersection) const
+		bool getIntersectionWithLimitedLine(const vector3d<T>& linePoint1, 
+					const vector3d<T>& linePoint2, vector3d<T>& outIntersection) const
 		{
 			return (	getIntersectionWithLine(linePoint1, linePoint2 - linePoint1, outIntersection) &&
 						outIntersection.isBetweenPoints(linePoint1, linePoint2));
@@ -98,22 +105,77 @@ class plane3d
 		//! ISREL3D_PLANAR if the point is within the plane.
 		EIntersectionRelation3D classifyPointRelation(const vector3d<T>& point) const
 		{
-			f32 pktprd = (MPoint - point).dotProduct(Normal);
-			
-			if (pktprd < -ROUNDING_ERROR)
+			f32 d = Normal.dotProduct(point) + D;
+
+			if (d < -ROUNDING_ERROR)
 				return ISREL3D_FRONT;
 
-			if (pktprd > ROUNDING_ERROR)
+			if (d > ROUNDING_ERROR)
 				return ISREL3D_BACK;
 
 			return ISREL3D_PLANAR;
 		}
 
+		//! Recalculates the distance from origin by applying
+		//! a new member point to the plane.
+		void recalculateD(const vector3d<T>& MPoint)
+		{
+			D = - MPoint.dotProduct(Normal);
+		}
+
+		//!\return Returns a member point of the plane.
+		vector3d<T> getMemberPoint() const
+		{
+			return Normal * -D;
+		}
+
+		//! Tests if there is a intersection between this plane and another
+		//! \return Returns true if there is a intersection.
+		bool existsInterSection(const plane3d<T>& other) const
+		{
+			vector3d<T> cross = other.Normal.crossProduct(Normal);
+			return cross.getLenght() > 1e-08f;
+		}
+
+		//! Intersects this plane with another.
+		//! \return Returns true if there is a intersection, false if not.
+		bool getIntersectionWithPlane(const plane3d<T>& other, vector3d<T>& outLinePoint,
+				vector3d<T>& outLineVect) const
+		{
+			f64 fn00 = Normal.getLength();
+			f64 fn01 = Normal.dotProduct(other.Normal);
+			f64 fn11 = other.Normal.getLength();
+			f64 det = fn00*fn11 - fn01*fn01;
+
+			if (fabs(det) < 1e-08f)
+				return false;
+
+            det = 1.0 / det;
+			f64 fc0 = (fn11*-D + fn01*other.D) * det;
+			f64 fc1 = (fn00*-other.D + fn01*D) * det;
+
+			outLineVect = Normal.crossProduct(other.Normal);
+			outLinePoint = Normal*(T)fc0 + other.Normal*(T)fc1;
+			return true;
+		}
+
+		//! Returns the intersection point with two other planes if there is one.
+		bool getIntersectionWithPlanes(const plane3d<T>& o1, 
+				const plane3d<T>& o2, vector3d<T>& outPoint) const
+		{
+			vector3d<T> linePoint, lineVect;
+			if (getIntersectionWithPlane(o1, linePoint, lineVect))
+				return o2.getIntersectionWithLine(linePoint, lineVect, outPoint);
+
+			return false;
+		}
+	
 		// member variables
 		
-		vector3d<T> MPoint;	// member point of plane
+		T D;					// distance from origin
 		vector3d<T> Normal;		// normal vector
 };
+
 
 
 
@@ -121,3 +183,4 @@ class plane3d
 } // end namespace irr
 
 #endif
+

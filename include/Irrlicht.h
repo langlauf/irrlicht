@@ -24,7 +24,7 @@
 
 #include "aabbox3d.h"
 #include "array.h"
-#include "Color.h"
+#include "SColor.h"
 #include "SLight.h"
 #include "dimension2d.h"
 #include "EDriverTypes.h"
@@ -50,7 +50,6 @@
 #include "IGUIWindow.h"
 #include "IMesh.h"
 #include "IMeshBuffer.h"
-#include "IQ3LevelMesh.h"
 #include "IReadFile.H"
 #include "IrrlichtDevice.h"
 #include "irrmath.h"
@@ -69,7 +68,7 @@
 #include "list.h"
 #include "matrix4.h"
 #include "plane3d.h"
-#include "plane3dex.h"
+#include "plane3d.h"
 #include "vector2d.h"
 #include "vector3d.h"
 #include "position2d.h"
@@ -97,12 +96,20 @@ namespace irr
 	\param bits: Bits per pixel in fullscreen mode. Ignored if windowed mode.
 	\param fullscreen: Should be set to true if the device should run in fullscreen. Otherwise
 		the device runs in window mode.
+	\param stencilbuffer: Specifies if the stencil buffer should be enabled. Set this to true,
+	    if you want the engine be able to draw stencil buffer shadows. Note that not all
+		devices are able to use the stencil buffer. If they don't no shadows will be drawn.
 	\param receiver: A user created event receiver.
 	\return Returns pointer to the created IrrlichtDevice or null if the 
 	device could not be created.
 	*/
-	IRRLICHT_API IrrlichtDevice* createDevice(video::EDriverType deviceType, 
-		const core::dimension2d<s32>& windowSize, u32 bits, bool fullscreen, IEventReceiver* receiver = 0);
+	IRRLICHT_API IrrlichtDevice* createDevice(
+		video::EDriverType deviceType = video::DT_SOFTWARE, 
+		const core::dimension2d<s32>& windowSize = core::dimension2d<s32>(640,480),
+		u32 bits = 16,
+		bool fullscreen = false,
+		bool stencilbuffer=false,
+		IEventReceiver* receiver = 0);
 
 	// THE FOLLOWING IS AN EMPTY LIST OF ALL SUB NAMESPACES
 	// EXISTING ONLY FOR THE DOCUMENTION SOFTWARE DOXYGEN.
@@ -134,3 +141,4 @@ namespace irr
 }
 
 #endif
+

@@ -147,7 +147,10 @@ public:
 			delete [] data;
 
 		//if (allocated < other.allocated)
-		data = new T[other.allocated];
+		if (other.allocated == 0)
+			data = 0;
+		else
+			data = new T[other.allocated];
 
 		used = other.used;
 		free_when_destroyed = other.free_when_destroyed;
@@ -348,3 +351,4 @@ public:
 
 
 #endif
+

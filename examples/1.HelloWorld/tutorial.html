@@ -4,24 +4,25 @@
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
-<body bgcolor="#5A5E9D" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<body bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
 <br>
 <table width="95%" border="0" cellspacing="0" cellpadding="2" align="center">
   <tr> 
-    <td bgcolor="#000000" width="10"><b><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="../../media/irrlichtlogo.jpg" width="88" height="31" border="0"></a></b></td>
-    <td bgcolor="#000000" width="100%"> 
+    <td bgcolor="#666699" width="10"><b><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="../../media/irrlichtlogo.jpg" width="88" height="31" border="0"></a></b></td>
+    <td bgcolor="#666699" width="100%"> 
       <div align="center"><b><font color="#FFFFFF"></font></b></div>
       <b><font color="#FFFFFF">Tutorial 1.HelloWorld</font></b></td>
   </tr>
-  <tr> 
-    <td height="90" bgcolor="#FFFFFF" colspan="2"> 
+  <tr bgcolor="#eeeeff"> 
+    <td height="90" colspan="2"> 
       <div align="left"> 
         <p>This Tutorial shows how to set up the IDE for using the Irrlicht Engine 
           and how to write a simple HelloWorld program with it. The program will 
           show how to use the basics of the VideoDriver, the GUIEnvironment and 
           the SceneManager.<br>
           The result of this example will look like this:</p>
-        <p align="center"><img src="../../media/001shot.jpg" width="259" height="204"></p>
+        <p align="center"><img src="../../media/001shot.jpg" width="259" height="204"><br>
+        </p>
       </div>
     </td>
   </tr>
@@ -29,12 +30,12 @@
 <br>
 <table width="95%" border="0" cellspacing="0" cellpadding="2" align="center">
   <tr> 
-    <td bgcolor="#000000"> 
+    <td bgcolor="#666699"> 
       <div align="center"><b><font color="#FFFFFF"></font></b></div>
       <b><font color="#FFFFFF">Setting up the IDE</font></b></td>
   </tr>
   <tr> 
-    <td height="90" bgcolor="#FFFFFF"> 
+    <td height="90" bgcolor="#eeeeff"> 
       <div align="left"> 
         <p>Microsoft Visual C++ 6.0 is used as example IDE, but you will also 
           be able to understand everything if you are using a different one.</p>
@@ -49,9 +50,9 @@
           select the 'Include' Item in the combo box. Add the \include directory 
           to the list of directories. Now the compiler will find the Irrlicht.h 
           header file. We also need the irrlicht.lib to be found, so stay in that 
-          dialog, select 'Libraries' in the combo box and add the \lib\win32 directory. 
-          That's it, with your IDE set up like this, you will now be able to develop 
-          applications with the Irrlicht Engine.</p>
+          dialog, select 'Libraries' in the combo box and add the \lib\VisualStudio 
+          directory. That's it, with your IDE set up like this, you will now be 
+          able to develop applications with the Irrlicht Engine.</p>
         <p align="center"><img src="../../media/vc6optionsdir.jpg" width="231" height="172">&nbsp;&nbsp;<img src="../../media/vc6include.jpg" width="231" height="159" align="baseline"></p>
       </div>
     </td>
@@ -60,12 +61,12 @@
 <br>
 <table width="95%" border="0" cellspacing="0" cellpadding="2" align="center">
   <tr> 
-    <td bgcolor="#000000"> 
+    <td bgcolor="#666699"> 
       <div align="center"><b><font color="#FFFFFF"></font></b></div>
       <b><font color="#FFFFFF">Lets start!</font></b></td>
   </tr>
   <tr> 
-    <td height="90" bgcolor="#FFFFFF" valign="top"> 
+    <td height="90" bgcolor="#eeeeff" valign="top"> 
       <div align="left"> 
         <p>After we have set up the IDE that the compiler will find the Irrlicht 
           Engine header files, we can include it now into our code.</p>
@@ -136,7 +137,7 @@
         </li>
         <li> 
           <div align="left">windowSize: Size of the Window or FullscreenMode to 
-            be created. In this example we use 640x480.</div>
+            be created. In this example we use 512x384.</div>
         </li>
         <li> 
           <div align="left">bits: Amount of bits per pixel when in fullscreen 
@@ -147,6 +148,8 @@
           <div align="left">fullscreen: Specifies if we want the device to run 
             in fullscreen mode or not.</div>
         </li>
+        <li>stencilbuffer: Specifies if we want to use the stencil buffer for 
+          drawing shadows.</li>
         <li> 
           <div align="left">eventReceiver: An object to receive events. We do 
             not want to use this parameter here, and set it to 0.</div>
@@ -155,7 +158,7 @@
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> 
-            <pre>IrrlichtDevice *device =<br>		createDevice(DT_SOFTWARE, dimension2d&lt;s32&gt;(512, 384), 16, false, 0);</pre>
+            <pre>IrrlichtDevice *device =<br>		createDevice(DT_SOFTWARE, dimension2d&lt;s32&gt;(512, 384), 16, false, false, 0);</pre>
           </td>
         </tr>
       </table>
@@ -218,11 +221,11 @@
         </tr>
       </table>
       <p>To look at the mesh, we place a camera into 3d space at the position 
-        (0, 20, -60). The camera looks from there to (0,0,0).</p>
+        (0, 10, -40). The camera looks from there to (0,0,0).</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> 
-            <pre>smgr-&gt;addCameraSceneNode(0, vector3df(0,20,-60), vector3df(0,0,0));</pre>
+            <pre>smgr-&gt;addCameraSceneNode(0, vector3df(0,10,-40), vector3df(0,0,0));</pre>
           </td>
         </tr>
       </table>
@@ -244,7 +247,7 @@
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> 
-            <pre>	driver-&gt;beginScene(true, true, Color(0,100,100,100));<br>
+            <pre>	driver-&gt;beginScene(true, true, SColor(0,100,100,100));<br>
 	smgr-&gt;drawAll();
 	guienv-&gt;drawAll();</pre>
             <pre>	driver-&gt;endScene();

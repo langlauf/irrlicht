@@ -5,8 +5,8 @@
 #ifndef __IRR_AABBOX_3D_H_INCLUDED__
 #define __IRR_AABBOX_3D_H_INCLUDED__
 
-#include "irrTypes.h"
-#include "plane3dex.h"
+#include "irrMath.h"
+#include "plane3d.h"
 
 namespace irr
 {
@@ -25,7 +25,8 @@ class aabbox3d
 
 		aabbox3d(): MinEdge(-1,-1,-1), MaxEdge(1,1,1) {};
 		aabbox3d(const vector3d<T>& min, const vector3d<T>& max): MinEdge(min), MaxEdge(max) {};
-		aabbox3d(T minx, T miny, T minz, T maxx, T maxy, T maxz): MinEdge(minx, miny, minz), MaxEdge(maxx, maxy, maxz), MaxEdge(max) {};
+		aabbox3d(const vector3d<T>& init): MinEdge(init), MaxEdge(init) {};
+		aabbox3d(T minx, T miny, T minz, T maxx, T maxy, T maxz): MinEdge(minx, miny, minz), MaxEdge(maxx, maxy, maxz) {};
 
 		// operators
 
@@ -115,7 +116,7 @@ class aabbox3d
 		//! \return Returns ISREL3D_FRONT if the box is in front of the plane,
 		//! ISREL3D_BACK if the box is back of the plane, and
 		//! ISREL3D_CLIPPED if is on both sides of the plane.
-		EIntersectionRelation3D classifyPlaneRelation(const plane3dex<f32>& plane) const
+		EIntersectionRelation3D classifyPlaneRelation(const plane3d<f32>& plane) const
 		{
 			vector3d<T> nearPoint(MaxEdge);
 			vector3d<T> farPoint(MinEdge);
@@ -147,6 +148,47 @@ class aabbox3d
 			return ISREL3D_BACK;
 		}
 
+
+		//! returns center of the bounding box
+		vector3d<T> getCenter() const
+		{
+			return (MinEdge + MaxEdge) / 2;
+		}
+
+
+		//! stores all 8 edges of the box into a array
+		//! \param edges: Pointer to array of 8 edges
+        void getEdges(vector3d<T> *edges) const
+		{
+			core::vector3df middle = (MinEdge + MaxEdge) / 2;
+			core::vector3df diag = middle - MaxEdge;
+
+			edges[0].set(middle.X + diag.X, middle.Y + diag.Y, middle.Z + diag.Z);
+			edges[1].set(middle.X + diag.X, middle.Y - diag.Y, middle.Z + diag.Z);
+			edges[2].set(middle.X + diag.X, middle.Y + diag.Y, middle.Z - diag.Z);
+			edges[3].set(middle.X + diag.X, middle.Y - diag.Y, middle.Z - diag.Z);
+			edges[4].set(middle.X - diag.X, middle.Y + diag.Y, middle.Z + diag.Z);
+			edges[5].set(middle.X - diag.X, middle.Y - diag.Y, middle.Z + diag.Z);
+			edges[6].set(middle.X - diag.X, middle.Y + diag.Y, middle.Z - diag.Z);
+			edges[7].set(middle.X - diag.X, middle.Y - diag.Y, middle.Z - diag.Z);
+		}
+
+
+		//! returns if the box is empty, which means that there is
+		//! no space within the min and the max edge.
+		bool isEmpty() const
+		{
+			core::vector3df d = MinEdge - MaxEdge;
+			if (d.X < 0) d.X = -d.X;
+			if (d.Y < 0) d.Y = -d.Y;
+			if (d.Z < 0) d.Z = -d.Z;
+
+			return (d.X < ROUNDING_ERROR && 
+					d.Y < ROUNDING_ERROR && 
+					d.Z < ROUNDING_ERROR);
+		}
+		
+
 	
 		// member variables
 		
@@ -160,3 +202,4 @@ class aabbox3d
 } // end namespace irr
 
 #endif
+

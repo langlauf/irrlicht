@@ -14,7 +14,7 @@ public:
 
 	CMainMenu();
 
-	bool run(bool& outFullscreen, bool& outMusic, video::EDriverType& outDriver);
+	bool run(bool& outFullscreen, bool& outMusic, bool& outShadows, video::EDriverType& outDriver);
 
 	virtual bool OnEvent(SEvent event);
 
@@ -26,6 +26,7 @@ private:
 	bool start;
 	bool fullscreen;
 	bool music;
+	bool shadows;
 
 	scene::IAnimatedMesh* quakeLevel;
 	scene::ISceneNode* lightMapNode;

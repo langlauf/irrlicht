@@ -14,6 +14,8 @@
 #include "IGUIEnvironment.h"
 #include "IEventReceiver.h"
 #include "ISceneManager.h"
+#include "ICursorControl.h"
+#include "ITimer.h"
 
 namespace irr
 {
@@ -41,6 +43,13 @@ namespace irr
 		//! \return Returns a pointer to the scene manager.
 		virtual scene::ISceneManager* getSceneManager() = 0;
 
+		//! \return Returns a pointer to the mouse cursor control interface.
+		virtual gui::ICursorControl* getCursorControl() = 0;
+
+		//! \return Returns a pointer to the ITimer object. With it the
+		//! current Time can be received.
+		virtual ITimer* getTimer() = 0;
+
 		//! Sets the caption of the window.
 		//! \param text: New text of the window caption.
 		virtual void setWindowCaption(const wchar_t* text) = 0;
@@ -57,3 +66,4 @@ namespace irr
 } // end namespace
 
 #endif
+

@@ -6,13 +6,16 @@
 #define __I_ANIMATED_MESH_SCENE_NODE_H_INCLUDED__
 
 #include "ISceneNode.h"
+#include "IShadowVolumeSceneNode.h"
 
 namespace irr
 {
 namespace scene
 {
 
-	//! Scene node capable of displaying an animated mesh.
+	//! Scene node capable of displaying an animated mesh and its shadow.
+	/** The shadow is optional: If a shadow should be displayed too, just invoke
+	the IAnimatedMeshSceneNode::createShadowVolumeSceneNode().*/
 	class IAnimatedMeshSceneNode : public ISceneNode
 	{
 	public:
@@ -44,9 +47,18 @@ namespace scene
 		//! Sets the speed with witch the animation is played.
 		//! \param framesPerSecond: Frames per second played.
 		virtual void setAnimationSpeed(s32 framesPerSecond) = 0;
+
+		//! Creates shadow volume scene node as child of this node
+		//! and returns a pointer to it. 
+		//! \param id: Id of the shadow scene node. This id can be used to identify
+		//! the node later.
+		//! \return Returns pointer to the created shadow scene node.
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		virtual IShadowVolumeSceneNode* addShadowVolumeSceneNode(s32 id=-1) = 0;
 	};
 
 } // end namespace scene
 } // end namespace irr
 
 #endif
+

@@ -45,10 +45,10 @@ public:
 	virtual void drawAll() = 0;
 
 	//! Sets the key focus to an element.
-	virtual setKeyFocus(IGUIElement* element) = 0;
+	virtual void setKeyFocus(IGUIElement* element) = 0;
 
 	//! Removes the key focus from an element.
-	virtual removeKeyFocus(IGUIElement* element) = 0;
+	virtual void removeKeyFocus(IGUIElement* element) = 0;
 
 	//! Sets the mouse focus to an element.
 	virtual void setMouseFocus(IGUIElement* element) = 0;
@@ -141,3 +141,4 @@ public:
 } // end namespace irr
 
 #endif
+

@@ -1,13 +1,13 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1">
-<title>IAnimatedMeshSceneNode.h Source File</title>
+<title>The Irrlicht Engine SDK</title>
 <link href="doxygen.css" rel="stylesheet" type="text/css">
 </head><body>
-<table width="100%" border="0" cellspacing="0" cellpadding="2" bgcolor="#5A5E9D">
+<table width="100%" border="0" cellspacing="0" cellpadding="2" bgcolor="#666699">
   <tr> 
     <td width="0"><small><a href="http://www.irrlicht.sourceforge.net" target="_blank"><img src="media/irrlichtlogo.jpg" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></td>
     <td width="100%"><b><font color="#FFFFFF">The Irrlicht Engine SDK version 
-      0.1</font></b></td>
+      0.2</font></b></td>
   </tr>
 </table>
 <hr>
@@ -15,56 +15,60 @@
   of the SDK. So please note that there are features missing in the engine and 
   maybe also some bugs.</p>
 <p> Content of this file:</p>
-<p> <a href="#1">1. Where to find what</a><br>
+<p> <a href="#1">1. Directory structure overview</a><br>
   <a href="#2">2. How to start<br>
   </a><a href="#3">3. Release Notes</a><br>
   <a href="#4">4. License</a><br>
   <a href="#5">5. Contact</a></p>
 <hr>
-<h2><a name="1"></a>1. Where to find what<br>
+<h2><a name="1"></a>1. Directory structure overview<br>
 </h2>
 <p> You will find some directories after decompressing the archive in which came 
   the SDK. These are:</p>
 <table border="1" cellspacing="2" cellpadding="5" width="500">
-  <tr>
+  <tr> 
     <td>\bin</td>
     <td>The compiled library Irrlicht.DLL and some compiled demo and example applications, 
       just start them to see the Irrlicht Engine in action.</td>
   </tr>
-  <tr>
+  <tr> 
     <td>\doc</td>
     <td>Documentation of the Irrlicht Engine.</td>
   </tr>
-  <tr>
+  <tr> 
     <td>\examples</td>
     <td>Examples and tutorials showing how to use the engine. </td>
   </tr>
-  <tr>
+  <tr> 
     <td>\include</td>
     <td>Header files to include when using the engine.</td>
   </tr>
-  <tr>
+  <tr> 
     <td>\lib</td>
     <td>Lib to link with your programs when using the engine.</td>
   </tr>
-  <tr>
+  <tr> 
     <td>\media</td>
     <td>Graphics and sound data for the demo applications and examples.</td>
   </tr>
-  <tr>
+  <tr> 
     <td>\source</td>
     <td>The source code of the Irrlicht Engine. This code is not needed to develop 
       applications with the engine, but it is included to let you be able to recompile 
       and debug it, if necessary. </td>
+  </tr>
+  <tr>
+    <td>\tools</td>
+    <td>Useful tools and their sourcecode for the engine.</td>
   </tr>
 </table>
 <p></p>
 <hr>
 <h2><a name="2"></a>2. How to start<br>
 </h2>
-<p>To see the engine in action, just go to the \bin directory, and start some 
-  applications. There should also be an application named TechDemo.exe, this should 
-  show the most interesting things.<br>
+<p>To see the engine in action, just go to the \bin\VisualStudio directory, and 
+  start some applications. There should also be an application named TechDemo.exe, 
+  this should show the most interesting things.<br>
   <br>
   To start developing own applications and games with the engine take a look at 
   the 1.HelloWorld example in the \examples directory.<br>
@@ -78,13 +82,6 @@
   which can be found in the documentation and accessed with the Irrlicht header 
   files work and can already be used. </p>
 <table border="1" cellspacing="2" cellpadding="2">
-  <tr> 
-    <td>OpenGL Device</td>
-    <td>The OpenGL Device is currently only able to load textures and draw basic 
-      3D primitives. No 2D functions, complex materials and dynamic light are 
-      implemented. Please use the DirectX8 or the Software Device instead. In 
-      the next release (0.2) the OpenGL device will be complete.</td>
-  </tr>
   <tr> 
     <td>Software Device</td>
     <td>Dynamic lighting, multitexturing, 3d clipping and bilinear filtering are 
@@ -119,7 +116,7 @@
     <td>Quake 3 maps</td>
     <td>No support for curved surfaces and scripted materials yet.</td>
   </tr>
-  <tr>
+  <tr> 
     <td>Linux Support</td>
     <td>The engine currently only runs with Windows platforms. A linux version 
       will be available somewhere between the versions 0.4 and 0.5, it depends 
@@ -130,9 +127,9 @@
 <br>
 <hr>
 <h2><a name="4"></a>4. License</h2>
-<p>The license of the Irrlicht Engine is based on the zlib/libpng license. Even 
+<p> The license of the Irrlicht Engine is based on the zlib/libpng license. Even 
   though this license does not require you to mention that you are using the Irrlicht 
-  Engine in your product, an acknowledgement somewhere would be highly appreciated.</p>
+  Engine in your product, an acknowledgement would be highly appreciated.</p>
 <h3><br>
   The Irrlicht Engine License<br>
 </h3>

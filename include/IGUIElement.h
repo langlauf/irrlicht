@@ -19,7 +19,7 @@ namespace gui
 class IGUIEnvironment;
 
 //! Base class of all GUI elements.
-class IGUIElement : public IUnknown, IEventReceiver
+class IGUIElement : public IUnknown, public IEventReceiver
 {
 public:
 
@@ -265,3 +265,4 @@ protected:
 } // end namespace irr
 
 #endif
+

@@ -80,7 +80,7 @@ void main()
 	MyEventReceiver receiver;
 
 	IrrlichtDevice *device =
-		createDevice(video::DT_DIRECTX8, core::dimension2d<s32>(640, 480), 16, false, &receiver);
+		createDevice(video::DT_DIRECTX8, core::dimension2d<s32>(640, 480), 16, false, false, &receiver);
 
 	/*
 	Get a pointer to the video driver and the SceneManager so that
@@ -130,12 +130,21 @@ void main()
 
 	/*
 	Now we only need a Camera to look at the Quake 3 map.
-	And we want to create a user controlled camera. There is a camera
-	available, which can be controlled compareable to the camera in Maya:
+	And we want to create a user controlled camera. There are some
+	different cameras available in the Irrlicht engine. For example the 
+	Maya Camera which can be controlled compareable to the camera in Maya:
 	Rotate with left mouse button pressed, Zoom with both buttons pressed,
-	translate with right mouse button pressed.
+	translate with right mouse button pressed. This could be created with
+	addCameraSceneNodeMaya(). But for this example, we want to create a 
+	camera which behaves like the ones in first person shooter games (FPS).
 	*/
-	camera = smgr->addCameraSceneNodeMaya();
+	camera = smgr->addCameraSceneNodeFPS();
+
+	/*
+	The mouse cursor needs not to be visible, so we make it invisible.
+	*/
+
+	device->getCursorControl()->setVisible(false);
 
 	/*
 	We have done everything, so lets draw it. We also write the current
@@ -146,7 +155,7 @@ void main()
 
 	while(device->run())
 	{
-		driver->beginScene(true, true, video::Color(0,100,100,100));
+		driver->beginScene(true, true, video::SColor(0,100,100,100));
 		smgr->drawAll();
 		driver->endScene();
 
@@ -154,7 +163,7 @@ void main()
 
 		if (lastFPS != fps)
 		{
-			wchar_t tmp[255];
+			wchar_t tmp[1024];
 			swprintf(tmp, L"Quake 3 Map Example - Irrlicht Engine (fps:%d) Triangles:%d", 
 				fps, driver->getPrimitiveCountDrawed());
 

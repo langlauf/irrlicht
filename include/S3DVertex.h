@@ -7,7 +7,7 @@
 
 #include "vector3d.h"
 #include "vector2d.h"
-#include "Color.h"
+#include "SColor.h"
 
 namespace irr
 {
@@ -32,12 +32,12 @@ struct S3DVertex
 	S3DVertex() {};
 
 	//! constructor
-	S3DVertex(f32 x, f32 y, f32 z, f32 nx, f32 ny, f32 nz, Color c, f32 tu, f32 tv)
+	S3DVertex(f32 x, f32 y, f32 z, f32 nx, f32 ny, f32 nz, SColor c, f32 tu, f32 tv)
 		: Pos(x,y,z), Normal(nx,ny,nz), Color(c), TCoords(tu,tv) {}
 
 	//! constructor
 	S3DVertex(const core::vector3df& pos, const core::vector3df& normal,
-		video::Color& color, const core::vector2d<f32>& tcoords)
+		video::SColor& color, const core::vector2d<f32>& tcoords)
 		: Pos(pos), Normal(normal), Color(color), TCoords(tcoords) {}
 
 	//! Position
@@ -47,7 +47,7 @@ struct S3DVertex
 	core::vector3df Normal;	
 
 	//! Color
-	video::Color Color;				
+	irr::video::SColor Color;				
 
 	//! Texture coordinates
 	core::vector2d<f32> TCoords;	
@@ -78,7 +78,7 @@ struct S3DVertex2TCoords
 	S3DVertex2TCoords() {};
 
 	//! constructor
-	S3DVertex2TCoords(f32 x, f32 y, f32 z, Color c, f32 tu, f32 tv, f32 tu2, f32 tv2)
+	S3DVertex2TCoords(f32 x, f32 y, f32 z, SColor c, f32 tu, f32 tv, f32 tu2, f32 tv2)
 		: Pos(x,y,z), Color(c), TCoords(tu,tv), TCoords2(tu2,tv2) {}
 
 	//! Position
@@ -88,7 +88,7 @@ struct S3DVertex2TCoords
 	core::vector3df Normal;		
 
 	//! Color
-	video::Color Color;				
+	SColor Color;				
 
 	//! First set of texture coordinates
 	core::vector2d<f32> TCoords;	
@@ -102,3 +102,4 @@ struct S3DVertex2TCoords
 } // end namespace irr
 
 #endif
+

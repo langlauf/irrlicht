@@ -6,7 +6,7 @@
 #define __IRR_I_VIDEO_DRIVER_H_INCLUDED__
 
 #include "rect.h"
-#include "Color.h"
+#include "SColor.h"
 #include "ITexture.h"
 #include "matrix4.h"
 #include "dimension2d.h"
@@ -14,6 +14,7 @@
 #include "IReadFile.h"
 #include "SMaterial.h"
 #include "SLight.h"
+#include "ISurfaceLoader.h"
 
 namespace irr
 {
@@ -32,7 +33,9 @@ namespace video
 		//! Is hardeware transform and lighting supported?
 		EK3DVDF_HARDWARE_TL,			
 		//! Can the driver handle mip maps?
-		EK3DVDF_MIP_MAP,				
+		EK3DVDF_MIP_MAP,		
+		//! Are stencilbuffers switched on and does the device support stencil buffers?
+		EK3DVDF_STENCIL_BUFFER
 	};
 
 	enum E_TRANSFORMATION_STATE
@@ -70,7 +73,7 @@ namespace video
 		//! \param zBuffer: Speciefies if the depth or z buffer should be cleared. It is
 		//! not nesesarry to do so, if only 2d drawing is used.
 		//! \return Returns false if failed. Begin Scene can clear the back- and the z-buffer.
-		virtual bool beginScene(bool backBuffer, bool zBuffer, Color color) = 0;
+		virtual bool beginScene(bool backBuffer, bool zBuffer, SColor color) = 0;
 
 		//! Presents the rendered image on the screen.
 		//! Applications must call this method after performing any rendering. 
@@ -187,7 +190,7 @@ namespace video
 		//! used to draw the image.
 		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos,
 			const core::rectEx<s32>& sourceRect, const core::rectEx<s32>* clipRect = 0,
-			Color color=Color(255,255,255,255), bool useAlphaChannelOfTexture=false) = 0;
+			SColor color=SColor(255,255,255,255), bool useAlphaChannelOfTexture=false) = 0;
 
 		//! Draws an 2d rectangle.
 		//! \param color: Color of the rectangle to draw. The alpha component will not
@@ -195,8 +198,32 @@ namespace video
 		//! \param pos: Position of the rectangle.
 		//! \param clip: Pointer to rectangle against which the rectangle will be clipped.
 		//! If the pointer is null, no clipping will be performed.
-		virtual void draw2DRectangle(Color color, const core::rectEx<s32>& pos,
+		virtual void draw2DRectangle(SColor color, const core::rectEx<s32>& pos,
 			const core::rectEx<s32>* clip = 0) = 0;
+
+		//! Draws a shadow volume into the stencil buffer. To draw a stencil shadow, do
+		//! this: Frist, draw all geometry. Then use this method, to draw the shadow
+		//! volume. Then, use IVideoDriver::drawStencilShadow() to visualize the shadow.
+		//! \param triangles: Pointer to array of 3d vectors, specifing the shadow volume.
+		//! \param count: Amount of triangles in the array.
+		virtual void drawStencilShadowVolume(const core::vector3df* triangles, s32 count) = 0;
+
+		//! Fills the stencil shadow with color. After the shadow volume has been drawn
+		//! into the stencil buffer using IVideoDriver::drawStencilShadowVolume(), use this
+		//! to draw the color of the shadow. 
+		//! \param clearStencilBuffer: Set this to false, if you want to draw every shadow 
+		//! with the same color, and only want to call drawStencilShadow() once after all
+		//! shadow volumes have been drawn. Set this to true, if you want to paint every
+		//! shadow with its own color.
+		//! \param leftUpEdge: Color of the shadow in the upper left corner of screen.
+		//! \param rightUpEdge: Color of the shadow in the upper right corner of screen.
+		//! \param leftDownEdge: Color of the shadow in the lower left corner of screen.
+		//! \param rightDownEdge: Color of the shadow in the lower right corner of screen.
+		virtual void drawStencilShadow(bool clearStencilBuffer=false, 
+			video::SColor leftUpEdge = video::SColor(255,0,0,0), 
+			video::SColor rightUpEdge = video::SColor(255,0,0,0),
+			video::SColor leftDownEdge = video::SColor(255,0,0,0),
+			video::SColor rightDownEdge = video::SColor(255,0,0,0)) = 0;
 
 		//! Returns the size of the screen or render window.
 		//! \return Size of screen or render window.
@@ -218,9 +245,36 @@ namespace video
 		//! \param light: Data specifing the dynamic light.
 		virtual void addDynamicLight(const SLight& light) = 0;
 
+		//! Sets the dynamic ambient light color. The default color is
+		//! (0,0,0,0) which means it is dark.
+		//! \param color: New color of the ambient light.
+		virtual void setAmbientLight(const SColorf& color) = 0;
+
 		//! Returns the maximal amount of dynamic lights the device can handle
 		//! \return Maximal amount of dynamic lights.
 		virtual s32 getMaximalDynamicLightAmount() = 0;
+
+		//! Returns current amount of dynamic lights set
+		//! \return Current amount of dynamic lights set
+		virtual s32 getDynamicLightCount() = 0;
+
+		//! Returns light data which was previously set with IVideDriver::addDynamicLight().
+		//! \param idx: Zero based index of the light. Must be greater than 0 and smaller
+		//! than IVideoDriver()::getDynamicLightCount.
+		//! \return Light data.
+		virtual const SLight& getDynamicLight(s32 idx) = 0;
+        
+		//! \return Returns the name of the video driver. Example: In case of the DirectX8
+		//! driver, it would return "Direct3D8.1".
+		virtual const wchar_t* getName() = 0;
+
+		//! Adds an external surface loader to the engine. This is useful if 
+		//! the Irrlicht Engine should be able to load textures of currently 
+		//! unsupported file formats (e.g .gif). The ISurfaceLoader only needs
+		//! to be implemented for loading this file format. A pointer to
+		//! the implementation can be passed to the engine using this method.
+		//! \param loader: Pointer to the external loader created.
+		virtual void addExternalSurfaceLoader(ISurfaceLoader* loader) = 0;
 	};
 
 } // end namespace video
@@ -228,3 +282,4 @@ namespace video
 
 
 #endif
+

@@ -5,10 +5,12 @@
 #ifndef __I_SCENE_MANAGER_H_INCLUDED__
 #define __I_SCENE_MANAGER_H_INCLUDED__
 
+#include "array.h"
 #include "IUnknown.h"
 #include "vector3d.h"
 #include "dimension2d.h"
-#include "Color.h"
+#include "SColor.h"
+#include "SMaterial.h"
 
 namespace irr
 {
@@ -36,6 +38,9 @@ namespace scene
 		//! the very first pass.
 		SNRT_LIGHT_AND_CAMERA,	
 
+		//! this is used for sky boxes.
+		SNRT_SKY_BOX,
+
 		//! Default render time, all normal objects should use this.
 		//! The scene Manager will determine by itself if an object is 
 		//! transparent, and do everything necessary by itself.
@@ -57,6 +62,7 @@ namespace scene
 	class ISceneNodeAnimator;
 	class ILightSceneNode;
 	class IBillboardSceneNode;
+	class IMeshLoader;
 
 	//!	The Scene Manager manages scene nodes, mesh recources, cameras and all the other stuff.
 	/** All Scene nodes can be created only here. There is a always growing list of scene 
@@ -174,17 +180,31 @@ namespace scene
 			const core::vector3df& position = core::vector3df(0,0,0), 
 			const core::vector3df& lookat = core::vector3df(0,0,100), s32 id=-1) = 0;
 
-		//! Adds a camera scene node which is able to be controlle with the mouse similar
+		//! Adds a camera scene node which is able to be controlled with the mouse similar
 		//! like in the 3D Software Maya by Alias Wavefront.
 		//! \param parent: Parent scene node of the camera. Can be null.
 		//! \param rotateSpeed: Rotation speed of the camera.
 		//! \param zoomSpeed: Zoom speed of the camera.
 		//! \param tranlationSpeed: TranslationSpeed of the camera.
 		//! \param id: id of the camera. This id can be used to identify the camera.
-		//! \return Returns pointer to interface to camera if successful, otherwise 0.
+		//! \return Returns a pointer to the interface of the camera if successful, otherwise 0.
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
 		virtual ICameraSceneNode* addCameraSceneNodeMaya(ISceneNode* parent = 0,
 			f32 rotateSpeed = -1500.0f, f32 zoomSpeed = 200.0f, f32 translationSpeed = 1500.0f, s32 id=-1) = 0;
+
+		//! Adds a camera scene node which is able to be controled with the mouse and keys
+		//! like in most first person shooters (FPS): 
+		//! Look with the mouse, move with cursor keys.
+		//! \param parent: Parent scene node of the camera. Can be null.
+		//! \param rotateSpeed: Speed with wich the camera is rotated. This can be done
+		//! only with the mouse.
+		//! \param movespeed: Speed with which the camera is moved. Movement is done with
+		//! the cursor keys.
+		//! \param id: id of the camera. This id can be used to identify the camera.
+		//! \return Returns a pointer to the interface of the camera if successful, otherwise 0.
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		virtual ICameraSceneNode* addCameraSceneNodeFPS(ISceneNode* parent = 0,
+			f32 rotateSpeed = 100.0f, f32 moveSpeed = 500.0f, s32 id=-1) = 0;
 
 		//! Adds a dynamic light scene node. The light will cast dynamic light on all
 		//! other scene nodes in the scene, which have the material flag video::MTF_LIGHTING
@@ -194,13 +214,13 @@ namespace scene
 		//! \param position: Position of the space relative to its parent where the light will be placed.
 		//! \param color: Diffuse color of the light. Ambient or Specular colors can be set manually with
 		//! the ILightSceneNode::getLightData() method.
-		//! \param range: Range of the light.
+		//! \param radius: Radius of the light.
 		//! \param id: id of the node. This id can be used to identify the node.
 		//! \return Returns pointer to the interface of the light if successful, otherwise NULL.
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
 		virtual ILightSceneNode* addLightSceneNode(ISceneNode* parent = 0,
 			const core::vector3df& position = core::vector3df(0,0,0),
-			video::Colorf color = video::Colorf(1.0f, 1.0f, 1.0f),	f32 range=100.0f, s32 id=-1) = 0;
+			video::SColorf color = video::SColorf(1.0f, 1.0f, 1.0f),	f32 radius=100.0f, s32 id=-1) = 0;
 
 		//! Adds a billboard scene node to the scene. A billboard is like a 3d sprite: A 2d element,
 		//! which always looks to the camera. It is usually used for things like explosions, fire,
@@ -216,6 +236,59 @@ namespace scene
 		virtual IBillboardSceneNode* addBillboardSceneNode(ISceneNode* parent = 0,
 			const core::dimension2d<f32>& size = core::dimension2d<f32>(10.0f, 10.0f),
 			const core::vector3df& position = core::vector3df(0,0,0), s32 id=-1) = 0;
+
+		//! Adds a skybox scene node. A skybox is a big cube with 6 textures on it and
+		//! is drawed around the camera position. 
+		//! \param top: Texture for the top plane of the box.
+		//! \param bottom: Texture for the bottom plane of the box.
+		//! \param left: Texture for the left plane of the box.
+		//! \param right: Texture for the right plane of the box.
+		//! \param front: Texture for the front plane of the box.
+		//! \param parent: Parent scene node of the skybox. A skybox usually has no parent,
+		//! so this should be null. Note: If a parent is set to the skybox, the box will not 
+		//! change how it is drawed.
+		//! \param id: An id of the node. This id can be used to identify the node.
+		//! \return Returns a pointer to the sky box if successful, otherwise NULL.
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		virtual ISceneNode* addSkyBoxSceneNode(video::ITexture* top, video::ITexture* bottom,
+			video::ITexture* left, video::ITexture* right, video::ITexture* front,
+			video::ITexture* back, ISceneNode* parent = 0, s32 id=-1) = 0;
+
+		//! Adds a Hill Plane mesh to the mesh pool. The mesh is generated on the fly
+		//! and looks like a plane with some hills on it. It is uses mostly for quick
+		//! tests of the engine only. You can specify how many hills there should be 
+		//! on the plane and how high they should be. Also you must specify a name for
+		//! the mesh, because the mesh is added to the mesh pool, and can be retieved
+		//! again using ISceneManager::getMesh() with the name as parameter.
+		//! \param filename: The name of this mesh which must be specified in order
+		//! to be able to retrieve the mesh later with ISceneManager::getMesh().
+		//! \param tileSize: Size of a tile of the mesh. (10.0f, 10.0f) would be a
+		//! good value to start, for example.
+		//! \param tileCount: Specifies how much tiles there will be. If you specifiy 
+		//! for example that a tile has the size (10.0f, 10.0f) and the tileCount is
+		//! (10,10), than you get a field of 100 tiles wich has the dimension 100.0fx100.0f.
+		//! \param material: Material of the hill mesh.
+		//! \param hillHeight: Height of the hills. If you specify a negative value
+		//! you will get holes instead of hills. If the height is 0, no hills will be
+		//! created.
+		//! \param countHills: Amount of hills on the plane. There will be countHills.X
+		//! hills along the X axis and countHills.Y along the Y axis. So in total there 
+		//! will be countHills.X * countHills.Y hills.
+        //! \return Returns null if the creation failed. The reason could be that you 
+		//! specified some invalid parameters or that a mesh with that name already
+		//! exists. If successful, a pointer to the mesh is returned. 
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		virtual IAnimatedMesh* addHillPlaneMesh(const c8* name,
+			const core::dimension2d<f32>& tileSize, const core::dimension2d<s32>& tileCount,
+			video::SMaterial* material = 0,	f32 hillHeight = 0.0f, 
+			core::dimension2d<f32> countHills = core::dimension2d<f32>(0.0f, 0.0f)) = 0;
+
+		//! Returns the root scene node. This is the scene node wich is parent 
+		//! of all scene nodes. The root scene node is a special scene node which
+		//! only exists to manage all scene nodes. It is not rendered and cannot
+		//! be removed from the scene.
+		//! \return Returns a pointer to the root scene node.
+		virtual ISceneNode* getRootSceneNode() = 0;
 
 		//! Returns the current active camera.
 		//! \return The active camera is returned. Note that this can be NULL, if there
@@ -242,21 +315,55 @@ namespace scene
 		//! See IUnknown::drop() for more information.
 		virtual ISceneNodeAnimator* createRotationAnimator(const core::vector3df& rotationPerSecond) = 0;
 
-		//! creates a fly circle animator, which lets the attached scene node fly 
+		//! Creates a fly circle animator, which lets the attached scene node fly 
 		//! around a center. The center is the position of the scene node.
 		//! \param rotationPerSecond: Specifies the speed of the animation
 		//! \return Returns the animator. Attach it to a scene node with ISceneNode::addAnimator()
 		//! and the animator will animate it.
 		//! If you no longer need the animator, you should call ISceneNodeAnimator::drop().
 		//! See IUnknown::drop() for more information.
-		virtual ISceneNodeAnimator* createFlyCircleAnimator(const core::vector3df& normal, f32 radius, f32 speed=0.001f) = 0;
+		virtual ISceneNodeAnimator* createFlyCircleAnimator(const core::vector3df& normal, 
+			f32 radius, f32 speed=0.001f) = 0;
+
+		//! Creates a fly straight animator, which lets the attached scene node
+		//! fly or move along a line between two points.
+		//! \param startPoint: Start point of the line.
+		//! \param endPoint: End point of the line.
+		//! \param timeForWay: Time in milli seconds how long the node should need to
+		//! move from the start point to the end point.
+		//! \param loop: If set to false, the node stops when the end point is reached.
+		//! If loop is true, the node begins again at the start.
+		//! \return Returns the animator. Attach it to a scene node with ISceneNode::addAnimator()
+		//! and the animator will animate it.
+		//! If you no longer need the animator, you should call ISceneNodeAnimator::drop().
+		//! See IUnknown::drop() for more information.
+		virtual ISceneNodeAnimator* createFlyStraightAnimator(const core::vector3df& startPoint,
+			const core::vector3df& endPoint, u32 timeForWay, bool loop=false) = 0;
+
+		//! Creates a texture animator, which switches the textures of the target scene
+		//! node based on a list of textures.
+		//! \param textures: List of textures to use.
+		//! \param timePerFrame: Time in milliseconds, how long any texture in the list
+		//! should be visible.
+		//! \param loop: If set to to false, the last texture remains set, and the animation
+		//! stops. If set to true, the animation restarts with the first texture.
+		//! \return Returns the animator. Attach it to a scene node with ISceneNode::addAnimator()
+		//! and the animator will animate it.
+		//! If you no longer need the animator, you should call ISceneNodeAnimator::drop().
+		//! See IUnknown::drop() for more information.
+		virtual ISceneNodeAnimator* createTextureAnimator(const core::array<video::ITexture*>& textures,
+			s32 timePerFrame, bool loop=true) = 0;
+
+		//! Adds an external mesh loader. If you want the engine to be extended with
+		//! file formats it currently is not able to load (e.g. .cob), just implement
+		//! the IMeshLoader interface in your loading class and add it with this method.
+		//! \param externalLoader: Implementation of a new mesh loader.
+		virtual void addExternalMeshLoader(IMeshLoader* externalLoader) = 0;
 	};
 
-
-	// creates a scenemanager
-	ISceneManager* createSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs);
 
 } // end namespace scene
 } // end namespace irr
 
 #endif
+

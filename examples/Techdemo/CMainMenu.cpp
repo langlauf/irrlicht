@@ -11,10 +11,11 @@ CMainMenu::CMainMenu()
 
 
 
-bool CMainMenu::run(bool& outFullscreen, bool& outMusic, video::EDriverType& outDriver)
+bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
+					video::EDriverType& outDriver)
 {
 	device = createDevice(video::DT_SOFTWARE,
-		core::dimension2d<s32>(512, 384), 16, false, this);
+		core::dimension2d<s32>(512, 384), 16, false, false, this);
 
 	device->getFileSystem()->addZipFileArchive("irrlicht.dat");
 	device->getFileSystem()->addZipFileArchive("..\\..\\media\\irrlicht.dat");
@@ -23,7 +24,7 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, video::EDriverType& out
 	scene::ISceneManager* smgr = device->getSceneManager();
 	gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
 
-	device->setWindowCaption(L"Irrlicht Engine Techdemo v0.1");
+	device->setWindowCaption(L"Irrlicht Engine Techdemo v0.2");
 
 	// add images
 
@@ -34,8 +35,8 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, video::EDriverType& out
 
 	gui::IGUIListBox* box = guienv->addListBox(core::rectEx<int>(295,23,485,90), 0, 1);
 	box->addItem(L"Irrlicht Software Engine [too slow]");
-	box->addItem(L"Direct3D 8");
-	box->addItem(L"OpenGL [incomplete]");
+	box->addItem(L"Direct3D 8.1");
+	box->addItem(L"OpenGL 1.2");
 	box->setSelected(selected);
 
 	// add button
@@ -46,10 +47,11 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, video::EDriverType& out
 
 	guienv->addCheckBox(fullscreen, core::rectEx<int>(295,105,400,130), 0, 3, L"Fullscreen");
 	guienv->addCheckBox(music, core::rectEx<int>(295,130,400,155), 0, 4, L"Music");
+	guienv->addCheckBox(music, core::rectEx<int>(295,160,400,175), 0, 5, L"Shadows");
 
 	// add text
 
-	wchar_t* text[] = {		L"Welcome to the Irrlicht Engine v0.1.",
+	wchar_t* text[] = {		L"Welcome to the Irrlicht Engine v0.2.",
 							L"Please select a device to display the demo. What you",
 							L"currently see is displayed using the Irrlicht",
 							L"Software Engine, but this would be too slow for the",
@@ -83,13 +85,13 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, video::EDriverType& out
 		node->setFrameLoop(0, 310);
 	}
 
-	smgr->addCameraSceneNode(0, core::vector3df(60,0,0), core::vector3df(0,0,20));
+	smgr->addCameraSceneNode(0, core::vector3df(35,0,0), core::vector3df(0,0,20));
 
 	while(device->run())
 	{
 		if (device->isWindowActive())
 		{
-			driver->beginScene(false, true, video::Color(0,0,0,0));
+			driver->beginScene(false, true, video::SColor(0,0,0,0));
 			guienv->drawAll();
 			smgr->drawAll();
 			driver->endScene();
@@ -100,6 +102,8 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, video::EDriverType& out
 
 	outFullscreen = fullscreen;
 	outMusic = music;
+	outShadows = shadows;
+
 
 	switch(selected)
 	{
@@ -124,7 +128,7 @@ bool CMainMenu::OnEvent(SEvent event)
 			if (event.GUIEvent.EventType == gui::EGET_LISTBOX_CHANGED)
 			{
 				selected = ((gui::IGUIListBox*)event.GUIEvent.Caller)->getSelected();
-				startButton->setEnabled(selected == 1);
+				startButton->setEnabled(selected != 0);
 			}
 			break;
 		case 2:
@@ -140,6 +144,10 @@ bool CMainMenu::OnEvent(SEvent event)
 		case 4:
 			if (event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED )
 				music = ((gui::IGUICheckBox*)event.GUIEvent.Caller)->isChecked();
+			break;
+		case 5:
+			if (event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED )
+				shadows = ((gui::IGUICheckBox*)event.GUIEvent.Caller)->isChecked();
 			break;
 		}
 	}

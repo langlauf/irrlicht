@@ -7,6 +7,7 @@
 
 #include "irrTypes.h"
 #include "vector3d.h"
+#include "plane3d.h"
 
 namespace irr
 {
@@ -50,7 +51,7 @@ namespace core
 			void setTranslation( const vector3df& translation );			
 
 			//! Gets the current translation
-			inline vector3df matrix4::getTranslation() const;
+			vector3df matrix4::getTranslation() const;
 
 			//! Set the inverse translation of the current matrix. Will erase any previous values.
 			void setInverseTranslation( const vector3df& translation );	
@@ -80,10 +81,16 @@ namespace core
 			void transformVect( vector3df& vect) const;
 
 			//! Transforms input vector by this matrix and stores result in output vector 
-			void transformVect( const vector3df& in, vector3df& out);
+			void transformVect( const vector3df& in, vector3df& out) const;
 
 			//! Translate a vector by tthe translation part of this matrix.
 			void translateVect( vector3df& vect ) const;
+
+			//! Transforms a plane by this matrix
+			void transformPlane( core::plane3d<f32> &plane) const;
+
+			//! Transforms a plane by this matrix
+			void transformPlane( const core::plane3d<f32> &in, core::plane3d<f32> &out) const;
 
 			//! Multiplies this matrix by a 1x4 matrix
 			void multiplyWith1x4Matrix(f32* matrix) const;
@@ -115,6 +122,7 @@ namespace core
 			//! Builds a right-handed look-at matrix.
 			void buildCameraLookAtMatrixRH(const vector3df& position, const vector3df& target, const vector3df& upVector);
 
+			
 		private:
 
 			//! Matrix data, stored in column-major order
@@ -308,12 +316,35 @@ namespace core
 		vect.Z = vector[2];
 	}
 
-	inline void matrix4::transformVect( const vector3df& in, vector3df& out)
+	inline void matrix4::transformVect( const vector3df& in, vector3df& out) const
 	{
 		out.X = in.X*M[0] + in.Y*M[4] + in.Z*M[8] + M[12];
 		out.Y = in.X*M[1] + in.Y*M[5] + in.Z*M[9] + M[13];
 		out.Z = in.X*M[2] + in.Y*M[6] + in.Z*M[10] + M[14];
 	}
+
+
+	//! Transforms a plane by this matrix
+	inline void matrix4::transformPlane( core::plane3d<f32> &plane) const
+	{
+		vector3df member;
+		transformVect(plane.getMemberPoint(), member);
+
+		vector3df origin(0,0,0);
+		transformVect(plane.Normal);
+		transformVect(origin);
+
+		plane.Normal -= origin;
+		plane.D = - member.dotProduct(plane.Normal);
+	}
+
+	//! Transforms a plane by this matrix
+	inline void matrix4::transformPlane( const core::plane3d<f32> &in, core::plane3d<f32> &out) const
+	{
+		out = in;
+        transformPlane( out );
+	}
+
 
 	//! Multiplies this matrix by a 1x4 matrix
 	inline void matrix4::multiplyWith1x4Matrix(f32* matrix) const

@@ -8,7 +8,7 @@
 #include "IUnknown.h"
 #include "rect.h"
 #include "irrTypes.h"
-#include "Color.h"
+#include "SColor.h"
 
 namespace irr
 {
@@ -24,7 +24,7 @@ public:
 	virtual ~IGUIFont() {};
 
 	//! draws an text and clips it to the specified rectangle if wanted
-	virtual void draw(const wchar_t* text, const core::rectEx<s32>& position, video::Color color, bool hcenter=false, bool vcenter=false, const core::rectEx<s32>* clip=0) = 0;
+	virtual void draw(const wchar_t* text, const core::rectEx<s32>& position, video::SColor color, bool hcenter=false, bool vcenter=false, const core::rectEx<s32>* clip=0) = 0;
 
 	//! returns the dimension of a text
 	virtual core::dimension2d<s32> getDimension(const wchar_t* text) = 0;
@@ -34,3 +34,4 @@ public:
 } // end namespace irr
 
 #endif
+

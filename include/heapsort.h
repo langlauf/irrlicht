@@ -44,10 +44,11 @@ inline void heapsort(T* array, s32 size)
 
 	T* virtualArray = array - 1;
 	s32 virtualSize = size + 2;
+	s32 i;
 
 	// build heap
 
-	for (s32 i=((size-1)/2); i>=0; --i)	
+	for (i=((size-1)/2); i>=0; --i)	
 		heapsink(virtualArray, i+1, virtualSize-1);
 
 	// sort array
@@ -67,3 +68,4 @@ inline void heapsort(T* array, s32 size)
 
 
 #endif
+

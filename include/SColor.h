@@ -59,21 +59,21 @@ namespace video
 	to specify a color. An other way is using the class Colorf, which
 	stores the color values in 4 floats.
 	*/
-	class Color
+	class SColor
 	{
 	public:
 
 		//! Constructor of the Color. Does nothing. The color value is not
 		//! initialized to save time.
-		inline Color() {}
+		inline SColor() {}
 
 		//! Constructs the color from 4 values representing the alpha, red, green and 
 		//! blue components of the color. Must be values between 0 and 255.
-		inline Color (s32 a, s32 r, s32 g, s32 b)
+		inline SColor (s32 a, s32 r, s32 g, s32 b)
 			: color(((a & 0xff)<<24) | ((r & 0xff)<<16) | ((g & 0xff)<<8) | (b & 0xff))	{}
 
 		//! Constructs the color from a 32 bit value. Could be another color.
-		inline Color(s32 clr)
+		inline SColor(s32 clr)
 			: color(clr) {}
 
 		//! Returns the alpha component of the color. The alpha component
@@ -151,11 +151,11 @@ namespace video
 
 		//! Compares the color to another color.
 		//! \return Returns true if the colors are the same, and false if not.
-		inline bool operator==(const Color& other) const { return other.color == color; }
+		inline bool operator==(const SColor& other) const { return other.color == color; }
 
 		//! Compares the color to another color.
 		//! \return Returns true if the colors are different, and false if they are the same.
-		inline bool operator!=(const Color& other) const { return other.color != color; }
+		inline bool operator!=(const SColor& other) const { return other.color != color; }
 
 		//! color in A8R8G8B8 Format
 		s32 color; 
@@ -170,13 +170,13 @@ namespace video
 	to specify a color. An other, faster way is using the class Color, which
 	stores the color values in a single 32 bit integer. 
 	*/
-	class Colorf
+	class SColorf
 	{
 	public:
 
 		//! Constructs a color. All values are initialised with 0.0f, resulting
 		//! in a black color.
-		Colorf() : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {};
+		SColorf() : r(0.0f), g(0.0f), b(0.0f), a(0.0f) {};
 
 		//! Constructs a color from three color values: red, green and blue.
 		//! \param r: Red color component. Should be a value between 0.0f meaning
@@ -185,7 +185,7 @@ namespace video
 		//! very dark green (=black) and 1.0f, meaning full green.
 		//! \param b: Blue color component. Should be a value between 0.0f meaning
 		//! very dark blue (=black) and 1.0f, meaning full blue.
-		Colorf(f32 r, f32 g, f32 b) : r(r), g(g), b(b), a(1.0f) {};
+		SColorf(f32 r, f32 g, f32 b) : r(r), g(g), b(b), a(1.0f) {};
 
 		//! Constructs a color from four color values: alpha, red, green and blue.
 		//! \param a: Alpha color component of the color.
@@ -198,12 +198,18 @@ namespace video
 		//! very dark green (=black) and 1.0f, meaning full green.
 		//! \param b: Blue color component. Should be a value between 0.0f meaning
 		//! very dark blue (=black) and 1.0f, meaning full blue.
-		Colorf(f32 r, f32 g, f32 b, f32 a) : r(r), g(g), b(b), a(a) {};
+		SColorf(f32 r, f32 g, f32 b, f32 a) : r(r), g(g), b(b), a(a) {};
 
 		//! Constructs a color from 32 bit Color.
 		//! \param c: 32 bit color value from which this Colorf class is 
 		//! constructed from.
-		Colorf(Color c) { const f32 inv = 1.0f / 255.0f; r = c.getRed() * inv; g = c.getGreen() * inv; b = c.getBlue() * inv;	a = c.getAlpha() * inv;	};
+		SColorf(SColor c) { const f32 inv = 1.0f / 255.0f; r = c.getRed() * inv; g = c.getGreen() * inv; b = c.getBlue() * inv;	a = c.getAlpha() * inv;	};
+
+		//! Converts this color to a SColor without floats.
+		SColor toSColor() const
+		{
+			return SColor((s32)(a*255.0f), (s32)(r*255.0f), (s32)(g*255.0f), (s32)(b*255.0f));
+		}
 
 		//! red color component
 		f32 r;
@@ -231,3 +237,4 @@ namespace video
 } // end namespace irr
 
 #endif
+

@@ -25,10 +25,10 @@ class line2d
 
 		// operators
 
-		line2d<T> operator+(const vector2d<T>& point) const { return line2d<T>(start + point, end + point;) };
+		line2d<T> operator+(const vector2d<T>& point) const { return line2d<T>(start + point, end + point); };
 		line2d<T>& operator+=(const vector2d<T>& point) { start += point; end += point; return *this; };
 
-		line2d<T> operator-(const vector2d<T>& point) const { return line2d<T>(start - point, end - point;) };
+		line2d<T> operator-(const vector2d<T>& point) const { return line2d<T>(start - point, end - point); };
 		line2d<T>& operator-=(const vector2d<T>& point) { start -= point; end -= point; return *this; };
 
 		bool operator==(const line2d<T>& other) const { return (start==other.start && end==other.end) || (end==other.start && start==other.end);};
@@ -56,8 +56,8 @@ class line2d
 		bool intersectWith(const line2d<T>& l, vector2d<T>& out)
 		{
 			bool found = getInterSectionOfLines(	start.X, start.Y, end.X-start.X, end.Y-start.Y,
-																l.start.X, l.start.Y, l.end.X-l.start.X, l.end.Y-l.start.Y,
-																out.X, out.Y);
+													l.start.X, l.start.Y, l.end.X-l.start.X, l.end.Y-l.start.Y,
+													out.X, out.Y);
 			return (found
 				&&	isPointBetweenPoints(out.X, out.Y, start.X, start.Y, end.X, end.Y)
 				&&	isPointBetweenPoints(out.X, out.Y, l.start.X, l.start.Y, l.end.X, l.end.Y));
@@ -90,3 +90,4 @@ class line2d
 } // end namespace irr
 
 #endif
+

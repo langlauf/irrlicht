@@ -23,7 +23,7 @@ namespace io
 		//! \param buffer: Pointer to buffer where to read bytes will be written to.
 		//! \param sizeToRead: Amount of bytes to read from the file.
 		//! \return Returns how much bytes were read.
-		virtual size_t read(void* buffer, size_t sizeToRead) = 0;
+		virtual s32 read(void* buffer, s32 sizeToRead) = 0;
 
 		//! Changes position in file, returns true if successful.
 		//! \param finalPos: Destination position in the file.
@@ -35,7 +35,7 @@ namespace io
 
 		//! Returns size of file.
 		//! \return Returns the size of the file in bytes.
-		virtual size_t getSize() = 0;
+		virtual s32 getSize() = 0;
 
 		//! Returns the current position in the file.
 		//! \return Returns the current position in the file in bytes.
@@ -49,7 +49,7 @@ namespace io
 	//! Internal function, please do not use.
 	IReadFile* createReadFile(const c8* fileName);
 	//! Internal function, please do not use.
-	IReadFile* createLimitReadFile(const c8* fileName, IReadFile* alreadyOpenedFile, size_t areaSize);
+	IReadFile* createLimitReadFile(const c8* fileName, IReadFile* alreadyOpenedFile, s32 areaSize);
 	//! Internal function, please do not use.
 	IReadFile* createMemoryReadFile(void* memory, s32 size, const c8* fileName, bool deleteMemoryWhenDropped);
 
@@ -57,3 +57,4 @@ namespace io
 } // end namespace io
 
 #endif
+

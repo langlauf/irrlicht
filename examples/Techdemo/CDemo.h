@@ -16,12 +16,13 @@ using namespace audiere;
 #endif
 
 using namespace irr;
+const int CAMERA_COUNT = 7;
 
 class CDemo : public IEventReceiver
 {
 public:
 
-	CDemo(bool fullscreen, bool music, video::EDriverType driver);
+	CDemo(bool fullscreen, bool music, bool shadows, video::EDriverType driver);
 
 	void run();
 
@@ -30,9 +31,13 @@ public:
 private:
 
 	void doSceneSetup();
+	void createLoadingScreen();
+	void loadSceneData();
+	void switchToNextScene();
 
 	bool fullscreen;
 	bool music;
+	bool shadows;
 	bool scenePrepared;
 	video::EDriverType driverType;
 	IrrlichtDevice *device;
@@ -44,19 +49,16 @@ private:
 #endif
 
 	int currentScene;
-	video::Color backColor;
+	video::SColor backColor;
 	gui::IGUIElement* statusText;
-	scene::ISceneNode* dynamicNode;
-	scene::ISceneNode* lightMapNode;
-	scene::IAnimatedMesh* quakeLevel;
-	scene::ICameraSceneNode* camera;
+	scene::IAnimatedMesh* quakeLevelMesh;
+	scene::ISceneNode* quakeLevelNode;
+	scene::ISceneNode* skyboxNode;
 	scene::IAnimatedMeshSceneNode* model1;
 	scene::IAnimatedMeshSceneNode* model2;
-	scene::IBillboardSceneNode* billboard;
 
-	DWORD time;
-
-	core::stringw text;
+	u32 time;
+	u32 timeForThisScene;
 };
 
 #endif

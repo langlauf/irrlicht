@@ -83,7 +83,9 @@ namespace scene
 		core::aabbox3d<f32> BoundingBox;
 	};
 
+
 } // end namespace scene
 } // end namespace irr
 
 #endif
+

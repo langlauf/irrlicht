@@ -5,7 +5,7 @@
 #ifndef __S_LIGHT_H_INCLUDED__
 #define __S_LIGHT_H_INCLUDED__
 
-#include "Color.h"
+#include "SColor.h"
 
 namespace irr
 {
@@ -19,39 +19,32 @@ by the irrlicht engine.
 struct SLight
 {
 	SLight() : AmbientColor(0.0f,0.0f,0.0f), DiffuseColor(1.0f, 1.0f, 1.0f), 
-		SpecularColor(0.0f,0.0f,0.0f), Position(0.0f, 0.0f, 0.0f), Range(100.0f),
-		ConstantAttenuation(1.0f), LinearAttenuation(0.0f), QuadraticAttenuation(0.0f) {};
+		SpecularColor(0.0f,0.0f,0.0f), Position(0.0f, 0.0f, 0.0f), Radius(100.0f),
+		CastShadows(true)
+		 {};
 
 	//! Ambient color emitted by the light
-	Colorf AmbientColor; 
+	SColorf AmbientColor; 
 
-	//! Diffuse color emitted by the light.
-	Colorf DiffuseColor; 
+	//! Diffuse color emitted by the light. This is the primary color you
+	//! might want to set.
+	SColorf DiffuseColor; 
 
 	//! Specular color emitted by the light. 
-	Colorf SpecularColor; 
+	SColorf SpecularColor; 
 
 	//! Position of the light.
 	core::vector3df Position; 
 
-	//! Range of the light.
-	f32 Range; 
+	//! Radius of light. Everything within this radius be be lighted.
+	f32 Radius; 
 
-	//! Constant attenuatuion value specifying how the light intensity changes
-	//! over distance. Must be between 0.0 and 1.0: 1.0 means never attenuate, 
-	//! 0.0 is complete attenuation.
-	f32 ConstantAttenuation; 
-
-	//! Linear attenuatuion value specifying how the light intensity changes over distance.
-	//! Must be a positive value. 1.0 means attenuate evenly over the distance.
-	f32 LinearAttenuation; 
-
-	//! Quadratic attenuatuion value specifying how the light intensity changes over distance.
-	//! Must be a positive value. Adds a curvature to the attenuation formula. 
-	f32 QuadraticAttenuation; 
+	//! Does the light cast shadows?
+	bool CastShadows;
 };
 
 } // end namespace video
 } // end namespace irr
 
 #endif
+

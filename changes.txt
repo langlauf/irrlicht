@@ -1,0 +1,127 @@
+Changes in version 0.2:
+
+- The engine is now able to load .3ds files, with their materials and textures.
+
+- There is now a tool for generating new fonts for the engine included in the SDK.
+
+- There are some new SceneNodeAnimators: A fly straight animator and a texture animator.
+
+- Texture coordinates can now be set to clamp or wrap mode with 
+  a flag in the SMaterial struct.
+  
+- Skyboxes are implemented.
+
+- Billboards now work 100% correctly.
+
+- The IAnimatedMeshSceneNode is now able to draw shadows of itself. To enable this, just call
+  addShadowVolumeSceneNode(). Please note that shadows are currently just experimental,
+  there are some bugs, and they only only in Direct3D mode.
+
+- A small bug in the view frustrum and the octree fixed.
+
+- The default aspect ratio in all camera scene nodes were changed.
+
+- Some changes and extenstions to the core::matrix4, SViewFrustum, plane3d and
+  aabbox were made. The plane3dex was removed, there is now only one plane implementation
+  available. Implemented some ideas and suggestions by Mark Jeacocke. Thanx a lot!
+
+- The interface for adding dynamic lights has been enhanced. There are some new methods
+  for handling dynamic light in the IVideoDriver interface. For example, it is now possible
+  to change the ambient light.
+
+- There is a new parameter in the createDevice() function, which specifies if the 
+  stencil buffer should be activated. Also, now all parameters have default parameters.
+
+- There is now a timer object to get the current timer. It can be received using
+  the getTimer() method from the IrrlichtDevice.
+
+- The first person shooter camera is now able to be moved by external using 
+  setRelativePosition() and the sceneNodeAnimators. In addition, it now supports 
+  multiple FPS cameras.
+  
+- Mesh format loading extenstions are now possible. To extend the engine with a
+  mesh format it currently does not support (e.g. .cob), just implement a 
+  IMeshLoader interface and add it to the engine calling 
+  ISceneManager::addExternalMeshLoader().
+
+- It is now possible to extend the Irrlicht Engine easily with new texture file format
+  loaders. If there is an image file format the engine does not support (for example
+  .gif files) the ISurfaceLoader interface can be implemented to load .gif files 
+  and added to the engine via IVideoDriver::addExternalSurfaceLoader().
+  
+-------------------------------------------------------------------------------------
+Changes in version 0.1.5:
+
+- The zlib and libjpeg are now included in the SDK.
+
+- It is now possible to let the scene manager generate a hilly plane on the fly.
+
+- The Interface for handling dynamic lights was simplified.
+
+- The OpenGL 2D and 3D device is now full implemented.
+
+- There is now a way to access to root scene node from the scene manager, and so it
+  is possible to add external created custom scene nodes to the scene.
+
+- There is a new Camera control scene node available in the engine: First Person Shooter
+  Camera Control. Look with mouse movement, move and strafe with the cursor keys.
+
+- The engine now compiles with g++ and the Microsoft compilers, which enables it to
+  develop applications for the engine with VisualC++6.0, VisualC++.NET and Dev-C++.
+
+- There is now a ICursorControl available in the engine, which is able to modify the
+  mouse cursor: Get/Set the position of the cursor, make it invisible or visible.
+
+- video::Color was renamed to video::SColor to fit the Irrlicht Engine naming conventions
+  and for g++ compatibility issues in the Vertices.
+
+-------------------------------------------------------------------------------------
+Release notes of version 0.1:
+
+  This is an alpha version of the SDK. So please note that there are
+  features missing in the engine and maybe also some bugs. The following
+  list is a complete list of parts of this alpha SDK which do not work
+  100% correct. All other parts which can be found in the documentation
+  and accessed with the Irrlicht header files work and can already be 
+  used. 
+  
+- OpenGL Device
+  The OpenGL Device is currently only able to load textures and draw basic 
+  3D primitives. No 2D functions, complex materials and dynamic light are
+  implemented. Please use the DirectX8 or the Software Device instead. 
+  In the next release (0.2) the OpenGL device will be complete.
+  
+- Software Device
+  Dynamic lighting, multitexturing, 3d clipping and bilinear filtering are
+  not implemented because the Software Device was intented to to only 2d 
+  functions, the primitive 3d functions are only an addition. Until the
+  first non beta release (1.0) of the Engine, some more 3d functionality
+  will be added.
+  
+- BspTree
+  The binary space partition scene node does not work correctly and has 
+  some bugs in it, which might lead to crashes. Please use the OctTree
+  scene node instead. There is nearly no difference between the interface
+  of them.
+
+- MeshViewerGUIElement
+  The camera control of this element is currently disabled.
+  
+- FileOpenDialog
+  Not all functions are implemented.
+  
+- Render to Texture support
+  Is not implemented yet.
+  
+- MS3D Skeletal Animation
+  A loaded mesh is currently not animated and only drawn static.
+  
+- Quake 3 maps
+  No support for curved surfaces yet.
+  
+- Linux Support
+  The engine currently only runs with Windows platforms. A linux version
+  will be available somewhere between the versions 0.2 and 0.5, it depends
+  on the need of the users.
+
+-------------------------------------------------------------------------------------

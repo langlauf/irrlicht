@@ -1,12 +1,12 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.1
+The Irrlicht Engine SDK version 0.2
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
 
   Content of this file:
 
-  1. Where to find what
+  1. Directory structure overview
   2. How to start
   3. Release Notes
   4. License
@@ -15,7 +15,7 @@ The Irrlicht Engine SDK version 0.1
 
 
 ==========================================================================
-1. Where to find what
+1. Directory structure overview
 ==========================================================================
 
   You will find some directories after decompressing the archive in which
@@ -33,7 +33,8 @@ The Irrlicht Engine SDK version 0.1
   \source    The source code of the Irrlicht Engine. This code is
              not needed to develop applications with the engine,
              but it is included to let you be able to recompile and
-             debug it, if necessary.             
+             debug it, if necessary.     
+  \tools     Useful tools and their sourcecode for the engine.
 
 
 
@@ -41,13 +42,14 @@ The Irrlicht Engine SDK version 0.1
 2. How to start
 ==========================================================================
 
-  To see the engine in action, just go to the \bin directory, and start
-  some applications. There should also be an application named 
-  TechDemo.exe, this should show the most interesting things.
+  To see the engine in action, just go to the \bin\VisualStudio
+  directory, and start some applications. There should also be an
+  application named TechDemo.exe, this should show the most
+  interesting things.
   
   To start developing own applications and games with the engine take 
   a look at the 1.HelloWorld example in the \examples directory.
-  There will also be a .html file with an easy to understand tutorial.
+  There will also be a .html file with a tutorial easy to understand .
   
 
 
@@ -55,30 +57,24 @@ The Irrlicht Engine SDK version 0.1
 3. Release Notes
 ==========================================================================
 
-  This is an alpha version of the SDK. So please note that there are
+  This is an alpha version of the SDK. Therefore please note that there are
   features missing in the engine and maybe also some bugs. The following
   list is a complete list of parts of this alpha SDK which do not work
   100% correct. All other parts which can be found in the documentation
   and accessed with the Irrlicht header files work and can already be 
   used. 
   
-  OpenGL Device
-  The OpenGL Device is currently only able to load textures and draw basic 
-  3D primitives. No 2D functions, complex materials and dynamic light are
-  implemented. Please use the DirectX8 or the Software Device instead. 
-  In the next release (0.2) the OpenGL device will be complete.
-  
   Software Device
   Dynamic lighting, multitexturing, 3d clipping and bilinear filtering are
-  not implemented because the Software Device was intented to to only 2d 
-  functions, the primitive 3d functions are only an addition. Until the
+  not implemented because the Software Device was intented to perform only 2d 
+  functions, the primitive 3d functions are only additionally. Until the
   first non beta release (1.0) of the Engine, some more 3d functionality
   will be added.
   
   BspTree
   The binary space partition scene node does not work correctly and has 
   some bugs in it, which might lead to crashes. Please use the OctTree
-  scene node instead. There is nearly no difference between the interface
+  scene node instead. There is nearly no difference between the interfaces
   of them.
 
   MeshViewerGUIElement
@@ -107,7 +103,7 @@ The Irrlicht Engine SDK version 0.1
 
   The license of the Irrlicht Engine is based on the zlib/libpng license.
   Even though this license does not require you to mention that you are
-  using the Irrlicht Engine in your product, an acknowledgement somewhere
+  using the Irrlicht Engine in your product, an acknowledgement
   would be highly appreciated.
 
 

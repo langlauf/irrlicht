@@ -42,9 +42,11 @@ typedef signed int			s32;
 
 
 
-//! 64 bit signed variable.
-/** This is a typedef for __int64, it ensures portability of the engine. */
-typedef __int64				s64; 
+// 64 bit signed variable.
+// This is a typedef for __int64, it ensures portability of the engine. 
+// This type is currently not used by the engine and not supported by compilers
+// other than Microsoft Compilers, so it is outcommented.
+//typedef __int64				s64; 
 
 
 
@@ -59,6 +61,9 @@ typedef double				f64;
 
 } // end namespace
 
+
+// define the wchar_t type if not already built in.
+#ifdef _MSC_VER 
 #ifndef _WCHAR_T_DEFINED
 //! A 16 bit wide character type.
 /**
@@ -71,5 +76,7 @@ typedef double				f64;
 typedef unsigned short wchar_t;
 #define _WCHAR_T_DEFINED
 #endif
+#endif
 
 #endif
+

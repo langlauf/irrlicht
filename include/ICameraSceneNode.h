@@ -5,6 +5,7 @@
 #ifndef __I_CAMERA_SCENE_NODE_H_INCLUDED__
 #define __I_CAMERA_SCENE_NODE_H_INCLUDED__
 
+#include "SViewFrustrum.h"
 #include "ISceneNode.h"
 #include "IEventReceiver.h"
 
@@ -12,41 +13,6 @@ namespace irr
 {
 namespace scene
 {
-
-	//! Defines the view frustrum. Thats the space viewed by the camera.
-	/** The view frustrum is enclosed by 6 planes. These six planes share
-	four points. A bounding box around these four points is also stored in
-	this structure.
-	*/
-	struct SViewFrustrum
-	{
-		enum planes
-		{
-			//! Far plane of the frustrum. Thats the plane farest away from the eye.
-			CVA_FAR_PLANE = 0,
-			//! Near plane of the frustrum. Thats the plane nearest to the eye.
-			CVA_NEAR_PLANE,
-			//! Left plane of the frustrum.
-			CVA_LEFT_PLANE,
-			//! Right plane of the frustrum.
-			CVA_RIGHT_PLANE,
-			//! Bottom plane of the frustrum.
-			CVA_BOTTOM_PLANE,
-			//! Top plane of the frustrum.
-			CVA_TOP_PLANE,
-
-			//! Amount of planes enclosing the view frustum. Should be 6.
-			CVA_PLANE_COUNT
-		};
-
-		core::plane3dex<f32> planes[CVA_PLANE_COUNT];
-		core::vector3df rightFarDown;
-		core::vector3df leftFarDown;
-		core::vector3df rightFarUp;
-		core::vector3df leftFarUp;
-
-		core::aabbox3d<f32> box;
-	};
 
 	//! Scene Node which is a (controlable) camera.
 	/** The whole scene will be
@@ -143,3 +109,4 @@ namespace scene
 } // end namespace irr
 
 #endif
+

@@ -6,7 +6,7 @@
 #define __I_GUI_SKIN_H_INCLUDED__
 
 #include "IUnknown.h"
-#include "Color.h"
+#include "SColor.h"
 #include "IGUISkin.h"
 
 namespace irr
@@ -86,10 +86,10 @@ namespace gui
 		~IGUISkin() {};
 
 		//! returns default color
-		virtual video::Color getColor(EGUI_DEFAULT_COLOR color) = 0;
+		virtual video::SColor getColor(EGUI_DEFAULT_COLOR color) = 0;
 
 		//! sets a default color
-		virtual void setColor(EGUI_DEFAULT_COLOR which, video::Color newColor) = 0;
+		virtual void setColor(EGUI_DEFAULT_COLOR which, video::SColor newColor) = 0;
 
 		//! returns default color
 		virtual s32 getSize(EGUI_DEFAULT_SIZE size) = 0;
@@ -112,3 +112,4 @@ namespace gui
 } // end namespace irr
 
 #endif
+

@@ -80,8 +80,8 @@ namespace core
 		{
 			// this is very slow, i'll have to write a faster one later.
 
-			vector3df lv = end - begin;
-			vector3df pv = *this - begin;
+			vector3d<T> lv = end - begin;
+			vector3d<T> pv = *this - begin;
 
 			T l1 = lv.X*lv.X + lv.Y*lv.Y + lv.Z*lv.Z;
 			T l2 = pv.X*pv.X + pv.Y*pv.Y + pv.Z*pv.Z;
@@ -157,3 +157,4 @@ namespace core
 } // end namespac irr
 
 #endif
+

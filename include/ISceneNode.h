@@ -30,8 +30,6 @@ namespace scene
 	{
 	public:
 
-
-
 		//! Constructor
 		ISceneNode(	ISceneNode* parent, ISceneManager* mgr, s32 id=-1,
 					const core::vector3df& position = core::vector3df(0,0,0),
@@ -406,3 +404,4 @@ namespace scene
 } // end namespace irr
 
 #endif
+

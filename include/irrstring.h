@@ -400,3 +400,4 @@ typedef string<wchar_t> stringw;
 } // end namespace irr
 
 #endif
+

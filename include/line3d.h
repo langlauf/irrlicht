@@ -6,6 +6,7 @@
 #define __IRR_LINE_3D_H_INCLUDED__
 
 #include "irrTypes.h"
+#include "vector3d.h"
 
 namespace irr
 {
@@ -27,10 +28,10 @@ class line3d
 
 		// operators
 
-		line3d<T> operator+(const vector3d<T>& point) const { return line3d<T>(start + point, end + point;) };
+		line3d<T> operator+(const vector3d<T>& point) const { return line3d<T>(start + point, end + point); };
 		line3d<T>& operator+=(const vector3d<T>& point) { start += point; end += point; return *this; };
 
-		line3d<T> operator-(const vector3d<T>& point) const { return line3d<T>(start - point, end - point;) };
+		line3d<T> operator-(const vector3d<T>& point) const { return line3d<T>(start - point, end - point); };
 		line3d<T>& operator-=(const vector3d<T>& point) { start -= point; end -= point; return *this; };
 
 		bool operator==(const line3d<T>& other) const { return (start==other.start && end==other.end) || (end==other.start && start==other.end);};
@@ -57,3 +58,4 @@ class line3d
 } // end namespace irr
 
 #endif
+

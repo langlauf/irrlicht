@@ -21,7 +21,7 @@ Add the \include directory to the list of directories.
 Now the compiler will find the Irrlicht.h header file. We also
 need the irrlicht.lib to be found, so stay
 in that dialog, select 'Libraries' in the combo box and add the
-\lib\win32 directory. That's it, with your IDE set up like this,
+\lib\VisualStudio directory. That's it, with your IDE set up like this,
 you will now be able to develop applications with the Irrlicht Engine.
 */
 #include <irrlicht.h>
@@ -83,12 +83,13 @@ void main()
 	   be 16 or 32. This parameter is ignored when running in windowed mode.
 	fullscreen: Specifies if we want the device to run in fullscreen mode
 	   or not.
+	stencilbuffer: Specifies if we want to use the stencil buffer for drawing shadows.
 	eventReceiver: An object to receive events. We do not want to use this
 	   parameter here, and set it to 0.
 	*/
 
 	IrrlichtDevice *device =
-		createDevice(DT_SOFTWARE, dimension2d<s32>(512, 384), 16, false, 0);
+		createDevice(DT_SOFTWARE, dimension2d<s32>(512, 384), 16, false, false, 0);
 
 	/*
 	Set the caption of the window to some nice text. Note that there is 
@@ -143,9 +144,9 @@ void main()
 
 	/*
 	To look at the mesh, we place a camera into 3d space at the position
-	(0, 20, -60). The camera looks from there to (0,0,0).
+	(0, 10, -40). The camera looks from there to (0,0,0).
 	*/
-	smgr->addCameraSceneNode(0, vector3df(0,20,-60), vector3df(0,0,0));
+	smgr->addCameraSceneNode(0, vector3df(0,10,-40), vector3df(0,0,0));
 
 	/*
 	Ok, now we have set up the scene, lets draw everything:
@@ -162,7 +163,7 @@ void main()
 		GUI Environment draw their content. With the endScene() call
 		everything is presented on the screen.
 		*/
-		driver->beginScene(true, true, Color(0,100,100,100));
+		driver->beginScene(true, true, SColor(0,100,100,100));
 
 		smgr->drawAll();
 		guienv->drawAll();
