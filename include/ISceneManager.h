@@ -63,6 +63,7 @@ namespace scene
 	class ILightSceneNode;
 	class IBillboardSceneNode;
 	class IMeshLoader;
+	class ISceneCollisionManager;
 
 	//!	The Scene Manager manages scene nodes, mesh recources, cameras and all the other stuff.
 	/** All Scene nodes can be created only here. There is a always growing list of scene 
@@ -274,6 +275,8 @@ namespace scene
 		//! \param countHills: Amount of hills on the plane. There will be countHills.X
 		//! hills along the X axis and countHills.Y along the Y axis. So in total there 
 		//! will be countHills.X * countHills.Y hills.
+		//! \param textureRepeatCount: Defines how often the texture will be repeated in
+		//! x and y direction.
         //! \return Returns null if the creation failed. The reason could be that you 
 		//! specified some invalid parameters or that a mesh with that name already
 		//! exists. If successful, a pointer to the mesh is returned. 
@@ -281,7 +284,8 @@ namespace scene
 		virtual IAnimatedMesh* addHillPlaneMesh(const c8* name,
 			const core::dimension2d<f32>& tileSize, const core::dimension2d<s32>& tileCount,
 			video::SMaterial* material = 0,	f32 hillHeight = 0.0f, 
-			core::dimension2d<f32> countHills = core::dimension2d<f32>(0.0f, 0.0f)) = 0;
+			const core::dimension2d<f32>& countHills = core::dimension2d<f32>(0.0f, 0.0f),
+			const core::dimension2d<f32>& textureRepeatCount = core::dimension2d<f32>(1.0f, 1.0f)) = 0;
 
 		//! Returns the root scene node. This is the scene node wich is parent 
 		//! of all scene nodes. The root scene node is a special scene node which
@@ -359,6 +363,9 @@ namespace scene
 		//! the IMeshLoader interface in your loading class and add it with this method.
 		//! \param externalLoader: Implementation of a new mesh loader.
 		virtual void addExternalMeshLoader(IMeshLoader* externalLoader) = 0;
+
+		//! Returns a pointer to the scene collision manager.
+		virtual ISceneCollisionManager* getSceneCollisionManager() = 0;
 	};
 
 

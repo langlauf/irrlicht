@@ -45,7 +45,57 @@ class line3d
 
 		//! Returns length of line
 		//! \return Returns lenght of line.
-		f64 getLenght() { return start.getDistanceFrom(end); };
+		f64 getLenght() const { return start.getDistanceFrom(end); };
+
+		//! Returns middle of line
+		vector3d<T> getMiddle() const
+		{
+			return (start + end) * (T)0.5;
+		}
+
+		//! Returns vector of line
+		vector3d<T> getVector() const
+		{
+			return end - start;
+		}
+
+		//! Returns the closest point on this line to a point
+		vector3d<T> getClosestPoint(const vector3d<T>& point) const
+		{
+			f64 d = getLenght();
+
+			vector3d<T> v = getVector();
+			v /= d;	// normalizes v
+
+			T t = v.dotProduct(point - start);
+
+			// check if t is beyond the extents of this line segment
+			if (t < 0) return start;
+			if (t > d) return end;
+
+			// return the point between start and end
+			v *= t;
+			return start + v;
+		}
+
+		//! Returns if the line intersects with a shpere
+		//! \param sorigin: Origin of the shpere.
+		//! \param sradius: Radius if the sphere.
+		//! \return Returns true if there is an intersection.
+		//! If there is one, the distance to the first intersection point
+		//! is stored in outdistance.
+		bool getIntersectionWithSphere(vector3d<T> sorigin, T sradius, f64& outdistance)
+		{
+			vector3d<T> q = sorigin - start;
+			f64 c = q.getLength();
+			f64 v = q.dotProduct(getVector().normalize());
+			f64 d = sradius * sradius - (c*c - v*v);
+
+            if (d < 0.0) 
+				return false;
+
+			return v - sqrt(d);
+		}
 
 		// member variables
 		

@@ -29,8 +29,13 @@ namespace video
 		EMT_TRANSPARENT_ADD_COLOR,
 
 		//! Makes the material transparent based on the texture alpha channel.
-		//! Only first texture is used.
+		//! Only first texture is used. Please note that this material is currenly
+		//! NOT IMPLEMENTED.
 		EMT_TRANSPARENT_ALPHA_CHANNEL,	
+
+		//! Makes the material transparent based on the vertex alpha value.
+		//! This material is only implemented in the DirectX driver yet.
+		EMT_TRANSPARENT_VERTEX_ALPHA,
 
 		//! Material type with standard lightmap technique: 
 		//! There should be 2 textures: The first texture layer is a diffuse map,
@@ -174,7 +179,8 @@ namespace video
 		inline bool isTransparent()
 		{
 			return MaterialType == EMT_TRANSPARENT_ADD_COLOR ||
-					MaterialType == EMT_TRANSPARENT_ALPHA_CHANNEL;
+					MaterialType == EMT_TRANSPARENT_ALPHA_CHANNEL || 
+					MaterialType == EMT_TRANSPARENT_VERTEX_ALPHA;
 		}
 	};
 

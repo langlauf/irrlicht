@@ -14,8 +14,10 @@ namespace irr
 namespace core
 {
 
-	//! Rectangle template class with position and dimension.
-	/**	Mostly used by 2D Interface Classes.
+	//!	Rectangle template.
+	/** Mostly used by 2D GUI elements and for 2D drawing methods.
+	    It has 2 positions instead of position and dimension
+		and a fast method for collision detection with other rectangles and points.
 	*/
 	template <class T>
 	class rect
@@ -23,117 +25,50 @@ namespace core
 	public:
 
 		rect()
-			: dimension(0,0), position(0,0) {};
-
-
-		rect(T x, T y, T w, T h)
-			: dimension(w,h), position(x,y) {};
-
-
-		rect(const rect<T>& other)
-			: dimension(other.dimension), position(other.position) {};
-
-
-		rect(const position2d<T>& pos, const dimension2d<T>& dim)
-			: position(pos), dimension(dim) {};
-
-
-        bool operator == (const rect<T>& other) const
-		{
-			return dimension == other.dimension && position == other.position;
-		}
-
-
-		bool operator != (const rect<T>& other) const
-		{
-			return dimension != other.dimension || position != other.position;
-		}
-
-		const rect<T>& operator = (const rect<T>& other)
-		{
-			dimension = other.dimension;
-			position = other.position;
-			return *this;
-		}
-
-
-		//! Returns if a 2d point is within this rectangle.
-		//! \param pos: Position to test if it lies within this rectangle.
-		//! \return Returns true if the position is within the rectangle, false if not.
-		bool isPointInside(const position2d<T>& pos) const
-		{
-			return position.X <= pos.X && position.Y <= pos.Y &&
-				dimension.Width + position.X >= pos.X && dimension.Height + position.Y >= pos.Y;
-		}
-
-		dimension2d<T> dimension;
-		position2d<T> position;
-	};
-
-
-
-	//!	Extendet rectangle template.
-	/** It has 2 positions instead of position and dimension
-		and a faster method for collision detection with other rectangles and points.
-	*/
-	template <class T>
-	class rectEx
-	{
-	public:
-
-		rectEx()
 			: UpperLeftCorner(0,0), LowerRightCorner(0,0) {};
 
 
-		rectEx(T x, T y, T x2, T y2)
+		rect(T x, T y, T x2, T y2)
 			: UpperLeftCorner(x,y), LowerRightCorner(x2,y2) {};
 
 
-		rectEx(const position2d<T>& upperLeft, const position2d<T>& lowerRight)
+		rect(const position2d<T>& upperLeft, const position2d<T>& lowerRight)
 			: UpperLeftCorner(upperLeft), LowerRightCorner(lowerRight) {};
 
-
-		rectEx(const rect<T>& other)
-			: UpperLeftCorner(other.position), 
-				LowerRightCorner(	other.position.X + other.dimension.Width,
-									other.position.Y + other.dimension.Height) {};
-
-
-		rectEx(const rectEx<T>& other)
+		rect(const rect<T>& other)
 			: UpperLeftCorner(other.UpperLeftCorner), LowerRightCorner(other.LowerRightCorner) {};
 
-
-		rectEx(const position2d<T>& pos, const dimension2d<T>& size)
+		rect(const position2d<T>& pos, const dimension2d<T>& size)
 			: UpperLeftCorner(pos), LowerRightCorner(pos.X + size.Width, pos.Y + size.Height) {};
 
 
-		rectEx<T> operator+(const position2d<T>& pos) const
+		rect<T> operator+(const position2d<T>& pos) const
 		{
-			rectEx<T> ret(*this);
+			rect<T> ret(*this);
 			ret.UpperLeftCorner += pos;
 			ret.LowerRightCorner += pos;
 			return ret;
 		}
 
-		const rectEx<T>& operator+=(const position2d<T>& pos)
+		const rect<T>& operator+=(const position2d<T>& pos)
 		{
 			UpperLeftCorner += pos;
 			LowerRightCorner += pos;
 			return *this;
 		}
 
-        bool operator == (const rectEx<T>& other) const
+        bool operator == (const rect<T>& other) const
 		{
 			return UpperLeftCorner == other.UpperLeftCorner && LowerRightCorner == other.LowerRightCorner;
 		}
 
 
-		bool operator != (const rectEx<T>& other) const
+		bool operator != (const rect<T>& other) const
 		{
 			return UpperLeftCorner != other.UpperLeftCorner || LowerRightCorner != other.LowerRightCorner;
 		}
 
-		const rectEx<T>& operator = (const rectEx<T>& other)
+		const rect<T>& operator = (const rect<T>& other)
 		{
 			UpperLeftCorner = other.UpperLeftCorner;
 			LowerRightCorner = other.LowerRightCorner;
@@ -150,14 +85,14 @@ namespace core
 		}
 
 		//! Returns if the rectangle collides with an other rectangle.
-		bool isRectCollided(const rectEx<T>& other) const
+		bool isRectCollided(const rect<T>& other) const
 		{
 			return (LowerRightCorner.Y > other.UpperLeftCorner.Y && UpperLeftCorner.Y < other.LowerRightCorner.Y &&
 					LowerRightCorner.X > other.UpperLeftCorner.X && UpperLeftCorner.X < other.LowerRightCorner.X);
 		}
 
 		//! Clips this rectangle with another one.
-		void clipAgainst(const rectEx<T>& other) 
+		void clipAgainst(const rect<T>& other) 
 		{
 			if (other.LowerRightCorner.X < LowerRightCorner.X)
 				LowerRightCorner.X = other.LowerRightCorner.X;

@@ -29,7 +29,7 @@ namespace gui
 	public:
 
 		//! constructor
-		IGUIMeshViewer(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rectEx<s32> rectangle)
+		IGUIMeshViewer(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 			: IGUIElement(environment, parent, id, rectangle) {}
 
 		//! destructor

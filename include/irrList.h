@@ -55,7 +55,7 @@ public:
 
 	//! constructor
 	list()
-		: root(0), last(0)	{}
+		: root(0), last(0), size(0)	{}
 
 
 	//! destructor

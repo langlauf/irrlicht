@@ -120,7 +120,7 @@
         <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
           <tr> 
             <td> 
-              <pre>void main()<br>{</pre>
+              <pre>int main()<br>{</pre>
             </td>
           </tr>
         </table>
@@ -188,7 +188,7 @@
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> 
-            <pre>guienv-&gt;addStaticText(L&quot;Hello World! This is the Irrlicht Software engine!&quot;,<br>	true, rectEx&lt;int&gt;(10,10,200,30));</pre>
+            <pre>guienv-&gt;addStaticText(L&quot;Hello World! This is the Irrlicht Software engine!&quot;,<br>	true, rect&lt;int&gt;(10,10,200,30));</pre>
           </td>
         </tr>
       </table>
@@ -203,7 +203,7 @@
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> 
-            <pre>IAnimatedMesh* mesh = smgr-&gt;getMesh(&quot;..\\..\\media\\sydney.md2&quot;);<br>IAnimatedMeshSceneNode* node = smgr-&gt;addAnimatedMeshSceneNode( mesh );</pre>
+            <pre>IAnimatedMesh* mesh = smgr-&gt;getMesh(&quot;../../media/sydney.md2&quot;);<br>IAnimatedMeshSceneNode* node = smgr-&gt;addAnimatedMeshSceneNode( mesh );</pre>
           </td>
         </tr>
       </table>
@@ -216,7 +216,7 @@
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> 
-            <pre>if (node)<br>{<br>	node-&gt;setMaterialFlag(EMF_LIGHTING, false);<br>	node-&gt;setFrameLoop(0, 310);	<br>	node-&gt;setMaterialTexture( 0, driver-&gt;getTexture(&quot;..\\..\\media\\sydney.bmp&quot;) );<br>}</pre>
+            <pre>if (node)<br>{<br>	node-&gt;setMaterialFlag(EMF_LIGHTING, false);<br>	node-&gt;setFrameLoop(0, 310);	<br>	node-&gt;setMaterialTexture( 0, driver-&gt;getTexture(&quot;../../media/sydney.bmp&quot;) );<br>}</pre>
           </td>
         </tr>
       </table>
@@ -263,7 +263,8 @@
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> 
-            <pre>	device-&gt;drop();<br>}</pre>
+            <pre>	device-&gt;drop();<br> return 0;
+}</pre>
           </td>
         </tr>
       </table>

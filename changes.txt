@@ -1,8 +1,120 @@
+-------------------------------------------------------------------------------------
+Changes in version 0.3:
+
+- Linux port: The Irrlicht Engine now compiles and runs on Linux. Currently only
+  the OpenGL driver is available. The Software driver would be there too, if 
+  somebody could tell me a fast way to blit a A1R5G5B5 surface to the screen
+  using X.
+  All examples do compile and run, but there are some things missing:
+   * It is not yet possible to make the mouse cursor invisibe.
+   * The timer seems not to return the currect time.
+   * Multitexturing does not work correctly on all gfx adapters.
+  
+- Ms3D Animations: The engine is now able to play skeletal animations directy
+  from Milkshape 3D (.ms3d) files. It is also possible to attach objects to
+  parts of the animated mesh. For example a weapon to the left hand of 
+  the animated model.
+
+- Because the swprintf function in Windows32 does not match the ISO C standard,
+  and it does in linux and all other platforms, there is now a define in Irrlicht.h,
+  to make the code be the same on all platforms:
+  #define   swprintf   _snwprintf
+  This simply means that you need to add a parameter to your swprintf calls if
+  you used this function in your win32 irrlicht engine projects. For example instead
+  of writing 
+      wchar_t tmp[255]; 
+      swprint(tmp, "FPS: %d", fps);
+  you now write
+      wchar_t tmp[255]; 
+      swprint(tmp, 255, "FPS: %d", fps);
+
+- Automatic culling has changed a little bit: It is now done by the SceneManager.
+  Scene nodes now only need to return a valid, non transformed bounding box to be 
+  culled automaticly. It is explaned in the CustomSceneNode Tutorial how this works.
+  
+- It is now possible to use the engine easily for 2D graphics: There are now to new
+  methods in the IVideoDriver, which create an 1bit alpha channel for textures 
+  using an color key. The methods are both named makeColorKeyTexture. There is a 
+  tutorial '2d graphics' which explains how this works.
+  
+- The rect template class was removed and replaced by the rectEx class. There
+  is now only one rectangle template available, called 'rect' for simplifying
+  the interface.
+  
+- The texture coordinate bug in Milkshape 3d models with lots of shared vertices
+  was fixed.
+  
+- Bugfix with GUI environment hovering invisible elements.
+
+- There are two new tutorials: One for 2d graphics, and one for user interface.
+
+- Tutorial changes:
+   * All backslashes replaced by slashes in file names in 
+     all tutorials for linux compatibility.     
+   * RectEx replaces with rect in 1.HelloWorld
+   * Added second parameter to swprintf in 2.Quake3Map
+   * Added bounding box creation to 3.CustomSceneNode
+   * Added second parameter to swprintf in 4.Movement
+  
+- New/Changed methods in public interfaces:
+   * getClosestPoint in line3d	 
+   * getMatrixOfMeshPart in IAnimatedMesh
+   * removeChild in ISceneNode now returns true or false
+   * addChild in IAnimatedMeshSceneNode
+   * setParent in ISceneNode
+
+-------------------------------------------------------------------------------------
+Changes in version 0.2.5:
+
+- A new material type is available: EMT_TRANSPARENT_VERTEX_ALPHA, which
+  realizes transparency based on the vertex alpha color. It currently is
+  only implemented in the DirectX device.
+
+- There is now an ISceneCollisionManager available. Get it with 
+  getSceneCollisionManager() from the ISceneManager. It currently only implements
+  picking, but more is coming soon.
+
+- Automatic Culling based on Bounding Boxes is implemented now. It can be switched on
+  or off for every SceneNode seperately using ISceneNode::setAutomaticCulling().
+  It is on by default.
+  
+- It is now possible to remove loaded textures for freeing memory or reloading them.
+  Use IVideoDriver::removeTexture() or removeAllTextures().
+
+- New drawing methods in the IVideoDriver interface:
+   * Draw3dLine(), drawing a 3d line.
+   * Draw3dBox(), which draws an axis aligned bounding box.
+   * Draw2dLine(), currently only supported by the Software device.
+
+- MD2 bugfixes:
+   * There was a small bug with texture coordinates.
+   * Frames are now correctly interpolated when playing animations.
+
+- Bugfix in the 3ds file format loader: Single objects in the 3ds file with multiple
+  materials attached are now loaded correctly.
+  
+- list.h renamed to irrlist.h due to compatibility issues.
+
+- Now works with Dev-C++ 5 Beta 8. (4.9.8.0)
+  
+- New/Changed methods in public interfaces:
+   * 'getInverse' in matrix4.
+   * 'transformBox' in matrix4.
+   * 'repair' in aabbox.
+   * 'intersectsWithLine' in aabbox.
+   * 'getVector' in line3d.
+   * 'getMiddle' in line3d.
+   * 'normalize' method in vector3d and vector2d now returns reference to vector.
+   * 'getTransformedBoundingBox' in ISceneNode.
+   * 'getChildren' in ISceneNode
+   * 'setRotation' in ISceneNode
+   * 'addHillPlaneMesh' in ISceneManager now accepts a texture repeat count parameter.
+   
+
+-------------------------------------------------------------------------------------
 Changes in version 0.2:
 
 - The engine is now able to load .3ds files, with their materials and textures.
-
-- There is now a tool for generating new fonts for the engine included in the SDK.
 
 - There are some new SceneNodeAnimators: A fly straight animator and a texture animator.
 

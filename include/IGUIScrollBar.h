@@ -18,7 +18,7 @@ namespace gui
 	public:
 
 		//! constructor
-		IGUIScrollBar(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rectEx<s32> rectangle)
+		IGUIScrollBar(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 			: IGUIElement(environment, parent, id, rectangle) {}
 
 		//! destructor

@@ -18,7 +18,7 @@ namespace gui
 	public:
 
 		//! constructor
-		IGUIFileOpenDialog(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rectEx<s32> rectangle)
+		IGUIFileOpenDialog(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 			: IGUIElement(environment, parent, id, rectangle) {}
 
 		//! destructor

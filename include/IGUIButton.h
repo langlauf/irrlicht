@@ -19,7 +19,7 @@ namespace gui
 	public:
 
 		//! constructor
-		IGUIButton(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rectEx<s32> rectangle)
+		IGUIButton(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 			: IGUIElement(environment, parent, id, rectangle) {}
 
 		//! destructor

@@ -6,9 +6,9 @@
 #define __I_GUI_ELEMENT_H_INCLUDED__
 
 #include "IUnknown.h"
-#include "list.h"
+#include "irrList.h"
 #include "rect.h"
-#include "irrstring.h"
+#include "irrString.h"
 #include "IEventReceiver.h"
 
 namespace irr
@@ -24,7 +24,7 @@ class IGUIElement : public IUnknown, public IEventReceiver
 public:
 
 	//! Constructor
-	IGUIElement(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rectEx<s32> rectangle)
+	IGUIElement(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 		: Environment(environment), IsVisible(true), IsEnabled(true),
 			Parent(parent), RelativeRect(rectangle), ID(id)
 	{
@@ -61,21 +61,21 @@ public:
 
 
 	//! Returns the relative rectangle of this element.
-	core::rectEx<s32> getRelativePosition()
+	core::rect<s32> getRelativePosition()
 	{
 		return RelativeRect;
 	}
 
 
 	//! Returns the absolute rectangle of element.
-	core::rectEx<s32> getAbsolutePosition()
+	core::rect<s32> getAbsolutePosition()
 	{
 		return AbsoluteRect;
 	}
 
 
 	//! Updates the absolute position.
-	void updateAbsolutePosition(const core::rectEx<s32>& parentAbsolute)
+	void updateAbsolutePosition(const core::rect<s32>& parentAbsolute)
 	{
 		AbsoluteRect = RelativeRect + parentAbsolute.UpperLeftCorner;
 
@@ -97,16 +97,18 @@ public:
 		// we have to search from back to front.
 
 		core::list<IGUIElement*>::Iterator it = Children.getLast();
-		while(it != Children.end())
-		{
-			target = (*it)->getElementFromPoint(point);
-			if (target)
-				return target;
 
-			--it;
-		}
+		if (IsVisible)
+			while(it != Children.end())
+			{
+				target = (*it)->getElementFromPoint(point);
+				if (target)
+					return target;
 
-		if (AbsoluteRect.isPointInside(point))
+				--it;
+			}
+
+		if (AbsoluteRect.isPointInside(point) && IsVisible)
 			target = this;
 		
 		return target;
@@ -159,7 +161,7 @@ public:
 	virtual void move(core::position2d<s32> absoluteMovement)
 	{
 		RelativeRect += absoluteMovement;
-		core::rectEx<s32> parentRect(0,0,0,0);
+		core::rect<s32> parentRect(0,0,0,0);
 
 		if (Parent)
 			parentRect = Parent->getAbsolutePosition();
@@ -236,13 +238,13 @@ protected:
 	IGUIElement* Parent;
 
 	//! relative rect of element
-	core::rectEx<s32> RelativeRect;
+	core::rect<s32> RelativeRect;
 
 	//! absolute rect of element
-	core::rectEx<s32> AbsoluteRect;
+	core::rect<s32> AbsoluteRect;
 
 	//! absolute clipping rect of element
-	core::rectEx<s32> AbsoluteClippingRect;
+	core::rect<s32> AbsoluteClippingRect;
 
 	//! is visible?
 	bool IsVisible;

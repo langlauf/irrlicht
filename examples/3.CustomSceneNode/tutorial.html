@@ -85,13 +85,29 @@
  : scene::ISceneNode(parent, mgr, id)
 { 
   Material.Wireframe = false;
-  Material.Lighting = false;</pre> <pre>  Vertices[0] = video::S3DVertex(0,0,10, 1,1,0,video::SColor(255,0,255,255),0,1);
+  Material.Lighting = false;</pre> 
+              <pre>  Vertices[0] = video::S3DVertex(0,0,10, 1,1,0,video::SColor(255,0,255,255),0,1);
   Vertices[1] = video::S3DVertex(10,0,-10, 1,0,0,video::SColor(255,255,0,255),1,1); 
   Vertices[2] = video::S3DVertex(0,20,0, 0,1,1,video::SColor(255,255,255,0),1,0);
   Vertices[3] = video::S3DVertex(-10,0,-10, 0,0,1,video::SColor(255,0,255,0),0,0);
-}</pre></td>
+</pre></td>
           </tr>
         </table>
+        <br>
+        The Irrlicht Engine needs to know the bounding box of your scene node. 
+        It will use it for doing automatic culling and other things. Hence we 
+        need to create a bounding box from the 4 vertices we use. If you do not 
+        want the engine to use the box for automatic culling, and/or don't want 
+        to create the box, you could also write<br>
+        <font face="Courier New, Courier, mono">AutomaticCullingEnabled = false;</font>.<br>
+        <br>
+        <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
+          <tr> 
+            <td> <pre>  Box.reset(Vertices[0].Pos);<br> 		for (s32 i=1; i&lt;4; ++i)<br> 			Box.addInternalPoint(Vertices[i].Pos);
+}</pre> </td>
+          </tr>
+        </table>
+        <br>
         <p>Before it is drawn, the OnPreRender() method of every scene node in 
           the scene is called by the scene manager. If the scene node wishes to 
           draw itself, it may register itself in the scene manager to be drawn. 
@@ -150,7 +166,7 @@
         create the scene node and a camera, and look at the result.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>void main()<br>{
+          <td> <pre>int main()<br>{
   IrrlichtDevice *device =
        createDevice(video::DT_OPENGL, core::dimension2d&lt;s32&gt;(640, 480), 16, false);</pre> <pre>  device-&gt;setWindowCaption(L&quot;Custom Scene Node - Irrlicht Engine Demo&quot;);</pre> <pre>  video::IVideoDriver* driver = device-&gt;getVideoDriver();
            scene::ISceneManager* smgr = device-&gt;getSceneManager();</pre> 
@@ -192,7 +208,7 @@ anim-&gt;drop();</pre> </td>
   }
 
 device-&gt;drop();
-
+return 0;
 }</pre> </td>
         </tr>
       </table>

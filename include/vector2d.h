@@ -104,11 +104,12 @@ public:
 	}
 
 	//! normalizes the vector.
-	void normalize()
+	vector2d<T>& normalize()
 	{
-		f64 len = getLenght();
-		X /= len;
-		Y /= len;
+		T len = (T)(1.0 / getLenght());
+		X *= len;
+		Y *= len;
+		return *this;
 	}
 
 	// member variables

@@ -8,7 +8,7 @@
 #include "IUnknown.h"
 #include "position2d.h"
 #include "rect.h"
-#include "scolor.h"
+#include "SColor.h"
 
 namespace irr
 {
@@ -17,7 +17,7 @@ namespace video
 
 //!	Interface for 16 bit A1R5G5B5 surface.
 /** Surface loaders create these surfaces, so to create a surface loader
-one must implement the methods of this class. Because there are so much, only
+one must implement the methods of this class. Because there are so many, only
 the lock(), unlock(), getDimension(), setPixel() and getPixel() methods
 are really needed. All other methods are used by the Software device directly.
 */
@@ -47,7 +47,7 @@ public:
 	virtual void fill(s16 color) = 0;
 
 	//! draws a rectangle
-	virtual void drawRectangle(const core::rectEx<s32>& rect, SColor color) = 0;
+	virtual void drawRectangle(const core::rect<s32>& rect, SColor color) = 0;
 
 	//! draws a rectangle
 	virtual void drawRectangle(s32 x, s32 y, s32 x2, s32 y2, SColor color) = 0;
@@ -59,13 +59,13 @@ public:
 	virtual void copyTo(ISurface* target, const core::position2d<s32>& pos) = 0;
 
 	//! copies this surface into another
-	virtual void copyTo(ISurface* target, const core::position2d<s32>& pos, const core::rectEx<s32>& sourceRect, const core::rectEx<s32>* clipRect=0) = 0;
+	virtual void copyTo(ISurface* target, const core::position2d<s32>& pos, const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect=0) = 0;
 
 	//! copies this surface into another, using the alpha mask
-	virtual void copyToWithAlpha(ISurface* target, const core::position2d<s32>& pos, const core::rectEx<s32>& sourceRect) = 0;
+	virtual void copyToWithAlpha(ISurface* target, const core::position2d<s32>& pos, const core::rect<s32>& sourceRect) = 0;
 
 	//! copies this surface into another, using the alpha mask, an cliprect and a color to add with
-	virtual void copyToWithAlpha(ISurface* target, const core::position2d<s32>& pos, const core::rectEx<s32>& sourceRect, s16 color, const core::rectEx<s32>* clipRect = 0) = 0;
+	virtual void copyToWithAlpha(ISurface* target, const core::position2d<s32>& pos, const core::rect<s32>& sourceRect, s16 color, const core::rect<s32>* clipRect = 0) = 0;
 
 	//! copies this surface into another, scaling it to fit it.
 	virtual void copyToScaling(ISurface* target) = 0;

@@ -22,7 +22,7 @@ namespace scene
 	*/
 	struct SViewFrustrum
 	{
-		enum planes
+		enum VFPLANES
 		{
 			//! Far plane of the frustrum. Thats the plane farest away from the eye.
 			VF_FAR_PLANE = 0,
@@ -54,6 +54,9 @@ namespace scene
 		//! all planes enclosing the view frustrum.
 		core::plane3d<f32> planes[VF_PLANE_COUNT];
 
+		//! bouding box around the view frustrum
+		core::aabbox3d<f32> boundingBox;
+
 		//! transforms the furstum by the matrix
 		//! \param Matrix by which the view frustrum is transformed.
 		void transform(const core::matrix4 &mat);
@@ -77,6 +80,8 @@ namespace scene
 		//! returns a bounding box enclosing the whole view frustrum
 		core::aabbox3d<f32> getBoundingBox() const;
 
+		//! recalculates the bounding box member based on the planes
+		void recalculateBoundingBox();
 	};
 
 
@@ -88,6 +93,8 @@ namespace scene
 			mat.transformPlane(planes[i]);
 
 		mat.transformVect(cameraPosition);
+
+		recalculateBoundingBox();
     }
 
 
@@ -143,6 +150,13 @@ namespace scene
 	//! returns a bounding box encosing the whole view frustrum
 	inline core::aabbox3d<f32> SViewFrustrum::getBoundingBox() const
 	{
+		return boundingBox;
+	}
+
+
+	//! recalculates the bounding box member based on the planes
+	inline void SViewFrustrum::recalculateBoundingBox()
+	{
 		core::aabbox3d<f32> box(cameraPosition);
 
 		box.addInternalPoint(getFarLeftUp());
@@ -150,7 +164,7 @@ namespace scene
 		box.addInternalPoint(getFarLeftDown());
 		box.addInternalPoint(getFarRightDown());
 
-		return box;
+		boundingBox = box;
 	}
 
 
@@ -204,6 +218,10 @@ namespace scene
 			planes[i].Normal *= len;
 			planes[i].D *= len;
 		}
+
+		// make bounding box
+
+		recalculateBoundingBox();
 	}
 
 

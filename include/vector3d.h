@@ -65,7 +65,7 @@ namespace core
 
 		//! Returns distance from an other point. Here, the vector is interpreted as
 		//! point in 3 dimensional space.
-		f64 getDistanceFrom(const vector3d<T>& other)
+		f64 getDistanceFrom(const vector3d<T>& other) const
 		{
 			f64 vx = X - other.X; f64 vy = Y - other.Y; f64 vz = Z - other.Z;
 			return sqrt(vx*vx + vy*vy + vz*vz);
@@ -90,12 +90,13 @@ namespace core
 		}
 
 		//! Normalizes the vector.
-		void normalize()
+		vector3d<T>& normalize()
 		{
 			T inv = (T)1.0 / (T)getLength();
 			X *= inv;
 			Y *= inv;
 			Z *= inv;
+			return *this;
 		}
 
 		//! Inverts the vector.

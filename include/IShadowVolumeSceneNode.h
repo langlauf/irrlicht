@@ -5,8 +5,8 @@
 #ifndef __I_SHADOW_VOLUME_SCENE_NODE_H_INCLUDED__
 #define __I_SHADOW_VOLUME_SCENE_NODE_H_INCLUDED__
 
-#include "ISceneNode.H"
-#include "IMesh.H"
+#include "ISceneNode.h"
+#include "IMesh.h"
 
 namespace irr
 {

@@ -1,6 +1,7 @@
+
 /*
 This Tutorial shows how to set up the IDE for using the 
-Irrlicht Engine and how to write a simple HelloWorld 
+Irrlicht Engine and how to write a simple HelloWorld
 program with it. The program will show how to use the 
 basics of the VideoDriver, the GUIEnvironment and the
 SceneManager. 
@@ -27,9 +28,9 @@ you will now be able to develop applications with the Irrlicht Engine.
 #include <irrlicht.h>
 
 /*
-In the Irrlicht Engine, everything can be found in the namespace 
+In the Irrlicht Engine, everything can be found in the namespace
 'irr'. So if you want to use a class of the engine, you have to
-write an irr:: before the name of the class. For example to use 
+write an irr:: before the name of the class. For example to use
 the IrrlichtDevice write: irr::IrrlichtDevice. To get rid of the 
 irr:: in front of the name of every class, we tell the compiler
 that we use that namespace from now on, and we will not have to
@@ -66,7 +67,7 @@ if we would want to get rid of the console window, which pops up when
 starting a program with main(), but to keep this example simple,
 we use main().
 */
-void main()
+int main()
 {
 	/*
 	The most important function of the engine is the 'createDevice'
@@ -112,7 +113,7 @@ void main()
 	We add a hello world label to the window, using the GUI environment.
 	*/
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software engine!",
-		true, rectEx<int>(10,10,200,30));
+		true, rect<int>(10,10,200,30));
 
 	/*
 	To display something interesting, we load a Quake 2 model 
@@ -124,7 +125,7 @@ void main()
 	By the way, that cool Quake 2 model called sydney was modelled
 	by Brian Collins.
 	*/
-	IAnimatedMesh* mesh = smgr->getMesh("..\\..\\media\\sydney.md2");
+	IAnimatedMesh* mesh = smgr->getMesh("../../media/sydney.md2");
 	IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode( mesh );
 
 	/*
@@ -139,7 +140,7 @@ void main()
 	{
 		node->setMaterialFlag(EMF_LIGHTING, false);
 		node->setFrameLoop(0, 310);	
-		node->setMaterialTexture( 0, driver->getTexture("..\\..\\media\\sydney.bmp") );
+		node->setMaterialTexture( 0, driver->getTexture("../../media/sydney.bmp") );
 	}
 
 	/*
@@ -182,5 +183,7 @@ void main()
 	for more information.
 	*/
 	device->drop();
+
+	return 0;
 }
 

@@ -4,11 +4,11 @@ engine, create a SceneNode for optimizing the speed of
 rendering and how to create a user controlled camera.
 
 Lets start like the HelloWorld example: We include
-the irrlicht header files. This time we also include 
+the irrlicht header files. This time we also include
 the stdio.h for the swprintf function.
 */
 #include <irrlicht.h>
-#include <stdio.h>
+#include <wchar.h>
 
 /*
 As already written in the HelloWorld example, in the Irrlicht
@@ -66,10 +66,10 @@ public:
 Ok, lets start. Again, we use the main() method as start, not the
 WinMain(), because its shorter to write.
 */
-void main()
+int main()
 {
 	/*
-	Like in the HelloWorld example, we create an IrrlichtDevice with 
+	Like in the HelloWorld example, we create an IrrlichtDevice with
 	createDevice(). The difference now is that we use the DirectX8 driver
 	because the Software device would be too slow to draw a huge Quake 3 map.
 	Also, we create an EventReceiver we declared above and set a pointer to
@@ -97,7 +97,7 @@ void main()
 	we are able to read from the files in that archive as they would
 	directly be stored on disk.
 	*/
-	device->getFileSystem()->addZipFileArchive("..\\..\\media\\map-20kdm2.pk3");
+	device->getFileSystem()->addZipFileArchive("../../media/map-20kdm2.pk3");
 
 	/* 
 	Now we can load the mesh by calling getMesh(). We get a pointer returned
@@ -164,7 +164,7 @@ void main()
 		if (lastFPS != fps)
 		{
 			wchar_t tmp[1024];
-			swprintf(tmp, L"Quake 3 Map Example - Irrlicht Engine (fps:%d) Triangles:%d", 
+			swprintf(tmp, 1024, L"Quake 3 Map Example - Irrlicht Engine (fps:%d) Triangles:%d", 
 				fps, driver->getPrimitiveCountDrawed());
 
 			device->setWindowCaption(tmp);
@@ -176,5 +176,7 @@ void main()
 	In the end, delete the Irrlicht device.
 	*/
 	device->drop();
+	
+	return 0;
 }
 

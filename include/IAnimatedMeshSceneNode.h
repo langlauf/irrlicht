@@ -55,6 +55,25 @@ namespace scene
 		//! \return Returns pointer to the created shadow scene node.
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
 		virtual IShadowVolumeSceneNode* addShadowVolumeSceneNode(s32 id=-1) = 0;
+
+		//! Adds a child scene node which is animated by a part of the animated
+		//! mesh. In this way, it is for example possible to attach a weapon the
+		//! the left hand of an animated model.
+		//! If the attached child scene node has already a parent
+		//! (which is should have), it is automaticly removed from the old
+		//! parent and reattached to this one. You will not have to worry about
+		//! that.
+		//! \param name: Name of the mesh part with which the attached scene node
+		//! will be animated. For example if you loaded a .ms3d file
+		//! and want the child scene node to be animated with the left hand, like it
+		//! would be holded by it, the name should be then "lefthand", if the joint of
+		//! the left hand in the ms3d file is called "lefthand". 
+		//! \param child: Pointer to child scene node.
+		//! \return Returns true if the child was sucessfully attached to the
+		//! right part of the mesh. False is returned if a part of the mesh with
+		//! the specified name could not be found or the mesh does not support
+		//! attaching objects to parts of the mesh.
+		virtual bool addChild(const c8* name, ISceneNode* child) = 0;
 	};
 
 } // end namespace scene

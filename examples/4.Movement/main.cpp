@@ -4,9 +4,10 @@ basic concept of SceneNodeAnimators is shown as well as manual
 movement of nodes using the keyboard.
 
 As always, I include the header files, use the irr namespace,
-and tell the linker to link with the .lib file. 
+and tell the linker to link with the .lib file.
 */
 #include <stdio.h>
+#include <wchar.h>
 #include <irrlicht.h>
 
 using namespace irr;
@@ -17,7 +18,7 @@ using namespace irr;
 In this tutorial, one of our goals is to move a scene node using some
 keys on the keyboard. We store a pointer to the scene node we want to
 move with the keys here.
-The other pointer is a pointer to the Irrlicht Device, which we need 
+The other pointer is a pointer to the Irrlicht Device, which we need
 int the EventReceiver to manipulate the scene node and to get the 
 active camera.
 */
@@ -77,7 +78,7 @@ an Irrlicht Device and the scene node we want to move. We also create some
 other additional scene nodes, to show that there are also some different 
 possibilities to move and animate scene nodes.
 */
-void main()
+int main()
 {
 	MyEventReceiver receiver;
 
@@ -96,7 +97,7 @@ void main()
 	*/
 	node = smgr->addTestSceneNode();
 	node->setRelativePosition(core::vector3df(0,0,30));
-	node->setMaterialTexture(0, driver->getTexture("..//..//media//t351sml.jpg"));
+	node->setMaterialTexture(0, driver->getTexture("../../media/t351sml.jpg"));
 
 
 	/* 
@@ -110,7 +111,7 @@ void main()
 	*/
 	scene::ISceneNode* n = smgr->addTestSceneNode();
 	n->setRelativePosition(core::vector3df(0,0,30));
-	n->setMaterialTexture(0, driver->getTexture("..//..//media//t351sml.jpg"));
+	n->setMaterialTexture(0, driver->getTexture("../../media/t351sml.jpg"));
 
 	scene::ISceneNodeAnimator* anim = smgr->createFlyCircleAnimator(
 		core::vector3df(0,1,0), 20.0f);
@@ -123,7 +124,7 @@ void main()
 	a md2 model, which uses a 'fly straight' animator to run between to points.
 	*/
 	scene::IAnimatedMeshSceneNode* anms = smgr->addAnimatedMeshSceneNode(
-		smgr->getMesh("..//..//media//sydney.md2"));
+		smgr->getMesh("../../media/sydney.md2"));
 
 	if (n)
 	{
@@ -139,10 +140,10 @@ void main()
 		and the texture.
 		*/
 		anms->setMaterialFlag(video::EMF_LIGHTING, false);
-		anms->setFrameLoop(313, 359);
+		anms->setFrameLoop(313, 360);
 		anms->getRelativeTransformation().setRotationDegrees(core::vector3df(0,180.0f,0));
 		anms->setAnimationSpeed(40);
-		anms->setMaterialTexture(0, driver->getTexture("..//..//media//sydney.BMP"));
+		anms->setMaterialTexture(0, driver->getTexture("../../media/sydney.bmp"));
 	}
 
 
@@ -172,7 +173,7 @@ void main()
 		if (lastFPS != fps)
 		{
 			wchar_t tmp[1024];
-			swprintf(tmp, L"Movement Example - Irrlicht Engine (%s)(fps:%d)", 
+			swprintf(tmp, 1024, L"Movement Example - Irrlicht Engine (%s)(fps:%d)", 
 				driver->getName(), fps);
 
 			device->setWindowCaption(tmp);
@@ -184,5 +185,7 @@ void main()
 	In the end, delete the Irrlicht device.
 	*/
 	device->drop();
+	
+	return 0;
 }
 

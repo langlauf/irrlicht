@@ -28,12 +28,12 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 
 	// add images
 
-	gui::IGUIImage* img = guienv->addImage(core::rectEx<int>(0,0,512,384));
+	gui::IGUIImage* img = guienv->addImage(core::rect<int>(0,0,512,384));
 	img->setImage(driver->getTexture("..\\..\\media\\techdemoback.bmp"));
 
 	// add list box
 
-	gui::IGUIListBox* box = guienv->addListBox(core::rectEx<int>(295,23,485,90), 0, 1);
+	gui::IGUIListBox* box = guienv->addListBox(core::rect<int>(295,23,485,90), 0, 1);
 	box->addItem(L"Irrlicht Software Engine [too slow]");
 	box->addItem(L"Direct3D 8.1");
 	box->addItem(L"OpenGL 1.2");
@@ -41,13 +41,13 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 
 	// add button
 
-	startButton = guienv->addButton(core::rectEx<int>(420,105,485,130), 0, 2, L"Start Demo");
+	startButton = guienv->addButton(core::rect<int>(420,105,485,130), 0, 2, L"Start Demo");
 
 	// add checkbox
 
-	guienv->addCheckBox(fullscreen, core::rectEx<int>(295,105,400,130), 0, 3, L"Fullscreen");
-	guienv->addCheckBox(music, core::rectEx<int>(295,130,400,155), 0, 4, L"Music");
-	guienv->addCheckBox(music, core::rectEx<int>(295,160,400,175), 0, 5, L"Shadows");
+	guienv->addCheckBox(fullscreen, core::rect<int>(295,105,400,130), 0, 3, L"Fullscreen");
+	guienv->addCheckBox(music, core::rect<int>(295,130,400,155), 0, 4, L"Music");
+	guienv->addCheckBox(music, core::rect<int>(295,160,400,175), 0, 5, L"Shadows");
 
 	// add text
 
@@ -70,7 +70,7 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 	while(text[t])
 	{
 		guienv->addStaticText(text[t], false, 
-			core::rectEx<int>(295, top + t*textHeight, 485, top + (t+1)*textHeight));
+			core::rect<int>(295, top + t*textHeight, 485, top + (t+1)*textHeight));
 		++t;
 	}
 	

@@ -37,7 +37,7 @@
           files. This time we also include the stdio.h for the swprintf function.</p>
         <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
           <tr> 
-            <td> <pre>#include &lt;irrlicht.h&gt;<br>#include &lt;stdio.h&gt;</pre> </td>
+            <td> <pre>#include &lt;irrlicht.h&gt;<br>#include &lt;wchar.h&gt;</pre> </td>
           </tr>
         </table>
         <p>As already written in the HelloWorld example, in the Irrlicht Engine, 
@@ -89,7 +89,7 @@
         because its shorter to write.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>void main()<br>{</pre> </td>
+          <td> <pre>int main()<br>{</pre> </td>
         </tr>
       </table>
       <p> Like in the HelloWorld example, we create an IrrlichtDevice with createDevice(). 
@@ -101,9 +101,10 @@
       </p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>MyEventReceiver receiver;</pre> <p>IrrlichtDevice *device =<br>
-              createDevice(video::DT_DIRECTX8, core::dimension2d&lt;s32&gt;(640, 
-              480), 16, false, false, &amp;receiver);</p></td>
+          <td> <pre>MyEventReceiver receiver;</pre> 
+            <pre>IrrlichtDevice *device =
+               createDevice(video::DT_DIRECTX8,
+               core::dimension2d&lt;s32&gt;(640, 480), 16, false, false, &amp;receiver);</pre></td>
         </tr>
       </table>
       <p>Get a pointer to the video driver and the SceneManager so that we do 
@@ -120,7 +121,7 @@ scene::ISceneManager* smgr = device-&gt;getSceneManager();</pre> </td>
         from the files in that archive as they would directly be stored on disk.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>device-&gt;getFileSystem()-&gt;addZipFileArchive(&quot;..\\..\\media\\map-20kdm2.pk3&quot;);</pre> </td>
+          <td> <pre>device-&gt;getFileSystem()-&gt;addZipFileArchive(&quot;../../media/map-20kdm2.pk3&quot;);</pre> </td>
         </tr>
       </table>
       <p>Now we can load the mesh by calling getMesh(). We get a pointer returned 
@@ -177,11 +178,12 @@ if (mesh)<br>    node = smgr-&gt;addOctTreeSceneNode(mesh-&gt;getMesh(0));</pre>
 {
   driver-&gt;beginScene(true, true, video::SColor(0,100,100,100));
   smgr-&gt;drawAll();
-  driver-&gt;endScene();</pre> <pre>  int fps = driver-&gt;getFPS();</pre> <pre>  if (lastFPS != fps)
+  driver-&gt;endScene();</pre> <pre>  int fps = driver-&gt;getFPS();</pre>
+            <pre>  if (lastFPS != fps)
   {
      wchar_t tmp[1024];
-     swprintf(tmp, L&quot;Quake 3 Map Example - Irrlicht Engine (fps:%d) Triangles:%d&quot;, 
-                     fps, driver-&gt;getPrimitiveCountDrawed());</pre> 
+     swprintf(tmp, 1024, <br>         L&quot;Quake 3 Map Example - Irrlicht Engine (fps:%d) Triangles:%d&quot;, 
+         fps, driver-&gt;getPrimitiveCountDrawed());</pre> 
             <pre>     device-&gt;setWindowCaption(tmp);
      lastFPS = fps;
   }
@@ -191,7 +193,7 @@ if (mesh)<br>    node = smgr-&gt;addOctTreeSceneNode(mesh-&gt;getMesh(0));</pre>
       <p>In the end, delete the Irrlicht device.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>  device-&gt;drop();<br>}</pre> </td>
+          <td> <pre>  device-&gt;drop();<br>  return 0;<br>}</pre> </td>
         </tr>
       </table>
       <p>That's it. Compile and play around with the program. </p></td>

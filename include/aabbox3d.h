@@ -7,6 +7,7 @@
 
 #include "irrMath.h"
 #include "plane3d.h"
+#include "line3d.h"
 
 namespace irr
 {
@@ -111,6 +112,45 @@ class aabbox3d
 			return (MinEdge <= other.MaxEdge && MaxEdge >= other.MinEdge);
 		}
 
+		//! Tests if the box intersects with a line
+		//! \param line: Line to test intersection with.
+		//! \return Returns true if there is an intersection and false if not.
+		bool intersectsWithLine(const line3d<T>& line) const
+		{
+			return intersectsWithLine(line.getMiddle(), line.getVector().normalize(), 
+					(T)(line.getLenght() * 0.5));
+		}
+
+		//! Tests if the box intersects with a line
+		//! \return Returns true if there is an intersection and false if not.
+		bool intersectsWithLine(const vector3d<T>& linemiddle, 
+								const vector3d<T>& linevect,
+								T halflenght) const
+		{
+			const vector3d<T> e = (MaxEdge - MinEdge) * (T)0.5;
+			const vector3d<T> t = (MinEdge + e) - linemiddle;
+			float r;
+
+			if ((fabs(t.X) > e.X + halflenght * fabs(linevect.X)) || 
+				(fabs(t.Y) > e.Y + halflenght * fabs(linevect.Y)) ||
+				(fabs(t.Z) > e.Z + halflenght * fabs(linevect.Z)) )
+				return false;
+
+			r = e.Y * (T)fabs(linevect.Z) + e.Z * (T)fabs(linevect.Y);
+			if (fabs(t.Y*linevect.Z - t.Z*linevect.Y) > r )
+				return false;
+
+			r = e.X * (T)fabs(linevect.Z) + e.Z * (T)fabs(linevect.X);
+			if (fabs(t.Z*linevect.X - t.X*linevect.Z) > r )
+				return false;
+
+			r = e.X * (T)fabs(linevect.Y) + e.Y * (T)fabs(linevect.X);
+			if (fabs(t.X*linevect.Y - t.Y*linevect.X) > r)
+				return false;
+
+			return true;
+		}
+
 		//! Classifies a relation with a plane.
 		//! \param plane: Plane to classify relation to.
 		//! \return Returns ISREL3D_FRONT if the box is in front of the plane,
@@ -155,6 +195,12 @@ class aabbox3d
 			return (MinEdge + MaxEdge) / 2;
 		}
 
+		//! returns extend of the box
+		vector3d<T> getExtend() const
+		{
+			return MaxEdge - MinEdge;
+		}
+
 
 		//! stores all 8 edges of the box into a array
 		//! \param edges: Pointer to array of 8 edges
@@ -187,9 +233,20 @@ class aabbox3d
 					d.Y < ROUNDING_ERROR && 
 					d.Z < ROUNDING_ERROR);
 		}
-		
 
-	
+		//! repairs the box, if for example MinEdge and MaxEdge are swapped.
+		void repair()
+		{
+			T t;
+
+			if (MinEdge.X > MaxEdge.X)
+				{ t=MinEdge.X; MinEdge.X = MaxEdge.X; MaxEdge.X=t; }
+			if (MinEdge.Y > MaxEdge.Y)
+				{ t=MinEdge.Y; MinEdge.Y = MaxEdge.Y; MaxEdge.Y=t; }
+			if (MinEdge.Z > MaxEdge.Z)
+				{ t=MinEdge.Z; MinEdge.Z = MaxEdge.Z; MaxEdge.Z=t; }
+		}
+
 		// member variables
 		
 		vector3d<T> MinEdge;

@@ -37,7 +37,7 @@
 #include "IFileList.h"
 #include "IFileSystem.h"
 #include "IGUIButton.h"
-#include "IGUICheckbox.h"
+#include "IGUICheckBox.h"
 #include "IGUIElement.h"
 #include "IGUIEnvironment.h"
 #include "IGUIFileOpenDialog.h"
@@ -50,14 +50,15 @@
 #include "IGUIWindow.h"
 #include "IMesh.h"
 #include "IMeshBuffer.h"
-#include "IReadFile.H"
+#include "IReadFile.h"
 #include "IrrlichtDevice.h"
-#include "irrmath.h"
-#include "irrstring.h"
+#include "irrMath.h"
+#include "irrString.h"
 #include "ISceneManager.h"
 #include "ISceneNode.h"
 #include "ILightSceneNode.h"
 #include "ISceneNodeAnimator.h"
+#include "ISceneCollisionManager.h"
 #include "IBillboardSceneNode.h"
 #include "ITexture.h"
 #include "IUnknown.h"
@@ -65,7 +66,7 @@
 #include "Keycodes.h"
 #include "line2d.h"
 #include "line3d.h"
-#include "list.h"
+#include "irrList.h"
 #include "matrix4.h"
 #include "plane3d.h"
 #include "plane3d.h"
@@ -80,11 +81,22 @@
 #include "SMeshBufferLightMap.h"
 #include "irrTypes.h"
 
+#ifdef _WIN32
+#include <wchar.h>
+//! Define for swprintf because this method does not match the ISO C standard
+//! on Win32 platforms, but it does on all other ones.
+#define   swprintf   _snwprintf
+#endif // WIN32
+
+#ifdef WIN32
 #ifdef IRRLICHT_EXPORTS
 #define IRRLICHT_API __declspec(dllexport)
 #else
 #define IRRLICHT_API __declspec(dllimport)
-#endif
+#endif // IRRLICHT_EXPORT
+#else
+#define IRRLICHT_API 
+#endif // WIN32
 
 //! Everything in the Irrlicht Engine can be found in this namespace.
 namespace irr
@@ -139,6 +151,7 @@ namespace irr
 	{
 	}
 }
+
 
 #endif
 

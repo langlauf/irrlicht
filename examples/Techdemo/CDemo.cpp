@@ -43,7 +43,7 @@ void CDemo::run()
 			driver->endScene();
 
 			wchar_t tmp[255];
-			swprintf(tmp, L"%s fps:%d polys:%d", 
+			swprintf(tmp, 255, L"%s fps:%d polys:%d", 
 					driver->getName(), 
 					driver->getFPS(),
 					driver->getPrimitiveCountDrawed());
@@ -370,7 +370,7 @@ void CDemo::createLoadingScreen()
 
 	backColor.set(255,90,90,156);
 	gui::IGUIImage* img = device->getGUIEnvironment()->addImage(
-		core::rectEx<int>(10,10,98,41));
+		core::rect<int>(10,10,98,41));
 
 	img->setImage(
 		device->getVideoDriver()->getTexture("..\\..\\media\\irrlichtlogoaligned.jpg"));
@@ -378,7 +378,7 @@ void CDemo::createLoadingScreen()
 	const int lwidth = 170;
 	const int lheight = 20;
 
-	core::rectEx<int> pos(10, size.Height-lheight-10, 10+lwidth, size.Height-10);
+	core::rect<int> pos(10, size.Height-lheight-10, 10+lwidth, size.Height-10);
 	
 	device->getGUIEnvironment()->addImage(pos);
 	statusText = device->getGUIEnvironment()->addStaticText(L"Loading...",	true, pos);

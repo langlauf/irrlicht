@@ -28,7 +28,7 @@ using namespace irr;
 Here comes the most sophisticated part of this tutorial: 
 The class of our very own custom scene node. To keep it simple,
 our scene node will not be an indoor portal renderer nor a terrain
-scene node, but a simple tetraeder, a 3d object consiting of 4 
+scene node, but a simple tetraeder, a 3d object consiting of 4
 connected vertices, which only draws itself and does nothing more.
 
 To let our scene node be able to be inserted into the Irrlicht 
@@ -69,6 +69,18 @@ public:
 		Vertices[1] = video::S3DVertex(10,0,-10, 1,0,0, video::SColor(255,255,0,255), 1, 1);
 		Vertices[2] = video::S3DVertex(0,20,0, 0,1,1, video::SColor(255,255,255,0), 1, 0);
 		Vertices[3] = video::S3DVertex(-10,0,-10, 0,0,1, video::SColor(255,0,255,0), 0, 0);
+
+	/*
+	The Irrlicht Engine needs to know the bounding box of your scene node. 
+	It will use it for doing automatic culling and other things. Hence we
+	need to create a bounding box from the 4 vertices we use. 
+	If you do not want the engine to use the box for automatic culling, 
+	and/or don't want to create the box, you could also write
+	AutomaticCullingEnabled = false;.
+	*/
+		Box.reset(Vertices[0].Pos);
+		for (s32 i=1; i<4; ++i)
+			Box.addInternalPoint(Vertices[i].Pos);
 	}
 
 
@@ -139,7 +151,7 @@ public:
 That's it. The Scene node is done. Now we simply have to start
 the engine, create the scene node and a camera, and look at the result.
 */
-void main()
+int main()
 {
 	// create engine and camera
 
@@ -192,5 +204,7 @@ void main()
 	}
 
 	device->drop();
+	
+	return 0;
 }
 

@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.2
+The Irrlicht Engine SDK version 0.3
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -42,15 +42,21 @@ The Irrlicht Engine SDK version 0.2
 2. How to start
 ==========================================================================
 
-  To see the engine in action, just go to the \bin\VisualStudio
+  To see the engine in action in Windows, just go to the \bin\VisualStudio
   directory, and start some applications. There should also be an
   application named TechDemo.exe, this should show the most
   interesting things.
+
+  The Irrlicht Engine is a static lib under linux. A precomipled version can be
+  found in \lib\Linux. 
+  If you wish to compile the engine in linux yourself, unzip the source .zip
+  file in the \source directory and run 'make'. After this, you should be able 
+  to make all example applications in \examples. Then just start an X Server
+  and run them, from the directory where they are.
   
   To start developing own applications and games with the engine take 
   a look at the 1.HelloWorld example in the \examples directory.
   There will also be a .html file with a tutorial easy to understand .
-  
 
 
 ==========================================================================
@@ -63,39 +69,9 @@ The Irrlicht Engine SDK version 0.2
   100% correct. All other parts which can be found in the documentation
   and accessed with the Irrlicht header files work and can already be 
   used. 
-  
-  Software Device
-  Dynamic lighting, multitexturing, 3d clipping and bilinear filtering are
-  not implemented because the Software Device was intented to perform only 2d 
-  functions, the primitive 3d functions are only additionally. Until the
-  first non beta release (1.0) of the Engine, some more 3d functionality
-  will be added.
-  
-  BspTree
-  The binary space partition scene node does not work correctly and has 
-  some bugs in it, which might lead to crashes. Please use the OctTree
-  scene node instead. There is nearly no difference between the interfaces
-  of them.
 
-  MeshViewerGUIElement
-  The camera control of this element is currently disabled.
-  
-  FileOpenDialog
-  Not all functions are implemented.
-  
-  Render to Texture support
-  Is not implemented yet.
-  
-  MS3D Skeletal Animation
-  A loaded mesh is currently not animated and only drawn static.
-  
-  Quake 3 maps
-  No support for curved surfaces yet.
-  
-  Linux Support
-  The engine currently only runs with Windows platforms. A linux version
-  will be available somewhere between the versions 0.2 and 0.5, it depends
-  on the need of the users.
+  Informations about changes in this new version of the engine can be 
+  found in changes.txt.
 
 ==========================================================================
 4. License
@@ -105,6 +81,14 @@ The Irrlicht Engine SDK version 0.2
   Even though this license does not require you to mention that you are
   using the Irrlicht Engine in your product, an acknowledgement
   would be highly appreciated.
+
+  Please note that the Irrlicht Engine is based in part on the work of 
+  the Independent JPEG Group and the zlib. This means that if you use
+  the Irrlicht Engine in your product, you must acknowledge somewhere 
+  in your documentation that you've used the IJG code. It would also be
+  nice to mention that you use the Irrlicht Engine and the zlib.
+  See the README files in the jpeglib and the zlib for
+  further informations.
 
 
   The Irrlicht Engine License

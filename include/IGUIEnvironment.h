@@ -79,43 +79,43 @@ public:
 	//! \return
 	//! Returns a pointer to the created button. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIButton* addButton(const core::rectEx<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+	virtual IGUIButton* addButton(const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
 
 	//! Adds an empty window element. 
 	//! \return
 	//! Returns a pointer to the created window. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIWindow* addWindow(const core::rectEx<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+	virtual IGUIWindow* addWindow(const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
 
 	//! Adds a scrollbar. 
 	//! \return
 	//! Returns a pointer to the created scrollbar. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIScrollBar* addScrollBar(bool horizontal, const core::rectEx<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
+	virtual IGUIScrollBar* addScrollBar(bool horizontal, const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
 
 	//! Adds an image element. 
 	//! \return
 	//! Returns a pointer to the created image element. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIImage* addImage(const core::rectEx<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+	virtual IGUIImage* addImage(const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
 
 	//! Adds a checkbox element.
 	//! \return
 	//! Returns a pointer to the created check box. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUICheckBox* addCheckBox(bool checked, const core::rectEx<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+	virtual IGUICheckBox* addCheckBox(bool checked, const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
 
 	//! Adds a list box element.
 	//! \return
 	//! Returns a pointer to the created list box. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIListBox* addListBox(const core::rectEx<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
+	virtual IGUIListBox* addListBox(const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
 
 	//! Adds an mesh viewer. Not 100% implemented yet.
 	//! \return
 	//! Returns a pointer to the created mesh viewer. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIMeshViewer* addMeshViewer(const core::rectEx<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+	virtual IGUIMeshViewer* addMeshViewer(const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
 
 	//! Adds a file open dialog.
 	//! \return
@@ -132,7 +132,7 @@ public:
 	//! \return
 	//! Returns a pointer to the created static text. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIElement* addStaticText(const wchar_t* text, bool border, const core::rectEx<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
+	virtual IGUIElement* addStaticText(const wchar_t* text, bool border, const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
 
 };
 

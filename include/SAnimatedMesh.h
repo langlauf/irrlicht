@@ -48,7 +48,7 @@ namespace scene
 		//! \param detailLevel: Level of detail. 0 is the lowest,
 		//! 255 the highest level of detail. Most meshes will ignore the detail level.
 		//! \return Returns the animated mesh based on a detail level. 
-		virtual IMesh* getMesh(s32 frame, s32 detailLevel)
+		virtual IMesh* getMesh(s32 frame, s32 detailLevel, s32 startFrameLoop=-1, s32 endFrameLoop=-1)
 		{
 			return Meshes[frame];
 		}
@@ -64,8 +64,28 @@ namespace scene
 			}
 		}
 
+        
+		//! Returns an axis aligned bounding box of the mesh.
+		//! \return A bounding box of this mesh is returned.
+		virtual const core::aabbox3d<f32>& getBoundingBox() const
+		{
+			return Box;
+		}
 
+		void recalculateBoundingBox()
+		{
+			Box.reset(0,0,0);
 
+			if (Meshes.empty())
+				return;
+
+			Box = Meshes[0]->getBoundingBox();
+
+			for (u32 i=1; i<Meshes.size(); ++i)
+				Box.addInternalBox(Meshes[i]->getBoundingBox());				
+		}
+
+		core::aabbox3d<f32> Box;
 		core::array<IMesh*> Meshes;
 	};
 

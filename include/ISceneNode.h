@@ -8,10 +8,10 @@
 #include "IUnknown.h"
 #include "ISceneNodeAnimator.h"
 #include "SMaterial.h"
-#include "irrstring.h"
+#include "irrString.h"
 #include "aabbox3d.h"
 #include "matrix4.h"
-#include "list.h"
+#include "irrList.h"
 
 namespace irr
 {
@@ -35,7 +35,8 @@ namespace scene
 					const core::vector3df& position = core::vector3df(0,0,0),
 					const core::vector3df& rotation = core::vector3df(0,0,0),
 					const core::vector3df& scale = core::vector3df(1.0f, 1.0f, 1.0f))
-			: IsVisible(true), ID(id), Parent(parent), SceneManager(mgr)
+			: IsVisible(true), ID(id), Parent(parent), SceneManager(mgr),
+				AutomaticCullingEnabled(true)
 		{
 			if (Parent)
 				Parent->addChild(this);
@@ -85,7 +86,7 @@ namespace scene
 
 
 		//! OnPostRender() is called just after rendering the whole scene.
-		//! nodes may calculate or store animations here, and may do other useful things,
+		//! Nodes may calculate or store animations here, and may do other useful things,
 		//! dependent on what they are.
 		//! \param timeMs: Current time in milli seconds.
 		virtual void OnPostRender(u32 timeMs)
@@ -132,9 +133,25 @@ namespace scene
 		}
 
 
-		//! Returns the axis aligned bounding box of this node.
+		//! Returns the axis aligned, not transformed bounding box of this node.
+		//! This means that if this node is a animated 3d character, moving in a room,
+		//! the bounding box will always be around the origin. To get the box in
+		//! real world coordinates, just transform it with the matrix you receive with
+		//! getAbsoluteTransformation() or simply use getTransformedBoundingBox(),
+		//! which does the same.
 		virtual const core::aabbox3d<f32>& getBoundingBox() const = 0;
 
+
+
+		//! Returns the axis aligned, transformed and animated absolute bounding box
+		//! of this node.
+		core::aabbox3d<f32> getTransformedBoundingBox()
+		{
+			core::aabbox3d<f32> box = getBoundingBox();
+			AbsoluteTransformation.transformBox(box);
+            return box;
+		}
+		
 
 		//! returns the absolute transformation of the node. Is recalculated every OnPostRender()-call.
 		core::matrix4& getAbsoluteTransformation()
@@ -199,7 +216,8 @@ namespace scene
 
 
 		//! Removes a child from this scene node.
-		virtual void removeChild(ISceneNode* child)
+		//! \return Returns true if the child could be removed, and false if not.
+		virtual bool removeChild(ISceneNode* child)
 		{
 			core::list<ISceneNode*>::Iterator it = Children.begin();
 			for (; it != Children.end(); ++it)
@@ -207,8 +225,10 @@ namespace scene
 				{
 					(*it)->drop();
 					Children.erase(it);
-					return;
+					return true;
 				}
+
+			return false;
 		}
 
 
@@ -329,10 +349,21 @@ namespace scene
 		//! This method exists only for easier use of the scene node.
 		//! You can also modify the position by yourself,
 		//! using the GetRelativeTransformation() method. 
-		//! \param position: New scale of the node
+		//! \param scale: New scale of the node
 		virtual void setScale(const core::vector3df& scale)
 		{
 			RelativeTransformation.setScale(scale);
+		}
+
+
+		//! Sets the rotation of the node.
+		//! This method exists only for easier use of the scene node.
+		//! You can also modify the position by yourself,
+		//! using the GetRelativeTransformation() method. 
+		//! \param roation: New rotation of the node in degrees
+		virtual void setRotation(const core::vector3df& rotation)
+		{
+			RelativeTransformation.setRotationDegrees(rotation);
 		}
 
 
@@ -356,6 +387,46 @@ namespace scene
 			return pos;
 		}
 
+		//! Enables or disables automatic culling based on the bounding
+		//! box. Automatic culling is enabled by default. Note that not
+		//! all SceneNodes support culling (the billboard scene node for example)
+		//! and that some nodes always cull their geometry because it is their
+		//! only reason for existance, for example the OctreeSceneNode.
+		//! \param enabled: If true, automatic culling is enabled.
+		//! If false, it is disabled.
+		void setAutomaticCulling(bool enabled)
+		{
+			AutomaticCullingEnabled = enabled;
+		}
+
+		//! Gets the automatic culling state. 
+		//! \return The node is culled based on its bounding box if this method
+		//! returns true, otherwise no culling is performed.
+		bool getAutomaticCulling() const
+		{
+			return AutomaticCullingEnabled;
+		}
+
+		//! Returns a const reference to the list of all children.
+		const core::list<ISceneNode*>& getChildren() const
+		{
+			return Children;
+		}
+
+		//! Changes the parent of the scene node.
+		virtual void setParent(ISceneNode* newParent)
+		{
+			grab();
+			remove();
+
+			Parent = newParent;
+
+			if (Parent)
+				Parent->addChild(this);
+
+			drop();
+		}
+
 
 	protected:
 
@@ -367,7 +438,6 @@ namespace scene
 			else
 				AbsoluteTransformation = AnimatedRelativeTransformation;
 		}
-
 
 		//! name of the scene node.
 		core::stringw Name;	
@@ -398,6 +468,9 @@ namespace scene
 
 		//! pointer to the scene manager
 		ISceneManager* SceneManager;
+
+		//! automatic culling
+		bool AutomaticCullingEnabled;
 	};
 
 } // end namespace scene
