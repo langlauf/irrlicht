@@ -202,7 +202,7 @@ class aabbox3d
 		}
 
 		//! returns extend of the box
-		vector3d<T> getExtend() const
+		vector3d<T> getExtent() const
 		{
 			return MaxEdge - MinEdge;
 		}

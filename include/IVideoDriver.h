@@ -16,6 +16,10 @@
 #include "SLight.h"
 #include "IImageLoader.h"
 #include "triangle3d.h"
+#include "SExposedVideoData.h"
+#include "IMaterialRenderer.h"
+#include "EDriverTypes.h"
+#include "IGPUProgrammingServices.h"
 
 namespace irr
 {
@@ -45,7 +49,40 @@ namespace video
 		EVDF_MIP_MAP,		
 
 		//! Are stencilbuffers switched on and does the device support stencil buffers?
-		EVDF_STENCIL_BUFFER
+		EVDF_STENCIL_BUFFER,
+
+		//! Is Vertex Shader 1.1 supported?
+		EVDF_VERTEX_SHADER_1_1,
+
+		//! Is Vertex Shader 2.0 supported?
+		EVDF_VERTEX_SHADER_2_0,
+
+		//! Is Vertex Shader 3.0 supported?
+		EVDF_VERTEX_SHADER_3_0,
+
+		//! Is Pixel Shader 1.1 supported?
+		EVDF_PIXEL_SHADER_1_1,
+
+		//! Is Pixel Shader 1.2 supported?
+		EVDF_PIXEL_SHADER_1_2,
+
+		//! Is Pixel Shader 1.3 supported?
+		EVDF_PIXEL_SHADER_1_3,
+
+		//! Is Pixel Shader 1.4 supported?
+		EVDF_PIXEL_SHADER_1_4,
+
+		//! Is Pixel Shader 2.0 supported?
+		EVDF_PIXEL_SHADER_2_0,
+
+		//! Is Pixel Shader 3.0 supported?
+		EVDF_PIXEL_SHADER_3_0,
+
+		//! Are ARB vertex programs v1.0 supported?
+		EVDF_ARB_VERTEX_PROGRAM_1,
+
+		//! Are ARB fragment programs v1.0 supported?
+		EVDF_ARB_FRAGMENT_PROGRAM_1,
 	};
 
 	//! enumeration for geometry transformation states
@@ -101,6 +138,9 @@ namespace video
 		//! \param state: Transformation type to be set. Can be view, world or projection.
 		//! \param mat: Matrix describing the transformation.
 		virtual void setTransform(E_TRANSFORMATION_STATE state, const core::matrix4& mat) = 0;
+
+		//! Returns the transformation set by setTransform
+		virtual core::matrix4 getTransform(E_TRANSFORMATION_STATE state) = 0;
 
 		//! Sets a material. All 3d drawing functions draw geometry now
 		//! using this material.
@@ -327,6 +367,17 @@ namespace video
 			const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect = 0,
 			SColor color=SColor(255,255,255,255), bool useAlphaChannelOfTexture=false) = 0;
 
+		//! Draws a part of the texture into the rectangle. Suggested and first implemented by zola.
+		//! \param texture: the texture to draw from 
+		//! \param destRect: the rectangle to draw into 
+		//! \param sourceRect: the rectangle denoting a part of the texture 
+		//! \param clipRect: cipps the destination rectangle (may be 0) 
+		//! \param colors: array of 4 colors denoting the color values of the corners of the destRect 
+		//! \param useAlphaChannelOfTexture: true if alpha channel will be blended. 
+		virtual void draw2DImage(video::ITexture* texture, const core::rect<s32>& destRect,
+			const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect = 0,
+			video::SColor* colors=0, bool useAlphaChannelOfTexture=false) = 0;
+
 		//! Draws an 2d rectangle.
 		//! \param color: Color of the rectangle to draw. The alpha component will not
 		//! be ignored and specifies how transparent the rectangle will be.
@@ -481,9 +532,54 @@ namespace video
 		//! See IUnknown::drop() for more information.
 		virtual IImage* createImageFromFile(io::IReadFile* file) = 0;
 
+		//! Creates a software image from a byte array. No hardware texture will
+		//! be created for this image. This method is useful for example if
+		//! you want to read a heightmap for a terrain renderer.
+		//! \param format: Desired color format of the texture
+		//! \param size: Desired the size of the image
+		//! \param data: a byte array with pixelcolor information
+		//! \return Returns the created image.
+		//! If you no longer need the image, you should call IImage::drop().
+		//! See IUnknown::drop() for more information.
+		virtual IImage* createImageFromData(ECOLOR_FORMAT format, const core::dimension2d<s32>& size, void *data) = 0;
+
 		//! Only used by the internal engine. Used to notify the driver that
 		//! the window was resized.
 		virtual void OnResize(const core::dimension2d<s32>& size) = 0;
+
+		//! Adds a new material renderer to the video device. 
+		//! Use this method to extend the VideoDriver with new MaterialTypes. To extend the
+		//! engine using this method do the following:
+		//! Derive a class from IMaterialRenderer and override the methods you need. For
+		//! setting the right renderstates, you can try to get a pointer to the real rendering device
+		//! using IVideoDriver::getExposedVideoData(). Add you class with 
+		//! IVideoDriver::addMaterialRenderer() and if you want an object in the engine to be displayed
+		//! with your new material, set the MaterialType member of the SMaterial struct to the 
+		//! value returned by this method.
+		//! \return Returns the number of the
+		//! material type which can be set in SMaterial::MaterialType to use the renderer.
+		//! -1 is returned if an error occured. (For example if you tried to add
+		//! an material renderer to the software renderer or the null device, which do not accept
+		//! material renderers.)
+		virtual s32 addMaterialRenderer(IMaterialRenderer* renderer) = 0;
+
+		//! Returns pointer to material renderer or null if not existing.
+		//! \param idx: Id of the material renderer. Can be a value of the E_MATERIAL_TYPE or a 
+		//! value which was returned by addMaterialRenderer().
+		virtual IMaterialRenderer* getMaterialRenderer(s32 idx) = 0;
+
+		//! Returns driver and operating system specific data about the IVideoDriver. This
+		//! method should only be used if the engine should be extended without having
+		//! to modify the source of the engine.
+		virtual SExposedVideoData getExposedVideoData() = 0;
+
+		//! Returns type of video driver
+		virtual E_DRIVER_TYPE getDriverType() = 0;
+
+		//! Returns pointer to the IGPUProgrammingServices interface. Returns 0 if the 
+		//! videodriver does not support this. (For example the Software and the NULL device
+		//! will always return 0)
+		virtual IGPUProgrammingServices* getGPUProgrammingServices() = 0;
 	};
 
 } // end namespace video

@@ -216,6 +216,9 @@ public:
 		node->prev = it.current;
 		it.current->next = node;
 		++size;
+
+		if (it.current == last) 
+			last = node;
 	}
 
 
@@ -236,6 +239,9 @@ public:
 		node->next = it.current;
 		it.current->prev = node;
 		++size;
+
+		if (it.current == last) 
+			last = node;
 	}
 
 

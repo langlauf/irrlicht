@@ -45,6 +45,55 @@ public:
 	}
 
 
+	//! Constructs a string from an int
+	string(int number)
+	: allocated(0), used(0), array(0)
+	{
+		// store if negative and make positive
+
+		bool negative = false;
+		if (number < 0)
+		{
+			number *= -1;
+			negative = true;
+		}
+
+		// temporary buffer for 16 numbers
+
+		c8 tmpbuf[16];
+		tmpbuf[15] = 0;
+		s32 idx = 15;	
+
+		// special case '0'
+
+		if (!number) 
+		{
+			tmpbuf[14] = '0';
+			*this = &tmpbuf[14];
+			return;
+		}
+
+		// add numbers
+
+		while(number && idx)
+		{
+			idx--;	
+			tmpbuf[idx] = (c8)('0' + (number % 10));
+			number = number / 10;					
+		}
+
+		// add sign
+
+		if (negative)
+		{
+			idx--;
+			tmpbuf[idx] = '-';			
+		}
+
+		*this = &tmpbuf[idx];
+	}
+
+
 
 	//! Constructor for copying a string from a pointer with a given lenght
 	template <class B>
@@ -444,6 +493,11 @@ public:
 	void operator += (const string<T>& other)
 	{
 		append(other);
+	}
+
+	void operator += (int i)
+	{
+		append(string<T>(i));
 	}
     	
 

@@ -65,7 +65,7 @@
 #include "IGUIStaticText.h"
 #include "IGUITabControl.h"
 #include "IGUIWindow.h"
-#include "IGUIToolBar.h"
+#include "IGUIToolbar.h"
 #include "ILightSceneNode.h"
 #include "ILogger.h"
 #include "IMesh.h"
@@ -81,6 +81,7 @@
 #include "ITriangleSelector.h"
 #include "ISceneNodeAnimator.h"
 #include "ISceneCollisionManager.h"
+#include "IMaterialRenderer.h"
 #include "ISceneNodeAnimatorCollisionResponse.h"
 #include "IParticleSystemSceneNode.h"
 #include "ITerrainSceneNode.h"
@@ -117,9 +118,9 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION L"0.6"
+#define IRRLICHT_SDK_VERSION L"0.7"
 
-/*! \mainpage Irrlicht Engine 0.6 API documentation
+/*! \mainpage Irrlicht Engine 0.7 API documentation
  *
  * \section intro Introduction
  *
@@ -234,6 +235,7 @@
 #endif // WIN32
 
 #ifdef WIN32
+
 #ifdef IRRLICHT_EXPORTS
 #define IRRLICHT_API __declspec(dllexport)
 #else
@@ -242,6 +244,12 @@
 #else
 #define IRRLICHT_API 
 #endif // WIN32
+
+#if defined(_STDCALL_SUPPORTED)
+#define IRRCALLCONV __stdcall  // Declare the calling convention.
+#else
+#define IRRCALLCONV
+#endif // STDCALL_SUPPORTED
 
 
 //! Everything in the Irrlicht Engine can be found in this namespace.
@@ -257,20 +265,32 @@ namespace irr
 	\param stencilbuffer: Specifies if the stencil buffer should be enabled. Set this to true,
 	    if you want the engine be able to draw stencil buffer shadows. Note that not all
 		devices are able to use the stencil buffer. If they don't no shadows will be drawn.
+	\param vsync: Specifies vertical syncronisation: If set to true, the driver will wait 
+		for the vertical retrace period, otherwise not.
 	\param receiver: A user created event receiver.
 	\param sdk_version_do_not_use: Don't use or change this parameter. Always set it to
 	IRRLICHT_SDK_VERSION, which is done by default. This is needed for sdk version checks.
 	\return Returns pointer to the created IrrlichtDevice or null if the 
 	device could not be created.
 	*/
-	IRRLICHT_API IrrlichtDevice* createDevice(
-		video::EDriverType deviceType = video::EDT_SOFTWARE, 
+
+	#ifdef __cplusplus
+	extern "C" {     // do not use C++ decorations
+	#endif
+
+	IRRLICHT_API IrrlichtDevice* IRRCALLCONV createDevice(
+		video::E_DRIVER_TYPE deviceType = video::EDT_SOFTWARE, 
 		const core::dimension2d<s32>& windowSize = core::dimension2d<s32>(640,480),
 		u32 bits = 16,
 		bool fullscreen = false,
 		bool stencilbuffer=false,
+		bool vsync=false,
 		IEventReceiver* receiver = 0,
 		const wchar_t* sdk_version_do_not_use = IRRLICHT_SDK_VERSION);
+
+	#ifdef __cplusplus
+	} // close extern C
+	#endif
 
 	// THE FOLLOWING IS AN EMPTY LIST OF ALL SUB NAMESPACES
 	// EXISTING ONLY FOR THE DOCUMENTION SOFTWARE DOXYGEN.

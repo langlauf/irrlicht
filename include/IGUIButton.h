@@ -63,6 +63,12 @@ namespace gui
 		//! can be in two states: Normal or Pressed. With a click on the button,
 		//! the user can change the state of the button.
 		virtual void setIsPushButton(bool isPushButton) = 0;
+
+		//! Sets the pressed state of the button if this is a pushbutton
+		virtual void setPressed(bool pressed) = 0;
+
+		//! Returns if the button is currently pressed
+		virtual bool isPressed() = 0;
 	};
 
 

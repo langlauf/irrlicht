@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.6
+The Irrlicht Engine SDK version 0.7
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -21,20 +21,23 @@ The Irrlicht Engine SDK version 0.6
   You will find some directories after decompressing the archive in which
   came the SDK. These are:
   
-  \bin       The compiled library Irrlicht.DLL and some compiled demo 
-             and example applications, just start them to see the 
-             Irrlicht Engine in action.
-  \doc       Documentation of the Irrlicht Engine.
-  \examples  Examples and tutorials showing how to use the engine. 
-  \include   Header files to include when using the engine.
-  \lib       Lib to link with your programs when using the engine.
-  \media     Graphics and sound data for the demo applications and
-             examples.
-  \source    The source code of the Irrlicht Engine. This code is
-             not needed to develop applications with the engine,
-             but it is included to let you be able to recompile and
-             debug it, if necessary.     
-  \tools     Useful tools and their sourcecode for the engine.
+  \bin         The compiled library Irrlicht.DLL and some compiled demo 
+               and example applications, just start them to see the 
+               Irrlicht Engine in action.
+  \doc         Documentation of the Irrlicht Engine.
+  \examples    Examples and tutorials showing how to use the native engine
+               engine using C++.
+  \example.net Examples and tutorials showing how to use the engine with
+               a .net languages.
+  \include     Header files to include when using the engine.
+  \lib         Lib to link with your programs when using the engine.
+  \media       Graphics and sound data for the demo applications and
+               examples.
+  \source      The source code of the Irrlicht Engine. This code is
+               not needed to develop applications with the engine,
+               but it is included to let you be able to recompile and
+               debug it, if necessary.     
+  \tools       Useful tools and their sourcecode for the engine.
 
 
 
@@ -49,14 +52,15 @@ The Irrlicht Engine SDK version 0.6
 
   The Irrlicht Engine is a static lib under linux. A precomipled version can be
   found in \lib\Linux. 
-  If you wish to compile the engine in linux yourself, unzip the source .zip
-  file in the \source directory and run 'make'. After this, you should be able 
-  to make all example applications in \examples. Then just start an X Server
-  and run them, from the directory where they are.
+  If you wish to compile the engine in linux yourself, unzip the file source.zip
+  file in the \source directory. Run a 'make' in the now existing new subfolder 'Irrlicht'.
+  After this, you should be able to make all example applications in \examples.
+  Then just start an X Server and run them, from the directory where they are.
   
   To start developing own applications and games with the engine take 
   a look at the 1.HelloWorld example in the \examples directory.
-  There will also be a .html file with a tutorial easy to understand.
+  There will also be a .html file with a tutorial which should be
+  easy to understand.
 
 
 ==========================================================================

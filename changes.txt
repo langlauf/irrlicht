@@ -1,4 +1,130 @@
 -------------------------------------------------------------------------------------
+Changes in version 0.7: (fffff)
+
+- The first version of Irrlicht.NET is included in this release. It is a managed C++
+  wrapper .DLL which makes the most important features of the engine available for all
+  .NET languages. The wrapper is incomplete, but it can already be used. 
+  You can find the documentation for this .DLL in the compiled help file doc\IrrlichtNET.chm. 
+  There are also two very basic examples available, which show how to use Irrlicht.NET 
+  from C# and VisualBasic.
+  
+- Low level vertex and pixel shader programming is now possible. There are
+  now some methods with wich you can write GPU programs in vertex/pixel shader assembler
+  using Direct3D 8 and 9 and in ARB vertex and fragment program assembler for OpenGL.
+  You can use the IGPUProgrammingServices interface which can be reached by 
+  IVideoDriver->getGPUProgrammingServices() for this. The new material types you can create
+  with this can be combined with all other already existing material types.
+  For example, it is possible to create a new material which uses a vertex shader to
+  calculate texture coordinates and diffuse colors, and let this be rendered by the built in
+  material video::EMT_TRANSPARENT_ADD_COLOR.
+  Support for high level programming languages like GLSL or HLSL is planned for the
+  following releases. Also note that you won't be able to use all techniques shaders offer with
+  Irrlicht, due to its current high level abstraction of the 3D APIs. For example, the engine 
+  does not expose vertex streams or vertex buffers currently.  
+  
+- There is a new tutorial showing how to use shaders with the engine. In addition, all
+  old tutorials have been rewritten and adapted. For example, the hello world
+  tutorial now also shows how to set up visual studio .NET to use it with
+  the engine.
+  
+- Hardware mip map level generation of textures is now supported when using D3D9. 
+
+- Internal pointers and data of the video drivers can now be exposed for experienced users with
+  VideoDriver::getExposedVideoData(). For example, you can get a pointer to the IDirect3DDevice9
+  interface and the HWND window handle, if the engine is running with D3D9.
+
+- The createDevice() function has a new additional parameter: bool vsync. With this, it is now
+  possible to enable or disable the waiting for the vertical retrace period. This is implemented
+  in D3D9, D3D8 and the OpenGL driver only, the software driver will ignore this flag.
+  
+- The engine now behaves like in the documentation: irr::createDevice() returns 0, if 
+  the wanted driver could not be initialized.
+  
+- There is a new SceneNode available: The ITextSceneNode is able to display 2D text at a 
+  position in 3D space. Use ISceneManager::addTextSceneNode() to create one.
+  
+- Finally now all VideoDrivers have a draw2DLine() implementation, thanks to some additions sent in
+  by Vash TheStampede.
+  
+- Applied some changes to the compilation configuration, so that it should now be 
+  easier to use the engine with XBOX projects. Thanks to MattyBoy for sending 
+  in some clues for this.
+  
+- Some improvements for the linux version of the engine: The NULL device is finally fully operational with Linux
+  too, and also all examples and even the techdemo compiles and runs with this operating system.
+  
+- The default field of view in the cameras of the irrlicht engine was a little bit 
+  extreme, so I changed it now from core::PI / 3.5f to core::PI / 2.5f.
+  
+- Added a new draw2DImage method for partially draw a 2d Texture, as sent in by zola with 
+  implementations for OpenGL, D3D8 and D3D9. Software implementation is missing.
+  
+- The string class is now able to convert integer values into a string or append it as string
+  to itself.
+  
+- Added a getDriverType() method to the IVideoDriver interface.
+
+- Added a getTransform() method to the IVideoDriver interface.
+  
+- The EMT_TRANSPARENT_ALPHA_CHANNEL material in OpenGL is now implemented.
+  
+- The integrated XML Parser now works better with different text file formats. (ASCII, UFT-16,..)
+  
+- IGUIEdit Box now feels more like a windows editbox, thanks to some changes by Jox
+
+- Added a new method to IVideoDriver: createImageFromData as suggested by Oliver Klems. 
+  
+- Fixed a the EMT_TRANSPARENT_ALPHA_CHANNEL problem in D3D8 and D3D9 due to a suggestion by Jox.
+  
+- Added 3 methods created by zola to the quaternion class: fromAngleAxis(), toEuler() and
+  operator*(vector3df&).
+
+- A bug in a matrix multiplication operator was fixed.	
+  
+- Changed visual studio project files to version 7.1, but provided 7.0 project files
+  for people with that version.
+  
+- Added SceneNodeAnimatorRotation rotation fix as posted by warui
+
+- Added normalization fix to vector2d and 3d. Warui suggested a fix like that in the forum.
+  The one I made has the same result, but is a little bit faster.
+  
+- Fixed some problems with the drawStencilShadow() method in the OpenGL implementation of the 
+  IVideoDriver interface after some suggestions by Nicholas Bray.
+  
+- Added IGUIButton::setPressed() and isPressed().
+
+- Fixed checkPrimitiveCount() bug in NullDevice.
+
+- Applied jox's matrix4::getRotationDegrees() fix, many thanks for posting this!
+
+- Changed aabbox3d::getExtend() to getExtent().
+  
+- Changed IXMLReader::isEmtpyElement() to isEmptyElement()
+
+- Fixed a bug in CSceneManager::getSceneNodeFromId() which caused the engine to crash sometimes.
+
+- Fixed a bug in CGUISkin::setSize reported by REAPER. This method never worked before.
+
+- Improved texture mapping and normals of the TestSceneNode, thanks go again to Jox.
+
+- ScrollBar is now posting mousewheel events, thanks go to REAPER to post this bug and a fix for it.
+
+- Added - operator to vector2d and vector3d, thanks to calimero
+
+- Fixed a bug in vector2d::getAngle() and vector2d::rotateBy() thanks to Jox.
+
+- Fixed a bug in quaternion::set(f32 x, f32 y, f32 z) thanks again to Jox.
+
+- Fixed a bug in list::insert_before and list::insert_after, reported by Haddock.
+
+- Fixed a bug in XML Parser which caused a seqfault on linux. Thanks for G.o.D reporting this problem.
+
+- EDriverType enumeration renamed to E_DRIVER_TYPE
+
+- SceneNodeRenderTime enumeration renamed to E_SCENE_NODE_RENDER_TIME
+  
+-------------------------------------------------------------------------------------
 Changes in version 0.6: (09 Mar 2004)
 
 - Irrlicht now includes its own XML parser. It provides forward-only, read-only 

@@ -10,7 +10,7 @@ namespace irr
 namespace video  
 {
 	//! An enum for all types of drivers the Irrlicht Engine supports.
-	enum EDriverType
+	enum E_DRIVER_TYPE
 	{
 		//! Null device, useful for applications to run the engine without visualisation. 
 		//! The null device is able to load textures, but does not render and display

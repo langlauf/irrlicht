@@ -4,12 +4,12 @@
 #include "CDemo.h"
 #include <stdio.h>
 
-CDemo::CDemo(bool f, bool m, bool s, bool a, video::EDriverType d)
+CDemo::CDemo(bool f, bool m, bool s, bool a, bool v, video::E_DRIVER_TYPE d)
 : fullscreen(f), driverType(d), currentScene(-2),
  model1(0), model2(0), music(m), 
 shadows(s), quakeLevelMesh(0), quakeLevelNode(0), timeForThisScene(0),
 skyboxNode(0), mapSelector(0), metaSelector(0), campFire(0), device(0),
-additive(a)
+additive(a), vsync(v)
 {
 }
 
@@ -27,13 +27,12 @@ CDemo::~CDemo()
 void CDemo::run()
 {
 	device = createDevice(driverType,
-		core::dimension2d<s32>(640, 480), 16, fullscreen, shadows, this);
-		//core::dimension2d<s32>(512, 350), 16, fullscreen, shadows, this);
+		core::dimension2d<s32>(640, 480), 16, fullscreen, shadows, vsync, this);;
 
 	device->getFileSystem()->addZipFileArchive("irrlicht.dat");
-	device->getFileSystem()->addZipFileArchive("..\\..\\media\\irrlicht.dat");
+	device->getFileSystem()->addZipFileArchive("../../media/irrlicht.dat");
 	device->getFileSystem()->addZipFileArchive("map-20kdm2.pk3");
-	device->getFileSystem()->addZipFileArchive("..\\..\\media\\map-20kdm2.pk3");
+	device->getFileSystem()->addZipFileArchive("../../media/map-20kdm2.pk3");
 
 	video::IVideoDriver* driver = device->getVideoDriver();
 	scene::ISceneManager* smgr = device->getSceneManager();
@@ -65,8 +64,7 @@ void CDemo::run()
 
 			// write statistics
 
-			swprintf(tmp, 255, L"%s fps:%d polys:%d", driver->getName(),
-				driver->getFPS(), driver->getPrimitiveCountDrawn());
+			swprintf(tmp, 255, L"%s fps:%d", driver->getName(),	driver->getFPS());
 
 			statusText->setText(tmp);
 		}
@@ -162,56 +160,54 @@ void CDemo::switchToNextScene()
 			camera = sm->addCameraSceneNodeFPS(0, 100, 500);
 			timeForThisScene = 14000000;
 			#else
-			timeForThisScene = 39664;
 			currentScene += 1;
 			camera = sm->addCameraSceneNode(0, core::vector3df(0,0,0), core::vector3df(-586,708,52));
 			camera->setTarget(core::vector3df(0,400,0));
 			
 			core::array<core::vector3df> points;
-		
-			points.push_back(core::vector3df(1114.336792f, 242.206009f, -56.976807f));
-			points.push_back(core::vector3df(1116.545166f, 378.685272f, -56.083183f));
-			points.push_back(core::vector3df(1118.940186f, 516.664307f, -56.338856f));
-			points.push_back(core::vector3df(1130.007935f, 662.745605f, -56.157753f));
-			points.push_back(core::vector3df(1154.303345f, 814.303101f, -57.683624f));
-			points.push_back(core::vector3df(1007.227173f, 757.994019f, 226.902283f));
-			points.push_back(core::vector3df(913.370850f, 667.597168f, 469.352020f));
-
-			points.push_back(core::vector3df(804.647400f, 625.486145f, 637.515320f));
-			points.push_back(core::vector3df(799.796814f, 625.486145f, 971.678223f));
-			points.push_back(core::vector3df(576.089050f, 573.689880f, 1024.815430f));
-			points.push_back(core::vector3df(492.829620f, 545.776917f, 940.990051f));
-			points.push_back(core::vector3df(502.472015f, 563.155029f, 811.918396f));
-			points.push_back(core::vector3df(456.350525f, 545.089233f, 587.798828f));
-			points.push_back(core::vector3df(477.665680f, 545.019470f, 350.156158f));
-			points.push_back(core::vector3df(462.408508f, 534.190247f, 55.671730f));
-			points.push_back(core::vector3df(455.176117f, 548.591370f, -195.685745f));
-			points.push_back(core::vector3df(445.013641f, 561.275391f, -481.564636f));
-			points.push_back(core::vector3df(470.327087f, 554.699463f, -914.740601f));
-			points.push_back(core::vector3df(215.299149f, 478.205139f, -890.992554f));
-			points.push_back(core::vector3df(40.725445f, 406.419464f, -856.153564f));
-			points.push_back(core::vector3df(-139.619537f, 367.475952f, -832.361145f));
-			points.push_back(core::vector3df(-372.134460f, 353.153320f, -718.145630f));
-			points.push_back(core::vector3df(-396.479126f, 399.665192f, -464.819946f));
-			points.push_back(core::vector3df(-401.636963f, 400.320068f, -85.747185f));
-			points.push_back(core::vector3df(-399.067566f, 405.603760f, 78.287315f));
-			points.push_back(core::vector3df(-142.541534f, 390.756897f, 108.415192f));
-			points.push_back(core::vector3df(110.264053f, 388.120453f, 91.955513f));
-			points.push_back(core::vector3df(358.585236f, 392.355316f, 98.712135f));
-			points.push_back(core::vector3df(573.278687f, 396.884125f, 109.258797f));
-			points.push_back(core::vector3df(631.992310f, 419.328979f, 281.179108f));
-			points.push_back(core::vector3df(607.874084f, 413.811523f, 535.857849f));
-			points.push_back(core::vector3df(614.861389f, 400.083984f, 751.252869f));
-			points.push_back(core::vector3df(557.560303f, 341.482758f, 924.299133f));
-			points.push_back(core::vector3df(430.859222f, 331.369476f, 985.138367f));
-			points.push_back(core::vector3df(263.945251f, 215.380280f, 968.150269f));
-			points.push_back(core::vector3df(202.371033f, 213.545090f, 943.107300f));
+		 
+			points.push_back(core::vector3df(-931.473755f, 138.300003f, 987.279114f)); // -49873
+			points.push_back(core::vector3df(-847.902222f, 136.757553f, 915.792725f)); // -50559
+			points.push_back(core::vector3df(-748.680420f, 152.254501f, 826.418945f)); // -51964
+			points.push_back(core::vector3df(-708.428406f, 213.569580f, 784.466675f)); // -53251
+			points.push_back(core::vector3df(-686.217651f, 288.141174f, 762.965576f)); // -54015
+			points.push_back(core::vector3df(-679.685059f, 365.095612f, 756.551453f)); // -54733
+			points.push_back(core::vector3df(-671.317871f, 447.360107f, 749.394592f)); // -55588
+			points.push_back(core::vector3df(-669.468445f, 583.335632f, 747.711853f)); // -56178
+			points.push_back(core::vector3df(-667.611267f, 727.313232f, 746.018250f)); // -56757
+			points.push_back(core::vector3df(-665.853210f, 862.791931f, 744.436096f)); // -57859
+			points.push_back(core::vector3df(-642.649597f, 1026.047607f, 724.259827f)); // -59705
+			points.push_back(core::vector3df(-517.793884f, 838.396790f, 490.326050f)); // -60983
+			points.push_back(core::vector3df(-474.387299f, 715.691467f, 344.639984f)); // -61629
+			points.push_back(core::vector3df(-444.600250f, 601.155701f, 180.938095f)); // -62319
+			points.push_back(core::vector3df(-414.808899f, 479.691406f, 4.866660f)); // -63048
+			points.push_back(core::vector3df(-410.418945f, 429.642242f, -134.332687f)); // -63757
+			points.push_back(core::vector3df(-399.837585f, 411.498383f, -349.350983f)); // -64418
+			points.push_back(core::vector3df(-390.756653f, 403.970093f, -524.454407f)); // -65005
+			points.push_back(core::vector3df(-334.864227f, 350.065491f, -732.397400f)); // -65701
+			points.push_back(core::vector3df(-195.253387f, 349.577209f, -812.475891f)); // -66335
+			points.push_back(core::vector3df(16.255573f, 363.743134f, -833.800415f)); // -67170
+			points.push_back(core::vector3df(234.940964f, 352.957825f, -820.150696f)); // -67939
+			points.push_back(core::vector3df(436.797668f, 349.236450f, -816.914185f)); // -68596
+			points.push_back(core::vector3df(575.236206f, 356.244812f, -719.788513f)); // -69166
+			points.push_back(core::vector3df(594.131042f, 387.173828f, -609.675598f)); // -69744
+			points.push_back(core::vector3df(617.615234f, 412.002899f, -326.174072f)); // -70640
+			points.push_back(core::vector3df(606.456848f, 403.221954f, -104.179291f)); // -71390
+			points.push_back(core::vector3df(610.958252f, 407.037750f, 117.209778f)); // -72085
+			points.push_back(core::vector3df(597.956909f, 395.167877f, 345.942200f)); // -72817
+			points.push_back(core::vector3df(587.383118f, 391.444519f, 566.098633f)); // -73477
+			points.push_back(core::vector3df(559.572449f, 371.991333f, 777.689453f)); // -74124
+			points.push_back(core::vector3df(423.753204f, 329.990051f, 925.859741f)); // -74941
+			points.push_back(core::vector3df(247.520050f, 252.818954f, 935.311829f)); // -75651
 			points.push_back(core::vector3df(114.756012f, 199.799759f, 805.014160f));
 			points.push_back(core::vector3df(96.783348f, 181.639481f, 648.188110f));
 			points.push_back(core::vector3df(97.865623f, 138.905975f, 484.812561f));
 			points.push_back(core::vector3df(99.612457f, 102.463669f, 347.603210f));
 			points.push_back(core::vector3df(99.612457f, 102.463669f, 347.603210f));
 			points.push_back(core::vector3df(99.612457f, 102.463669f, 347.603210f));
+
+
+			timeForThisScene = (points.size()-3)* 1000;
 			
 			sa = sm->createFollowSplineAnimator(device->getTimer()->getTime(), 
 				points);
@@ -242,7 +238,7 @@ void CDemo::switchToNextScene()
 			model1->setVisible(true);
 			model2->setVisible(true);
 			campFire->setVisible(true);
-			timeForThisScene = -1;
+			timeForThisScene = (u32)-1;
 
 			SKeyMap keyMap[8];
 			keyMap[0].Action = EKA_MOVE_FORWARD;
@@ -320,13 +316,13 @@ void CDemo::loadSceneData()
 	// load sydney model and create 2 instances
 
 	scene::IAnimatedMesh* mesh = 0;
-	mesh = sm->getMesh("..\\..\\media\\sydney.md2");
+	mesh = sm->getMesh("../../media/sydney.md2");
 	if (mesh)
 	{
 		model1 = sm->addAnimatedMeshSceneNode(mesh);
 		if (model1)
 		{
-			model1->setMaterialTexture(0, driver->getTexture("..\\..\\media\\spheremap.jpg"));
+			model1->setMaterialTexture(0, driver->getTexture("../../media/spheremap.jpg"));
 			model1->setPosition(core::vector3df(100,40,-80));
 			model1->setScale(core::vector3df(2,2,2));
 			model1->setMD2Animation(scene::EMAT_SALUTE);
@@ -342,7 +338,7 @@ void CDemo::loadSceneData()
 			model2->setScale(core::vector3df(2,2,2));
 			model2->setMD2Animation(scene::EMAT_RUN);
 			model2->setAnimationSpeed(20);
-			model2->setMaterialTexture(0, device->getVideoDriver()->getTexture("../../media/sydney.BMP"));
+			model2->setMaterialTexture(0, device->getVideoDriver()->getTexture("../../media/sydney.bmp"));
 			model2->setMaterialFlag(video::EMF_LIGHTING, true);
 			model2->addShadowVolumeSceneNode();
 		}
@@ -352,13 +348,17 @@ void CDemo::loadSceneData()
 
 	// create sky box
 
+	//driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
+
 	skyboxNode = sm->addSkyBoxSceneNode(
-		driver->getTexture("..\\..\\media\\irrlicht2_up.bmp"),
-		driver->getTexture("..\\..\\media\\irrlicht2_dn.bmp"),
-		driver->getTexture("..\\..\\media\\irrlicht2_lf.bmp"),
-		driver->getTexture("..\\..\\media\\irrlicht2_rt.bmp"),
-		driver->getTexture("..\\..\\media\\irrlicht2_ft.bmp"),
-		driver->getTexture("..\\..\\media\\irrlicht2_bk.bmp"));
+		driver->getTexture("../../media/irrlicht2_up.jpg"),
+		driver->getTexture("../../media/irrlicht2_dn.jpg"),
+		driver->getTexture("../../media/irrlicht2_lf.jpg"),
+		driver->getTexture("../../media/irrlicht2_rt.jpg"),
+		driver->getTexture("../../media/irrlicht2_ft.jpg"),
+		driver->getTexture("../../media/irrlicht2_bk.jpg"));
+
+	//driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
 	// create walk-between-portals animation
 
@@ -380,7 +380,7 @@ void CDemo::loadSceneData()
 	for (s32 g=1; g<8; ++g)
 	{
 		char tmp[64];
-		sprintf(tmp, "..\\..\\media\\portal%d.bmp", g);
+		sprintf(tmp, "../../media/portal%d.bmp", g);
 		video::ITexture* t = driver->getTexture(tmp);
 		textures.push_back(t);
 	}
@@ -396,7 +396,7 @@ void CDemo::loadSceneData()
 		bill = sm->addBillboardSceneNode(0, core::dimension2d<f32>(100,100),
 			waypoint[r]+ core::vector3df(0,20,0));
 		bill->setMaterialFlag(video::EMF_LIGHTING, false);
-		bill->setMaterialTexture(0, driver->getTexture("..\\..\\media\\portal1.bmp"));
+		bill->setMaterialTexture(0, driver->getTexture("../../media/portal1.bmp"));
 		bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 		bill->addAnimator(anim);
 	}
@@ -419,7 +419,7 @@ void CDemo::loadSceneData()
 	bill = device->getSceneManager()->addBillboardSceneNode(
 		light, core::dimension2d<f32>(40,40));
 	bill->setMaterialFlag(video::EMF_LIGHTING, false);
-	bill->setMaterialTexture(0, driver->getTexture("..\\..\\media\\particlewhite.bmp"));
+	bill->setMaterialTexture(0, driver->getTexture("../../media/particlewhite.bmp"));
 	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 
 	// create meta triangle selector with all triangles selectors in it.
@@ -447,7 +447,7 @@ void CDemo::loadSceneData()
 	paf->drop();
 
 	campFire->setMaterialFlag(video::EMF_LIGHTING, false);
-	campFire->setMaterialTexture(0, driver->getTexture("..\\..\\media\\fireball.bmp"));
+	campFire->setMaterialTexture(0, driver->getTexture("../../media/fireball.bmp"));
 	campFire->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
 
 	// load music
@@ -485,11 +485,11 @@ void CDemo::createLoadingScreen()
 		core::rect<int>(10,10,98,41));
 
 	img->setImage(
-		device->getVideoDriver()->getTexture("..\\..\\media\\irrlichtlogoaligned.jpg"));
+		device->getVideoDriver()->getTexture("../../media/irrlichtlogoaligned.jpg"));
 
 	// loading text
 
-	const int lwidth = 170;
+	const int lwidth = 120;
 	const int lheight = 15;
 
 	core::rect<int> pos(10, size.Height-lheight-10, 10+lwidth, size.Height-10);
@@ -501,7 +501,7 @@ void CDemo::createLoadingScreen()
 	// load bigger font
 
 	device->getGUIEnvironment()->getSkin()->setFont(
-		device->getGUIEnvironment()->getFont("..\\..\\media\\fonthaettenschweiler.bmp"));
+		device->getGUIEnvironment()->getFont("../../media/fonthaettenschweiler.bmp"));
 
 	// set new font color
 
@@ -527,7 +527,9 @@ void CDemo::shoot()
 	core::vector3df start = camera->getPosition();
 	core::vector3df end = (camera->getTarget() - start);
 	end.normalize();
+	start += end*5.0f;
 	end = start + (end * camera->getFarValue());
+	
 
 	core::triangle3df triangle;
 
@@ -560,11 +562,11 @@ void CDemo::shoot()
 		core::dimension2d<f32>(25,25), start);
 
 	node->setMaterialFlag(video::EMF_LIGHTING, false);
-	node->setMaterialTexture(0, device->getVideoDriver()->getTexture("..\\..\\media\\particle.bmp"));
+	node->setMaterialTexture(0, device->getVideoDriver()->getTexture("../../media/fireball.bmp"));
 	node->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 		
 	f32 length = (f32)(end - start).getLength();
-	const f32 speed = 0.3f;
+	const f32 speed = 0.6f;
 	u32 time = (u32)(length / speed);
 
 	scene::ISceneNodeAnimator* anim = 0;
@@ -655,7 +657,7 @@ void CDemo::startAudiere()
 	stream = OpenSound(audiereDevice.get(), "IrrlichtTheme.mp3", true);
 	if (!stream) 
 	{
-		stream = OpenSound(audiereDevice.get(), "..\\..\\media\\IrrlichtTheme.mp3", true);
+		stream = OpenSound(audiereDevice.get(), "../../media/IrrlichtTheme.mp3", true);
 		if (!stream)
 			return;
 	}
@@ -663,13 +665,13 @@ void CDemo::startAudiere()
 	ballSound = OpenSound(audiereDevice.get(), "ball.wav", false);
 	if (!ballSound) 
 	{
-		ballSound = OpenSound(audiereDevice.get(), "..\\..\\media\\ball.wav", false);
+		ballSound = OpenSound(audiereDevice.get(), "../../media/ball.wav", false);
 	}
 
 	impactSound = OpenSound(audiereDevice.get(), "impact.wav", false);
 	if (!impactSound) 
 	{
-		impactSound = OpenSound(audiereDevice.get(), "..\\..\\media\\impact.wav", false);
+		impactSound = OpenSound(audiereDevice.get(), "../../media/impact.wav", false);
 	}
 		
 	stream->setRepeat(true);

@@ -26,6 +26,8 @@ namespace core
 
 		// operators
 
+		vector3d<T> operator-() const { return vector3d<T>(-X, -Y, -Z);   }
+
 		vector3d<T>& operator=(const vector3d<T>& other)	{ X = other.X; Y = other.Y; Z = other.Z; return *this; }
 
 		vector3d<T> operator+(const vector3d<T>& other) const { return vector3d<T>(X + other.X, Y + other.Y, Z + other.Z);	}
@@ -100,10 +102,14 @@ namespace core
 		//! Normalizes the vector.
 		vector3d<T>& normalize()
 		{
-			T inv = (T)1.0 / (T)getLength();
-			X *= inv;
-			Y *= inv;
-			Z *= inv;
+			T l = (T)getLength();
+			if (l == 0)
+				return *this;
+
+			l = (T)1.0 / l;
+			X *= l;
+			Y *= l;
+			Z *= l;
 			return *this;
 		}
 

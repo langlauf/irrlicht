@@ -1,3 +1,0 @@
-The Irrlicht Engine Meshviewer is part of the examples.
-A precompiled version can be found in the directory
-bin/VisualStudio

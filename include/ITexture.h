@@ -127,7 +127,7 @@ public:
 	//! use a texture because textures may be incompatible between different
 	//! devices.
 	//! \return Returns driver type of texture.
-	virtual EDriverType getDriverType() = 0;
+	virtual E_DRIVER_TYPE getDriverType() = 0;
 
 	//! Returns the color format of texture. This format is in most cases
 	//! ECF_A1R5G5B5 or ECF_A8R8G8B8.

@@ -142,7 +142,7 @@ namespace gui
 		virtual void setDefaultText(EGUI_DEFAULT_TEXT which, const wchar_t* newText) = 0;
 
 		//! sets a default size
-		virtual void setSize(s32 size) = 0;
+		virtual void setSize(EGUI_DEFAULT_SIZE which, s32 size) = 0;
 
 		//! returns the default font
 		virtual IGUIFont* getFont() = 0;

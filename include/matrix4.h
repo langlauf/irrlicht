@@ -156,6 +156,9 @@ namespace core
 			//! \param time: Must be a value between 0 and 1.
 			matrix4 interpolate(core::matrix4& b, f32 time);
 
+			//! returns transposed matrix
+			matrix4 getTransposed();
+
 			//! Matrix data, stored in column-major order
 			f32 M[16];
 	};
@@ -186,7 +189,7 @@ namespace core
 		newMatrix[8] = m1[0]*m2[8] + m1[4]*m2[9] + m1[8]*m2[10] + m1[12]*m2[11];
 		newMatrix[9] = m1[1]*m2[8] + m1[5]*m2[9] + m1[9]*m2[10] + m1[13]*m2[11];
 		newMatrix[10] = m1[2]*m2[8] + m1[6]*m2[9] + m1[10]*m2[10] + m1[14]*m2[11];
-		newMatrix[11] = m1[3]*m2[8] + m1[7]*m2[10] + m1[11]*m2[10] + m1[15]*m2[11];
+		newMatrix[11] = m1[3]*m2[8] + m1[7]*m2[9] + m1[11]*m2[10] + m1[15]*m2[11];
 		
 		newMatrix[12] = m1[0]*m2[12] + m1[4]*m2[13] + m1[8]*m2[14] + m1[12]*m2[15];
 		newMatrix[13] = m1[1]*m2[12] + m1[5]*m2[13] + m1[9]*m2[14] + m1[13]*m2[15];
@@ -221,7 +224,7 @@ namespace core
 		m3[8] = m1[0]*m2[8] + m1[4]*m2[9] + m1[8]*m2[10] + m1[12]*m2[11];
 		m3[9] = m1[1]*m2[8] + m1[5]*m2[9] + m1[9]*m2[10] + m1[13]*m2[11];
 		m3[10] = m1[2]*m2[8] + m1[6]*m2[9] + m1[10]*m2[10] + m1[14]*m2[11];
-		m3[11] = m1[3]*m2[8] + m1[7]*m2[10] + m1[11]*m2[10] + m1[15]*m2[11];
+		m3[11] = m1[3]*m2[8] + m1[7]*m2[9] + m1[11]*m2[10] + m1[15]*m2[11];
 		
 		m3[12] = m1[0]*m2[12] + m1[4]*m2[13] + m1[8]*m2[14] + m1[12]*m2[15];
 		m3[13] = m1[1]*m2[12] + m1[5]*m2[13] + m1[9]*m2[14] + m1[13]*m2[15];
@@ -299,37 +302,41 @@ namespace core
 	//! in by Chev.
 	inline core::vector3df matrix4::getRotationDegrees() const
 	{
-		const matrix4 &mat = *this;
-		
-		f32 Y = -asinf(mat(2,0)); 
-		f32 D = Y;
-		f32 C = cosf(Y); 
-		Y *= 180.000f/PI; 
+		const matrix4 &mat = *this; 
 
-		f32 rotx, roty, X, Z;
- 
-		if (fabs(Y)>0.0005f) 
+		f64 Y = -asin(mat(2,0)); 
+		f64 D = Y; 
+		f64 C = cos(Y); 
+		Y *= GRAD_PI; // <- this was "180.000f/PI" before 
+		//   (not part of the bug) 
+
+		f64 rotx, roty, X, Z; 
+
+		if (fabs(C)>0.0005f) // <- C not Y 
 		{ 
 			rotx = mat(2,2) / C; 
 			roty = mat(2,1)  / C; 
-			X = atan2f( roty, rotx ) * (f32)GRAD_PI; 
-			rotx =  mat(0,0) / C; 
+			X = atan2( roty, rotx ) * GRAD_PI; 
+			rotx = mat(0,0) / C; 
 			roty = mat(1,0) / C; 
-			Z = atan2f( roty, rotx ) * (f32)GRAD_PI; 
+			Z = atan2( roty, rotx ) * GRAD_PI; 
 		} 
 		else 
-		{
+		{ 
 			X  = 0.0f; 
-			rotx = -mat(1,1); 
-			roty = mat(1,0); 
-			Z  = atan2f( roty, rotx ) * (f32)GRAD_PI; 
+			rotx = mat(1,1); // <- no minus here 
+			roty = -mat(0,1); // <- but here, and not (1,0) 
+			Z  = atan2( roty, rotx ) * (f32)GRAD_PI; 
 		} 
- 
-		if (fabs(X)>=360.00f) X=0.00f; 
-		if (fabs(Y)>=360.00f) Y=0.00f; 
-		if (fabs(Z)>=360.00f) Z=0.00f; 
- 
-		return vector3df(X,Y,Z); 
+
+		// fix values that get below zero 
+		// before it would set (!) values to 360 
+		// that where above 360: 
+		if (X < 0.00) X += 360.00; 
+		if (Y < 0.00) Y += 360.00; 
+		if (Z < 0.00) Z += 360.00; 
+
+		return vector3df((f32)X,(f32)Y,(f32)Z);
 	}
 
 	inline void matrix4::setInverseRotationRadians( const vector3df& rotation )
@@ -837,6 +844,16 @@ namespace core
 			mat.M[i] = M[i]*ntime + b.M[i]*time;
 
 		return mat;
+	}
+
+	//! returns transposed matrix
+	inline matrix4 matrix4::getTransposed()
+	{
+		matrix4 t;
+		for (s32 r=0; r<4; ++r)
+			for (s32 c=0; c<4; ++c)
+				t(r,c) = (*this)(c,r);
+		return t;
 	}
 
 

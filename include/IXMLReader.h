@@ -157,7 +157,7 @@ namespace io
 		virtual const wchar_t* getNodeData() = 0;
 
 		//! Returns if an element is an empty element, like <foo />
-		virtual bool isEmtpyElement() = 0;
+		virtual bool isEmptyElement() = 0;
 	};
 
 } // end namespace irr

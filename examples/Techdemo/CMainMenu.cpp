@@ -4,21 +4,21 @@
 #include "CMainMenu.h"
 
 CMainMenu::CMainMenu()
-: startButton(0), device(0), start(false), fullscreen(true), selected(1),
-	music(true), shadows(false), additive(false), transparent(true)
+: startButton(0), device(0), start(false), fullscreen(true), selected(2),
+	music(true), shadows(false), additive(false), transparent(true), vsync(true)
 {
 }
 
 
 
 bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
-					bool& outAdditive, video::EDriverType& outDriver)
+					bool& outAdditive, bool &outVSync, video::E_DRIVER_TYPE& outDriver)
 {
 	device = createDevice(video::EDT_SOFTWARE,
-		core::dimension2d<s32>(512, 384), 16, false, false, this);
+		core::dimension2d<s32>(512, 384), 16, false, false, false, this);
 
 	device->getFileSystem()->addZipFileArchive("irrlicht.dat");
-	device->getFileSystem()->addZipFileArchive("..\\..\\media\\irrlicht.dat");
+	device->getFileSystem()->addZipFileArchive("../../media/irrlicht.dat");
 
 	video::IVideoDriver* driver = device->getVideoDriver();
 	scene::ISceneManager* smgr = device->getSceneManager();
@@ -39,10 +39,10 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 	gui::IGUIImage* img = guienv->addImage(core::rect<int>(0,0,512,384));
 	img->setImage(driver->getTexture("../../media/techdemoback.bmp"));
 
-    const s32 leftX = 280;
+    const s32 leftX = 260;
 
 	// add tab control
-	gui::IGUITabControl* tabctrl = guienv->addTabControl(core::rect<int>(leftX,0,512,384),
+	gui::IGUITabControl* tabctrl = guienv->addTabControl(core::rect<int>(leftX,10,512-10,384-10),
 		0, true, true);
 	gui::IGUITab* optTab = tabctrl->addTab(L"Demo");
 	gui::IGUITab* aboutTab = tabctrl->addTab(L"About");
@@ -62,14 +62,16 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 
 	// add checkbox
 
-	guienv->addCheckBox(fullscreen, core::rect<int>(20,105,130,130), 
+	guienv->addCheckBox(fullscreen, core::rect<int>(20,85,130,110), 
 		optTab, 3, L"Fullscreen");
-	guienv->addCheckBox(music, core::rect<int>(20,130,130,155), 
+	guienv->addCheckBox(music, core::rect<int>(20,110,130,135), 
 		optTab, 4, L"Music & Sfx");
-	guienv->addCheckBox(shadows, core::rect<int>(20,160,130,175), 
-		optTab, 5, L"Shadows");
-	guienv->addCheckBox(additive, core::rect<int>(20,180,230,205),
+	guienv->addCheckBox(shadows, core::rect<int>(20,135,230,160), 
+		optTab, 5, L"Realtime shadows");
+	guienv->addCheckBox(additive, core::rect<int>(20,160,230,185),
 		optTab, 6, L"Old HW compatible blending");
+	guienv->addCheckBox(vsync, core::rect<int>(20,185,230,210),
+		optTab, 7, L"Vertical synchronisation");
 
 	// add text
 
@@ -104,7 +106,7 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 		node->setFrameLoop(0, 310);
 	}
 
-	smgr->addCameraSceneNode(0, core::vector3df(35,0,0), core::vector3df(0,0,20));
+	smgr->addCameraSceneNode(0, core::vector3df(45,0,0), core::vector3df(0,0,20));
 
 	// irrlicht logo
 	video::ITexture* irrlichtLogo = driver->getTexture("../../media/irrlichtlogo.bmp");
@@ -135,7 +137,7 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 	outMusic = music;
 	outShadows = shadows;
 	outAdditive = additive;
-
+	outVSync = vsync;
 
 	switch(selected)
 	{
@@ -208,6 +210,10 @@ bool CMainMenu::OnEvent(SEvent event)
 			if (event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED )
 				additive = ((gui::IGUICheckBox*)event.GUIEvent.Caller)->isChecked();
 			break;
+		case 7:
+			if (event.GUIEvent.EventType == gui::EGET_CHECKBOX_CHANGED )
+				vsync = ((gui::IGUICheckBox*)event.GUIEvent.Caller)->isChecked();
+			break;			
 		}
 	}
 
@@ -221,7 +227,7 @@ void CMainMenu::setTransparency()
 	{
 		video::SColor col = device->getGUIEnvironment()->getSkin()->
 			getColor((gui::EGUI_DEFAULT_COLOR)i);
-		col.setAlpha(transparent ? 101 : 255);
+		col.setAlpha(transparent ? 201 : 255);
 		device->getGUIEnvironment()->getSkin()->setColor((gui::EGUI_DEFAULT_COLOR)i, col);
 	}
 }

@@ -25,6 +25,8 @@ public:
 
 	// operators
 
+	vector2d<T> operator-() const { return vector2d<T>(-X, -Y);   }
+
 	vector2d<T>& operator=(const vector2d<T>& other)	{ X = other.X; Y = other.Y; return *this; }
 
 	vector2d<T> operator+(const vector2d<T>& other) const { return vector2d<T>(X + other.X, Y + other.Y);	}
@@ -72,7 +74,7 @@ public:
 	//! rotates the point around a center by an amount of degrees.
 	void rotateBy(f64 degrees, const vector2d<T>& center)
 	{
-		degrees *=gradPI2;
+		degrees *= GRAD_PI2;
 		T cs = (T)cos(degrees);
 		T sn = (T)sin(degrees);
 
@@ -88,9 +90,13 @@ public:
 	//! normalizes the vector.
 	vector2d<T>& normalize()
 	{
-		T len = (T)(1.0 / getLength());
-		X *= len;
-		Y *= len;
+		T l = (T)getLength();
+		if (l == 0)
+			return *this;
+
+		l = (T)1.0 / l;
+		X *= l;
+		Y *= l;
 		return *this;
 	}
 
@@ -98,8 +104,10 @@ public:
 	//! \return Returns a value between 0 and 360.
 	inline f64 getAngle() const
 	{
-		if (Y == 0.0)
-			return X > 0.0 ? 90.0 : 180.0;
+		if (Y == 0.0)  // corrected thanks to a suggestion by Jox
+			return X < 0.0 ? 180.0 : 0.0; 
+		else if (X == 0.0) 
+			return Y < 0.0 ? 90.0 : 270.0;
 
 		f64 tmp = Y / sqrt(X*X + Y*Y);
 		tmp = atan(sqrt(1 - tmp*tmp) / tmp) * GRAD_PI;

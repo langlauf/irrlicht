@@ -13,7 +13,7 @@ namespace irr
 {
 namespace scene
 {
-	enum EANIMATED_MESH_TYPE
+	enum E_ANIMATED_MESH_TYPE
 	{
 		//! Unknown animated mesh type.
 		EAMT_UNKNOWN = 0,
@@ -75,7 +75,7 @@ namespace scene
 		//! if getMeshType() returns EAMT_MD2, its save to cast the
 		//! IAnimatedMesh to IAnimatedMeshMD2.
 		//! \returns Type of the mesh.
-		virtual EANIMATED_MESH_TYPE getMeshType() const
+		virtual E_ANIMATED_MESH_TYPE getMeshType() const
 		{
 			return EAMT_UNKNOWN;
 		}

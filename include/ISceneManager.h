@@ -22,6 +22,11 @@ namespace io
 	class IFileSystem;
 }
 
+namespace gui
+{
+	class IGUIFont;
+}
+
 namespace video
 {
 	class IVideoDriver;
@@ -34,7 +39,7 @@ namespace scene
 	//! Enumeration with render times.
 	/** A parameter passed to the registerNodeForRendering() method of the ISceneManager, 
 	specifiing when the mode wants to be drawed in relation to the other nodes. */
-	enum ESceneNodeRenderTime
+	enum E_SCENE_NODE_RENDER_TIME
 	{
 		//! scene nodes which are lights or camera should use this,
 		//! the very first pass.
@@ -73,6 +78,7 @@ namespace scene
 	class ITriangleSelector;
 	class IMetaTriangleSelector;
 	class IMeshManipulator;
+	class ITextSceneNode;
 
 	//!	The Scene Manager manages scene nodes, mesh recources, cameras and all the other stuff.
 	/** All Scene nodes can be created only here. There is a always growing list of scene 
@@ -405,6 +411,13 @@ namespace scene
 		virtual IDummyTransformationSceneNode* addDummyTransformationSceneNode(
 			ISceneNode* parent=0, s32 id=-1) = 0;
 
+		//! Adds a text scene node, which is able to display 
+		//! 2d text at a position in three dimensional space
+		virtual ITextSceneNode* addTextSceneNode(gui::IGUIFont* font, const wchar_t* text,
+			video::SColor color=video::SColor(100,255,255,255), 
+			ISceneNode* parent = 0,	const core::vector3df& position = core::vector3df(0,0,0),
+			s32 id=-1) = 0;
+
 		//! Adds a Hill Plane mesh to the mesh pool. The mesh is generated on the fly
 		//! and looks like a plane with some hills on it. It is uses mostly for quick
 		//! tests of the engine only. You can specify how many hills there should be 
@@ -498,7 +511,7 @@ namespace scene
 		//! Registers a node for rendering it at a specific time.
 		//! This method should only be used by SceneNodes when they get a 
 		//! ISceneNode::OnPreRender() call.
-		virtual void registerNodeForRendering(ISceneNode* node, ESceneNodeRenderTime time = SNRT_DEFAULT) = 0;
+		virtual void registerNodeForRendering(ISceneNode* node, E_SCENE_NODE_RENDER_TIME time = SNRT_DEFAULT) = 0;
 
 		//! Draws all the scene nodes. This can only be invoked between
 		//! IVideoDriver::beginScene() and IVideoDriver::endScene().

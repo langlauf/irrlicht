@@ -12,7 +12,7 @@ namespace irr
 {
 namespace video
 {
-	//! Abstracted and easy to use standard material modes.
+	//! Abstracted and easy to use fixed function pipeline material modes.
 	enum E_MATERIAL_TYPE
 	{
 		//! Standard solid material. Only first texture is used, which is
@@ -232,15 +232,25 @@ namespace video
 		};
 
 
-		//! Determinates if the material is somehow transparent.
-		//! \return Returns true if material is transparent, false if not.
-		inline bool isTransparent()
+		//! Compare operator
+		inline bool operator!=(const SMaterial& b)
 		{
-			return MaterialType == EMT_TRANSPARENT_ADD_COLOR ||
-					MaterialType == EMT_TRANSPARENT_ALPHA_CHANNEL || 
-					MaterialType == EMT_TRANSPARENT_VERTEX_ALPHA ||
-					MaterialType == EMT_TRANSPARENT_REFLECTION_2_LAYER;
-		}
+			return MaterialType != b.MaterialType ||
+				AmbientColor != b.AmbientColor ||
+				DiffuseColor != b.DiffuseColor ||
+				EmissiveColor != b.EmissiveColor ||
+				SpecularColor != b.SpecularColor ||
+				Shininess != b.Shininess ||
+				Wireframe != b.Wireframe ||
+				GouraudShading != b.GouraudShading ||
+				Lighting != b.Lighting ||
+				ZBuffer != b.ZBuffer ||
+				ZWriteEnable != b.ZWriteEnable ||
+				BackfaceCulling != b.BackfaceCulling ||
+				BilinearFilter != b.BilinearFilter ||
+				TrilinearFilter != b.TrilinearFilter ||
+				FogEnable != b.FogEnable;
+		}	
 	};
 
 } // end namespace video

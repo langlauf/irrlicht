@@ -89,14 +89,14 @@ namespace scene
 
 
 		//! Returns the type of the animated mesh.
-		virtual EANIMATED_MESH_TYPE getMeshType() const
+		virtual E_ANIMATED_MESH_TYPE getMeshType() const
 		{
 			return Type;
 		}
 
 		core::aabbox3d<f32> Box;
 		core::array<IMesh*> Meshes;
-		EANIMATED_MESH_TYPE Type;
+		E_ANIMATED_MESH_TYPE Type;
 	};
 
 

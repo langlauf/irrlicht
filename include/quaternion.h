@@ -52,6 +52,9 @@ class quaternion
 		quaternion& operator*=(f32 s);
 
 		//! multiplication operator
+		vector3df quaternion::operator* (const vector3df& v) const;
+
+		//! multiplication operator
 		quaternion& operator*=(const quaternion& other);
 
 		//! calculates the dot product
@@ -72,8 +75,15 @@ class quaternion
 		//! Inverts this quaternion
         void makeInverse();
 
-		// Interpolates the quaternion between to quaternions based on time
-		quaternion Slerp(quaternion q1, quaternion q2, f32 time);
+		//! Interpolates the quaternion between to quaternions based on time
+		quaternion slerp(quaternion q1, quaternion q2, f32 time);
+
+		//! axis must be unit length 
+		//! The quaternion representing the rotation is 
+		//!  q = cos(A/2)+sin(A/2)*(x*i+y*j+z*k) 
+		void fromAngleAxis (f32 angle, const vector3df& axis);
+
+		void toEuler(vector3df& euler);
 
 		f32 X, Y, Z, W;
 };
@@ -298,7 +308,7 @@ inline void quaternion::set(f32 x, f32 y, f32 z)
 	f32 cpcy = cp * cy;
 	f32 spcy = sp * cy;
 	f32 cpsy = cp * sy;
-	f32 spsy = cp * sy;
+	f32 spsy = sp * sy; 
 
 	X = sr * cpcy - cr * spsy;
 	Y = cr * spcy + sr * cpsy;
@@ -327,7 +337,7 @@ inline quaternion& quaternion::normalize()
 
 
 // Interpolates the quaternion between to quaternions based on time
-inline quaternion quaternion::Slerp(quaternion q1, quaternion q2, f32 time)
+inline quaternion quaternion::slerp(quaternion q1, quaternion q2, f32 time)
 {
     f32 angle = q1.getDotProduct(q2);
 
@@ -371,6 +381,48 @@ inline quaternion quaternion::Slerp(quaternion q1, quaternion q2, f32 time)
 inline f32 quaternion::getDotProduct(const quaternion& q2) const
 {
 	return (X * q2.X) + (Y * q2.Y) + (Z * q2.Z) + (W * q2.W);
+}
+
+
+inline void quaternion::fromAngleAxis(f32 angle, const vector3df& axis) 
+{ 
+	f32 fHalfAngle = 0.5f*angle; 
+	f32 fSin = (f32)sin(fHalfAngle); 
+	W = (f32)cos(fHalfAngle); 
+	X = fSin*axis.X; 
+	Y = fSin*axis.Y; 
+	Z = fSin*axis.Z; 
+} 
+
+inline void quaternion::toEuler(vector3df& euler)
+{ 
+	double sqw = W*W;    
+	double sqx = X*X;    
+	double sqy = Y*Y;    
+	double sqz = Z*Z; 
+
+	// heading = rotaton about z-axis 
+	euler.Z = (f32) (atan2(2.0 * (X*Y +Z*W),(sqx - sqy - sqz + sqw))); 
+
+	// bank = rotation about x-axis 
+	euler.X = (f32) (atan2(2.0 * (Y*Z +X*W),(-sqx - sqy + sqz + sqw))); 
+
+	// attitude = rotation about y-axis 
+	euler.Y = (f32) (asin(-2.0 * (X*Z - Y*W))); 
+} 
+
+inline vector3df quaternion::operator* (const vector3df& v) const 
+{ 
+	// nVidia SDK implementation 
+
+	vector3df uv, uuv; 
+	vector3df qvec(X, Y, Z); 
+	uv = qvec.crossProduct(v); 
+	uuv = qvec.crossProduct(uv); 
+	uv *= (2.0f * W); 
+	uuv *= 2.0f; 
+
+	return v + uv + uuv; 
 }
 
 } // end namespace core
