@@ -63,6 +63,12 @@ namespace scene
 			return Indices.const_pointer();
 		}
 
+		//! returns pointer to Indices
+		virtual u16* getIndices()
+		{
+			return Indices.pointer();
+		}
+
 		//! returns amount of indices
 		virtual s32 getIndexCount() const
 		{

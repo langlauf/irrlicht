@@ -211,6 +211,7 @@ public:
 
 	//! Erases an element
 	//! \param it: Iterator pointing to the element which should be erased.
+	//! \return Returns iterator pointing to next element.
 	Iterator erase(Iterator& it)
 	{
 		Iterator returnIterator(it);

@@ -15,6 +15,7 @@
 #include "SMaterial.h"
 #include "SLight.h"
 #include "ISurfaceLoader.h"
+#include "triangle3d.h"
 
 namespace irr
 {
@@ -141,7 +142,6 @@ namespace video
 		//! \param texture: Texture to delete from the engines cache.
 		virtual void removeTexture(ITexture* texture) = 0;
 
-
 		//! Removes all texture from the texture cache and deletes them, freeing lot of
 		//! memory. Please note that after calling this, the pointer to all ITextures
 		//! may not be longer valid, if they were not grabbed before by other parts of 
@@ -170,7 +170,8 @@ namespace video
 		//! \param colorKeyPixelPos: Position of a pixel with the color key color.
 		//! Every pixel with this color will get transparent 
 		//! like described above. 
-		virtual void makeColorKeyTexture(video::ITexture* texture, core::position2d<s32> colorKeyPixelPos) = 0;
+		virtual void makeColorKeyTexture(video::ITexture* texture,
+			core::position2d<s32> colorKeyPixelPos) = 0;
 
 		//! Sets a new render target. This will only work, if the driver
 		//! supports the EK3DVDF_RENDER_TO_TARGET feature, which can be 
@@ -196,7 +197,8 @@ namespace video
 		//! \param vertexCount: Amount of vertices in the array.
 		//! \param indexList: Pointer to array of indizes.
 		//! \param triangleCount: amount of Triangles. Usually amount of indizes / 3.
-		virtual void drawIndexedTriangleList(const S3DVertex* vertices, s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
+		virtual void drawIndexedTriangleList(const S3DVertex* vertices,
+			s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
 
 		//! Draws an indexed triangle list.
 		//! Note that there may be at maximum 65536 vertices, because the
@@ -207,7 +209,8 @@ namespace video
 		//! \param vertexCount: Amount of vertices in the array.
 		//! \param indexList: Pointer to array of indizes.
 		//! \param triangleCount: amount of Triangles. Usually amount of indizes / 3.
-		virtual void drawIndexedTriangleList(const S3DVertex2TCoords* vertices, s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
+		virtual void drawIndexedTriangleList(const S3DVertex2TCoords* vertices,
+			s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
 
 		//! Draws a 3d line.
 		//! This method usually simply calls drawIndexedTriangles with some 
@@ -219,7 +222,22 @@ namespace video
 		//! \param start: Start of the 3d line.
 		//! \param end: End of the 3d line.
 		//! \param color: Color of the line. 
-		virtual void draw3DLine(const core::vector3df& start, const core::vector3df& end, SColor color = SColor(255,255,255,255)) = 0;
+		virtual void draw3DLine(const core::vector3df& start,
+			const core::vector3df& end, SColor color = SColor(255,255,255,255),
+			f32 thickness = 1.0f) = 0;
+
+		//! Draws a 3d triangle.
+		//! This method usually simply calls drawIndexedTriangles with some 
+		//! triangles. Note that the line is drawed using the current transformation
+		//! matrix and material.
+		//! This method was created for making collision debugging easier. It works with
+		//! all drivers because it does simply a call to drawIndexedTriangleList and
+		//! hence is not very fast but it might be useful for further development. 
+		//! \param triangle: The triangle to draw.
+		//! \param color: Color of the line. 
+		//! \param thickness: Thickness of every line of the triangle.
+		virtual void draw3DTriangle(const core::triangle3df& triangle,
+			SColor color = SColor(255,255,255,255), f32 thickness = 1.0f) = 0;
 
 		//! Draws a 3d axis aligned box.
 		//! This method usually simply calls drawIndexedTriangles with some 
@@ -230,12 +248,16 @@ namespace video
 		//! hence is not very fast but it might be useful for further development. 
 		//! \param box: The axis aligned box to draw
 		//! \param color: Color to use while drawing the box.
-		virtual void draw3DBox(const core::aabbox3d<f32> box, SColor color = SColor(255,255,255,255)) = 0;
+		//! \param thickness: Thickness of every line of the box.
+		virtual void draw3DBox(const core::aabbox3d<f32> box,
+			SColor color = SColor(255,255,255,255),
+			f32 thickness = 1.0f) = 0;
 
 		//! Simply draws an 2d image, without any special effects
 		//! \param texture: Pointer to texture to use.
 		//! \param destPos: upper left 2d destination position where the image will be drawn.
-		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos) = 0;
+		virtual void draw2DImage(video::ITexture* texture,
+			const core::position2d<s32>& destPos) = 0;
 
 		//! Draws an 2d image, using a color (if color is other then 
 		//! Color(255,255,255,255)) and the alpha channel of the texture if wanted.
@@ -275,7 +297,8 @@ namespace video
 		//! volume. Then, use IVideoDriver::drawStencilShadow() to visualize the shadow.
 		//! \param triangles: Pointer to array of 3d vectors, specifing the shadow volume.
 		//! \param count: Amount of triangles in the array.
-		virtual void drawStencilShadowVolume(const core::vector3df* triangles, s32 count) = 0;
+		//! \param zfail: If set to true, zfail method is used, otherwise zpass.
+		virtual void drawStencilShadowVolume(const core::vector3df* triangles, s32 count, bool zfail=true) = 0;
 
 		//! Fills the stencil shadow with color. After the shadow volume has been drawn
 		//! into the stencil buffer using IVideoDriver::drawStencilShadowVolume(), use this
@@ -305,7 +328,7 @@ namespace video
 		//! Returns amount of primitives (mostly triangles) which were drawn in the last frame.
 		//! Together with getFPS() very useful method for statistics.
 		//! \return Amount of primitives drawn in the last frame.
-		virtual u32 getPrimitiveCountDrawed() = 0;
+		virtual u32 getPrimitiveCountDrawn() = 0;
 
 		//! Deletes all dynamic lights which were previously added with addDynamicLight().
 		virtual void deleteAllDynamicLights() = 0;

@@ -51,9 +51,9 @@ public:
 			case KEY_KEY_W:
 			case KEY_KEY_S:
 				{
-					core::vector3df v = node->getRelativePosition();
+					core::vector3df v = node->getPosition();
 					v.Y += event.KeyInput.Key == KEY_KEY_W ? 2.0f : -2.0f;
-					node->setRelativePosition(v);
+					node->setPosition(v);
 				}
 				return true;
 			}
@@ -96,7 +96,7 @@ int main()
 	to let it look a little bit more interesting.
 	*/
 	node = smgr->addTestSceneNode();
-	node->setRelativePosition(core::vector3df(0,0,30));
+	node->setPosition(core::vector3df(0,0,30));
 	node->setMaterialTexture(0, driver->getTexture("../../media/t351sml.jpg"));
 
 
@@ -110,7 +110,7 @@ int main()
 	this node fly around our first test scene node.
 	*/
 	scene::ISceneNode* n = smgr->addTestSceneNode();
-	n->setRelativePosition(core::vector3df(0,0,30));
+	n->setPosition(core::vector3df(0,0,30));
 	n->setMaterialTexture(0, driver->getTexture("../../media/t351sml.jpg"));
 
 	scene::ISceneNodeAnimator* anim = smgr->createFlyCircleAnimator(
@@ -136,13 +136,17 @@ int main()
 		/*
 		To make to model look better, we disable lighting (we have created no lights,
 		and so the model would be black), set the frames between which the animation
-		should look, rotate the model around 180 degrees, and adjust the animation speed
+		should loop, rotate the model around 180 degrees, and adjust the animation speed
 		and the texture.
+		To set the right animation (frames and speed), we would also be able to just
+		call "anms->setMD2Animation(scene::EMAT_RUN)" for the 'run' animation 
+		instead of "setFrameLoop" and "setAnimationSpeed",
+		but this only works with MD2 animations, and so you know how to start other animations.
 		*/
 		anms->setMaterialFlag(video::EMF_LIGHTING, false);
-		anms->setFrameLoop(313, 360);
-		anms->getRelativeTransformation().setRotationDegrees(core::vector3df(0,180.0f,0));
-		anms->setAnimationSpeed(40);
+		anms->setFrameLoop(320, 360);
+		anms->setAnimationSpeed(30);
+		anms->setRotation(core::vector3df(0,180.0f,0));
 		anms->setMaterialTexture(0, driver->getTexture("../../media/sydney.bmp"));
 	}
 

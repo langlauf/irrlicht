@@ -6,6 +6,7 @@
 #define __I_ANIMATED_MESH_SCENE_NODE_H_INCLUDED__
 
 #include "ISceneNode.h"
+#include "IAnimatedMeshMD2.h"
 #include "IShadowVolumeSceneNode.h"
 
 namespace irr
@@ -49,31 +50,50 @@ namespace scene
 		virtual void setAnimationSpeed(s32 framesPerSecond) = 0;
 
 		//! Creates shadow volume scene node as child of this node
-		//! and returns a pointer to it. 
+		//! and returns a pointer to it.  The shadow can be rendered using the ZPass
+		//! or the zfail method. ZPass is a little bit faster because the shadow volume
+		//! creation is easier, but with this method there occur ugly looking artifacs
+		//! when the camera is inside the shadow volume. These error do not occur
+		//! with the ZFail method.
 		//! \param id: Id of the shadow scene node. This id can be used to identify
 		//! the node later.
+		//! \param zfailmethod: If set to true, the shadow will use the zfail method,
+		//! if not, zpass is used. 
+		//! \param intinity: Value used by the shadow volume algorithm to scale the 
+		//! shadow volume. 
 		//! \return Returns pointer to the created shadow scene node.
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
-		virtual IShadowVolumeSceneNode* addShadowVolumeSceneNode(s32 id=-1) = 0;
+		virtual IShadowVolumeSceneNode* addShadowVolumeSceneNode(s32 id=-1,
+			bool zfailmethod=true, f32 infinity=10000.0f) = 0;
 
-		//! Adds a child scene node which is animated by a part of the animated
-		//! mesh. In this way, it is for example possible to attach a weapon the
-		//! the left hand of an animated model.
-		//! If the attached child scene node has already a parent
-		//! (which is should have), it is automaticly removed from the old
-		//! parent and reattached to this one. You will not have to worry about
-		//! that.
-		//! \param name: Name of the mesh part with which the attached scene node
-		//! will be animated. For example if you loaded a .ms3d file
-		//! and want the child scene node to be animated with the left hand, like it
-		//! would be holded by it, the name should be then "lefthand", if the joint of
-		//! the left hand in the ms3d file is called "lefthand". 
-		//! \param child: Pointer to child scene node.
-		//! \return Returns true if the child was sucessfully attached to the
-		//! right part of the mesh. False is returned if a part of the mesh with
-		//! the specified name could not be found or the mesh does not support
-		//! attaching objects to parts of the mesh.
-		virtual bool addChild(const c8* name, ISceneNode* child) = 0;
+		//! Returns a pointer to a child node, wich has the same transformation as 
+		//! the corrsesponding joint, if the mesh in this scene node is a ms3d mesh.
+		//! Otherwise 0 is returned. With this method it is possible to
+		//! attach scene nodes to joints more easily. In this way, it is
+		//! for example possible to attach a weapon to the left hand of an
+		//! animated model. This example shows how:
+		//! \code
+		//! ISceneNode* hand = 
+		//!		yourMS3DAnimatedMeshSceneNode->getMS3DJointNode("LeftHand");
+		//! hand->addChild(weaponSceneNode);
+		//! \endcode
+		//! Please note that the SceneNode returned by this method may not exist
+		//! before this call and is created by it.
+		//! \param jointName: Name of the joint.
+		//! \return Returns a pointer to the scene node which represents the joint
+		//! with the specified name. Returns 0 if the contained mesh is not an
+		//! ms3d mesh or the name of the joint could not be found.
+		virtual ISceneNode* getMS3DJointNode(const c8* jointName) = 0;
+
+		//! Starts a MD2 animation. 
+		//! With this method it is easily possible to start a Run, Attack,
+		//! Die or whatever animation, if the mesh contained in this scene
+		//! node is a md2 mesh. Otherwise, nothing happenes.
+		//! \param anim: An MD2 animation type, which should be played, for
+		//! example EMAT_STAND for the standing animation.
+		//! \return Returns true if successful, and false if not, for example
+		//! if the mesh in the scene node is not a md2 mesh.
+		virtual bool setMD2Animation(EMD2_ANIMATION_TYPE anim) = 0;
 	};
 
 } // end namespace scene

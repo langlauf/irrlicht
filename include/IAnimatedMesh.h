@@ -13,6 +13,26 @@ namespace irr
 {
 namespace scene
 {
+	enum EANIMATED_MESH_TYPE
+	{
+		//! Unknown animated mesh type.
+		EAMT_UNKNOWN = 0,
+
+		//! Quake 2 MD2 model file
+		EAMT_MD2, 
+
+		//! Milkshape 3d skeletal animation file
+		EAMT_MS3D,
+
+		//! Maya .obj not animated model
+		EAMT_OBJ,
+
+		//! Quake 3 .bsp Map, not animated
+		EAMT_BSP,
+
+		//! 3D Studio .3ds file
+		EAMT_3DS
+	};
 
 	//! Interface for an animated mesh.
 	class IAnimatedMesh : public IUnknown
@@ -40,28 +60,20 @@ namespace scene
 		//! \return Returns the animated mesh based on a detail level. 
 		virtual IMesh* getMesh(s32 frame, s32 detailLevel=255, s32 startFrameLoop=-1, s32 endFrameLoop=-1) = 0;
 
-		//! Returns a pointer to a transformation matrix of a part of the 
-		//! mesh based on a frame time. This is used for being able to attach
-		//! objects to parts of animated meshes. For example a weapon to an animated 
-		//! hand. Not all animated meshes implement this, they will then simply return
-		//! null.
-		//! \param name: Name of the mesh part. For example if you loaded a .ms3d file
-		//! and want to get the transformation matrix of the hand to be able to display
-		//! a weapon like it would be holded by the left hand, you can get the matrix
-		//! by calling getMatrixOfMeshPart("lefthand", yourframe). "lefthand" would then
-		//! be the name of the joint/bone.
-		//! \param frame: Frame of the animation.
-		//! \return: Returns a pointer to the matrix of the mesh part or 
-		//! null if the mesh doesn't support mesh part matrizes or there is no
-		//! mesh part with this name.
-		virtual core::matrix4* getMatrixOfMeshPart(const c8* name, s32 frame) 
-		{
-			return 0;
-		}
-
 		//! Returns an axis aligned bounding box of the mesh.
 		//! \return A bounding box of this mesh is returned.
 		virtual const core::aabbox3d<f32>& getBoundingBox() const = 0;
+
+		//! Returns the type of the animated mesh.
+		//! In most cases it is not neccessary to use this method.
+		//! This is useful for making a save downcast, for example
+		//! if getMeshType() returns EAMT_MD2, its save to cast the
+		//! IAnimatedMesh to IAnimatedMeshMD2.
+		//! \returns Type of the mesh.
+		virtual EANIMATED_MESH_TYPE getMeshType() const
+		{
+			return EAMT_UNKNOWN;
+		}
 	};
 
 } // end namespace scene

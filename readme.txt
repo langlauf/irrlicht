@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.3
+The Irrlicht Engine SDK version 0.4
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -56,7 +56,7 @@ The Irrlicht Engine SDK version 0.3
   
   To start developing own applications and games with the engine take 
   a look at the 1.HelloWorld example in the \examples directory.
-  There will also be a .html file with a tutorial easy to understand .
+  There will also be a .html file with a tutorial easy to understand.
 
 
 ==========================================================================
@@ -64,11 +64,7 @@ The Irrlicht Engine SDK version 0.3
 ==========================================================================
 
   This is an alpha version of the SDK. Therefore please note that there are
-  features missing in the engine and maybe also some bugs. The following
-  list is a complete list of parts of this alpha SDK which do not work
-  100% correct. All other parts which can be found in the documentation
-  and accessed with the Irrlicht header files work and can already be 
-  used. 
+  features missing in the engine and maybe also some bugs. 
 
   Informations about changes in this new version of the engine can be 
   found in changes.txt.
@@ -126,9 +122,10 @@ The Irrlicht Engine SDK version 0.3
   You will find forums, bugtrackers, patches, tutorials, and other stuff
   which will help you out.
   
-  If want to contact the author of the engine, please send an email to:
+  If want to contact the author of the engine, please send an email to
+  Nikolaus Gebhardt:
   
-  niko@code3d.com
+  irrlicht@users.sourceforge.net
 
 
   

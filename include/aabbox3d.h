@@ -118,22 +118,22 @@ class aabbox3d
 		bool intersectsWithLine(const line3d<T>& line) const
 		{
 			return intersectsWithLine(line.getMiddle(), line.getVector().normalize(), 
-					(T)(line.getLenght() * 0.5));
+					(T)(line.getLength() * 0.5));
 		}
 
 		//! Tests if the box intersects with a line
 		//! \return Returns true if there is an intersection and false if not.
 		bool intersectsWithLine(const vector3d<T>& linemiddle, 
 								const vector3d<T>& linevect,
-								T halflenght) const
+								T halflength) const
 		{
 			const vector3d<T> e = (MaxEdge - MinEdge) * (T)0.5;
 			const vector3d<T> t = (MinEdge + e) - linemiddle;
 			float r;
 
-			if ((fabs(t.X) > e.X + halflenght * fabs(linevect.X)) || 
-				(fabs(t.Y) > e.Y + halflenght * fabs(linevect.Y)) ||
-				(fabs(t.Z) > e.Z + halflenght * fabs(linevect.Z)) )
+			if ((fabs(t.X) > e.X + halflength * fabs(linevect.X)) || 
+				(fabs(t.Y) > e.Y + halflength * fabs(linevect.Y)) ||
+				(fabs(t.Z) > e.Z + halflength * fabs(linevect.Z)) )
 				return false;
 
 			r = e.Y * (T)fabs(linevect.Z) + e.Z * (T)fabs(linevect.Y);
@@ -209,6 +209,19 @@ class aabbox3d
 			core::vector3df middle = (MinEdge + MaxEdge) / 2;
 			core::vector3df diag = middle - MaxEdge;
 
+			/*
+			Edges are stored in this way:
+			Hey, am I an ascii artist, or what? :) niko.
+                  /1--------/3
+                 /  |      / |
+                /   |     /  |
+                5---------7  |
+                |   0- - -| -2
+                |  /      |  /
+                |/        | /
+                4---------6/ 
+			*/
+
 			edges[0].set(middle.X + diag.X, middle.Y + diag.Y, middle.Z + diag.Z);
 			edges[1].set(middle.X + diag.X, middle.Y - diag.Y, middle.Z + diag.Z);
 			edges[2].set(middle.X + diag.X, middle.Y + diag.Y, middle.Z - diag.Z);
@@ -245,6 +258,16 @@ class aabbox3d
 				{ t=MinEdge.Y; MinEdge.Y = MaxEdge.Y; MaxEdge.Y=t; }
 			if (MinEdge.Z > MaxEdge.Z)
 				{ t=MinEdge.Z; MinEdge.Z = MaxEdge.Z; MaxEdge.Z=t; }
+		}
+
+		//! Calculates a new interpolated bounding box.
+		//! \param other: other box to interpolate between
+		//! \param d: value between 0.0f and 1.0f.
+		aabbox3d<T> getInterpolated(const aabbox3d<T>& other, f32 d) const
+		{
+			f32 inv = 1.0f - d;
+			return aabbox3d<T>((other.MinEdge*inv) + (MinEdge*d),
+				(other.MaxEdge*inv) + (MaxEdge*d));
 		}
 
 		// member variables

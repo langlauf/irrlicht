@@ -134,7 +134,7 @@ class plane3d
 		bool existsInterSection(const plane3d<T>& other) const
 		{
 			vector3d<T> cross = other.Normal.crossProduct(Normal);
-			return cross.getLenght() > 1e-08f;
+			return cross.getLength() > 1e-08f;
 		}
 
 		//! Intersects this plane with another.
@@ -168,6 +168,23 @@ class plane3d
 				return o2.getIntersectionWithLine(linePoint, lineVect, outPoint);
 
 			return false;
+		}
+
+		//! Returns if the plane is front of backfacing. Note that this only
+		//! works if the normal is Normalized.
+		//! \param lookDirection: Look direction.
+		//! \return Returns true if the plane is front facing, which mean it would
+		//! be visible, and false if it is backfacing.
+		bool isFrontFacting(const vector3d<T>& lookDirection) const
+		{
+			return Normal.dotProduct(lookDirection) <= 0.0f;
+		}
+
+		//! Returns the distance to a point.  Note that this only
+		//! works if the normal is Normalized.
+		T getDistanceTo(const vector3d<T>& point) const
+		{
+			return point.dotProduct(Normal) + D;
 		}
 	
 		// member variables

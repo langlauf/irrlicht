@@ -49,7 +49,10 @@ public:
 		// delete all children
 		core::list<IGUIElement*>::Iterator it = Children.begin();
 		for (; it != Children.end(); ++it)
+		{
+			(*it)->Parent = 0;
 			(*it)->drop();
+		}
 	};
 
 

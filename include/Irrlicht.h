@@ -30,9 +30,12 @@
 #include "EDriverTypes.h"
 #include "heapsort.h"
 #include "IAnimatedMesh.h"
+#include "IAnimatedMeshMD2.h"
+#include "IAnimatedMeshMS3D.h"
 #include "IAnimatedMeshSceneNode.h"
 #include "IBspTreeSceneNode.h"
 #include "ICameraSceneNode.h"
+#include "IDummyTransformationSceneNode.h"
 #include "IEventReceiver.h"
 #include "IFileList.h"
 #include "IFileSystem.h"
@@ -43,26 +46,36 @@
 #include "IGUIFileOpenDialog.h"
 #include "IGUIFont.h"
 #include "IGUIImage.h"
+#include "IGUIInOutFader.h"
 #include "IGUIListBox.h"
 #include "IGUIMeshViewer.h"
 #include "IGUIScrollBar.h"
 #include "IGUISkin.h"
+#include "IGUIStaticText.h"
 #include "IGUIWindow.h"
 #include "IMesh.h"
 #include "IMeshBuffer.h"
+#include "IMeshManipulator.h"
+#include "IMetaTriangleSelector.h"
 #include "IReadFile.h"
 #include "IrrlichtDevice.h"
 #include "irrMath.h"
 #include "irrString.h"
 #include "ISceneManager.h"
 #include "ISceneNode.h"
+#include "ITriangleSelector.h"
 #include "ILightSceneNode.h"
 #include "ISceneNodeAnimator.h"
 #include "ISceneCollisionManager.h"
+#include "ISceneNodeAnimatorCollisionResponse.h"
+#include "IParticleSystemSceneNode.h"
+#include "IParticleEmitter.h"
+#include "IParticleAffector.h"
 #include "IBillboardSceneNode.h"
 #include "ITexture.h"
 #include "IUnknown.h"
 #include "IVideoDriver.h"
+#include "IVideoModeList.h"
 #include "Keycodes.h"
 #include "line2d.h"
 #include "line3d.h"
@@ -72,6 +85,7 @@
 #include "plane3d.h"
 #include "vector2d.h"
 #include "vector3d.h"
+#include "triangle3d.h"
 #include "position2d.h"
 #include "rect.h"
 #include "S3DVertex.h"
@@ -81,8 +95,101 @@
 #include "SMeshBufferLightMap.h"
 #include "irrTypes.h"
 
-#ifdef _WIN32
+/*! \mainpage Irrlicht Engine API documentation
+ *
+ * \section intro Introduction
+ *
+ * Welcome to the Irrlicht Engine API documentation.
+ * Here you'll find any information you'll need to develop applications with
+ * the Irrlicht Engine. If you look for a tutorial on how to start, take a look
+ * at the homepage of the Irrlicht Engine at 
+ * <A HREF="http://irrlicht.sourceforge.net" >irrlicht.sourceforge.net</A> 
+ * or into the SDK in the directory \examples.
+ *
+ * The Irrlicht Engine is intended to be an easy-to-use 3d engine, so
+ * this documentation is an important part of it. If you have any questions or
+ * suggestions, just send a email to the author of the engine, Nikolaus Gebhardt
+ * (niko (at) code3d.com).
+ *
+ * \section links Links
+ *
+ * <A HREF="namespaces.html">Namespaces</A>: A very good place to start reading
+ * the documentation.<BR>
+ * <A HREF="annotated.html">Compound list</A>: List of all classes with descriptions.<BR>
+ * <A HREF="hierarchy.html">Class hierarchy</A>: Class hierarchy list.<BR>
+ * <A HREF="classes.html">Alphabetical class list</A>: Good place to find forgotten class names.<BR>
+ *
+ * \section example Short example
+ *
+ * A simple application, starting up the engine, loading a Quake2 animated 
+ * model file and the corresponding texture, animating and displaying it
+ * in front of a blue background and placing a 3d camera would look like
+ * the following code. I think this example shows the usage of the engine quite good:
+ *
+ * \code
+ * #include <Irrlicht.h>
+ * using namespace irr;
+ *
+ * int main()
+ * {
+ *	IrrlichtDevice *device = createDevice(video::DT_DIRECTX8,
+ *		core::dimension2d<s32>(640,480), false);
+ *
+ *	video::IVideoDriver* driver = device->getVideoDriver();
+ *	scene::ISceneManager* scenemgr = device->getSceneManager();
+ *
+ *	device->setWindowCaption(L"Hello World!");
+ *
+ *	scene::ISceneNode* node = scenemgr->addAnimatedMeshSceneNode(
+ *		scenemgr->getMesh("quake2model.md2"));
+ *	node->setMaterialTexture(0, driver->getTexture("texture.bmp"));
+ *	node->setMaterialFlag(video::EMF_LIGHTING, false);
+ *
+ *	scenemgr->addCameraSceneNode(0, core::vector3df(0,0,-40));
+ * 
+ *	while(device->run() && driver)
+ *	{
+ *		driver->beginScene(true, true, video::SColor(255,0,0,255));
+ *		scenemgr->drawAll();
+ *		driver->endScene();
+ *	}
+ *
+ *	device->drop();
+ *	return 0;
+ * }
+ * \endcode
+ *
+ * If you would like to replace the simple blue screen by a cool Quake 3 Map,
+ * optimized by an octtree, just insert this code somewhere
+ * before the while loop:
+ *
+ * \code
+ * device->getFileSystem()->addZipFileArchive("quake3map.pk3");
+ * scene::IAnimatedMesh* mesh = scenemgr->getMesh("quake3map.bsp");
+ * node = scenemgr->addOctTreeSceneNode(mesh->getMesh(0));
+ * \endcode
+ *
+ * As you can see, the engine uses namespaces. Everything in the engine is
+ * placed into the namespace 'irr', but there are also 5 sub namespaces.
+ * You can find a list of all namespaces with descriptions at the 
+ * <A HREF="namespaces.html"> namespaces page</A>. 
+ * This is also a good place to start reading the documentation. If you
+ * don't want always write the namespace names, just use all namespaces like 
+ * this:
+ * \code
+ * using namespace core;
+ * using namespace scene;
+ * using namespace video;
+ * using namespace io;
+ * using namespace gui;
+ * \endcode
+ *
+ * There is a lot more the engine can do, but I hope this gave a short
+ * overview over the basic features of the engine.
+ */
+
 #include <wchar.h>
+#ifdef _WIN32
 //! Define for swprintf because this method does not match the ISO C standard
 //! on Win32 platforms, but it does on all other ones.
 #define   swprintf   _snwprintf

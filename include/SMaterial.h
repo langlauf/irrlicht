@@ -17,7 +17,30 @@ namespace video
 	{
 		//! Standard solid material. Only first texture is used, which is
 		//! supposed to be the diffuse material.
-		EMT_SOLID = 0,					
+		EMT_SOLID = 0,			
+
+		//! Solid material with 2 texture layers. The second is blended onto the
+		//! first using the alpha value of the vertex colors.
+		//! This material is currently not implemented in OpenGL, but it
+		//! works with DirectX.
+		EMT_SOLID_2_LAYER,
+
+		//! Material type with standard lightmap technique: 
+		//! There should be 2 textures: The first texture layer is a diffuse map,
+		//! the second is a light map. Vertex light is ignored.
+		EMT_LIGHTMAP,
+
+		//! Makes the material look like it was reflection the environment
+		//! around it. To make this possible, a texture called 'sphere map'
+		//! is used, which must be set as Texture1.
+		EMT_SPHERE_MAP,
+
+		//! A reflecting material with an 
+		//! optional additional non reflecting texture layer. The reflection
+		//! map should be set as Texture 1.
+		//! Please note that this material type is currently not 100% implemented
+		//! in OpenGL. It works in DirectX8.
+		EMT_REFLECTION_2_LAYER,
 
 		//! A transparent material. Only the first texture is used.
 		//! The new color is calculated by simply adding the source color and
@@ -34,18 +57,16 @@ namespace video
 		EMT_TRANSPARENT_ALPHA_CHANNEL,	
 
 		//! Makes the material transparent based on the vertex alpha value.
-		//! This material is only implemented in the DirectX driver yet.
 		EMT_TRANSPARENT_VERTEX_ALPHA,
 
-		//! Material type with standard lightmap technique: 
-		//! There should be 2 textures: The first texture layer is a diffuse map,
-		//! the second is a light map. Vertex light is ignored.
-		EMT_LIGHTMAP,				
-
-		//! Makes the material look like it was reflection the environment
-		//! around it. To make this possible, a texture called 'sphere map'
-		//! is used, which must be set as Texture1.
-		EMT_SPHERE_MAP,
+		//! A transparent reflecting material with an 
+		//! optional additional non reflecting texture layer. The reflection
+		//! map should be set as Texture 1. The transparency depends on the
+		//! alpha value in the vertex colors. A texture which will not reflect
+		//! can be set als Texture 2.
+		//! Please note that this material type is currently not 100% implemented
+		//! in OpenGL. It works in DirectX8.
+		EMT_TRANSPARENT_REFLECTION_2_LAYER,
 
 		//! This value is not used. it only forces this enumeration to compile in 32 bit. 
 		EMT_FORCE_32BIT = 0x7fffffff	
@@ -76,6 +97,11 @@ namespace video
 		//! Is bilinear filtering enabled? Default: true
 		EMF_BILINEAR_FILTER,
 
+		//! Is trilinear filtering enabled? Default: false
+		//! If the trilinear filter flag is enabled,
+		//! the bilinear filtering flag is ignored.
+		EMF_TRILINEAR_FILTER,
+
 		//! Clamp texture coordinates instead of wrapping them. Default: false
 		EMF_CLAMP_TEXTURE_COORDINATES,
 
@@ -96,7 +122,7 @@ namespace video
 			MaterialType(EMT_SOLID), Wireframe(false), Lighting(true),
 			ZBuffer(true), ZWriteEnable(true), BackfaceCulling(true),
 			GouraudShading(true), Shininess(0.0f), BilinearFilter(true),
-			ClampTextureCooridnates(false)
+			TrilinearFilter(false),	ClampTextureCooridnates(false)
 		{}
 
 		//! Type of the material. Specifies how everything is blended together
@@ -166,6 +192,11 @@ namespace video
 				//! Is bilinear filtering enabled? Default: true
 				bool BilinearFilter;	
 
+				//! Is trilinear filtering enabled? Default: false
+				//! If the trilinear filter flag is enabled,
+				//! the bilinear filtering flag is ignored.
+				bool TrilinearFilter;
+
 				//! Clamp texture coordinates instead of wrapping them. Default: false
 				bool ClampTextureCooridnates;
 			};
@@ -180,7 +211,8 @@ namespace video
 		{
 			return MaterialType == EMT_TRANSPARENT_ADD_COLOR ||
 					MaterialType == EMT_TRANSPARENT_ALPHA_CHANNEL || 
-					MaterialType == EMT_TRANSPARENT_VERTEX_ALPHA;
+					MaterialType == EMT_TRANSPARENT_VERTEX_ALPHA ||
+					MaterialType == EMT_TRANSPARENT_REFLECTION_2_LAYER;
 		}
 	};
 

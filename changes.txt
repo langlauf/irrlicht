@@ -1,4 +1,171 @@
 -------------------------------------------------------------------------------------
+Changes in version 0.4:
+
+- Collision detection and reponse based on ellipsoids in now implemented.
+  There is a new method available in the ISceneCollisionMananger, which returns
+  a collision response point. In addition, a new SceneNodeAnimator is available,
+  which causes a scene node, to which it is attached to, not to move through
+  walls, to climb stairs and to be affected by gravity. This scene node animator
+  can be attached to any scene node. For example adding it to the FPSCamera, it makes
+  the user possible to walk through the 3d world as in first person shooters.
+
+- There is now a full featured Particle System included in the engine for
+  creating fire, explosions, snow, smoke and so on.
+  It is cusomizeable and extensible. There is a ParticleSystemScene node
+  available in the SceneManager and some standard particle emitters and
+  affectors are already implemented.
+  
+- Realistic water: The engine now features a IWaterSurfaceScene node, which
+  animates a static mesh with water waves. In combination with the new
+  EMT_REFLECTION or EMT_TRANSPARENT_REFLECTION material type, you can easily
+  create realistic animated water surfaces.
+  
+- Triangle base picking is now possible using the ISceneCollisionMananager.
+  If a collision happened, the intersecoin point and the triangle causing
+  the intersection is returned.
+  
+- Stencil shadows are now drawn using the ZFail method by default, but it is 
+  possible to choose ZPass, if wished. This means that the camera may now move
+  inside the shadow volumes and no errors will occur. In addition a stencil
+  shadow bug is now fixed: In 0.3 there where no shadows visible in the TechDemo.
+  
+- The interface of ISceneNode has changed: There is no more a RelativeTransformation
+  and AnimatedRelativeTransformation matrix. They have been replaced by 3 vectors:
+  RelativeTranslation, RelativeRotation and RelativeScale, which can be accessed by
+  the corresponing get() and set() methods. This simplifies the interface 
+  a lot. Also, the set/getRelativePosition was renamed to set/getPosition. 
+    
+- The new IAnimatedMeshMD2 interface now returns start, begin time and
+  fps of every MD2 animation type. In this context, IAnimatedMeshSceneNode
+  got a new method called setMD2Animation(), which accepts a single constant
+  like EMAT_ATTACK, which starts and plays the fitting animation (attack
+  animation in this case), simplifying the interface a lot.
+  
+- Some scene nodes can now draw debug data like their bounding boxes.
+  This feature is switched on for a single node by calling 
+  ISceneNode::setDebugDataVisible(true). Looks really interesting for
+  animated scene nodes like particle systems or animated meshes.
+  
+- There is now a IGUIInOutFader avaiable, which is able to fade in or
+  out the whole screen or parts of it.
+  
+- The new IVideoModeList is a list with all available video modes. It can
+  be retrieved with IrrlichtDevice::getVideoModeList(). If you are confused 
+  now, because you think you have to create an Irrlicht Device with a video
+  mode before being able to get the video mode list, let me tell you that
+  there is no need to start up an Irrlicht Device with DT_DIRECTX8, DT_OPENGL or
+  DT_SOFTWARE: For this (and for lots of other reasons) the null device,
+  DT_NULL exists.
+  
+- With the new IMeshManipulator interface accessible with
+  ISceneManager::getMeshManipulator() it is possible to perform some basic 
+  operations on meshes: Flipping all surfaces, recalculating all normals, 
+  scaling the mesh, creating a new texture mapping and so on.
+  
+- A new material for creating water surfaces or glass with reflections on it
+  is available: EMT_REFLECTION_2_LAYER and EMT_TRANSPARENT_REFLECTION_2_LAYER.
+  It has uses a reflection map, and an additional optional texture.
+  The transparency of this material is set by the alpha color value in the vertices. 
+  
+- Another new material is EMT_SOLID_2_LAYER. It is a material with 2 textures,
+  blended together with the alpha value of the vertex color. This material is
+  currently only available in DirectX.
+  
+- Trilinear Filtering is now supported the engine.
+  There is a new option in SMaterial: TrilinearFilter and EMF_TRILINEAR_FILTER.
+  
+- The addChild() method of the IAnimatedMeshSceneNode for adding SceneNodes to
+  joints of skeletal animated meshes was removed.
+  Instead there is now a new method: getMS3DJointNode(). This returns a pointer
+  to a child node, wich has the same transformation as the corrsesponding joint.
+  In this way it is possible to do more advanced operations with joints and 
+  attaching scene nodes to joints. Also, the IAnimatedMeshMS3D interface now gives
+  access to all joints. In this way, you can easily enumerate all names of all
+  joints in the mesh.
+  
+- Font and color of every IGUIStaticText can now be set separately, without
+  modifying the IGUISkin.
+  
+- There is now a ELEMENT_LEFT gui event, which all hovered elements receive when they
+  are left.
+  
+- All features of the FileOpenDialog are now working.
+  
+- Debug informations are now printed out to the console window
+  also on the win32 platform.
+  
+- FPSCamera now supports setTarget(). Its not precise but working.
+
+- Textures of 3ds files are now loaded from the same directory in which the
+  3ds file is. If the texture is not found there, the texture is tried to be 
+  loaded from the current working directory. 
+  
+- A small bug in the 3ds file loader has been fixed. There where 3ds files exported
+  by anim8or, where the reading of the 3ds file never stopped.
+  
+- It is now possible to configurate the minimal amount of polygons contained
+  in every node in an OctTree via addOctTreeSceneNode().
+  
+- There is a new template class in the core namespace: triangle3d. With this,
+  it is easy to find intersections between lines and triangles, find out if 
+  a point is within a triangle and so on.
+  
+- A small bug in ISceneManager::addHillPlaneMesh() was fixed: Now the right tile
+  amount is created.
+  
+- There is a new SceneNode available: IDummyTransformationSceneNode. It exists
+  for making it possible to insert matrix transformations anywhere into the 
+  scene graph.
+  
+- Added a new SceneNode animator for deleting Scene nodes automaticly after some
+  time. Create it with ISceneManager::createDeleteAnimator().
+  
+- The techdemo now is interactive. After a short non-interactive flight over
+  the quake 3 level, you are placed as player inside the level, may move around,
+  shoot fire balls and take a look at some animated characters which are placed
+  on the map.
+  
+- I fixed a bug which caused the screen get black when choosing shadows and fullscreen
+  on some special 3d adapters. 
+
+- I fixed some bugs in the linux port: The timer returned an incorrect time, causing
+  wrong animations everywhere and the releasing of keys and mouse buttons was not 
+  sent as event. In addition, I placed a copy of the zlib.a and jpeglib.a into the
+  /lib/Linux directory and changed the Makefiles of the examples and the source
+  of the engine for doing this automaticly in the future, so I hope there will be no
+  problems with other versions of zlib and jpeglib anymore.
+  
+- There are 2 new tutorials: One showing how to do collision detection and 
+  for special effects.
+
+- Other, Minor New/Changed methods in public interfaces:
+  * getVersion() in IrrlichtDevice
+  * getLengthSQ() in vector3d
+  * getInterpolated() in vector3d
+  * getInterpolated() in SColor
+  * getAngle() in vector2d
+  * getAngleWith() in vector2d
+  * getPrimitiveCountDrawed() in IVideoDriver renamed to getPrimitiveCountDrawn()
+  * getSceneNodeFromSceenCoordinates() renamed to getSceneNodeFromScreenCoordinates()
+  * getMeshType() in IAnimatedMesh
+  * getInterpolated() in aabbox
+  * setMD2Animation() in IAnimatedMeshSceneNode
+  * getFullFileName() in IFileList
+  * addShadowVolumeSceneNode() in IAnimatedMeshSceneNode extended with zfail parameter
+  * drawStencilShadowVolume() in IVideoDriver extended with zfail parameter
+  * getDistanceFromSQ() in vector3d
+  * subString() in string
+  * findFirst() in string
+  * findLast() in string
+  * getTriangleSelector() in ISceneNode
+  * setTriangleSelector() in ISceneNode
+  * draw3DTriangle() in IVideoDriver
+  * setShadowColor() in ISceneManager
+  * getShadowColor() in ISceneManager
+  * addToDeletionQueue() in ISceneManager
+  * getSceneNodeFromId() in ISceneManager
+  
+-------------------------------------------------------------------------------------
 Changes in version 0.3:
 
 - Linux port: The Irrlicht Engine now compiles and runs on Linux. Currently only

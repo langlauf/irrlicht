@@ -70,7 +70,7 @@
           the node moves up, and if you press 'S' it moves down.</p>
         <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
           <tr> 
-            <td> <pre>if (node != 0 &amp;&amp; event.EventType == irr::EET_KEY_INPUT_EVENT&amp;&amp;<br>			!event.KeyInput.PressedDown)<br>{<br>		switch(event.KeyInput.Key)<br>		{<br>		case KEY_KEY_W:<br>		case KEY_KEY_S:<br>			{<br>				core::vector3df v = node-&gt;getRelativePosition();<br>				v.Y += event.KeyInput.Key == KEY_KEY_W ? 2.0f : -2.0f;<br>				node-&gt;setRelativePosition(v);<br>			}<br>			return true;<br>		}<br>}</pre></td>
+            <td> <pre>if (node != 0 &amp;&amp; event.EventType == irr::EET_KEY_INPUT_EVENT&amp;&amp;<br>			!event.KeyInput.PressedDown)<br>{<br>		switch(event.KeyInput.Key)<br>		{<br>		case KEY_KEY_W:<br>		case KEY_KEY_S:<br>			{<br>				core::vector3df v = node-&gt;getPosition();<br>				v.Y += event.KeyInput.Key == KEY_KEY_W ? 2.0f : -2.0f;<br>				node-&gt;setPosition(v);<br>			}<br>			return true;<br>		}<br>}</pre></td>
           </tr>
         </table>
         <p>We send all other key and mouse input to the currently active camera 
@@ -103,7 +103,7 @@
         a little bit more interesting.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td><pre>node = smgr-&gt;addTestSceneNode();<br>node-&gt;setRelativePosition(core::vector3df(0,0,30));<br>node-&gt;setMaterialTexture(0, driver-&gt;getTexture(&quot;../../media/t351sml.jpg&quot;));</pre></td>
+          <td><pre>node = smgr-&gt;addTestSceneNode();<br>node-&gt;setPosition(core::vector3df(0,0,30));<br>node-&gt;setMaterialTexture(0, driver-&gt;getTexture(&quot;../../media/t351sml.jpg&quot;));</pre></td>
         </tr>
       </table>
       <p>Now we create another node, moving using a scene node animator. Scene 
@@ -118,7 +118,7 @@
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td>
-<pre>scene::ISceneNode* n = smgr-&gt;addTestSceneNode();<br>n-&gt;setRelativePosition(core::vector3df(0,0,30));<br>n-&gt;setMaterialTexture(0, driver-&gt;getTexture(&quot;../../media/t351sml.jpg&quot;));</pre>
+<pre>scene::ISceneNode* n = smgr-&gt;addTestSceneNode();<br>n-&gt;setPosition(core::vector3df(0,0,30));<br>n-&gt;setMaterialTexture(0, driver-&gt;getTexture(&quot;../../media/t351sml.jpg&quot;));</pre>
             <pre>scene::ISceneNodeAnimator* anim = 
      smgr-&gt;createFlyCircleAnimator(core::vector3df(0,1,0), 20.0f);
 n-&gt;addAnimator(anim);
@@ -138,12 +138,18 @@ if (n)<br>	{<br>		anim = smgr-&gt;createFlyStraightAnimator(core::vector3df(100,
       </table>
       <p>To make to model look better, we disable lighting (we have created no 
         lights, and so the model would be black), set the frames between which 
-        the animation<br>
-        should look, rotate the model around 180 degrees, and adjust the animation 
-        speed and the texture.</p>
+        the animation should loop, rotate the model around 180 degrees, and adjust 
+        the animation speed<br>
+        and the texture.<br>
+        To set the right animation (frames and speed), we would also be able to 
+        just call &quot;anms-&gt;setMD2Animation(scene::EMAT_RUN)&quot; for the 
+        'run' animation instead of &quot;setFrameLoop&quot; and &quot;setAnimationSpeed&quot;, 
+        but this only works with MD2 animations, and so you know how to start 
+        other animations.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>   anms-&gt;setMaterialFlag(video::EMF_LIGHTING, false);<br>   anms-&gt;setFrameLoop(313, 360);<br>   anms-&gt;getRelativeTransformation().setRotationDegrees(core::vector3df(0,180.0f,0));<br>   anms-&gt;setAnimationSpeed(40);<br>   anms-&gt;setMaterialTexture(0, driver-&gt;getTexture(&quot;../../media/sydney.BMP&quot;));<br>}<br></pre></td>
+          <td> <pre>   anms-&gt;setMaterialFlag(video::EMF_LIGHTING, false);<br>   anms-&gt;setFrameLoop(320, 360);
+   anms-&gt;setAnimationSpeed(30);<br>   anms-&gt;setRotation(core::vector3df(0,180.0f,0));<br>   anms-&gt;setMaterialTexture(0, driver-&gt;getTexture(&quot;../../media/sydney.BMP&quot;));<br>}<br></pre></td>
         </tr>
       </table>
       <p>To be able to look at and move around in this scene, we create a first 

@@ -126,7 +126,7 @@ int main()
 	the whole level a little bit.
 	*/
 	if (node)
-		node->setRelativePosition(core::vector3df(-1300,-144,-1249));
+		node->setPosition(core::vector3df(-1300,-144,-1249));
 
 	/*
 	Now we only need a Camera to look at the Quake 3 map.
@@ -165,7 +165,7 @@ int main()
 		{
 			wchar_t tmp[1024];
 			swprintf(tmp, 1024, L"Quake 3 Map Example - Irrlicht Engine (fps:%d) Triangles:%d", 
-				fps, driver->getPrimitiveCountDrawed());
+				fps, driver->getPrimitiveCountDrawn());
 
 			device->setWindowCaption(tmp);
 			lastFPS = fps;

@@ -6,6 +6,7 @@
 #define __IRR_POINT_3D_H_INCLUDED__
 
 #include <math.h>
+#include "irrMath.h"
 #include "irrTypes.h"
 
 namespace irr
@@ -57,6 +58,11 @@ namespace core
 		//! Returns length of the vector.
 		f64 getLength() const { return sqrt(X*X + Y*Y + Z*Z); }
 
+		//! Returns squared length of the vector.
+		//! This is useful because it is much faster then
+		//! getLength().
+		f64 getLengthSQ() const { return X*X + Y*Y + Z*Z; }
+
 		//! Returns the dot product with another vector.
 		T dotProduct(const vector3d<T>& other) const
 		{
@@ -71,6 +77,14 @@ namespace core
 			return sqrt(vx*vx + vy*vy + vz*vz);
 		}
 
+		//! Returns squared distance from an other point. 
+		//! Here, the vector is interpreted as point in 3 dimensional space.
+		f32 getDistanceFromSQ(const vector3d<T>& other) const
+		{
+			f32 vx = X - other.X; f32 vy = Y - other.Y; f32 vz = Z - other.Z;
+			return (vx*vx + vy*vy + vz*vz);
+		}
+
 		vector3d<T> crossProduct(const vector3d<T>& p) const
 		{
 			return vector3d<T>(Y * p.Z - Z * p.Y, Z * p.X - X * p.Z, X * p.Y - Y * p.X);
@@ -78,15 +92,9 @@ namespace core
 
 		bool isBetweenPoints(const vector3d<T>& begin, const vector3d<T>& end) const
 		{
-			// this is very slow, i'll have to write a faster one later.
-
-			vector3d<T> lv = end - begin;
-			vector3d<T> pv = *this - begin;
-
-			T l1 = lv.X*lv.X + lv.Y*lv.Y + lv.Z*lv.Z;
-			T l2 = pv.X*pv.X + pv.Y*pv.Y + pv.Z*pv.Z;
-
-			return (l2 < l1);
+			f32 f = (f32)(end - begin).getLengthSQ();
+			return (f32)getDistanceFromSQ(begin) < f && 
+				(f32)getDistanceFromSQ(end) < f;
 		}
 
 		//! Normalizes the vector.
@@ -97,6 +105,13 @@ namespace core
 			Y *= inv;
 			Z *= inv;
 			return *this;
+		}
+
+		//! Sets the lenght of the vector to a new value
+		void setLength(T newlength)
+		{
+			normalize();
+			*this *= newlength;
 		}
 
 		//! Inverts the vector.
@@ -141,6 +156,17 @@ namespace core
 			set(X, Y*cs - Z*sn, Y*sn + Z*cs);
 			Z += center.Z;
 			Y += center.Y;
+		}
+
+		//! returns interpolated vector
+		//! \param other: other vector to interpolate between
+		//! \param d: value between 0.0f and 1.0f.
+		vector3d<T> getInterpolated(const vector3d<T>& other, f32 d) const
+		{
+			f32 inv = 1.0f - d;
+			return vector3d<T>(other.X*inv + X*d,
+								other.Y*inv + Y*d,
+								other.Z*inv + Z*d);
 		}
 
 		// member variables

@@ -13,24 +13,6 @@ namespace core
 {
 
 
-template <class T>
-inline void rotateBy(f64 degrees, T& x, T&y, T centerx, T centery)
-{
-	degrees *=GRAD_PI2;
-	T cs = (T)cos(degrees);
-	T sn = (T)sin(degrees);
-
-	x -= centerx;
-	y -= centery;
-
-	T nx = x*cs - y*sn;
-	y = x*sn + y*cs;
-	x = nx;
-
-	x += centerx;
-	y += centery;
-}
-
 //! 2d vector template class with lots of operators and methods.
 template <class T>
 class vector2d
@@ -106,10 +88,50 @@ public:
 	//! normalizes the vector.
 	vector2d<T>& normalize()
 	{
-		T len = (T)(1.0 / getLenght());
+		T len = (T)(1.0 / getLength());
 		X *= len;
 		Y *= len;
 		return *this;
+	}
+
+	//! Calculates the angle of this vector in grad.
+	//! \return Returns a value between 0 and 360.
+	inline f64 getAngle() const
+	{
+		if (Y == 0.0)
+			return X > 0.0 ? 90.0 : 180.0;
+
+		f64 tmp = Y / sqrt(X*X + Y*Y);
+		tmp = atan(sqrt(1 - tmp*tmp) / tmp) * GRAD_PI;
+
+		if (X>0.0 && Y>0.0)
+			return tmp + 270;
+		else
+		if (X>0.0 && Y<0.0)
+			return tmp + 90;
+		else
+		if (X<0.0 && Y<0.0)
+			return 90 - tmp;
+		else
+		if (X<0.0 && Y>0.0)
+			return 270 - tmp;
+
+		return tmp;
+	}
+
+	//! Calculates the angle between this vector and another one in grad.
+	//! \return Returns a value between 0 and 90.
+	inline f64 getAngleWith(const vector2d<T>& b) const
+	{
+		f64 tmp = X*b.X + Y*b.Y;
+
+		if (tmp == 0.0)
+			return 90.0;
+
+		tmp = tmp / sqrt((X*X + Y*Y) * (b.X*b.X + b.Y*b.Y));
+		if (tmp < 0.0) tmp = -tmp;
+
+		return atan(sqrt(1 - tmp*tmp) / tmp) * GRAD_PI;
 	}
 
 	// member variables

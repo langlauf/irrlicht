@@ -24,21 +24,23 @@ public:
 
 	CDemo(bool fullscreen, bool music, bool shadows, video::EDriverType driver);
 
+	~CDemo();
+
 	void run();
 
 	virtual bool OnEvent(SEvent event);
 
 private:
 
-	void doSceneSetup();
 	void createLoadingScreen();
 	void loadSceneData();
 	void switchToNextScene();
+	void shoot();
+	void createParticleImpacts();
 
 	bool fullscreen;
 	bool music;
 	bool shadows;
-	bool scenePrepared;
 	video::EDriverType driverType;
 	IrrlichtDevice *device;
 
@@ -46,19 +48,37 @@ private:
 	void startAudiere();
 	AudioDevicePtr audiereDevice;
 	OutputStreamPtr stream;
+	OutputStreamPtr ballSound;
+	OutputStreamPtr impactSound;
 #endif
+
+	struct SParticleImpact
+	{
+		u32 when;
+		core::vector3df pos;
+		core::vector3df outVector;
+	};
 
 	int currentScene;
 	video::SColor backColor;
-	gui::IGUIElement* statusText;
+
+	gui::IGUIStaticText* statusText;
+	gui::IGUIInOutFader* inOutFader;
+
 	scene::IAnimatedMesh* quakeLevelMesh;
 	scene::ISceneNode* quakeLevelNode;
 	scene::ISceneNode* skyboxNode;
 	scene::IAnimatedMeshSceneNode* model1;
 	scene::IAnimatedMeshSceneNode* model2;
+	scene::IParticleSystemSceneNode* campFire;
 
-	u32 time;
+	scene::IMetaTriangleSelector* metaSelector;
+	scene::ITriangleSelector* mapSelector;
+
+	u32 sceneStartTime;
 	u32 timeForThisScene;
+
+	core::array<SParticleImpact> Impacts;
 };
 
 #endif

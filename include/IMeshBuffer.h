@@ -47,6 +47,9 @@ namespace scene
 		//! returns pointer to Indices
 		virtual const u16* getIndices() const = 0;
 
+		//! returns pointer to Indices
+		virtual u16* getIndices() = 0;
+
 		//! returns amount of indices
 		virtual s32 getIndexCount() const = 0;
 

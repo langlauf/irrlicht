@@ -32,6 +32,8 @@ class IGUIMeshViewer;
 class IGUICheckBox;
 class IGUIListBox;
 class IGUIFileOpenDialog;
+class IGUIInOutFader;
+class IGUIStaticText;
 
 //! GUI Environment. Used as factory and manager of all other GUI elements.
 class IGUIEnvironment : public IUnknown
@@ -132,7 +134,17 @@ public:
 	//! \return
 	//! Returns a pointer to the created static text. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIElement* addStaticText(const wchar_t* text, bool border, const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
+	virtual IGUIStaticText* addStaticText(const wchar_t* text, bool border, const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
+
+	//! Adds an element for fading in or out.
+	//! \param rectangle: Pointer to rectangle specifing the borders of the element.
+	//! If the pointer is NULL, the whole screen is used.
+	//! \param parent: Parent item of the element. E.g. a window. Set it to 0 to place the static text directly in the environment.
+	//! \param id: A s32 to identify the text.
+	//! \return
+	//! Returns a pointer to the created in-out-fader. Returns 0 if an error occured.
+	//! This pointer should not be dropped. See IUnknown::drop() for more information.
+	virtual IGUIInOutFader* addInOutFader(const core::rect<s32>* rectangle=0, IGUIElement* parent=0, s32 id=-1) = 0;
 
 };
 

@@ -26,11 +26,19 @@ public:
 	virtual s32 getFileCount() = 0;
 
 	//! Gets the name of a file in the list, based on an index.
+	//! The path is not included in this name. Use getFullFileName for this.
 	//! \param index is the zero based index of the file which name should
 	//!   be returned. The index has to be smaller than the amount getFileCount() returns.
 	//! \return
 	//! Returns the file name of the file. Returns 0, if an error occured.
 	virtual const c8* getFileName(s32 index) = 0;
+
+	//! Gets the full name of a file in the list, path included, based on an index.
+	//! \param index is the zero based index of the file which name should
+	//!   be returned. The index has to be smaller than the amount getFileCount() returns.
+	//! \return
+	//! Returns the file name of the file. Returns 0, if an error occured.
+	virtual const c8* getFullFileName(s32 index) = 0;
 
 	//! Returns of the file is a directory
 	//! \param

@@ -157,6 +157,19 @@ namespace video
 		//! \return Returns true if the colors are different, and false if they are the same.
 		inline bool operator!=(const SColor& other) const { return other.color != color; }
 
+		//! Interpolates the color with a f32 value to an other color 
+		//! \param other: Other color
+		//! \param d: value between 0.0f and 1.0f
+		//! \return Returns interpolated color.
+		inline SColor getInterpolated(SColor other, f32 d) const
+		{
+			f32 inv = 1.0f - d;
+			return SColor((s32)(other.getAlpha()*inv + getAlpha()*d),
+				(s32)(other.getRed()*inv + getRed()*d),
+				(s32)(other.getGreen()*inv + getGreen()*d),
+				(s32)(other.getBlue()*inv + getBlue()*d));
+		}
+        
 		//! color in A8R8G8B8 Format
 		s32 color; 
 	};

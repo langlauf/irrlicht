@@ -41,7 +41,7 @@ class line2d
 		void setLine(const line2d<T>& line){start.set(line.start); end.set(line.end);}
 
 		//! Returns length of line
-		//! \return Returns lenght of line.
+		//! \return Returns length of line.
 		f64 getLength() const { return start.getDistanceFrom(end); };
 
 		//! Returns the vector of the line.
@@ -67,7 +67,7 @@ class line2d
 		//! \return Returns unit vector of this line.
 		vector2d<T> getUnitVector()
 		{
-			T len = (T)1.0 / (T)getLenght();
+			T len = (T)1.0 / (T)getLength();
 			return vector2d<T>((end.X - start.X) * len, (end.Y - start.Y) * len);
 		}
 

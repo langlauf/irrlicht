@@ -16,13 +16,10 @@ using namespace irr;
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 {
 	bool fullscreen = false;
-	bool music = false;
-	bool shadows = true;
+	bool music = true;
+	bool shadows = false;
 
 	video::EDriverType driverType = video::DT_DIRECTX8;
-
-	//CDemo demo(fullscreen, music, shadows, driverType);
-	//demo.run();		
 
 	CMainMenu menu;
 

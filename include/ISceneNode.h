@@ -7,6 +7,7 @@
 
 #include "IUnknown.h"
 #include "ISceneNodeAnimator.h"
+#include "ITriangleSelector.h"
 #include "SMaterial.h"
 #include "irrString.h"
 #include "aabbox3d.h"
@@ -36,19 +37,14 @@ namespace scene
 					const core::vector3df& rotation = core::vector3df(0,0,0),
 					const core::vector3df& scale = core::vector3df(1.0f, 1.0f, 1.0f))
 			: IsVisible(true), ID(id), Parent(parent), SceneManager(mgr),
-				AutomaticCullingEnabled(true)
+				AutomaticCullingEnabled(true), DebugDataVisible(false),
+				TriangleSelector(0), RelativeTranslation(position),
+				RelativeRotation(rotation), RelativeScale(scale)
+
 		{
 			if (Parent)
 				Parent->addChild(this);
 
-			RelativeTransformation.setRotationDegrees(rotation);
-			RelativeTransformation.setTranslation(position);
-
-			core::matrix4 mat;
-			mat.setScale(scale);
-			RelativeTransformation *= mat;
-
-			AnimatedRelativeTransformation = RelativeTransformation;
 			updateAbsolutePosition();			
 		}
 
@@ -66,6 +62,9 @@ namespace scene
 			core::list<ISceneNodeAnimator*>::Iterator ait = Animators.begin();
 				for (; ait != Animators.end(); ++ait)
 					(*ait)->drop();
+
+			if (TriangleSelector)
+				TriangleSelector->drop();
 		}
 
 
@@ -91,8 +90,6 @@ namespace scene
 		//! \param timeMs: Current time in milli seconds.
 		virtual void OnPostRender(u32 timeMs)
 		{
-			AnimatedRelativeTransformation = RelativeTransformation;
-
 			if (IsVisible)
 			{
 				// animate this node with all animators
@@ -142,7 +139,6 @@ namespace scene
 		virtual const core::aabbox3d<f32>& getBoundingBox() const = 0;
 
 
-
 		//! Returns the axis aligned, transformed and animated absolute bounding box
 		//! of this node.
 		core::aabbox3d<f32> getTransformedBoundingBox()
@@ -160,18 +156,25 @@ namespace scene
 		}
 
 
-		//! Returns the transformation relative to the parent of the node.
-		//! May be recalculated every OnPostRender()-call by one or more NodeAnimators.
-		core::matrix4& getRelativeTransformation()
+		//! Returns the relative transformation of the scene node.
+		//! The relative transformation is stored internally as 3 vectors:
+		//! translation, rotation and scale. To get the relative transformation
+		//! matrix, it is calculated from these values.
+		//! \return Returns the relative transformation matrix.
+		virtual core::matrix4 getRelativeTransformation() const
 		{
-			return RelativeTransformation;
-		}
+			core::matrix4 mat;
+			mat.setRotationDegrees(RelativeRotation);
+			mat.setTranslation(RelativeTranslation);
 
+			if (RelativeScale != core::vector3df(1,1,1))
+			{
+				core::matrix4 smat;
+				smat.setScale(RelativeScale);
+				mat *= smat;
+			}
 
-		//! Returns the animated transformation relative to the parent of the node.
-		core::matrix4& getAnimatedRelativeTransformation()
-		{
-			return AnimatedRelativeTransformation;
+			return mat;
 		}
 
 
@@ -204,13 +207,16 @@ namespace scene
 		}
 
 
-		//! Adds a child to this scene node.
+		//! Adds a child to this scene node. If the scene node already
+		//! has got a parent, it is removed from there as child.
 		virtual void addChild(ISceneNode* child)
 		{
 			if (child)
 			{
-				Children.push_back(child);
 				child->grab();
+				child->remove(); // remove from old parent				
+				Children.push_back(child);
+				child->Parent = this;				
 			}
 		}
 
@@ -289,12 +295,14 @@ namespace scene
 			return *((video::SMaterial*)0);
 		}
 
+
 		//! Returns amount of materials used by this scene node.
 		//! \return Returns current count of materials used by this scene node.
 		virtual s32 getMaterialCount()
 		{
 			return 0;
 		}
+
 
 		//! Sets all material flags at once to a new value. Helpful for
 		//! example, if you want to be the the whole mesh to be lighted by 
@@ -305,6 +313,7 @@ namespace scene
 			for (s32 i=0; i<getMaterialCount(); ++i)
 				getMaterial(i).Flags[flag] = newvalue;
 		}
+
 
 		//! Sets the texture of the specified layer in all materials of this
 		//! scene node to the new texture.
@@ -331,61 +340,67 @@ namespace scene
 		}	
 
 
-		//! Sets the position of the node. Note that the position is
-		//! relative to the parent. 
-		//! This method exists only for easier use of the scene node.
-		//! You can also modify the position by yourself,
-		//! using the GetRelativeTransformation() method. 
-		//! \param position: New position of the node, relative to its parent.
-		virtual void setRelativePosition(const core::vector3df& position)
+		//! Gets the scale of the scene node. 
+		//! \return Returns the scale of the scene node.
+		virtual core::vector3df getScale() const
 		{
-			RelativeTransformation.setTranslation(position);
+			return RelativeScale;
 		}
 
 
-
-		//! Sets the position of the node. Note that the position is
-		//! relative to the parent. 
-		//! This method exists only for easier use of the scene node.
-		//! You can also modify the position by yourself,
-		//! using the GetRelativeTransformation() method. 
+		//! Sets the scale of the scene node. 
 		//! \param scale: New scale of the node
 		virtual void setScale(const core::vector3df& scale)
 		{
-			RelativeTransformation.setScale(scale);
+			RelativeScale = scale;
 		}
 
 
-		//! Sets the rotation of the node.
-		//! This method exists only for easier use of the scene node.
-		//! You can also modify the position by yourself,
-		//! using the GetRelativeTransformation() method. 
-		//! \param roation: New rotation of the node in degrees
+		//! Sets the rotation of the node. Note that this is
+		//! the relative rotation of the node.
+		//! \return: Current relative rotation of the scene node.
+		virtual const core::vector3df getRotation() const
+		{
+			return RelativeRotation;
+		}
+
+
+		//! Sets the rotation of the node. This only modifies
+		//! the relative rotation of the node.
+		//! \param roation: New rotation of the node in degrees.
 		virtual void setRotation(const core::vector3df& rotation)
 		{
-			RelativeTransformation.setRotationDegrees(rotation);
+			RelativeRotation = rotation;
 		}
 
 
 		//! Gets the position of the node. Note that the position is
-		//! relative to the parent and not animated.
-		//! \return Returns the current not animated position of the node.
-		virtual core::vector3df getRelativePosition() const
+		//! relative to the parent.
+		//! \return Returns the current position of the node relative to the parent.
+		virtual const core::vector3df getPosition() const
 		{
-			core::vector3df pos(0.0f, 0.0f, 0.0f);
-			RelativeTransformation.transformVect(pos);
-			return pos;
+			return RelativeTranslation;
 		}
 
-		//! Gets the abolute position of the node. The position is absolute
-		//! and animated.
-		//! \return Returns the current absolute animated position of the node
+
+		//! Sets the position of the node. Note that the position is
+		//! relative to the parent.
+		//! \param newpos: New relative postition of the scene node.
+		virtual void setPosition(const core::vector3df& newpos)
+		{
+			RelativeTranslation = newpos;
+		}
+
+
+		//! Gets the abolute position of the node. The position is absolute.
+		//! \return Returns the current absolute position of the scene node.
 		virtual core::vector3df getAbsolutePosition() const
 		{
 			core::vector3df pos(0.0f, 0.0f, 0.0f);
 			AbsoluteTransformation.transformVect(pos);
 			return pos;
 		}
+
 
 		//! Enables or disables automatic culling based on the bounding
 		//! box. Automatic culling is enabled by default. Note that not
@@ -399,6 +414,7 @@ namespace scene
 			AutomaticCullingEnabled = enabled;
 		}
 
+
 		//! Gets the automatic culling state. 
 		//! \return The node is culled based on its bounding box if this method
 		//! returns true, otherwise no culling is performed.
@@ -407,11 +423,21 @@ namespace scene
 			return AutomaticCullingEnabled;
 		}
 
+
+		//! Sets if debug data like bounding boxes should be drawed.
+		//! Please note that not all scene nodes support this feature.
+		void setDebugDataVisible(bool visible)
+		{
+			DebugDataVisible = visible;
+		}
+
+
 		//! Returns a const reference to the list of all children.
 		const core::list<ISceneNode*>& getChildren() const
 		{
 			return Children;
 		}
+
 
 		//! Changes the parent of the scene node.
 		virtual void setParent(ISceneNode* newParent)
@@ -428,15 +454,49 @@ namespace scene
 		}
 
 
+		//! Returns the triangle selector attached to this scene node.
+		//! The Selector can be used by the engine for doing collision
+		//! detection. You can create a TriangleSelector with 
+		//! ISceneManager::createTriangleSelector() or 
+		//! ISceneManager::createOctTreeTriangleSelector and set it with
+		//! ISceneNode::setTriangleSelector(). If a scene node got no triangle
+		//! selector, but collision tests should be done with it, a triangle
+		//! selector is created using the bounding box of the scene node.
+		//! \return Returns a pointer to the TriangleSelector or NULL, if there
+		//! is none.
+		virtual ITriangleSelector* getTriangleSelector() const
+		{
+			return TriangleSelector;
+		}
+
+
+		//! Sets the triangle selector of the scene node. The Selector can be
+		//! used by the engine for doing collision detection. You can create a
+		//! TriangleSelector with ISceneManager::createTriangleSelector() or 
+		//! ISceneManager::createOctTreeTriangleSelector(). Some nodes may
+		//! create their own selector by default, so it would be good to
+		//! check if there is already a selector in this node by calling
+		//! ISceneNode::getTriangleSelector(). 
+		//! \param selector: New triangle selector for this scene node.
+        virtual void setTriangleSelector(ITriangleSelector* selector) 
+		{
+			if (TriangleSelector)
+				TriangleSelector->drop();
+
+			TriangleSelector = selector;
+			TriangleSelector->grab();
+		}
+
 	protected:
 
 		//! updates the absolute position based on the relative and the parents position
 		void updateAbsolutePosition()
 		{
 			if (Parent)
-				AbsoluteTransformation = Parent->getAbsoluteTransformation() * AnimatedRelativeTransformation;
+				AbsoluteTransformation = 
+					Parent->getAbsoluteTransformation() * getRelativeTransformation();
 			else
-				AbsoluteTransformation = AnimatedRelativeTransformation;
+				AbsoluteTransformation = getRelativeTransformation();
 		}
 
 		//! name of the scene node.
@@ -445,11 +505,14 @@ namespace scene
 		//! absolute transformation of the node.
 		core::matrix4 AbsoluteTransformation; 
 
-		//! transformation relative to the parent of the node.
-		core::matrix4 RelativeTransformation; 
+		//! relative translation of the scene node.
+		core::vector3df RelativeTranslation;
 
-		//! animated transformation relative to the parent of the node.
-		core::matrix4 AnimatedRelativeTransformation; 
+		//! relative rotation of the scene node.
+		core::vector3df RelativeRotation;
+
+		//! relative scale of the scene node.
+		core::vector3df RelativeScale;
 
 		//! Pointer to the parent
 		ISceneNode* Parent;
@@ -460,17 +523,23 @@ namespace scene
 		//! List of all children of this node
 		core::list<ISceneNodeAnimator*> Animators;
 
-		//! is the node visible?
-		bool IsVisible;
-
 		//! id of the node. 
 		s32 ID;
 
 		//! pointer to the scene manager
 		ISceneManager* SceneManager;
 
+		//! pointer to the triangleselector
+		ITriangleSelector* TriangleSelector;
+
 		//! automatic culling
 		bool AutomaticCullingEnabled;
+
+		//! flag if debug data should be drawed, like Bounding Boxes.
+		bool DebugDataVisible;		
+
+		//! is the node visible?
+		bool IsVisible;
 	};
 
 } // end namespace scene

@@ -44,8 +44,12 @@ class line3d
 		void setLine(const line3d<T>& line){start.set(line.start); end.set(line.end);}
 
 		//! Returns length of line
-		//! \return Returns lenght of line.
-		f64 getLenght() const { return start.getDistanceFrom(end); };
+		//! \return Returns length of line.
+		f64 getLength() const { return start.getDistanceFrom(end); };
+
+		//! Returns sqared length of line
+		//! \return Returns sqared length of line.
+		f64 getLengthSQ() const { return start.getDistanceFromSQ(end); };
 
 		//! Returns middle of line
 		vector3d<T> getMiddle() const
@@ -59,21 +63,25 @@ class line3d
 			return end - start;
 		}
 
+		//! Returns if the overgiven point is between start and end of the
+		//! line. Assumes that the point is already somewhere on the line.
+		bool isPointBetweenStartAndEnd(const vector3d<T>& point) const
+		{
+			return point.isBetweenPoints(start, end);
+		}
+
 		//! Returns the closest point on this line to a point
 		vector3d<T> getClosestPoint(const vector3d<T>& point) const
 		{
-			f64 d = getLenght();
+			vector3d<T> c = point - start;
+			vector3d<T> v = end - start;
+			T d = (T)v.getLength();
+			v /= d;
+			T t = v.dotProduct(c);
 
-			vector3d<T> v = getVector();
-			v /= d;	// normalizes v
-
-			T t = v.dotProduct(point - start);
-
-			// check if t is beyond the extents of this line segment
-			if (t < 0) return start;
+			if (t < (T)0.0) return start;
 			if (t > d) return end;
 
-			// return the point between start and end
 			v *= t;
 			return start + v;
 		}
@@ -94,7 +102,8 @@ class line3d
             if (d < 0.0) 
 				return false;
 
-			return v - sqrt(d);
+			outdistance = v - sqrt(d);
+			return true;
 		}
 
 		// member variables

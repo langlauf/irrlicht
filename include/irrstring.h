@@ -12,19 +12,15 @@ namespace irr
 namespace core
 {
 
-//!	String class with some useful features.
+//!	Very simple string class with some useful features.
 /**	string<c8> and string<wchar_t> work both with unicode AND ascii,
 so you can assign unicode to string<c8> and ascii to string<wchar_t> 
 (and the other way round) if your ever would want to. 
 Note that the conversation between both is not done using an encoding.
 
 Known bugs:
-Characters like 'Ä', 'Ü' and 'Ö' are ignored in the functions make_upper, make_lower and equals_ignore_case
-
-TODO:
-substring
-find
-replace
+Special characters like 'Ä', 'Ü' and 'Ö' are ignored in the
+methods make_upper, make_lower and equals_ignore_case.
 */
 template <class T>
 class string
@@ -219,8 +215,8 @@ public:
 
 
     
-	//! Returns lenght of string
-	//! \return Returns lenght of the string in characters.
+	//! Returns length of string
+	//! \return Returns length of the string in characters.
 	s32 size() const
 	{
 		return used-1;
@@ -315,20 +311,20 @@ public:
 	}
 
 
-	//! Appends a string of the lenght l to this string.
+	//! Appends a string of the length l to this string.
 	//! \param other: other String to append to this string.
-	//! \param lenght: How much characters of the other string to add to this one.
-	void append(const string<T>& other, s32 lenght)
+	//! \param length: How much characters of the other string to add to this one.
+	void append(const string<T>& other, s32 length)
 	{
 		s32 len = other.size();
 
-		if (len < lenght)
+		if (len < length)
 		{
 			append(other);
 			return;
 		}
 
-		len = lenght;
+		len = length;
 		--used;
 		
 		if (used + len > allocated)
@@ -350,6 +346,53 @@ public:
 
 		reallocate(count);
 	}
+
+
+	//! finds first occurance of character in string
+	//! \param c: Character to search for.
+	//! \return Returns position where the character has been found,
+	//! or -1 if not found.
+	s32 findFirst(T c) const
+	{
+		for (s32 i=0; i<used; ++i)
+			if (array[i] == c)
+				return i;
+
+		return -1;
+	}
+
+
+	//! finds last occurance of character in string
+	//! \param c: Character to search for.
+	//! \return Returns position where the character has been found,
+	//! or -1 if not found.
+	s32 findLast(T c) const
+	{
+		for (s32 i=used-1; i>=0; --i)
+			if (array[i] == c)
+				return i;
+
+		return -1;
+	}
+
+
+	//! Returns a substring
+	//! \param begin: Start of substring.
+	//! \param length: Length of substring.
+	string<T> subString(s32 begin, s32 length)
+	{
+		string<T> o;
+		o.reserve(length+1);
+
+		for (s32 i=0; i<length; ++i)
+			o.array[i] = array[i+begin];
+
+		o.array[length] = 0;
+		o.used = o.allocated;
+
+		return o;
+	}
+    	
 
 private:
 

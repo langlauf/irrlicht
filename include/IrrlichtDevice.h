@@ -2,8 +2,8 @@
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
-#ifndef __I_K_DEVICE_H_INCLUDED__
-#define __I_K_DEVICE_H_INCLUDED__
+#ifndef __I_IRRLICHT_DEVICE_H_INCLUDED__
+#define __I_IRRLICHT_DEVICE_H_INCLUDED__
 
 #include "irrTypes.h"
 #include "IUnknown.h"
@@ -15,6 +15,7 @@
 #include "IEventReceiver.h"
 #include "ISceneManager.h"
 #include "ICursorControl.h"
+#include "IVideoModeList.h"
 #include "ITimer.h"
 
 namespace irr
@@ -28,7 +29,12 @@ namespace irr
 		virtual ~IrrlichtDevice() {};
 
 		//! Runs the device. Returns false if device wants to be deleted. Use it in this way:
-		//! while(device->run()) { drawEveryThing(); };
+		//! \code
+		//! while(device->run())
+		//! {
+		//!		drawEveryThing();
+		//! }
+		//! \endcode
 		virtual bool run() = 0;
 
 		//! \return Returns a pointer the video driver.
@@ -46,6 +52,16 @@ namespace irr
 		//! \return Returns a pointer to the mouse cursor control interface.
 		virtual gui::ICursorControl* getCursorControl() = 0;
 
+		//! Gets a list with all video modes available. If you are confused 
+		//! now, because you think you have to create an Irrlicht Device with a video
+		//! mode before being able to get the video mode list, let me tell you that
+		//! there is no need to start up an Irrlicht Device with DT_DIRECTX8, DT_OPENGL or
+		//! DT_SOFTWARE: For this (and for lots of other reasons) the null device,
+		//! DT_NULL exists.
+		//! \return Returns a pointer to a list with all video modes supported
+		//! by the gfx adapter.
+		virtual video::IVideoModeList* getVideoModeList() = 0;
+
 		//! \return Returns a pointer to the ITimer object. With it the
 		//! current Time can be received.
 		virtual ITimer* getTimer() = 0;
@@ -61,6 +77,10 @@ namespace irr
 		//! Notifies the device that it should close itself.
 		//! IrrlichtDevice::run() will always return false after closeDevice() was called.
 		virtual void closeDevice() = 0;
+
+		//! Returns the version of the engine. The returned string
+		//! will look like this: "1.2.3" or this: "1.2". 
+		virtual const wchar_t* getVersion() = 0;
 	};
 
 } // end namespace

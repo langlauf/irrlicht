@@ -27,16 +27,22 @@ namespace irr
 	{
 		//! Left mouse button was pressed down.
 		EMIE_LMOUSE_PRESSED_DOWN = 0,
+
 		//! Right mouse button was pressed down.
 		EMIE_RMOUSE_PRESSED_DOWN,
+
 		//! Middle mouse button was pressed down.
 		EMIE_MMOUSE_PRESSED_DOWN,
+
 		//! Left mouse button was left up.
 		EMIE_LMOUSE_LEFT_UP,
+
 		//! Right mouse button was left up.
 		EMIE_RMOUSE_LEFT_UP,
+
 		//! Middle mouse button was left up.
 		EMIE_MMOUSE_LEFT_UP,
+
 		//! The mouse cursor changed its position.
 		EMIE_MOUSE_MOVED
 	};
@@ -51,20 +57,36 @@ namespace irr
 		{
 			//! A gui element has lost its key focus.
 			EGET_ELEMENT_KEY_FOCUS_LOST = 0,
+
 			//! A gui element has lost its mouse focus.
 			EGET_ELEMENT_MOUSE_FOCUS_LOST,
+
 			//! A gui element was hovered.
 			EGET_ELEMENT_HOVERED,
+
+			//! A hovered gui element was left
+			EGET_ELEMENT_LEFT,
+
 			//! A button was clicked.
 			EGET_BUTTON_CLICKED,
+
 			//! A scrollbar has changed its position.
 			EGET_SCROLL_BAR_CHANGED,
+
 			//! A checkbox has changed its check state.
 			EGET_CHECKBOX_CHANGED,
+
 			//! A new item in a listbox was seleted.
 			EGET_LISTBOX_CHANGED, 
+
 			//! An item in the listbox was selected, which was already selected.
 			EGET_LISTBOX_SELECTED_AGAIN, 
+
+			//! A file has been selected in the file open dialog
+			EGET_FILE_SELECTED,
+
+			//! A file open dialog has been closed without choosing a file
+			EGET_FILE_CHOOSE_DIALOG_CANCELLED,
 		};
 	} // end namespace gui
 

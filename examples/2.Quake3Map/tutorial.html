@@ -148,7 +148,7 @@ if (mesh)<br>    node = smgr-&gt;addOctTreeSceneNode(mesh-&gt;getMesh(0));</pre>
         the whole level a little bit.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>if (node)<br>    node-&gt;setRelativePosition(core::vector3df(-1300,-144,-1249));</pre> </td>
+          <td> <pre>if (node)<br>    node-&gt;setPosition(core::vector3df(-1300,-144,-1249));</pre> </td>
         </tr>
       </table>
       <p>Now we only need a Camera to look at the Quake 3 map. And we want to 
@@ -183,7 +183,7 @@ if (mesh)<br>    node = smgr-&gt;addOctTreeSceneNode(mesh-&gt;getMesh(0));</pre>
   {
      wchar_t tmp[1024];
      swprintf(tmp, 1024, <br>         L&quot;Quake 3 Map Example - Irrlicht Engine (fps:%d) Triangles:%d&quot;, 
-         fps, driver-&gt;getPrimitiveCountDrawed());</pre> 
+         fps, driver-&gt;getPrimitiveCountDrawn());</pre> 
             <pre>     device-&gt;setWindowCaption(tmp);
      lastFPS = fps;
   }
