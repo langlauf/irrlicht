@@ -46,6 +46,25 @@ public:
 
 
 
+	//! Constructor for copying a string from a pointer with a given lenght
+	template <class B>
+	string(const B* c, s32 lenght)
+	: allocated(0), used(0), array(0)
+	{
+		if (!c)
+			return;
+
+        allocated = used = lenght+1;
+		array = new T[used];
+
+		for (s32 l = 0; l<lenght; ++l)
+			array[l] = (T)c[l];
+
+		array[lenght] = 0;
+	}
+
+
+
 	//! Constructor for unicode and ascii strings
 	template <class B>
 	string(const B* c)
@@ -89,6 +108,12 @@ public:
 	{
 		if (!c)
 		{
+			if (!array)
+			{
+				array = new T[1];
+				allocated = 1;
+				used = 1;
+			}
 			array[0] = 0x0;
 			return *this;
 		}
@@ -347,7 +372,7 @@ public:
 	}
 
 
-	//! finds first occurance of character in string
+	//! finds first occurrence of character in string
 	//! \param c: Character to search for.
 	//! \return Returns position where the character has been found,
 	//! or -1 if not found.
@@ -361,7 +386,22 @@ public:
 	}
 
 
-	//! finds last occurance of character in string
+	//! finds next occurrence of character in string
+	//! \param c: Character to search for.
+	//! \param startPos: Position in string to start searching. 
+	//! \return Returns position where the character has been found,
+	//! or -1 if not found.
+	s32 findNext(T c, s32 startPos) const
+	{
+		for (s32 i=startPos; i<used; ++i)
+			if (array[i] == c)
+				return i;
+
+		return -1;
+	}
+
+
+	//! finds last occurrence of character in string
 	//! \param c: Character to search for.
 	//! \return Returns position where the character has been found,
 	//! or -1 if not found.

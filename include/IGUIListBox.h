@@ -29,7 +29,7 @@ namespace gui
 		//! returns amount of list items
 		virtual s32 getItemCount() = 0;
 
-		//! returns string of a list item. the may be a value from 0 to itemCount-1
+		//! returns string of a list item. the may id be a value from 0 to itemCount-1
 		virtual const wchar_t* getListItem(s32 id) = 0;
 
 		//! adds an list item, returns id of item

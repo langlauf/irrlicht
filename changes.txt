@@ -1,5 +1,99 @@
 -------------------------------------------------------------------------------------
-Changes in version 0.5:
+Changes in version 0.6: (09 Mar 2004)
+
+- Irrlicht now includes its own XML parser. It provides forward-only, read-only 
+  access to a stream of non validated XML data. It can read everywhere Irrlicht can,
+  also in compressed .zip-Files for example. Use IFileSystem::createXMLReader() to
+  use it.
+  
+- Like the new XMLReader, there is also a IXMLWriter available for making it easier
+  to write xml files.
+  
+- There is a new tutorial available in the SDK. It is for more advanced users, and
+  shows how to create a 3d model viewer with the engine easily. It shows how to
+  use menus, tabcontrols, edit-, message- and sky boxes.
+  The resulting program  can also be used as tool, to check if the engine
+  loads exported 3d models correctly.
+  
+- Again, there are some new GUI widgets available: A ComboBox, a ToolBar, a PushButton
+  and an ImageButton. The last two are simply the old IGUIButton, but it is now able 
+  to display additional images and behave like a PushButton.
+  
+- It is now possible to make the drawing window resizeable, if it is in windowed mode.
+  Use IVideoDriver::setResizeAble(true) to do this.
+  
+- The .x file reader and animation player now should work with 99% of all text .x files.
+  This is achieved by most of the following bug fixes.
+  
+- Fixed a huge bug in the .x file reader, which caused that negative coordinates were 
+  interpreted as positive ones sometimes. This caused that sometimes .x animations
+  were played wrong.
+
+- Slerp interpolation of the quaternion class fixed. This means that also some bugs 
+  in the animation of .x files are removed now.
+  
+- Added virtual joints to not weighted vertices to improve .x file animations.
+
+- The FileSystem is now 100% implemented. Finally it is now possible to write files 
+  too. There is a new Class IWriteFile and the corresponding 
+  IFileSystem::createAndWriteFile()
+  
+- Added lots of text and sample code to the documentation. In most parts
+  documentation should be clearer now. 
+  
+- The ISceneManager has a clear() method, which clears the whole scene, all scene nodes
+  are removed. 
+  
+- All ISceneNodes now own a new method called removeAll(), which deletes all children
+  of the node.
+  
+- Fixed a bug which prevented the possibility to compile directx8 without 
+  having installed directx9.  
+  
+- Fixed a bug in 3d line dawing in D3D 8 and 9.
+
+- All video drivers now print out the gfx adapter type, vendor and driver version 
+  into the log strings.
+  
+- The D3D9 device is now as fast as the D3D8 device.  
+
+- The string class has an additional new constructor for creating a string from
+  character data with a specific lenght.
+  
+- Bug fixed in string class assignment operator which might cause a crash in very
+  special circumstances.
+  
+- Added a findNext() method to the string class.
+
+- The ISceneNode class now has a isDebugDataVisible() method.
+
+- Some lines were changed to make the source of the engine compatible to VS.NET 2003.
+  
+- Some functionality of the IFileList and IFileSystem were missing in the Linux version
+  of the engine. This caused the FileOpen-Dialog not to work. I fixed this problem.
+  
+- The Middle and Right mouse button were swapped in the Linux version. This is now
+  fixed.
+  
+- Multitexturing should now work with most linux systems too, thanks to a bug
+  report by Martin Piskernig.
+  
+- The logger now has an additional log() method which accepts another compination
+  of strings.
+  
+- Fixed a bug which caused fonts to be displayed very transparent in OpenGL.
+
+- Removed one of the redundant overloaded IGUIEnvironment::updateAbsolutePosition() 
+  methods.
+  
+- Fixed lots of clipping problems in all GUI Widgets.
+
+- core::rect has the new methods getCenter() and isValid().
+
+- Scrollbar buttons are now disabled if it is not possible to scroll.
+
+-------------------------------------------------------------------------------------
+Changes in version 0.5: (17 Feb 2004)
 
 -------------------------------------
 / Highlights in short:
@@ -154,7 +248,7 @@ Changes in version 0.5:
 	* getLast in array
 
 -------------------------------------------------------------------------------------
-Changes in version 0.4.2:
+Changes in version 0.4.2: (13 Dec 2003)
 
 - The engine does no more use only 16 bit textures internaly. Now all 
   other texture formats are supported too. This means higher precision
@@ -267,7 +361,7 @@ Changes in version 0.4.2:
   with the last TriangleSelector in it.
 
 -------------------------------------------------------------------------------------
-Changes in version 0.4.1:
+Changes in version 0.4.1: (18 Sep 2003)
 
 - Input events are now processed faster than repaint and window events. This
   means that input commands now effect things directly, in earlier versions
@@ -353,7 +447,7 @@ Changes in version 0.4.1:
    * getAnimationName() in IAnimatedMeshMD2
 
 -------------------------------------------------------------------------------------
-Changes in version 0.4:
+Changes in version 0.4: (04 Sep 2003)
 
 - Collision detection and reponse based on ellipsoids in now implemented.
   There is a new method available in the ISceneCollisionMananger, which returns
@@ -520,7 +614,7 @@ Changes in version 0.4:
   * getSceneNodeFromId() in ISceneManager
   
 -------------------------------------------------------------------------------------
-Changes in version 0.3:
+Changes in version 0.3: (18 Jul 2003)
 
 - Linux port: The Irrlicht Engine now compiles and runs on Linux. Currently only
   the OpenGL driver is available. The Software driver would be there too, if 
@@ -585,7 +679,7 @@ Changes in version 0.3:
    * setParent in ISceneNode
 
 -------------------------------------------------------------------------------------
-Changes in version 0.2.5:
+Changes in version 0.2.5: (22 Jun 2003)
 
 - A new material type is available: EMT_TRANSPARENT_VERTEX_ALPHA, which
   realizes transparency based on the vertex alpha color. It currently is
@@ -633,7 +727,7 @@ Changes in version 0.2.5:
    
 
 -------------------------------------------------------------------------------------
-Changes in version 0.2:
+Changes in version 0.2: (19 May 2003)
 
 - The engine is now able to load .3ds files, with their materials and textures.
 
@@ -683,7 +777,7 @@ Changes in version 0.2:
   and added to the engine via IVideoDriver::addExternalSurfaceLoader().
   
 -------------------------------------------------------------------------------------
-Changes in version 0.1.5:
+Changes in version 0.1.5: (03 Apr 2003)
 
 - The zlib and libjpeg are now included in the SDK.
 
@@ -709,7 +803,7 @@ Changes in version 0.1.5:
   and for g++ compatibility issues in the Vertices.
 
 -------------------------------------------------------------------------------------
-Release notes of version 0.1:
+Release notes of version 0.1: (14 Mar 2003)
 
   This is an alpha version of the SDK. So please note that there are
   features missing in the engine and maybe also some bugs. The following

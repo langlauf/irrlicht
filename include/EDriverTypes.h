@@ -17,7 +17,8 @@ namespace video
 		//! any graphics.
 		EDT_NULL,     
 
-		//! Software device, runs on all platforms, with every hardware. Is slow and does not support every renderstate correctly.
+		//! The Irrlicht Engine Software renderer, runs on all platforms,
+		//! with every hardware. Is slow and does not support every renderstate correctly.
 		//! It should only be used for 2d graphics, but it can also perform some
 		//! primitive 3d functions.
 		EDT_SOFTWARE, 

@@ -20,12 +20,10 @@ namespace scene
 		//! mesh based on a frame time. This is used for being able to attach
 		//! objects to parts of animated meshes. For example a weapon to an animated 
 		//! hand. 
-		//! Please note: The .X-Animation Player is still an alpha-version, so
-		//! this method might always return simply NULL.
 		//! \param jointNumber: Zero based index of joint. The last joint has the number
 		//! IAnimatedMeshX::getJointCount()-1;
 		//! \param frame: Frame of the animation.
-		//! \return: Returns a pointer to the matrix of the mesh part or 
+		//! \return Returns a pointer to the matrix of the mesh part or 
 		//! null if an error occured.
 		virtual core::matrix4* getMatrixOfJoint(s32 jointNumber, s32 frame) = 0;
 
@@ -51,6 +49,27 @@ namespace scene
 		//! to true, the Scene node will visualize the skeleton using this
 		//! method.
 		virtual const core::array<core::vector3df>* getDrawableSkeleton(s32 frame) = 0;
+
+		//! Returns amount of animations in .X-file.
+		virtual s32 getAnimationCount() const = 0;
+
+		//! Returns the name of an animation. 
+		//! \param idx: Zero based Index of the animation. Must be a value between
+		//! 0 and getAnimationCount()-1;
+		//! \return Returns pointer to the string of the name of the animation. 
+		//! Returns 0 if an animation with this index does not exist.
+		virtual const c8* getAnimationName(s32 idx) const = 0;
+
+		//! Sets an animation as animation to play back.
+		//! \param idx: Zero based Index of the animation. Must be a value between
+		//! 0 and getAnimationCount()-1;
+		virtual void setCurrentAnimation(s32 idx) = 0;
+
+		//! Sets an animation as animation to play back.
+		//! \param name: Name of the animtion. 
+		//! \return Returns true if successful, and false if the specified animation
+		//! does not exist.
+		virtual bool setCurrentAnimation(const c8* name) = 0;
 	};
 
 } // end namespace scene

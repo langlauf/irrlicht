@@ -49,6 +49,9 @@ class quaternion
 		quaternion operator*(f32 s) const;
 
 		//! multiplication operator
+		quaternion& operator*=(f32 s);
+
+		//! multiplication operator
 		quaternion& operator*=(const quaternion& other);
 
 		//! calculates the dot product
@@ -94,11 +97,13 @@ inline quaternion::quaternion(f32 x, f32 y, f32 z)
 	set(x,y,z);
 }
 
+
 //! Constructor which converts a matrix to a quaternion
 inline quaternion::quaternion(const matrix4& mat)
 {
 	(*this) = mat;
 }
+
 
 //! equal operator
 inline bool quaternion::operator==(const quaternion& other) const
@@ -114,6 +119,7 @@ inline bool quaternion::operator==(const quaternion& other) const
 
 	return true;
 }
+
 
 //! assignment operator
 inline quaternion& quaternion::operator=(const quaternion& other)
@@ -193,9 +199,9 @@ inline quaternion quaternion::operator*(const quaternion& other) const
 	quaternion tmp;
 
 	tmp.W = (other.W * W) - (other.X * X) - (other.Y * Y) - (other.Z * Z);
-	tmp.X = (other.W * X) - (other.X * W) - (other.Y * Z) - (other.Z * Y);
-	tmp.Y = (other.W * Y) - (other.Y * W) - (other.Z * X) - (other.X * Z);
-	tmp.Z = (other.W * Z) - (other.Z * W) - (other.X * Y) - (other.Y * X);
+	tmp.X = (other.W * X) + (other.X * W) + (other.Y * Z) - (other.Z * Y);
+	tmp.Y = (other.W * Y) + (other.Y * W) + (other.Z * X) - (other.X * Z);
+	tmp.Z = (other.W * Z) + (other.Z * W) + (other.X * Y) - (other.Y * X);
 
 	return tmp;
 }
@@ -205,6 +211,13 @@ inline quaternion quaternion::operator*(const quaternion& other) const
 inline quaternion quaternion::operator*(f32 s) const
 {
 	return quaternion(s*X, s*Y, s*Z, s*W);
+}
+
+//! multiplication operator
+inline quaternion& quaternion::operator*=(f32 s)
+{
+	X *= s; Y*=s; Z*=s; W*=s;
+	return *this;
 }
 
 //! multiplication operator
@@ -227,23 +240,23 @@ inline matrix4 quaternion::getMatrix() const
 	core::matrix4 m;
 
 	m(0,0) = 1.0f - 2.0f*Y*Y - 2.0f*Z*Z; 
-	m(1,0) = 2.0f*X*Y + 2.0f*Z*W; 
-	m(2,0) = 2.0f*X*Z - 2.0f*Y*W; 
-	m(3,0) = 0.0f;
+	m(0,1) = 2.0f*X*Y + 2.0f*Z*W; 
+	m(0,2) = 2.0f*X*Z - 2.0f*Y*W; 
+	m(0,3) = 0.0f;
 
-	m(0,1) = 2.0f*X*Y - 2.0f*Z*W; 
+	m(1,0) = 2.0f*X*Y - 2.0f*Z*W; 
 	m(1,1) = 1.0f - 2.0f*X*X - 2.0f*Z*Z; 
-	m(2,1) = 2.0f*Z*Y + 2.0f*X*W; 
-	m(3,1) = 0.0f;
+	m(1,2) = 2.0f*Z*Y + 2.0f*X*W; 
+	m(1,3) = 0.0f;
 
-	m(0,2) = 2.0f*X*Z + 2.0f*Y*W; 
-	m(1,2) = 2.0f*Z*Y - 2.0f*X*W; 
+	m(2,0) = 2.0f*X*Z + 2.0f*Y*W; 
+	m(2,1) = 2.0f*Z*Y - 2.0f*X*W; 
 	m(2,2) = 1.0f - 2.0f*X*X - 2.0f*Y*Y; 
-	m(3,2) = 0.0f;
+	m(2,3) = 0.0f;
 
-	m(0,3) = 0.0f; 
-	m(1,3) = 0.0f; 
-	m(2,3) = 0.0f; 
+	m(3,0) = 0.0f; 
+	m(3,1) = 0.0f; 
+	m(3,2) = 0.0f; 
 	m(3,3) = 1.0f;
 
 	return m;
@@ -316,30 +329,40 @@ inline quaternion& quaternion::normalize()
 // Interpolates the quaternion between to quaternions based on time
 inline quaternion quaternion::Slerp(quaternion q1, quaternion q2, f32 time)
 {
-	if(q1 == q2 || time == 0)
-		return q1;
+    f32 angle = q1.getDotProduct(q2);
 
-	f32 angle = q1.getDotProduct(q2);
-
-	if(angle < 0.0f) 
-	{
+    if (angle < 0.0f) 
+    {
+		q1 *= -1.0f;
 		angle *= -1.0f;
-		q2 = quaternion(-q2.W, -q2.X, -q2.Y, -q2.Z);
-	}
+    }
 
-	f32 invs = 1.0f - time;
-	f32 s = time;
+	f32 scale;
+	f32 invscale;
 
-	if(1.0f - angle > 0.0000001f)
-	{
-		f32 theta = (f32)acos(angle);
-		f32 sinTheta = (f32)sin(theta);
+    if ((angle + 1.0f) > 0.05f) 
+    {
+		if ((1.0f - angle) >= 0.05f)  // spherical interpolation
+		{
+			f32 theta = (f32)acos(angle);
+			f32 invsintheta = 1.0f / (f32)sin(theta);
+			scale = (f32)sin(theta * (1.0f-time)) * invsintheta;
+			invscale = (f32)sin(theta * time) * invsintheta;
+		}
+		else // linear interploation
+		{
+			scale = 1.0f - time;
+			invscale = time;
+		}
+    }
+    else 
+    {
+        q2 = quaternion(-q1.Y, q1.X, -q1.W, q1.Z);
+        scale = (f32)sin(PI * (0.5f - time));
+        invscale = (f32)sin(PI * time);
+    }
 
-		invs = (f32)sin(invs * theta) / sinTheta;
-		s = (f32)sin((time * theta)) / sinTheta;
-	}	
-
-	*this = (q1*invs) + (q2*s);
+	*this = (q1*scale) + (q2*invscale);
 	return *this;
 }
 

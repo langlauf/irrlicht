@@ -33,7 +33,9 @@ namespace scene
 		//! 3D Studio .3ds file
 		EAMT_3DS,
 
-		//! X file
+		//! Microsoft Direct3D .x-file. Can contain static and skeletal animated 
+		//! skinned meshes. This is the standard and best supported 
+		//! format of the Irrlicht Engine.
 		EAMT_X
 	};
 

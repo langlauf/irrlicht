@@ -17,7 +17,7 @@ namespace video
 
 //! An enum for the color format of textures used by the Irrlicht Engine.
 /** A color format specifies how color information is stored. The Irrlicht Engine
-Mostly uses the format EHCF_R5G5B5.
+mostly uses the format ECF_A1R5G5B5.
 */
 enum ECOLOR_FORMAT
 {
@@ -49,7 +49,8 @@ public:
 	//! destructor
 	virtual ~IImage() {};
 
-	//! Lock function.
+	//! Lock function. Use this to get a pointer to the image data. After you
+	//! don't need the pointer anymore, you must call unlock().
 	//! \return Returns pointer to the image data. What type of data
 	//! is pointed to depends on the color format of the image. For example
 	//! if the color format is ECF_A8R8G8B8, it is of s32.

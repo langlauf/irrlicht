@@ -23,7 +23,7 @@ namespace scene
 		//! \param jointNumber: Zero based index of joint. The last joint has the number
 		//! IAnimatedMeshMS3D::getJointCount()-1;
 		//! \param frame: Frame of the animation.
-		//! \return: Returns a pointer to the matrix of the mesh part or 
+		//! \return Returns a pointer to the matrix of the mesh part or 
 		//! null if an error occured.
 		virtual core::matrix4* getMatrixOfJoint(s32 jointNumber, s32 frame) = 0;
 

@@ -86,28 +86,29 @@ public:
 
 
 	//! Updates the absolute position.
-	void updateAbsolutePosition(const core::rect<s32>& parentAbsolute)
+	virtual void updateAbsolutePosition()
 	{
+		core::rect<s32> parentAbsolute(0,0,0,0);
+		core::rect<s32> parentAbsoluteClip;
+
+		if (Parent)
+		{
+			parentAbsolute = Parent->AbsoluteRect;
+			parentAbsoluteClip = Parent->AbsoluteClippingRect;
+		}
+
 		AbsoluteRect = RelativeRect + parentAbsolute.UpperLeftCorner;
 
+		if (!Parent)
+			parentAbsoluteClip = AbsoluteRect;
+
 		AbsoluteClippingRect = AbsoluteRect;
-		AbsoluteClippingRect.clipAgainst(parentAbsolute);		
+		AbsoluteClippingRect.clipAgainst(parentAbsoluteClip);		
 
 		// update all children
 		core::list<IGUIElement*>::Iterator it = Children.begin();
 		for (; it != Children.end(); ++it)
-			(*it)->updateAbsolutePosition(AbsoluteRect);
-	}
-
-	//! Updates the absolute position.
-	void updateAbsolutePosition()
-	{
-		core::rect<s32> parentRect(0,0,0,0);
-
-		if (Parent)
-			parentRect = Parent->getAbsolutePosition();
-
-		updateAbsolutePosition(parentRect);
+			(*it)->updateAbsolutePosition();
 	}
 
 
@@ -186,12 +187,7 @@ public:
 	virtual void move(core::position2d<s32> absoluteMovement)
 	{
 		RelativeRect += absoluteMovement;
-		core::rect<s32> parentRect(0,0,0,0);
-
-		if (Parent)
-			parentRect = Parent->getAbsolutePosition();
-
-		updateAbsolutePosition(parentRect);
+		updateAbsolutePosition();
 	}
 
 

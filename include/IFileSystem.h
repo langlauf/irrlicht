@@ -13,7 +13,10 @@ namespace io
 {
 
 class IReadFile;
+class IWriteFile;
 class IFileList;
+class IXMLReader;
+class IXMLWriter;
 
 //! The FileSystem manages files and archives and provides access to them.
 /*!
@@ -35,6 +38,16 @@ public:
 	//! The returned pointer should be dropped when no longer needed.
 	//! See IUnknown::drop() for more information.
 	virtual IReadFile* createAndOpenFile(const c8* filename) = 0;
+
+	//! Opens a file for write access.
+	//! \param filename: Name of file to open.
+	//! \param append: If the file already exist, all write operations are 
+	//! appended to the file.
+	//! \return Returns a pointer to the created file interface. 0 is returned, if the
+	//! file could not created or opened for writing.
+	//! The returned pointer should be dropped when no longer needed.
+	//! See IUnknown::drop() for more information.
+	virtual IWriteFile* createAndWriteFile(const c8* filename, bool append=false) = 0;
 
 	//! Adds an zip archive to the file system.
 	//! \param filename: Filename of the zip archive to add to the file system.
@@ -67,6 +80,34 @@ public:
 	//! \param filename is the string identifying the file which should be tested for existance.
 	//! \return Returns true if file exsits, and false if it does not exist or an error occured.
 	virtual bool existFile(const c8* filename) = 0;
+
+	//! Creates a XML Reader from a file.
+	//! \return 0, if file could not be opened, otherwise a pointer to the created
+	//! IXMLReader is returned. After use, the reader
+	//! has to be deleted using its IXMLReader::drop() method.
+	//! See IUnknown::drop() for more information.
+	virtual IXMLReader* createXMLReader(const c8* filename) = 0;
+
+	//! Creates a XML Reader from a file.
+	//! \return 0, if file could not be opened, otherwise a pointer to the created
+	//! IXMLReader is returned. After use, the reader
+	//! has to be deleted using its IXMLReader::drop() method.
+	//! See IUnknown::drop() for more information.
+	virtual IXMLReader* createXMLReader(IReadFile* file) = 0;
+
+	//! Creates a XML Writer from a file.
+	//! \return 0, if file could not be opened, otherwise a pointer to the created
+	//! IXMLWriter is returned. After use, the reader
+	//! has to be deleted using its IXMLWriter::drop() method.
+	//! See IUnknown::drop() for more information.
+	virtual IXMLWriter* createXMLWriter(const c8* filename) = 0;
+
+	//! Creates a XML Writer from a file.
+	//! \return 0, if file could not be opened, otherwise a pointer to the created
+	//! IXMLWriter is returned. After use, the reader
+	//! has to be deleted using its IXMLWriter::drop() method.
+	//! See IUnknown::drop() for more information.
+	virtual IXMLWriter* createXMLWriter(IWriteFile* file) = 0;
 };
 
 } // end namespace io

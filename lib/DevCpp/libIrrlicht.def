@@ -1,3 +1,3 @@
-; dlltool --base-file C:\DOKUME~1\Niko\LOKALE~1\Temp/cca01652.base --output-exp Irrlicht.exp --dllname Irrlicht.dll --output-def libIrrlicht.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup@12 --def C:\DOKUME~1\Niko\LOKALE~1\Temp/cca01652.def --output-lib libIrrlicht.a
+; dlltool --base-file C:\DOKUME~1\Niko\LOKALE~1\Temp/cca02628.base --output-exp Irrlicht.exp --dllname Irrlicht.dll --output-def libIrrlicht.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup@12 --def C:\DOKUME~1\Niko\LOKALE~1\Temp/cca02628.def --output-lib libIrrlicht.a
 EXPORTS
 	_ZN3irr12createDeviceENS_5video11EDriverTypeERKNS_4core11dimension2dIiEEjbbPNS_14IEventReceiverEPKw @ 1 ; irr::createDevice(irr::video::EDriverType, irr::core::dimension2d<int> const&, unsigned, bool, bool, irr::IEventReceiver*, wchar_t const*)

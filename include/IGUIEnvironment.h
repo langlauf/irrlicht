@@ -37,6 +37,8 @@ class IGUIEditBox;
 class IGUITabControl;
 class IGUITab;
 class IGUIContextMenu;
+class IGUIComboBox;
+class IGUIToolBar;
 
 //! GUI Environment. Used as factory and manager of all other GUI elements.
 class IGUIEnvironment : public IUnknown
@@ -92,7 +94,8 @@ public:
 	//! \return
 	//! Returns a pointer to the created button. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIButton* addButton(const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+	virtual IGUIButton* addButton(const core::rect<s32>& rectangle,
+		IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
 
 	//! Adds an empty window element. 
 	//! \param modal: Defines if the dialog is modal. This means, that all other
@@ -143,7 +146,8 @@ public:
 	//! \return
 	//! Returns a pointer to the created list box. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIListBox* addListBox(const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
+	virtual IGUIListBox* addListBox(const core::rect<s32>& rectangle, 
+		IGUIElement* parent=0, s32 id=-1, bool drawBackground=false) = 0;
 
 	//! Adds an mesh viewer. Not 100% implemented yet.
 	//! \return
@@ -165,7 +169,7 @@ public:
 	//! \param rectangle is the position of the static text.
 	//! \param border has to be set to true if the static text should have a 3d border.
 	//! \param wordWrap specifyes, if the text should be wrapped into multiple lines.
-	//! \param parent is the parent item of the element. E.g. a window. Set it to 0 to place the static text directly in the environment.
+	//! \param parent is the parent item of the element. E.g. a window. Set it to 0 to place the fader directly in the environment.
 	//! \param id is a s32 to identify the static text element.
 	//! \return
 	//! Returns a pointer to the created static text. Returns 0 if an error occured.
@@ -234,6 +238,18 @@ public:
 	//! \param parent is the parent item of the element. E.g. a window. Set it to 0 to place the menu directly in the environment.
 	//! \param id is a s32 to identify the menu.
 	virtual IGUIContextMenu* addMenu(IGUIElement* parent=0, s32 id=-1) = 0;
+
+	//! Adds a toolbar to the environment. It is like a menu is always placed on top
+	//! in its parent, and contains buttons.
+	//! \param parent is the parent item of the element. E.g. a window. Set it to 0 to place the tool bar directly in the environment.
+	//! \param id is a s32 to identify the tool bar.
+	virtual IGUIToolBar* addToolBar(IGUIElement* parent=0, s32 id=-1) = 0;
+
+	//! Adds a combo box to the environment.
+	//! \param parent is the parent item of the element. E.g. a window. Set it to 0 to place the combo box directly in the environment.
+	//! \param id is a s32 to identify the combo box.
+	virtual IGUIComboBox* addComboBox(const core::rect<s32>& rectangle,
+		IGUIElement* parent=0, s32 id=-1) = 0;
 };
 
 

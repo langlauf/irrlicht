@@ -480,6 +480,10 @@ namespace video
 		//! If you no longer need the image, you should call IImage::drop().
 		//! See IUnknown::drop() for more information.
 		virtual IImage* createImageFromFile(io::IReadFile* file) = 0;
+
+		//! Only used by the internal engine. Used to notify the driver that
+		//! the window was resized.
+		virtual void OnResize(const core::dimension2d<s32>& size) = 0;
 	};
 
 } // end namespace video

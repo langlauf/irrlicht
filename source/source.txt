@@ -1,6 +1,4 @@
---------------------------------------------------------------------------
 Source code of the Irrlicht Engine
---------------------------------------------------------------------------
 
 The complete source of the Irrlicht Engine can be found when decompressing
 the .zip file included in this directory. 
@@ -16,17 +14,3 @@ The source of the engine is only included because of the following reasons:
 	- To let developers be able to debug the engine.
 	- To let developers be able to make changes to the engine.
 	- To let developers be able to compile their own versions of the engine.
-
-
---------------------------------------------------------------------------
-Linux Users
---------------------------------------------------------------------------
-
-To compile your version of the engine, unzip the archive and run 'make'.
-This will also compile the zlib and jpeglib and copy the three resulting
-libraries into %YourIrrlichtSDKPath%/lib/Linux. But please note that usually
-you need not do this, there is already a precompiled version in this 
-directory.
-After this, you should be able to make all example applications in 
-\examples. Then just start an X Server and run them, from the directory
-where they are.

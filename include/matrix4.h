@@ -49,7 +49,10 @@ namespace core
 			matrix4 operator*(const matrix4& other) const;
 
 			//! Set matrix to identity. 
-			void makeIdentity();												
+			void makeIdentity();
+
+			//! Returns true if the matrix is the identity matrix
+			bool isIdentity();
 
 			//! Set the translation of the current matrix. Will erase any previous values.
 			void setTranslation( const vector3df& translation );			
@@ -354,11 +357,33 @@ namespace core
 		M[10] = (f32)( cr*cp );
 	}
 
+
 	inline void matrix4::makeIdentity()
 	{
 		for (s32 i=0; i<16; ++i)
 			M[i] = 0.0f;
 		M[0] = M[5] = M[10] = M[15] = 1;
+	}
+
+
+	inline bool matrix4::isIdentity()
+	{
+		for (s32 i=0; i<4; ++i)
+			for (s32 j=0; j<4; ++j)
+			if (j != i)
+			{
+				if ((*this)(i,j) < -0.0000001f ||
+					(*this)(i,j) >  0.0000001f)
+					return false;
+			}
+			else
+			{
+				if ((*this)(i,j) < 0.9999999f ||
+					(*this)(i,j) > 1.0000001f)
+					return false;
+			}
+
+		return true;
 	}
 
 	inline void matrix4::rotateVect( vector3df& vect ) const

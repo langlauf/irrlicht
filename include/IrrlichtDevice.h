@@ -23,6 +23,9 @@
 namespace irr
 {
 	//! The Irrlicht device. You can create it with createDevice(). 
+	/** This is the most important class of the Irrlicht Engine. You can access everything
+	in the engine if you have a pointer to an instance of this class. 
+	*/
 	class IrrlichtDevice : public IUnknown
 	{
 	public:
@@ -34,7 +37,7 @@ namespace irr
 		//! \code
 		//! while(device->run())
 		//! {
-		//!		drawEveryThing();
+		//!		// draw everything here
 		//! }
 		//! \endcode
 		virtual bool run() = 0;
@@ -82,7 +85,15 @@ namespace irr
 		virtual void setWindowCaption(const wchar_t* text) = 0;
 
 		//! \return Returns true if window is active. If the window is inactive,
-		//! nothing need to be drawn.
+		//! nothing need to be drawn. So if you don't want to draw anything when
+		//! the window is inactive, create your drawing loop this way:
+		//! \code
+		//! while(device->run())
+		//!		if (device->isWindowActive())
+		//!		{
+		//!			// draw everything here
+		//!		}
+		//! \endcode
 		virtual bool isWindowActive() = 0;
 
 		//! Notifies the device that it should close itself.
@@ -95,6 +106,10 @@ namespace irr
 
 		//! Sets a new event receiver to receive events.
 		virtual void setEventReceiver(IEventReceiver* receiver) = 0;
+
+		//! Sets if the window should be resizeable in windowed mode. The default
+		//! is false. This method only works in windowed mode.
+		virtual void setResizeAble(bool resize=false) = 0;
 	};
 
 } // end namespace

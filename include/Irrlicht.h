@@ -1,4 +1,4 @@
-/* Irrlicht.h -- interface of the 'Irrlicht Engine' version 0.5
+/* Irrlicht.h -- interface of the 'Irrlicht Engine' version 0.6
 
   Copyright (C) 2002-2004 Nikolaus Gebhardt
 
@@ -50,6 +50,7 @@
 #include "IGUIButton.h"
 #include "IGUICheckBox.h"
 #include "IGUIContextMenu.h"
+#include "IGUIComboBox.h"
 #include "IGUIElement.h"
 #include "IGUIEditBox.h"
 #include "IGUIEnvironment.h"
@@ -64,6 +65,7 @@
 #include "IGUIStaticText.h"
 #include "IGUITabControl.h"
 #include "IGUIWindow.h"
+#include "IGUIToolBar.h"
 #include "ILightSceneNode.h"
 #include "ILogger.h"
 #include "IMesh.h"
@@ -89,6 +91,9 @@
 #include "IUnknown.h"
 #include "IVideoDriver.h"
 #include "IVideoModeList.h"
+#include "IWriteFile.h"
+#include "IXMLReader.h"
+#include "IXMLWriter.h"
 #include "Keycodes.h"
 #include "line2d.h"
 #include "line3d.h"
@@ -112,9 +117,9 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION L"0.5"
+#define IRRLICHT_SDK_VERSION L"0.6"
 
-/*! \mainpage Irrlicht Engine 0.5 API documentation
+/*! \mainpage Irrlicht Engine 0.6 API documentation
  *
  * \section intro Introduction
  *
@@ -244,7 +249,7 @@ namespace irr
 {
 	//! Creates an Irrlicht device. The Irrlicht device is the root object for using the engine.
 	/** \param deviceType: Type of the device. This can currently be video::DT_NULL, 
-	video::DT_SOFTWARE,	video::DT_DIRECTX8 and video::DT_OPENGL.
+	video::EDT_SOFTWARE, video::EDT_DIRECTX8, video::EDT_DIRECTX9 and video::EDT_OPENGL.
 	\param windowSize: Size of the window or the video mode in fullscreen mode.
 	\param bits: Bits per pixel in fullscreen mode. Ignored if windowed mode.
 	\param fullscreen: Should be set to true if the device should run in fullscreen. Otherwise
@@ -280,12 +285,12 @@ namespace irr
 	{
 	}
 
-	//! This namespace provides interfaces for input/output: Reading and writing files, accessing zip archives, and so on.
+	//! This namespace provides interfaces for input/output: Reading and writing files, accessing zip archives, xml files, ...
 	namespace io
 	{
 	}
 
-	//! All scene management can be found in this namespace: Mesh loading, special scene nodes like octrees and billboards, and so on.
+	//! All scene management can be found in this namespace: Mesh loading, special scene nodes like octrees and billboards, ...
 	namespace scene
 	{
 	}

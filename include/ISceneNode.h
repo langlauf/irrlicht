@@ -238,6 +238,17 @@ namespace scene
 		}
 
 
+		//! Removes all children of this scene node
+		virtual void removeAll()
+		{
+			core::list<ISceneNode*>::Iterator it = Children.begin();
+			for (; it != Children.end(); ++it)
+				(*it)->drop();
+
+			Children.clear();
+		}
+
+
 		//! Removes this scene node from the scene, deleting it.
 		virtual void remove()
 		{
@@ -358,7 +369,7 @@ namespace scene
 
 		//! Sets the rotation of the node. Note that this is
 		//! the relative rotation of the node.
-		//! \return: Current relative rotation of the scene node.
+		//! \return Current relative rotation of the scene node.
 		virtual const core::vector3df getRotation() const
 		{
 			return RelativeRotation;
@@ -429,6 +440,12 @@ namespace scene
 		void setDebugDataVisible(bool visible)
 		{
 			DebugDataVisible = visible;
+		}
+
+		//! Returns if debug data like bounding boxes are drawed.
+		bool isDebugDataVisible()
+		{
+			return DebugDataVisible;
 		}
 
 
