@@ -413,6 +413,19 @@ namespace video
 								const core::position2d<s32>& end, 
 								SColor color=SColor(255,255,255,255)) = 0;
 
+		//! Draws a non filled concyclic reqular 2d polyon. This method can be used to draw 
+		//! circles, but also triangles, tetragons, pentagons, hexagons, heptagons, octagons,
+		//! enneagons, decagons, hendecagons, dodecagon, triskaidecagons, etc. I think you'll
+		//! got it now. And all this by simply specifying the vertex count. Welcome to the 
+		//! wonders of geometry.
+		//! \param center: Position of center of circle (pixels).
+		//! \param radius: Radius of circle in pixels.
+		//! \param color: Color of the circle.
+		//! \param vertexCount: Amount of vertices of the polygon. Specify 2 to draw a line,
+		//! 3 to draw a triangle, 4 for a tetragons and a lot (>10) for nearly a circle.
+		virtual void draw2DPolygon(core::position2d<s32> center, 
+			f32 radius, video::SColor color=SColor(100,255,255,255), s32 vertexCount=10) = 0;
+
 		//! Draws a shadow volume into the stencil buffer. To draw a stencil shadow, do
 		//! this: Frist, draw all geometry. Then use this method, to draw the shadow
 		//! volume. Then, use IVideoDriver::drawStencilShadow() to visualize the shadow.
@@ -556,10 +569,16 @@ namespace video
 		//! \param format: Desired color format of the texture
 		//! \param size: Desired the size of the image
 		//! \param data: a byte array with pixelcolor information
+		//! \param useForeignMemory: If true, the image will use the data pointer
+		//! directly and own it from now on, which means it will also try to delete [] the
+		//! data when the image will be destructed. 
+		//! If false, the memory will by copied internally.
 		//! \return Returns the created image.
 		//! If you no longer need the image, you should call IImage::drop().
 		//! See IUnknown::drop() for more information.
-		virtual IImage* createImageFromData(ECOLOR_FORMAT format, const core::dimension2d<s32>& size, void *data) = 0;
+		virtual IImage* createImageFromData(ECOLOR_FORMAT format, 
+			const core::dimension2d<s32>& size, void *data,
+			bool ownForeignMemory=false) = 0;
 
 		//! Only used by the internal engine. Used to notify the driver that
 		//! the window was resized.
@@ -574,6 +593,9 @@ namespace video
 		//! IVideoDriver::addMaterialRenderer() and if you want an object in the engine to be displayed
 		//! with your new material, set the MaterialType member of the SMaterial struct to the 
 		//! value returned by this method.
+		//! If you simply want to create a new material using vertex and/or pixel shaders, it would
+		//! be easier to use the video::IGPUProgrammingServices interface which you can get using
+		//! the getGPUProgrammingServices() method.
 		//! \return Returns the number of the
 		//! material type which can be set in SMaterial::MaterialType to use the renderer.
 		//! -1 is returned if an error occured. (For example if you tried to add

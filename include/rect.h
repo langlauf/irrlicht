@@ -103,6 +103,12 @@ namespace core
 				UpperLeftCorner.X = other.UpperLeftCorner.X;
 			if (other.UpperLeftCorner.Y > UpperLeftCorner.Y)
 				UpperLeftCorner.Y = other.UpperLeftCorner.Y;
+
+			// correct possible invalid rect resulting from clipping
+            if (UpperLeftCorner.Y > LowerRightCorner.Y)
+                UpperLeftCorner.Y = LowerRightCorner.Y;
+            if (UpperLeftCorner.X > LowerRightCorner.X)
+                UpperLeftCorner.X = LowerRightCorner.X;
 		}
 
 		//! Returns width of rectangle.
@@ -139,7 +145,7 @@ namespace core
 		//! Returns if the rect is valid to draw. It could be invalid, if
 		//! The UpperLeftCorner is lower or more right than the LowerRightCorner,
 		//! or if the area described by the rect is 0.
-		bool isValid()
+		bool isValid() const
 		{
 			// thx to jox for a correction to this method
 

@@ -86,6 +86,20 @@ class plane3d
 			return true;
 		}
 
+		//! Returns where on a line between two points an intersection with this plane happened.
+		//! Only useful if known that there is an intersection.
+		//! \param linePoint1: Point1 of the line to intersect with.
+		//! \param linePoint2: Point2 of the line to intersect with.
+		//! \return Returns where on a line between two points an intersection with this plane happened.
+		//! For example, 0.5 is returned if the intersection happened exectly in the middle of the two points.
+		f32 getKnownIntersectionWithLine(const vector3d<T>& linePoint1,
+			const vector3d<T>& linePoint2) const
+		{
+			core::vector3df vect = linePoint2 - linePoint1;
+			T t2 = Normal.dotProduct(vect);
+			return -((Normal.dotProduct(linePoint1) + D) / t2);
+		}
+
 		//! Returns an intersection with a 3d line, limited between two 3d points.
 		//! \param linePoint1: Point 1 of the line.
 		//! \param linePoint2: Point 2 of the line.
@@ -189,8 +203,8 @@ class plane3d
 	
 		// member variables
 		
-		T D;					// distance from origin
 		vector3d<T> Normal;		// normal vector
+		T D;					// distance from origin
 };
 
 

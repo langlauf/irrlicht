@@ -1,5 +1,7 @@
 ; part of the Irrlicht Engine Shader example.
 ; This Direct3D9 vertex shader will be loaded by the engine.
+; Please note that these example shaders don't do anything really useful. 
+; They only demonstrate that shaders can be used in Irrlicht.
 
 vs.1.1
 

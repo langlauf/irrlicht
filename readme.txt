@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.7
+The Irrlicht Engine SDK version 0.9
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -30,6 +30,8 @@ The Irrlicht Engine SDK version 0.7
                engine using C++.
   \example.net Examples and tutorials showing how to use the engine with
                a .net languages.
+  \exporters   Exporters and tools for varous 3D modelling packages. There
+               is a readme file with more details in the directory.
   \include     Header files to include when using the engine.
   \lib         Lib to link with your programs when using the engine.
   \media       Graphics and sound data for the demo applications and

@@ -24,7 +24,11 @@ namespace irr
 		EET_KEY_INPUT_EVENT,
 
 		//! A log event
-		EET_LOG_TEXT_EVENT
+		EET_LOG_TEXT_EVENT,
+
+		//! A user event with user data. This is not used by Irrlicht and can be used
+		//! to send user specific data though the system.
+		EET_USER_EVENT
 	};
 
 	//! Enumeration for all mouse input events
@@ -158,6 +162,13 @@ struct SEvent
 			const c8* Text;
 			ELOG_LEVEL Level;
 		} LogEvent;
+
+		struct
+		{
+			s32 UserData1; // Some user specified data as int
+			s32 UserData2; // Another user specified data as int
+			f32 UserData3; // Some user specified data as float
+		} UserEvent;
 
 	};
 

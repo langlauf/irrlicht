@@ -12,7 +12,7 @@ namespace irr
 {
 namespace gui
 {
-	// A tab, onto which other gui elements could be added.
+	//! A tab, onto which other gui elements could be added.
 	class IGUITab : public IGUIElement
 	{
 	public:

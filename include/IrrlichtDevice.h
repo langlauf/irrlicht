@@ -107,6 +107,9 @@ namespace irr
 		//! Sets a new event receiver to receive events.
 		virtual void setEventReceiver(IEventReceiver* receiver) = 0;
 
+		//! Returns poinhter to the current event receiver. Returns 0 if there is none.
+		virtual IEventReceiver* getEventReceiver() = 0;
+
 		//! Sets if the window should be resizeable in windowed mode. The default
 		//! is false. This method only works in windowed mode.
 		virtual void setResizeAble(bool resize=false) = 0;

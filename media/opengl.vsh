@@ -1,4 +1,7 @@
 !!ARBvp1.0
+# part of the Irrlicht Engine Shader example.
+# Please note that these example shaders don't do anything really useful. 
+# They only demonstrate that shaders can be used in Irrlicht.
 
 #input
 ATTRIB InPos = vertex.position;

@@ -23,6 +23,20 @@ namespace core
 	//! Constant for converting bettween degrees and radiants.
 	const f64 GRAD_PI2		= 3.1415926535897932384626433832795 / 180.0;
 
+	//! returns minimum of two values. Own implementation to get rid of the STL.
+	template<class T>
+	inline const T min_(const T a, const T b)
+	{
+		return a < b ? a : b;
+	}
+	
+	//! returns minimum of two values. Own implementation to get rid of the STL
+	template<class T>
+	inline T max_(const T a, const T b)
+	{
+		return a < b ? b : a;
+	}
+
 } // end namespace core
 }// end namespace irr
 

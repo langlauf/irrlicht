@@ -66,7 +66,7 @@ namespace video
 		//! optional additional non reflecting texture layer. The reflection
 		//! map should be set as Texture 1.
 		//! Please note that this material type is currently not 100% implemented
-		//! in OpenGL. It works in DirectX8.
+		//! in OpenGL. It works in DirectX8 and 9.
 		EMT_REFLECTION_2_LAYER,
 
 		//! A transparent material. Only the first texture is used.
@@ -79,8 +79,9 @@ namespace video
 		EMT_TRANSPARENT_ADD_COLOR,
 
 		//! Makes the material transparent based on the texture alpha channel.
-		//! Only first texture is used. Please note that this material is currenly
-		//! NOT IMPLEMENTED.
+		//! Only first texture is used. If you are using this material with small
+		//! textures and 3d object, it is a good idea to load the texture in 32 bit
+		//! mode (video::IVideoDriver::setTextureCreationFlag()).
 		EMT_TRANSPARENT_ALPHA_CHANNEL,	
 
 		//! Makes the material transparent based on the vertex alpha value.

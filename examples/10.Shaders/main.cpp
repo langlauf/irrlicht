@@ -33,12 +33,13 @@ IShaderConstantSetCallBack interface and override its only method,
 namely OnSetConstants(). This method will be called every time the material
 is set. 
 The method setVertexShaderConstant() of the IMaterialRendererServices interface
-is used to set the data the shader needs. If you would use a High Level shader
-language like HLSL instead of Assembler as we use it in this example, you would 
-have to set the variable name as parameter instead of the register index.
+is used to set the data the shader needs. If the user chose to use a High Level shader
+language like HLSL instead of Assembler in this example, you have to set the 
+variable name as parameter instead of the register index.
 */
 
 IrrlichtDevice* device = 0;
+bool UseHighLevelShaders = false;
 
 class MyShaderCallBack : public video::IShaderConstantSetCallBack
 {
@@ -49,10 +50,16 @@ public:
 		video::IVideoDriver* driver = services->getVideoDriver();
 
 		// set inverted world matrix
+		// if we are using highlevel shaders (the user can select this when
+		// starting the program), we must set the constants by name.
 
 		core::matrix4 invWorld = driver->getTransform(video::ETS_WORLD);
 		invWorld.makeInverse();
-		services->setVertexShaderConstant(&invWorld.M[0], 0, 4);
+
+		if (UseHighLevelShaders)
+			services->setVertexShaderConstant("mInvWorld", &invWorld.M[0], 16);
+		else
+			services->setVertexShaderConstant(&invWorld.M[0], 0, 4);
 
 		// set clip matrix
 
@@ -60,30 +67,47 @@ public:
 		worldViewProj = driver->getTransform(video::ETS_PROJECTION);			
 		worldViewProj *= driver->getTransform(video::ETS_VIEW);
 		worldViewProj *= driver->getTransform(video::ETS_WORLD);
-		core::matrix4 tr = worldViewProj;
-		services->setVertexShaderConstant(&tr.M[0], 4, 4);
+
+		if (UseHighLevelShaders)
+			services->setVertexShaderConstant("mWorldViewProj", &worldViewProj.M[0], 16);
+		else
+			services->setVertexShaderConstant(&worldViewProj.M[0], 4, 4);		
 
 		// set camera position
 
-		core::vector3df pos = device->getSceneManager()->getActiveCamera()->getAbsolutePosition();
-		services->setVertexShaderConstant(reinterpret_cast<f32*>(&pos), 8, 1);
+		core::vector3df pos = device->getSceneManager()->
+			getActiveCamera()->getAbsolutePosition();
+
+		if (UseHighLevelShaders)
+			services->setVertexShaderConstant("mLightPos", reinterpret_cast<f32*>(&pos), 3);
+		else
+			services->setVertexShaderConstant(reinterpret_cast<f32*>(&pos), 8, 1);
 
 		// set light color 
 
 		video::SColorf col(0.0f,1.0f,1.0f,0.0f);
-		services->setVertexShaderConstant(reinterpret_cast<f32*>(&col), 9, 1);
+
+		if (UseHighLevelShaders)
+			services->setVertexShaderConstant("mLightColor", reinterpret_cast<f32*>(&col), 4);
+		else
+			services->setVertexShaderConstant(reinterpret_cast<f32*>(&col), 9, 1);
 
 		// set transposed world matrix
 			
 		core::matrix4 world = driver->getTransform(video::ETS_WORLD);
 		world = world.getTransposed();
-		services->setVertexShaderConstant(&world.M[0], 10, 4);
+
+		if (UseHighLevelShaders)
+			services->setVertexShaderConstant("mTransWorld", &world.M[0], 16);
+		else
+			services->setVertexShaderConstant(&world.M[0], 10, 4);
 	}
 };
 
 /*
 	The next few lines start up the engine. Just like in most other tutorials
-	before.
+	before. But in addition, we ask the user if he wants this example to use
+	high level shaders if he selected a driver which is capable of doing so.
 */
 int main()
 {
@@ -107,6 +131,15 @@ int main()
 		case 'e': driverType = video::EDT_NULL;     break;
 		default: return 0;
 	}	
+
+	// ask the user if we should use high level shaders for this example
+	if (driverType == video::EDT_DIRECTX9)
+	{
+		printf("Please press 'y' if you want to use high level shaders.\n");
+		std::cin >> i;
+		if (i == 'y')
+			UseHighLevelShaders = true;
+	}
 
 	// create device
 
@@ -142,9 +175,18 @@ int main()
 		vsFileName = "../../media/d3d8.vsh";
 		break;
 	case video::EDT_DIRECTX9:
-		psFileName = "../../media/d3d9.psh";
-		vsFileName = "../../media/d3d9.vsh";
+		if (UseHighLevelShaders)
+		{
+			psFileName = "../../media/d3d9.hlsl";
+			vsFileName = psFileName; // both shaders are in the same file
+		}
+		else
+		{
+			psFileName = "../../media/d3d9.psh";
+			vsFileName = "../../media/d3d9.vsh";
+		}
 		break;
+
 	case video::EDT_OPENGL:
 		psFileName = "../../media/opengl.psh";
 		vsFileName = "../../media/opengl.vsh";
@@ -208,11 +250,33 @@ int main()
 	{
 		MyShaderCallBack* mc = new MyShaderCallBack();
 
-		newMaterialType1 = gpu->addShaderMaterialFromFiles(vsFileName,
-			psFileName, mc, video::EMT_SOLID);
+		// create the shaders depending on if the user wanted high level
+		// or low level shaders:
 
-		newMaterialType2 = gpu->addShaderMaterialFromFiles(vsFileName,
-			psFileName, mc, video::EMT_TRANSPARENT_ADD_COLOR);
+		if (UseHighLevelShaders)
+		{
+			// create material from high level shaders (hlsl or glsl)
+
+			newMaterialType1 = gpu->addHighLevelShaderMaterialFromFiles(
+				vsFileName,	"vertexMain", video::EVST_VS_1_1,
+				psFileName, "pixelMain", video::EPST_PS_1_1,
+				mc, video::EMT_SOLID);
+
+			newMaterialType2 = gpu->addHighLevelShaderMaterialFromFiles(
+				vsFileName,	"vertexMain", video::EVST_VS_1_1,
+				psFileName, "pixelMain", video::EPST_PS_1_1,
+				mc, video::EMT_TRANSPARENT_ADD_COLOR);
+		}
+		else
+		{
+			// create material from low level shaders (asm or arb_asm)
+
+			newMaterialType1 = gpu->addShaderMaterialFromFiles(vsFileName,
+				psFileName, mc, video::EMT_SOLID);
+
+			newMaterialType2 = gpu->addShaderMaterialFromFiles(vsFileName,
+				psFileName, mc, video::EMT_TRANSPARENT_ADD_COLOR);
+		}
 
 		mc->drop();
 	}

@@ -88,6 +88,7 @@ void loadModel(const c8* fn)
 		Model->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 	Model->setMaterialFlag(video::EMF_LIGHTING, false);
 	Model->setDebugDataVisible(true);
+	Model->setAnimationSpeed(1000);
 }
 
 
@@ -477,7 +478,7 @@ int main()
 			// draw irrlicht engine logo
 			driver->draw2DImage(irrLogo,
 				core::position2d<s32>(10, driver->getScreenSize().Height - 50),
-				core::rect<s32>(0,0,108-22,460-429));
+				core::rect<s32>(0,0,108-20,460-429));
 		
 			driver->endScene();
 

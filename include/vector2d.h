@@ -101,7 +101,30 @@ public:
 		return *this;
 	}
 
-	//! Calculates the angle of this vector in grad.
+	//! Calculates the angle of this vector in grad in the trigonometric sense.
+	//! This method has been suggested by Pr3t3nd3r.
+	//! \return Returns a value between 0 and 360.
+	inline f64 getAngleTrig() const
+	{
+		if (X == 0.0)
+			return Y < 0.0 ? 270.0 : 90.0;
+		else
+		if (Y == 0)
+			return X < 0.0 ? 180.0 : 0.0;
+
+		if ( Y > 0.0)
+			if (X > 0.0)
+				return atan(Y/X) * GRAD_PI;
+			else
+				return 180.0-atan(Y/-X) * GRAD_PI;
+		else
+			if (X > 0.0)
+				return 360.0-atan(-Y/X) * GRAD_PI;
+			else
+				return 180.0+atan(-Y/-X) * GRAD_PI;
+	} 
+
+	//! Calculates the angle of this vector in grad in the counter trigonometric sense.
 	//! \return Returns a value between 0 and 360.
 	inline f64 getAngle() const
 	{
@@ -141,6 +164,17 @@ public:
 		if (tmp < 0.0) tmp = -tmp;
 
 		return atan(sqrt(1 - tmp*tmp) / tmp) * GRAD_PI;
+	}
+
+
+	//! returns interpolated vector
+	//! \param other: other vector to interpolate between
+	//! \param d: value between 0.0f and 1.0f.
+	vector2d<T> getInterpolated(const vector2d<T>& other, f32 d) const
+	{
+		f32 inv = 1.0f - d;
+		return vector2d<T>(other.X*inv + X*d,
+						   other.Y*inv + Y*d);
 	}
 
 	// member variables

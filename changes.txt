@@ -1,4 +1,187 @@
 -------------------------------------------------------------------------------------
+Changes in version 0.9 (28 Mar 2005)
+
+- There is now a 100% working terrain renderer available. The old buggy and unfinished terrain  
+  scene node has been replaced by a new TerrainSceneNode which is based on Spintz's 
+  GeoMipMapSceneNode. Lots of thanks for his work on this and that he allowed it to be 
+  modified and integrated into Irrlicht.
+  
+- It is now possible for a scene node to draw itself in multiple passes. This means it can
+  register itself for multiple render passes (E_SCENE_NODE_RENDER_PASS) and during rendering
+  it can query the current render pass using ISceneManager::getSceneNodeRenderPass(). With 
+  this, SceneNodes can contain solid and transparent materials at the same time and will be 
+  rendered in the correct order from now on.
+  The IAnimatedMeshSceneNode and the IMeshSceneNode implement this feature, so it is now
+  possible to create for example cars with transparent windows without the need of a separate
+  scene node. Because of this change, all render time enumeration values have been renamed.
+   
+- Irrlicht is now able to load OCT files directly. OCT files 
+  can be created with Paul Nette's Radiosity Processor from http://www.fluidstudios.com 
+  or exported from Blender with Murphy McCauley's exporter. This exporter can be found
+  in the directory \exporters\OCTTools of the Irrlicht SDK or from his homepage
+  http://www.constantthought.com/project/OCTTools. A lot of thanks go to Murphy McCauley
+  for this work on this and his permission to include his OCTTools into Irrlicht.
+  
+- Irrlicht is now able to load Cartography shop 4 (.csm) files directly. A lot of
+  thanks go to Saurav Mohapatra for this work on this and his permission to adapt and
+  include his IrrCSM library into Irrlicht. If you are using .csm files, please note that
+  you'll have to set the path of the textures before loading meshes. You can do this using 
+  SceneManager->getStringParameters()->setParameter(scene::CSM_TEXTURE_PATH,
+   "path/to/your/textures");. The original loader can be obtained from 
+  http://www.geocities.com/standard_template/index.html
+  
+- Irrlicht is now able to load Pulsar LMTools (.lmts) files directly because it now
+  integrates a modified version of Jonas Petersen's lmts loader in version 1.5 (from
+  http://development.mindfloaters.de/). Lots of thanks go to him for creating this
+  loader and giving his permission to add it to Irrlicht. If you are using this loader,
+  please note that you can set the path of the textures before loading .lmts files. 
+  You can do this using SceneManager->getStringParameters()->setParameter(
+  scene::LMTS_TEXTURE_PATH, "path/to/your/textures");
+  
+- Irrlicht is now able to load my3D files directly. The My3DTools 3.12 loader by 
+  Zhuck Dimitry was (a bit modified and) integrated into the engine. Lots of thanks
+  go to him for his work and for giving his permission to do that. Newer versions
+  of this loader can be found at http://my3dproject.nm.ru. The exporters for this
+  file format have also been added into the \exporters directory of the SDK.
+  
+- To be able to replace built-in meshloaders with newer external versions without the
+  need of recompiling the engine, now mesh loaders which are added to the engine using
+  ISceneManager::addExternalMeshLoader() are prefered over built-in mesh loaders.
+  Thanks to for his suggestion of this.
+  
+- D3D8 and D3D9 support for dev-cpp has been improved. If you are using Dev-Cpp and
+  a DirectX-Devpack for recompiling the engine, just add 
+  -DIRR_COMPILE_WITH_DX9_DEV_PACK to your compiler 
+  settings and something like -ld3dx9 -ld3dx8 to the linker settings and 
+  press 'compile'.
+  
+- The SceneManager now contains an interface for storing and exchanging parameters. 
+  ISceneManager::getStringParameters() returns IStringParameters, which can be used for
+  example by extensions like external mesh loaders to set and read independent parameters.
+  This is also currently used by the newly built in CMS, LMTS and MY3D loader: It is possible to 
+  set a value 'CSM_TexturePath', 'LMTS_TexturePath' or 'MY3D_TexturePath' to let them know 
+  the path of the textures. 
+  
+- IAnimatedMeshSceneNode now has two new methods for being able to have more influcence
+  on the animation playback: It is now possible to set the playback mode to looped or
+  non looped with IAnimatedMeshSceneNode::setLoopMode() and it is possible to set
+  a callback interface which will be called when animation playback has finished 
+  using IAnimatedMeshSceneNode::setAnimationEndCallback(). Thanks to Electron for his
+  suggestion for this addition.
+  
+- The software renderer has a new triangle renderer specialized on disabled zread and write.
+  This means that skyboxes are now rendered in the correct order when using the software 
+  renderer. 
+  
+- Multitexturing and other extensions in Linux are now turned on by default. There is a new
+  #define in the file IrrCompileConfig.h for disabling this again: LINUX_OPENGL_USE_EXTENSIONS
+  
+- There is now a EET_USER_EVENT user event type for making it possible to send custom 
+  events through the system.
+  
+- The setTarget()-method of the FPSCameraSceneNode now is finally correctly implemented.
+  
+- Changing parents of scene nodes is now much safer. The parent member of a scene node now is 
+  set to 0 in all cases and should never point to invalid data when rearranging the scene node
+  tree. In addition, there is now a getParent() method in the ISceneNode class.
+  
+- Debug breakpoints using "_asm int 3" are now only being used when in debug mode and 
+  using Micosoft's compiler. Now more exotic compilers like BorlandC++ will like 
+  Irrlicht better because of this.
+
+- Updated zlib version to 1.2.2
+
+- An implementation of 3D triangle clipping in the software renderer has been started. It
+  is not 100% ready, but it is a beginning. This means now for version 0.9, that there are
+  not that much artifact triangles drawn anymore. But this means also that drawing is 
+  a lot faster and that triangles clipped at the border of the screen will disappear 
+  too fast. If anyone wants to finish the drawClippedIndexedTriangleListT() method
+  in the CVideoSoftware class, he is welcome :)
+
+- There is a new parameter in the IVideoDriver::createImageFromData() which causes the 
+  image to be able to own foreign memory.
+
+- A renderstate setting has been fixed which caused to disable mip maps on wrong geometry 
+  when there was other geometry which had no mip maps. At least this bug doesn't appear 
+  on my hardware any more, I hope this means the problem it is now fixed.  
+  
+- A bug in the D3D version of the stencil shadows has been fixed thanks to Murphy. Sometimes
+  you could see a small shadow similar to the the real shadow in the scene. This should now
+  be fixed.
+  
+- Irrlicht can now draw non filled concyclic reqular 2d polyons like triangles, tetragons,
+  pentagons, hexagons, heptagons, octagons, enneagons, decagons, hendecagons, dodecagon and
+  triskaidecagons. And circles. Yes, I was a little bit bored. Christian Lins made a 
+  suggestion to add 2D circle drawing support to Irrlicht, and I did this, but also added
+  support for drawing these figures using the same method. Check out 
+  IVideoDriver::draw2DPolygon().  
+  
+- Removed a memory leak when creating hlsl pixel shaders.
+  
+- I've made varoius updates to the documentation and moved to doxygen 1.4
+  
+- Fixed a bug in the xml reader which caused it to crash when reading empty xml files.
+  
+- Removed the buggy bsp tree scene node from the engine.
+
+- Tweaked some settings with some GUI elements.
+
+- ISceneNode::getAbsolutePosition now should be way faster.
+  
+- Applied a fix by William Finlayson to the opengl stencil shadow drawing code which
+  fixes several bugs.
+  
+- There is now a min_ and max_ template function available in the core namespace.
+
+- Added some bugfixes to MayaCameraSceneNode by jox. An even more improved version can
+  be found at http://development.mindfloaters.de/Downloads.12.0.html.
+
+- core::array now has a push_front method.
+
+- core::array now has an insert method. (Thanks to jox)
+
+- IrrlichtDevice now has a getEventReceiver() method. 
+
+- Fixed a mouse wheel - mouse coordinates bug thanks to a bug report and fix by jox.
+
+- Changed the first parameter in IGUIContextMenu::addItem(wchar_t* text, ...) to const.
+  Thanks to jox.. again. :)
+  
+- Fixed ignore path bug in zip file reader thanks to Pr3t3nd3r. It is now possible
+  to use zip files with the complete path to the files from the archive.
+  
+- Fixed matrix4::rotateVect method after a suggestion by several users. (I think Electron, 
+  Pr3t3nd3r, Jox) Thanks all :)
+  
+- Fixed a bug in CGUIEditbox that enables you to write more characters than the max set
+  limit, thanks to Rush for the bug report and fix.
+  
+- Added getAngleTrig() method to vector2d as suggested by Pr3t3nd3r, thanks!
+  
+- After a suggestion by schick, plane3d<T> now stores the normal vector first, and then
+  the distance to the origin.
+  
+- A bug was fixed which caused 2D elements to be drawn with a second texture set in OpenGL
+  mode when 3D geometry with >1 textures has been rendered before. This effect has often
+  been reported as darkened 2D gui in the forum.
+
+- A bug in IrrCompileConfig prevented users to be able to recompile irrlicht with D3D9 
+  with gcc. This is now fixed, thanks to Jedive.
+  
+- The project setup for Dev-C++ is now nicer. Added lots of folders and cleaned up the
+  whole setup a little bit with this.
+  
+- Fixed a small bug in CGUIScrollbar reported by Klaus Niederkrueger.
+  
+- The Checkbox rect is now clipped correctly, thanks to jox for that bug report.
+  
+- The debug names of all scene nodes and GUI elements are now set correctly.
+
+- Applied a patch making it possible to compile Irrlicht without OpenGL in Linux.
+ 
+- core::rect::clipAgainst was fixed thanks to a bug report and correction by Jox.
+
+-------------------------------------------------------------------------------------
 Changes in version 0.8 (19 Feb 2005)
 
 - Irrlicht now supports HLSL. This is possible using the new 
@@ -267,7 +450,7 @@ Changes in version 0.7: (11 Sep 2004)
 
 - EDriverType enumeration renamed to E_DRIVER_TYPE
 
-- SceneNodeRenderTime enumeration renamed to E_SCENE_NODE_RENDER_TIME
+- SceneNodeRenderTime enumeration renamed to E_SCENE_NODE_RENDER_PASS
   
 -------------------------------------------------------------------------------------
 Changes in version 0.6: (09 Mar 2004)

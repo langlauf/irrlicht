@@ -65,9 +65,9 @@ int main()
 	driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, true);
 
 	// add irrlicht logo
-	env->addImage(driver->getTexture("..//..//media//irrlichtlogoalpha.tga"),
+	env->addImage(driver->getTexture("../../media/irrlichtlogoalpha.tga"),
 		core::position2d<s32>(10,10));
-
+		
 	// add camera
 	scene::ICameraSceneNode* camera = 
 		smgr->addCameraSceneNodeFPS(0,100.0f,300.0f);

@@ -37,7 +37,7 @@ namespace gui
 		//! \param hasSubMenu: Set this to true if there should be a submenu
 		//! at this item. You can acess this submenu via getSubMenu().
 		//! \return Returns the index of the new item
-		virtual s32 addItem(wchar_t* text, s32 commandId=-1, bool enabled=true,
+		virtual s32 addItem(const wchar_t* text, s32 commandId=-1, bool enabled=true,
 			bool hasSubMenu=false) = 0;
 
 		//! Adds a separator item to the menu

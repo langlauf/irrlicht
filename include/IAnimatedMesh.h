@@ -36,7 +36,22 @@ namespace scene
 		//! Microsoft Direct3D .x-file. Can contain static and skeletal animated 
 		//! skinned meshes. This is the standard and best supported 
 		//! format of the Irrlicht Engine.
-		EAMT_X
+		EAMT_X,
+
+		//! My3D Mesh, the file format by Zhuck Dimitry
+		EAMT_MY3D,
+
+		//! Pulsar LMTools (.lmts) file. The Irrlicht loader for this was written by
+		//! Jonas Petersen
+		EAMT_LMTS,
+
+		//! Cartography Shop .csm file. The loader for this was created by Saurav Mohapatra.
+		EAMT_CSM,
+
+		//! .oct file for Paul Nette's FSRad or from Murphy McCauley's Blender .oct exporter.
+		//! The oct file format contains 3D geometry and lightmaps and can 
+		//! be loaded directly by Irrlicht
+		EAMTS_OCT
 	};
 
 	//! Interface for an animated mesh.

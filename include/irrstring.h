@@ -216,7 +216,7 @@ public:
 	//! Direct access operator
 	T& operator [](const s32 index)  const
 	{
-		#ifdef _DEBUG
+		#if defined(_DEBUG) && defined(_MSC_VER)
 		if (index>=used)
 			_asm int 3 // bad index
 		#endif

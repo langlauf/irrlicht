@@ -111,6 +111,11 @@ namespace irr
 		//! is stored somewhere by the driver.
 		bool drop()
 		{
+			#if defined(_DEBUG) && defined(_MSC_VER)
+			if (ReferenceCounter <= 0)
+				_asm int 3; // someone is doing bad reference counting.
+			#endif
+
 			--ReferenceCounter;
 			if (!ReferenceCounter)
 			{

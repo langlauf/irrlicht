@@ -41,7 +41,6 @@
 #include "IAnimatedMeshMS3D.h"
 #include "IAnimatedMeshX.h"
 #include "IAnimatedMeshSceneNode.h"
-#include "IBspTreeSceneNode.h"
 #include "ICameraSceneNode.h"
 #include "IDummyTransformationSceneNode.h"
 #include "IEventReceiver.h"
@@ -78,6 +77,7 @@
 #include "irrString.h"
 #include "ISceneManager.h"
 #include "ISceneNode.h"
+#include "IStringParameters.h"
 #include "ITriangleSelector.h"
 #include "ISceneNodeAnimator.h"
 #include "ISceneCollisionManager.h"
@@ -120,9 +120,11 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION L"0.8"
+#define IRRLICHT_SDK_VERSION L"0.9"
 
-/*! \mainpage Irrlicht Engine 0.8 API documentation
+/*! \mainpage Irrlicht Engine 0.9 API documentation
+ *
+ * <div align="center"><img src="logobig.png" ></div>
  *
  * \section intro Introduction
  *
@@ -138,13 +140,13 @@
  * suggestions, just send a email to the author of the engine, Nikolaus Gebhardt
  * (niko (at) code3d.com).
  *
+ *
  * \section links Links
  *
  * <A HREF="namespaces.html">Namespaces</A>: A very good place to start reading
  * the documentation.<BR>
- * <A HREF="annotated.html">Compound list</A>: List of all classes with descriptions.<BR>
- * <A HREF="hierarchy.html">Class hierarchy</A>: Class hierarchy list.<BR>
- * <A HREF="classes.html">Alphabetical class list</A>: Good place to find forgotten class names.<BR>
+ * <A HREF="annotated.html">Class list</A>: List of all classes with descriptions.<BR>
+ * <A HREF="functions.html">Class members</A>: Good place to find forgotten features.<BR>
  *
  * \section example Short example
  *
@@ -226,7 +228,8 @@
  * \endcode
  *
  * There is a lot more the engine can do, but I hope this gave a short
- * overview over the basic features of the engine.
+ * overview over the basic features of the engine. For more examples, please take
+ * a look into the examples directory of the SDK.
  */
 
 #include <wchar.h>
@@ -258,7 +261,7 @@
 namespace irr
 {
 	//! Creates an Irrlicht device. The Irrlicht device is the root object for using the engine.
-	/** \param deviceType: Type of the device. This can currently be video::DT_NULL, 
+	/** \param deviceType: Type of the device. This can currently be video::EDT_NULL, 
 	video::EDT_SOFTWARE, video::EDT_DIRECTX8, video::EDT_DIRECTX9 and video::EDT_OPENGL.
 	\param windowSize: Size of the window or the video mode in fullscreen mode.
 	\param bits: Bits per pixel in fullscreen mode. Ignored if windowed mode.

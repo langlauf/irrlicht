@@ -229,6 +229,7 @@ namespace scene
 			for (; it != Children.end(); ++it)
 				if ((*it) == child)
 				{
+					(*it)->Parent = 0;
 					(*it)->drop();
 					Children.erase(it);
 					return true;
@@ -243,7 +244,10 @@ namespace scene
 		{
 			core::list<ISceneNode*>::Iterator it = Children.begin();
 			for (; it != Children.end(); ++it)
+			{
+				(*it)->Parent = 0;
 				(*it)->drop();
+			}
 
 			Children.clear();
 		}
@@ -407,9 +411,7 @@ namespace scene
 		//! \return Returns the current absolute position of the scene node.
 		virtual core::vector3df getAbsolutePosition() const
 		{
-			core::vector3df pos(0.0f, 0.0f, 0.0f);
-			AbsoluteTransformation.transformVect(pos);
-			return pos;
+			return AbsoluteTransformation.getTranslation();
 		}
 
 
@@ -512,6 +514,12 @@ namespace scene
 					Parent->getAbsoluteTransformation() * getRelativeTransformation();
 			else
 				AbsoluteTransformation = getRelativeTransformation();
+		}
+		
+		//! Returns the parent of this scene node
+		scene::ISceneNode* getParent()
+		{
+			return Parent;
 		}
 
 	protected:

@@ -76,8 +76,6 @@ public:
 		delete [] old_data;
 	}
 
-
-
 	//! Adds an element at back of array. If the array is to small to 
 	//! add this new element, the array is made bigger.
 	//! \param element: Element to add at the back of the array.
@@ -89,6 +87,48 @@ public:
 		data[used++] = element;
 		is_sorted = false;
 	}
+
+
+	//! Adds an element at the front of the array. If the array is to small to 
+	//! add this new element, the array is made bigger. Please note that this
+	//! is slow, because the whole array needs to be copied for this.
+	//! \param element: Element to add at the back of the array.
+	void push_front(const T& element)
+	{
+		if (used + 1 > allocated)
+			reallocate(used * 2 +1);
+
+		for (int i=(int)used; i>0; --i)
+			data[i] = data[i-1];
+
+		data[0] = element;
+		is_sorted = false;
+		++used;
+	}
+
+	
+	//! Insert item into array at specified position. Please use this
+	//! only if you know what you are doing (possible performance loss). 
+	//! The preferred method of adding elements should be push_back().
+	//! \param element: Element to be inserted
+	//! \param index: Where position to insert the new element.
+	void insert(const T& element, u32 index=0) 
+	{
+		#ifdef _DEBUG
+		if (index>used)
+			_asm int 3 // access violation
+		#endif
+
+		if (used + 1 > allocated)
+			reallocate(used * 2 +1);
+
+		for (u32 i=used++; i>index; i--) 
+			data[i] = data[i-1];
+
+		data[index] = element;
+		is_sorted = false;
+	}
+
 
 
 
@@ -165,7 +205,7 @@ public:
 	//! Direct access operator
 	T& operator [](u32 index)
 	{
-		#ifdef _DEBUG
+		#if defined(_DEBUG) && defined(_MSC_VER)
 		if (index>=used)
 			_asm int 3 // access violation
 		#endif
@@ -178,7 +218,7 @@ public:
 	//! Direct access operator
 	const T& operator [](u32 index) const
 	{
-		#ifdef _DEBUG
+		#if defined(_DEBUG) && defined(_MSC_VER)
 		if (index>=used)
 			_asm int 3 // access violation
 		#endif
@@ -189,7 +229,7 @@ public:
     //! Gets last frame
 	const T& getLast() const
 	{
-		#ifdef _DEBUG
+		#if defined(_DEBUG) && defined(_MSC_VER)
 		if (!used)
 			_asm int 3 // access violation
 		#endif
@@ -200,7 +240,7 @@ public:
     //! Gets last frame
 	T& getLast()
 	{
-		#ifdef _DEBUG
+		#if defined(_DEBUG) && defined(_MSC_VER)
 		if (!used)
 			_asm int 3 // access violation
 		#endif
@@ -357,7 +397,7 @@ public:
 	//! \param index: Index of element to be erased.
 	void erase(u32 index)
 	{
-		#ifdef _DEBUG
+		#if defined(_DEBUG) && defined(_MSC_VER)
 		if (index>=used || index<0)
 			_asm int 3 // access violation
 		#endif
@@ -375,7 +415,7 @@ public:
 	//! \param count: Amount of elements to be erased.
 	void erase(u32 index, s32 count)
 	{
-		#ifdef _DEBUG
+		#if defined(_DEBUG) && defined(_MSC_VER)
 		if (index>=used || index<0 || count<1 || index+count>used)
 			_asm int 3 // access violation
 		#endif

@@ -12,14 +12,17 @@
 #include "SColor.h"
 #include "SMaterial.h"
 #include "IEventReceiver.h"
+#include "ITerrainSceneNode.h"
 
 namespace irr
 {
 	struct SKeyMap;
+	class IStringParameters;
 
 namespace io
 {
 	class IFileSystem;
+	class IReadFile;
 }
 
 namespace gui
@@ -36,28 +39,69 @@ namespace video
 
 namespace scene
 {
-	//! Enumeration with render times.
+	//! Name of the parameter for changing the texture path of the built-in csm loader.
+	/** Use it like this:
+	 \code
+	 SceneManager->getStringParameters()->setParameter(
+	    scene::CSM_TEXTURE_PATH, "path/to/your/textures");
+	\endcode
+	**/ 
+	const char* const CSM_TEXTURE_PATH = "CSM_TexturePath";
+
+	//! Name of the parameter for changing the texture path of the built-in lmts loader.
+	/** Use it like this:
+	 \code
+	 SceneManager->getStringParameters()->setParameter(
+	   scene::LMTS_TEXTURE_PATH, "path/to/your/textures");
+	\endcode
+	**/ 
+	const char* const LMTS_TEXTURE_PATH = "LMTS_TexturePath";
+
+	//! Name of the parameter for changing the texture path of the built-in my3d loader.
+	/** Use it like this:
+	 \code
+	 SceneManager->getStringParameters()->setParameter(
+	   scene::MY3D_TEXTURE_PATH, "path/to/your/textures");
+	\endcode
+	**/ 
+	const char* const MY3D_TEXTURE_PATH = "MY3D_TexturePath";
+
+	//! Enumeration for render passes.
 	/** A parameter passed to the registerNodeForRendering() method of the ISceneManager, 
-	specifiing when the mode wants to be drawed in relation to the other nodes. */
-	enum E_SCENE_NODE_RENDER_TIME
+	specifying when the mode wants to be drawed in relation to the other nodes. */
+	enum E_SCENE_NODE_RENDER_PASS
 	{
-		//! scene nodes which are lights or camera should use this,
+		//! Scene nodes which are lights or camera should use this,
 		//! the very first pass.
-		SNRT_LIGHT_AND_CAMERA,	
+		ESNRP_LIGHT_AND_CAMERA,	
 
-		//! this is used for sky boxes.
-		SNRT_SKY_BOX,
+		//! This is used for sky boxes.
+		ESNRP_SKY_BOX,
 
-		//! Default render time, all normal objects should use this.
-		//! The scene Manager will determine by itself if an object is 
-		//! transparent, and do everything necessary by itself.
-		SNRT_DEFAULT,			
+		//! All normal objects can use this for registering themselves. 
+		//! This value will never be returned by ISceneManager::getSceneNodeRenderPass().
+		//! The scene manager will determine by itself if an object is 
+		//! transparent or solid and register the object as SNRT_TRANSPARENT or
+		//! SNRT_SOLD automaticly if you call registerNodeForRendering with this
+		//! value (which is default). Note that it will register the node only as ONE type.
+		//! If your scene node has both solid and transparent material types register
+		//! it twice (one time as SNRT_SOLID, the other time as SNRT_TRANSPARENT) and
+		//! in the render() method call getSceneNodeRenderPass() to find out the current
+		//! render pass and render only the corresponding parts of the node.
+		ESNRP_AUTOMATIC, 
+
+		//! Solid scene nodes or special scene nodes without materials.
+		ESNRP_SOLID,
 
 		//! Drawn after the transparent nodes, the time for drawing shadow volumes						
-		SNRT_SHADOW,			
+		ESNRP_SHADOW,			
 
-		//! Never used, value specifing how much parameters there are
-		SNRT_COUNT				
+		//! Transparent scene nodes, drawn after shadow nodes. They are sorted from back
+		//! to front and drawn in that order.
+		ESNRP_TRANSPARENT,
+
+		//! Never used, value specifing how much parameters there are.
+		ESNRP_COUNT				
 	};
 
 	class IMesh;
@@ -65,7 +109,6 @@ namespace scene
 	class ISceneNode;
 	class ICameraSceneNode;
 	class IAnimatedMeshSceneNode;
-	class IBspTreeSceneNode;
 	class ISceneNodeAnimator;
 	class ISceneNodeAnimatorCollisionResponse;
 	class ILightSceneNode;
@@ -83,7 +126,7 @@ namespace scene
 	//!	The Scene Manager manages scene nodes, mesh recources, cameras and all the other stuff.
 	/** All Scene nodes can be created only here. There is a always growing list of scene 
 	nodes for lots of purposes: Indoor rendering scene nodes like the Octree 
-	(addOctTreeSceneNode()) or the binary space partition tree (addBspTreeSceneNode()),
+	(addOctTreeSceneNode()) or the terrain renderer (addTerrainSceneNode()),
 	different Camera scene nodes (addCameraSceneNode(), addCameraSceneNodeMaya()),
 	scene nodes for Light (addLightSceneNode()), Billboards (addBillboardSceneNode())
 	and so on.
@@ -92,6 +135,9 @@ namespace scene
 	visible, its children won't be visible too. In this way, it is for example easily possible
 	to attach a light to a moving car, or to place a walking character on a moving platform
 	on a moving ship.
+	The SceneManager is also able to load 3d mesh files of different formats. Take a look 
+	at getMesh() to find out what formats are supported. And if these formats are not enough
+	for you can use addExternalMeshLoader() to add your own format to the engine.
 	*/
 	class ISceneManager : public IUnknown
 	{
@@ -101,16 +147,103 @@ namespace scene
 		virtual ~ISceneManager() {};
 
 		//! Gets pointer to an animateable mesh. Loads it if needed.
-		//! Currently there are the following mesh formats supported:
-		//! .obj(Alias Wavefront Maya), .ms3d(Milkshape3D), .bsp(Quake3 Level),
-		//! .md2(Quake2 Model), .3ds(3D Studio), .x(Microsoft DirectX) More formats coming soon,
-		//! make a feature request on the Irrlicht Engine homepage if you like.
-		//! Special thanks go to Dean P. Macri who extended the Quake 3
-		//! .bsp loader with the curved surfaces feature.
-		//! \param filename: Filename of the mesh to load.
-		//! \return Returns NULL if failed and the pointer to the mesh if 
-		//! successful. 
-		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		/** 
+		 *  Currently there are the following mesh formats supported:
+		 *  <TABLE border="1" cellpadding="2" cellspacing="0">
+		 *  <TR> 
+		 *    <TD>Format</TD>
+		 *    <TD>Description</TD>
+		 *  </TR>
+		 *  <TR> 
+		 *    <TD>3D Studio (.3ds)</TD>
+		 *    <TD>Loader for 3D-Studio files which lots of 3D packages are able to export. 
+		 *      Only static meshes are currently supported by this importer. </TD>
+		 *  </TR>
+		 *  <TR> 
+		 *    <TD>Cartography shop 4 (.csm)</TD>
+		 *    <TD>Cartography Shop is a modeling program for creating architecture and calculating 
+		 *      lighting. Irrlicht can directly import .csm files thanks to the IrrCSM library 
+		 *      created by Saurav Mohapatra which is now integrated directly in Irrlicht. 
+		 *      If you are using this loader, please note that you'll have to set the path 
+		 *      of the textures before loading .csm files. You can do this using SceneManager-&gt;getStringParameters()-&gt;setParameter(scene::CSM_TEXTURE_PATH, 
+		 *      &quot;path/to/your/textures&quot;);</TD>
+		 *  </TR>
+		 *  <TR> 
+		 *    <TD>DirectX (.x)</TD>
+		 *    <TD>Platform independent importer (so not D3D-only) for .x files. Most 3D 
+		 *      packages can export these natively and there are several tools for them 
+		 *      available. (e.g. the Maya exporter included in the DX SDK) .x files can 
+		 *      include skeletal animations and Irrlicht is able to play and display them. 
+		 *      Currently, Irrlicht only supports text encoded .x files.</TD>
+		 *  </TR>
+		 *  <TR> 
+		 *    <TD>Maya (.obj)</TD>
+		 *    <TD>Most 3D software can create .obj files which contain static geometry without 
+		 *      material data. This importer for Irrlicht can load them directly. </TD>
+		 *  </TR>
+		 *  <TR> 
+		 *    <TD>Milkshape (.ms3d)</TD>
+		 *    <TD>.MS3D files contain models and sometimes skeletal animations from the 
+		 *      Milkshape 3D modeling and animation software. This importer for Irrlicht 
+		 *      can display and/or animate these files.  </TD>
+  		 *  </TR>
+  		 *  <TR> 
+    	 *  <TD>My3D (.my3d)</TD>
+		 *      <TD>.my3D is a flexible 3D file format. The My3DTools contains plug-ins to 
+		 *        export .my3D files from several 3D packages. With this built-in importer, 
+		 *        Irrlicht can read and display those files directly. This loader was written 
+		 *        by Zhuck Dimitry who also created the whole My3DTools package. If you are using this loader, please 
+		 *      note that you can set the path of the textures before loading .my3d files. 
+		 *      You can do this using SceneManager-&gt;getStringParameters()-&gt;setParameter(scene::MY3D_TEXTURE_PATH, 
+		 *      &quot;path/to/your/textures&quot;); </TD>
+		 *    </TR>
+		 *    <TR> 
+		 *      <TD>OCT (.oct)</TD>
+		 *      <TD>The oct file format contains 3D geometry and lightmaps and can be loaded 
+		 *        directly by Irrlicht. OCT files<br>
+		 *        can be created by FSRad, Paul Nette's radiosity processor or exported from 
+		 *        Blender using OCTTools which can be found in the exporters/OCTTools directory 
+		 *        of the SDK. Thanks to Murphy McCauley for creating all this.</TD>
+		 *    </TR>
+		 *    <TR> 
+		 *      <TD>Pulsar LMTools (.lmts)</TD>
+		 *      <TD>LMTools is a set of tools (Windows &amp; Linux) for creating lightmaps. 
+		 *        Irrlicht can directly read .lmts files thanks to<br>
+		 *        the importer created by Jonas Petersen. If you are using this loader, please 
+		 *        note that you can set the path of the textures before loading .lmts files. 
+		 *        You can do this using SceneManager-&gt;getStringParameters()-&gt;setParameter(scene::LMTS_TEXTURE_PATH, 
+		 *        &quot;path/to/your/textures&quot;); Notes for<br>
+		 *        this version of the loader:<br>
+		 *        - It does not recognice/support user data in the *.lmts files.<br>
+		 *        - The TGAs generated by LMTools don't work in Irrlicht for some reason (the 
+		 *        textures are upside down). Opening and resaving them in a graphics app will 
+		 *        solve the problem.</TD>
+		 *    </TR>
+		 *    <TR> 
+		 *      <TD>Quake 3 levels (.bsp)</TD>
+		 *      <TD>Quake 3 is a popular game by IDSoftware, and .pk3 files contain .bsp files 
+		 *        and textures/lightmaps describing huge<br>
+		 *        prelighted levels. Irrlicht can read .pk3 and .bsp files directly and thus 
+		 *        render Quake 3 levels directly. Written by Nikolaus Gebhardt enhanced by 
+		 *        Dean P. Macri with the curved surfaces feature. </TD>
+		 *    </TR>
+		 *    <TR> 
+		 *      <TD>Quake 2 models (.md2)</TD>
+		 *      <TD>Quake 2 models are characters with morph target animation. Irrlicht can 
+		 *        read, display and animate them directly with this importer. </TD>
+		 *    </TR>
+		 *  </TABLE>
+		 *
+		 *  To load and display a mesh quickly, just do this:
+		 *  \code
+		 *  SceneManager->addAnimatedMeshSceneNode(
+		 *		SceneManager->getMesh("yourmesh.3ds"));
+		 *  \endcode
+		 *  \param filename: Filename of the mesh to load.
+		 *  \return Returns NULL if failed and the pointer to the mesh if 
+		 *  successful. 
+		 *  This pointer should not be dropped. See IUnknown::drop() for more information.
+		 **/
 		virtual IAnimatedMesh* getMesh(const c8* filename) = 0;
 
 		//! Returns the video driver.
@@ -185,22 +318,8 @@ namespace scene
 			const core::vector3df& rotation = core::vector3df(0,0,0),
 			const core::vector3df& scale = core::vector3df(1.0f, 1.0f, 1.0f)) = 0;
 
-		//! Adds a scene node for rendering using a binary space partition tree.
-		//! This is a nice method for rendering indoor scenes. Based on a mesh given as parameter, the
-		//! tree will be build. Note that The build process can be slow, if there are lots of polygons.
-		//! Note that the implementation of the BspTree in the Irrlicht Engine is currently
-		//! not complete a little bit buggy. You may want to use the OctTree instead, it already works.
-		//! Use ISceneManager::addOctTreeSceneNode() for that.
-		//! \param mesh: The mesh containing all geometry from which the binary space partition tree will be build.
-		//! \param parent: Parent node of the bsp tree node.
-		//! \param id: id of the node. This id can be used to identify the node.
-		//! \return Returns the pointer to the IBspTreeSceneNode if successful, otherwise 0. 
-		//! This pointer should not be dropped. See IUnknown::drop() for more information.
-		virtual IBspTreeSceneNode* addBspTreeSceneNode(IMesh* mesh, ISceneNode* parent=0, s32 id=-1) = 0;
-
 		//! Adds a scene node for rendering using a octtree to the scene graph. This a good method for rendering 
-		//! scenes with lots of geometry. The Octree is built on the fly from the mesh, much
-		//! faster then a bsp tree.
+		//! scenes with lots of geometry. The Octree is built on the fly from the mesh.
 		//! \param mesh: The mesh containing all geometry from which the octtree will be build.
 		//! If this animated mesh has more than one frames in it, the first frame is taken.
 		//! \param parent: Parent node of the octtree node.
@@ -364,36 +483,65 @@ namespace scene
 			const core::vector3df& position = core::vector3df(0,0,0),
 			const core::vector3df& rotation = core::vector3df(0,0,0),
 			const core::vector3df& scale = core::vector3df(1.0f, 1.0f, 1.0f)) = 0;
-
+	
 		//! Adds a terrain scene node to the scene graph. This node 
-		//! implements is a simple terrain renderer which uses a quad 
-		//! tree for culling and a technique known as geo mip mapping
+		//! implements is a simple terrain renderer which uses
+		//! a technique known as geo mip mapping
 		//! for reducing the detail of triangle blocks which are far away.
-		//! Please note, that this is still a very early alpha version. LOD support is currently
-		//! disabled for example, so using this with big heightmaps will be extremely slow.
-		//! \param parent: Parent scene node of the camera. Can be null.
-		//! \param id: id of the camera. This id can be used to identify the camera.
-		//! \param texture: Texture for the terrain. This can be a very huge 
-		//! texture, for example 8000x8000 pixels, because it will be splitted
-		//! into smaller ones. Please note that this is not a 
-		//! hardware texture as usual (ITexture), but an IImage software texture.
-		//! You can load this texture with IVideoDriver::createImageFromFile(). 
-		//! \param heightmap: A grayscaled heightmap image. Like the texture,
-		//! it can be created with IVideoDriver::createImageFromFile(). The amount
-		//! of triangles created depends on the size of this texture, so use a small
-		//! heightmap to increase rendering speed.
-		//! \param detailmap: Detail map for the terrain. Can be null.
-		//! \param stretchSize: Parameter defining how big a is pixel on the heightmap. 
-		//! \param maxHeight: Defines how height a white pixel on the heighmap is.
-		//! \return Returns pointer to the created scene node.
-		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		//! The code for the TerrainSceneNode is based on the GeoMipMapSceneNode
+		//!  developed by Spinz. He made it available for Irrlicht and allowed it to be 
+		//! distributed under this licence. I only modified some parts. A lot of thanks go to him. 
+		//!
+		//! This scene node is capable of very quickly loading
+		//! terrains and updating the indices at runtime to enable viewing very large terrains.  It uses a
+		//! CLOD (Continuous Level of Detail) algorithm which updates the indices for each patch based on 
+		//! a LOD (Level of Detail) which is determined based on a patch's distance from the camera.
+		//!
+		//! The patch size of the terrain must always be a size of ( 2^N+1, i.e. 8+1(9), 16+1(17), etc. ).
+		//! The MaxLOD available is directly dependent on the patch size of the terrain.  LOD 0 contains all
+		//! of the indices to draw all the triangles at the max detail for a patch.  As each LOD goes up by 1
+		//! the step taken, in generating indices increases by - 2^LOD, so for LOD 1, the step taken is 2, for
+		//! LOD 2, the step taken is 4, LOD 3 - 8, etc.  The step can be no larger than the size of the patch,
+		//! so having a LOD of 8, with a patch size of 17, is asking the algoritm to generate indices every 
+		//! 2^8 ( 256 ) vertices, which is not possible with a patch size of 17.  The maximum LOD for a patch
+		//! size of 17 is 2^4 ( 16 ).  So, with a MaxLOD of 5, you'll have LOD 0 ( full detail ), LOD 1 ( every
+		//! 2 vertices ), LOD 2 ( every 4 vertices ), LOD 3 ( every 8 vertices ) and LOD 4 ( every 16 vertices ).
+		//! \param heightMapFile: The location of the file on disk, to read vertex data from. This should
+		//! be a gray scale bitmap.
+		//! \param position: The absolute position of this node.
+		//! \param rotation: The absolute rotation of this node. ( NOT YET IMPLEMENTED )
+		//! \param scale: The scale factor for the terrain.  If you're using a heightmap of size 128x128 and would like
+		//! your terrain to be 12800x12800 in game units, then use a scale factor of ( core::vector ( 100.0f, 100.0f, 100.0f ).
+		//! If you use a Y scaling factor of 0.0f, then your terrain will be flat.
+		//! \param vertexColor: The default color of all the vertices. If no texture is associated
+		//! with the scene node, then all vertices will be this color. Defaults to white.
+		//! \param maxLOD: The maximum LOD (level of detail) for the node. Only change if you 
+		//! know what you are doing, this might lead to strange behaviour.
+		//! \param patchSize: patch size of the terrain. Only change if you 
+		//! know what you are doing, this might lead to strange behaviour.
+		//! \return Returns pointer to the created scene node. Can be null if the 
+		//! terrain could not be created, for example because the heightmap could not be loaded.
+		//! The returned pointer should not be dropped. See IUnknown::drop() for more information.
 		virtual ITerrainSceneNode* addTerrainSceneNode(
-			ISceneNode* parent, s32 id,
-			video::IImage* texture,
-			video::IImage* heightmap, video::ITexture* detailmap, 
-			const core::dimension2d<f32>& stretchSize = core::dimension2d<f32>(10.0f,10.0f),
-			f32 maxHeight=200.0f, 
-			const core::dimension2d<s32>& defaultVertexBlockSize = core::dimension2d<s32>(64,64)) = 0;
+			const char* heightMapFileName, 
+			ISceneNode* parent=0, s32 id=-1, 
+			const core::vector3df& position = core::vector3df(0.0f,0.0f,0.0f),
+			const core::vector3df& rotation = core::vector3df(0.0f,0.0f,0.0f),
+			const core::vector3df& scale = core::vector3df(1.0f,1.0f,1.0f),
+			video::SColor vertexColor = video::SColor(255,255,255,255),
+			s32 maxLOD=5, E_TERRAIN_PATCH_SIZE patchSize=ETPS_17) = 0;
+
+		//! Just like the other addTerrainSceneNode() method, but takes an IReadFile
+		//! pointer as parameter for the heightmap. For more informations take a look
+		//! add the other overload.
+		virtual ITerrainSceneNode* addTerrainSceneNode(
+			io::IReadFile* heightMapFile, 
+			ISceneNode* parent=0, s32 id=-1, 
+			const core::vector3df& position = core::vector3df(0.0f,0.0f,0.0f),
+			const core::vector3df& rotation = core::vector3df(0.0f,0.0f,0.0f),
+			const core::vector3df& scale = core::vector3df(1.0f,1.0f,1.0f),
+			video::SColor vertexColor = video::SColor(255,255,255,255),
+			s32 maxLOD=5, E_TERRAIN_PATCH_SIZE patchSize=ETPS_17) = 0;
 
 		//! Adds an empty scene node. Can be used for doing advanced transformations
 		//! or structuring the scene graph.
@@ -511,7 +659,8 @@ namespace scene
 		//! Registers a node for rendering it at a specific time.
 		//! This method should only be used by SceneNodes when they get a 
 		//! ISceneNode::OnPreRender() call.
-		virtual void registerNodeForRendering(ISceneNode* node, E_SCENE_NODE_RENDER_TIME time = SNRT_DEFAULT) = 0;
+		virtual void registerNodeForRendering(ISceneNode* node,
+			E_SCENE_NODE_RENDER_PASS time = ESNRP_AUTOMATIC) = 0;
 
 		//! Draws all the scene nodes. This can only be invoked between
 		//! IVideoDriver::beginScene() and IVideoDriver::endScene().
@@ -683,9 +832,17 @@ namespace scene
 		//! See IUnknown::drop() for more information.
 		virtual IMetaTriangleSelector* createMetaTriangleSelector() = 0;
 
+		//! Creates a triangle selector which can select triangles from a terrain scene node
+		//! \param: Pointer to the created terrain scene node
+		//! \param: Level of detail, 0 for highest detail.
+		virtual ITriangleSelector* createTerrainTriangleSelector(
+			ITerrainSceneNode* node, s32 LOD=0) = 0;
+
 		//! Adds an external mesh loader. If you want the engine to be extended with
 		//! file formats it currently is not able to load (e.g. .cob), just implement
 		//! the IMeshLoader interface in your loading class and add it with this method.
+		//! Using this method it is also possible to override built-in mesh loaders with
+		//! newer or updated versions without the need of recompiling the engine.
 		//! \param externalLoader: Implementation of a new mesh loader.
 		virtual void addExternalMeshLoader(IMeshLoader* externalLoader) = 0;
 
@@ -711,6 +868,20 @@ namespace scene
 
 		//! Clears the whole scene. All scene nodes are removed. 
 		virtual void clear() = 0;
+
+		//! Returns interface to the parameters set in this scene.
+		//! String parameters can be used by plugins and mesh loaders.
+		//! For example the CMS and LMTS loader want a parameter named 'CSM_TexturePath'
+		//! and 'LMTS_TexturePath' set to the path were attached textures can be found.
+		virtual IStringParameters* getStringParameters() = 0;
+
+		//! Returns current render pass. All scene nodes are being rendered in a specific order.
+		//! First lights, cameras, sky boxes, solid geometry, and then transparent 
+		//! stuff. During the rendering process, scene nodes may want to know what the scene
+		//! manager is rendering currently, because for example they registered for rendering 
+		//! twice, once for transparent geometry and once for solid. When knowing what rendering
+		//! pass currently is active they can render the correct part of their geometry.
+		virtual E_SCENE_NODE_RENDER_PASS getSceneNodeRenderPass() = 0;
 	};
 
 

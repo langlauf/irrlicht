@@ -396,9 +396,9 @@ namespace core
 	inline void matrix4::rotateVect( vector3df& vect ) const
 	{
 		vector3df tmp = vect;
-		vect.X = -(tmp.X*M[0] + tmp.Y*M[1] + tmp.Z*M[2]);
-		vect.Y = -(tmp.X*M[4] + tmp.Y*M[5] + tmp.Z*M[6]);
-		vect.Z = -(tmp.X*M[8] + tmp.Y*M[9] + tmp.Z*M[10]);
+		vect.X = tmp.X*M[0] + tmp.Y*M[4] + tmp.Z*M[8];
+		vect.Y = tmp.X*M[1] + tmp.Y*M[5] + tmp.Z*M[9];
+		vect.Z = tmp.X*M[2] + tmp.Y*M[6] + tmp.Z*M[10]; 
 	}
 
 	inline void matrix4::inverseRotateVect( vector3df& vect ) const
