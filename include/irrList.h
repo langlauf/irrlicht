@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -38,8 +38,36 @@ public:
 		Iterator() : current(0) {};
 		Iterator(SKListNode* begin) : current(begin) {};
 
-		void operator ++() { current = current->next; };
-		void operator --() { current = current->prev; };
+		Iterator& operator ++() { current = current->next; return *this; };
+		Iterator& operator --() { current = current->prev; return *this; };
+		Iterator operator ++(s32) { Iterator tmp = *this; current = current->next; return tmp; };
+  		Iterator operator --(s32) { Iterator tmp = *this; current = current->prev; return tmp; };
+
+		Iterator operator+(s32 num) const 
+		{ 
+			Iterator tmp = *this; 
+
+			if (num >= 0) 
+				while (num-- && tmp.current != 0) ++tmp; 
+			else 
+				while (num++ && tmp.current != 0) --tmp; 
+
+			return tmp; 
+		} 
+
+		Iterator& operator+=(s32 num) 
+		{ 
+			if (num >= 0) 
+				while (num-- && this->current != 0) ++(*this); 
+			else 
+				while (num++ && this->current != 0) --(*this); 
+
+			return *this; 
+		} 
+
+		Iterator operator-(s32 num) const  { return (*this)+(-num);          } 
+		Iterator operator-=(s32 num) const { (*this)+=(-num);  return *this; }
+
 		bool operator ==(const Iterator& other) const { return current == other.current; };
 		bool operator !=(const Iterator& other) const { return current != other.current; };
 
@@ -187,6 +215,7 @@ public:
 
 		node->prev = it.current;
 		it.current->next = node;
+		++size;
 	}
 
 
@@ -206,6 +235,7 @@ public:
 
 		node->next = it.current;
 		it.current->prev = node;
+		++size;
 	}
 
 

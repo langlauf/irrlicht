@@ -98,10 +98,16 @@ public:
 						cnt = 0;
 
 					IGUIWindow* window = env->addWindow(
-						rect<s32>(100 + cnt, 100 + cnt, 300 + cnt, 200 + cnt), 0, -1, L"Test window");
+						rect<s32>(100 + cnt, 100 + cnt, 300 + cnt, 200 + cnt), 
+						false, // modal?
+						L"Test window");
 
-					env->addStaticText(L"Please close me", true, 
-						rect<s32>(35,35,140,50), window);
+					env->addStaticText(L"Please close me",  
+						rect<s32>(35,35,140,50),
+						true, // border?
+						false, // wordwrap?
+						window);
+
 					return true;
 				}
 
@@ -130,7 +136,7 @@ int main()
 {
 	MyEventReceiver receiver;
 
-	device = createDevice(video::DT_DIRECTX8,
+	device = createDevice(video::EDT_DIRECTX8,
 		core::dimension2d<s32>(512, 384), 16, false, false, &receiver);
 
 	device->setWindowCaption(L"Irrlicht Engine - User Inferface Demo");
@@ -157,11 +163,11 @@ int main()
 	Then we create an other static text and a list box.
 	*/
 
-	env->addStaticText(L"Transparent Control:", true, rect<s32>(150,20,350,40));
+	env->addStaticText(L"Transparent Control:", rect<s32>(150,20,350,40), true);
 	IGUIScrollBar* scrollbar = env->addScrollBar(true, rect<s32>(150, 45, 350, 60), 0, 104);
 	scrollbar->setMax(255);
 
-	env->addStaticText(L"Logging ListBox:", true, rect<s32>(50,80,250,100));
+	env->addStaticText(L"Logging ListBox:", rect<s32>(50,80,250,100), true);
 	listbox = env->addListBox(rect<s32>(50, 110, 250, 180));
 
 	/*

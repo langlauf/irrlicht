@@ -2,8 +2,7 @@
 buffer shadows, the particle system, billboards, dynamic light and the water
 surface scene node. 
 
-We start like in some tutorials before: Create an event receiver for our camera,
-and initialize the engine. Please note that this time, the 'shadows' flag in
+We start like in some tutorials before. Please note that this time, the 'shadows' flag in
 createDevice() is set to true, for we want to have a dynamic shadow casted from
 an animated character. If your this example runs to slow, set it to false. 
 The Irrlicht Engine checks if your hardware doesn't support the stencil 
@@ -16,28 +15,11 @@ using namespace irr;
 
 #pragma comment(lib, "Irrlicht.lib")
 
-scene::ICameraSceneNode* camera = 0;
-
-class MyEventReceiver : public IEventReceiver
-{
-public:
-	virtual bool OnEvent(SEvent event)
-	{
-		if (camera)
-			return camera->OnEvent(event);
-
-		return false;
-	}
-};
-
-
 int main()
 {
-	MyEventReceiver receiver;
-
-	IrrlichtDevice *device = createDevice(video::DT_DIRECTX8,
+	IrrlichtDevice *device = createDevice(video::EDT_DIRECTX8,
 		core::dimension2d<s32>(640, 480),
-		16, false, true, &receiver);
+		16, false, true);
 
 	video::IVideoDriver* driver = device->getVideoDriver();
 	scene::ISceneManager* smgr = device->getSceneManager();
@@ -50,7 +32,9 @@ int main()
 	Luckily I am a better programmer than artist, and so the Irrlicht Engine
 	is able to create a cool texture mapping for me: Just use the mesh manipulator
 	and create a planar texture mapping for the mesh. If you want to see the mapping
-	I made with Anim8or, uncomment this line.
+	I made with Anim8or, uncomment this line. I also did not figure out how to
+	set the material right in Anim8or, it has an emissive light color which I don't really
+	like. I'll switch it off too with this code.
 	*/
 
 	scene::IAnimatedMesh* mesh = smgr->getMesh(
@@ -63,6 +47,7 @@ int main()
 
 	node = smgr->addAnimatedMeshSceneNode(mesh);
 	node->setMaterialTexture(0,	driver->getTexture("../../media/wall.jpg"));
+	node->getMaterial(0).EmissiveColor.set(0,0,0,0);
 
 	/*
 	Now, for the first special effect: Animated water. It works like this: The
@@ -195,7 +180,7 @@ int main()
 	Finally we simply have to draw everything, that's all.
 	*/
 
-	camera = smgr->addCameraSceneNodeFPS();
+	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS();
 	camera->setPosition(core::vector3df(-50,50,-150));
 
 

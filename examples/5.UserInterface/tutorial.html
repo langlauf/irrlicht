@@ -106,10 +106,14 @@ IGUIListBox* listbox = 0;
                  if (cnt &gt; 200) 
                    cnt = 0;</pre>
               <pre>                 IGUIWindow* window = env-&gt;addWindow(
-                       rect&lt;s32&gt;(100 + cnt, 100 + cnt, 300 + cnt, 200 + cnt), 0,
-                      -1, L&quot;Test window&quot;);</pre>
-              <pre>                 env-&gt;addStaticText(L&quot;Please close me&quot;, true, 
-                       rect&lt;s32&gt;(35,35,140,50), window);
+                       rect&lt;s32&gt;(100 + cnt, 100 + cnt, 300 + cnt, 200 + cnt), <br>                       false, // modal?
+                       L&quot;Test window&quot;);</pre> 
+              <pre>                 env-&gt;addStaticText(L&quot;Please close me&quot;, 
+                       rect&lt;s32&gt;(35,35,140,50),
+                       true, // border?,
+                       false, // wordwrap?
+                       window);
+
                  return true;
               }</pre>
               <pre>              if (id == 103)
@@ -134,7 +138,7 @@ IGUIListBox* listbox = 0;
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> <pre>int main()<br>{<br>	MyEventReceiver receiver;</pre>
-            <pre> device = createDevice(video::DT_DIRECTX8,
+            <pre> device = createDevice(video::EDT_DIRECTX8,
              core::dimension2d&lt;s32&gt;(512, 384), 16, false, false, &amp;receiver);</pre>
             <pre> device-&gt;setWindowCaption(L&quot;Irrlicht Engine - User Inferface Demo&quot;);</pre>
             <pre> video::IVideoDriver* driver = device-&gt;getVideoDriver();
@@ -156,9 +160,9 @@ IGUIListBox* listbox = 0;
         Then we create an other static text and a list box.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td><pre>env-&gt;addStaticText(L&quot;Transparent Control:&quot;, true, rect&lt;s32&gt;(150,20,350,40));<br>IGUIScrollBar* scrollbar = env-&gt;addScrollBar(true,
+          <td><pre>env-&gt;addStaticText(L&quot;Transparent Control:&quot;, rect&lt;s32&gt;(150,20,350,40), true);<br>IGUIScrollBar* scrollbar = env-&gt;addScrollBar(true,
                rect&lt;s32&gt;(150, 45, 350, 60), 0, 104);<br>scrollbar-&gt;setMax(255);</pre>
-            <pre>env-&gt;addStaticText(L&quot;Logging ListBox:&quot;, true, rect&lt;s32&gt;(50,80,250,100));
+            <pre>env-&gt;addStaticText(L&quot;Logging ListBox:&quot;, rect&lt;s32&gt;(50,80,250,100), true);
 listbox = env-&gt;addListBox(rect&lt;s32&gt;(50, 110, 250, 180));</pre></td>
         </tr>
       </table>

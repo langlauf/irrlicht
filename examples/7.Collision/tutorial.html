@@ -8,7 +8,7 @@
 <br>
 <table width="95%" border="0" cellspacing="0" cellpadding="2" align="center">
   <tr> 
-    <td bgcolor="#666699" width="10"><b><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="file:///C|/Development/projektK/releases/irrlicht0.2/media/irrlichtlogo.jpg" width="88" height="31" border="0"></a></b></td>
+    <td bgcolor="#666699" width="10"><b><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="../../media/irrlichtlogo.jpg" width="88" height="31" border="0"></a></b></td>
     <td bgcolor="#666699" width="100%">
 <div align="center">
 <div align="center"></div>
@@ -43,10 +43,9 @@
           <p>To start, we take the program from tutorial 2, which loaded and displayed 
             a quake 3 level. We will use the level to walk in it and to pick triangles 
             from it. In addition we'll place 3 animated models into it for scene 
-            node picking. The following code creates an event receiver for sending 
-            events to the camera, starts up the engine and loads a quake 3 level. 
-            I will not explain it, because it should already be known from tutorial 
-            2.</p>
+            node picking. The following code starts up the engine and loads a 
+            quake 3 level. I will not explain it, because it should already be 
+            known from tutorial 2.</p>
           <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
             <tr> 
               <td> <pre><font size="2"><font color="#008000">#include &lt;irrlicht.h&gt;
@@ -55,28 +54,11 @@
 
 <font color="#008000">#pragma comment(lib, &quot;Irrlicht.lib&quot;)
 
-</font>scene::ICameraSceneNode* camera = <font color="#800080">0</font>;
-
-<b>class </b>MyEventReceiver : <b>public </b>IEventReceiver
+</font><b>int </b>main()
 {
-<b>public</b>:
-	<b>virtual bool </b>OnEvent(SEvent event)
-	{
-		<b>if </b>(camera)
-			<b>return </b>camera-&gt;OnEvent(event);
-
-		<b>return false</b>;
-	}
-};
-
-
-<b>int </b>main()
-{
-	MyEventReceiver receiver;
-
 	IrrlichtDevice *device =
-		createDevice(video::DT_DIRECTX8,
-       core::dimension2d&lt;s32&gt;(<font color="#800080">640</font>, <font color="#800080">480</font>),<br>       <font color="#800080">16</font>, <b>false</b>, <b>false</b>, &amp;receiver);
+		createDevice(video::EDT_DIRECTX8,
+       core::dimension2d&lt;s32&gt;(<font color="#800080">640</font>, <font color="#800080">480</font>),<br>       <font color="#800080">16</font>, <b>false</b>);
 
 	video::IVideoDriver* driver = device-&gt;getVideoDriver();
 	scene::ISceneManager* smgr = device-&gt;getSceneManager();
@@ -155,7 +137,7 @@
           </p>
           <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
             <tr> 
-              <td> <pre><font size="2">	camera = smgr-&gt;addCameraSceneNodeFPS(<font color="#800080">0</font>,<font color="#800080">100.0f</font>,<font color="#800080">300.0f</font>);
+              <td> <pre><font size="2">	scene::ICameraSceneNode* camera = 	<br>		camera = smgr-&gt;addCameraSceneNodeFPS(<font color="#800080">0</font>,<font color="#800080">100.0f</font>,<font color="#800080">300.0f</font>);
 	camera-&gt;setPosition(core::vector3df(<font color="#800080">0</font>,<font color="#800080">100</font>,<font color="#800080">0</font>));
 
 	scene::ISceneNodeAnimator* anim =<br>    smgr-&gt;createCollisionResponseAnimator(
@@ -266,7 +248,7 @@
 		{
 			bill-&gt;setPosition(intersection);
 				
-			driver-&gt;setTransform(video::TS_WORLD, core::matrix4());
+			driver-&gt;setTransform(video::ETS_WORLD, core::matrix4());
 			driver-&gt;setMaterial(material);
 			driver-&gt;draw3DTriangle(tri, video::SColor(<font color="#800080">0</font>,<font color="#800080">255</font>,<font color="#800080">0</font>,<font color="#800080">0</font>));
 		}</font></pre></td>

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -186,7 +186,28 @@ public:
 		return data[index];
 	}
 
+    //! Gets last frame
+	const T& getLast() const
+	{
+		#ifdef _DEBUG
+		if (!used)
+			_asm int 3 // access violation
+		#endif
 
+		return data[used-1];
+	}
+
+    //! Gets last frame
+	T& getLast()
+	{
+		#ifdef _DEBUG
+		if (!used)
+			_asm int 3 // access violation
+		#endif
+
+		return data[used-1];
+	}
+    
 
 	//! Returns a pointer to the array.
 	//! \return Pointer to the array.
@@ -300,6 +321,37 @@ public:
 	}
 
 
+	//! Finds an element in linear time, which is very slow. Use
+	//! binary_search for faster finding. Only works if =operator is implemented.
+	//! \param element: Element to search for.
+	//! \return Returns position of the searched element if it was found,
+	//! otherwise -1 is returned.
+	s32 linear_search(T& element)
+	{
+		for (u32 i=0; i<used; ++i)
+			if (!(element < data[i]) && !(data[i] < element))
+				return (s32)i;
+
+		return -1;
+	}
+
+
+	//! Finds an element in linear time, which is very slow. Use
+	//! binary_search for faster finding. Only works if =operator is implemented.
+	//! \param element: Element to search for.
+	//! \return Returns position of the searched element if it was found,
+	//! otherwise -1 is returned.
+	s32 linear_reverse_search(T& element)
+	{
+		for (s32 i=used-1; i>=0; --i)
+			if (data[i] == element)
+				return (s32)i;
+
+		return -1;
+	}
+
+
+
 	//! Erases an element from the array. May be slow, because all elements 
 	//! following after the erased element have to be copied.
 	//! \param index: Index of element to be erased.
@@ -332,6 +384,13 @@ public:
 			data[i-count] = data[i];
 
 		used-= count;
+	}
+
+
+	//! Sets if the array is sorted
+	void set_sorted(bool _is_sorted)
+	{
+		is_sorted = _is_sorted;
 	}
 
 			

@@ -1,11 +1,13 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
 #ifndef __I_EVENT_RECEIVER_H_INCLUDED__
 #define __I_EVENT_RECEIVER_H_INCLUDED__
 
+#include "ILogger.h"
 #include "position2d.h"
+#include "Keycodes.h"
 
 namespace irr
 {
@@ -19,7 +21,10 @@ namespace irr
 		EET_MOUSE_INPUT_EVENT,
 
 		//! A key input evant.
-		EET_KEY_INPUT_EVENT
+		EET_KEY_INPUT_EVENT,
+
+		//! A log event
+		EET_LOG_TEXT_EVENT
 	};
 
 	//! Enumeration for all mouse input events
@@ -44,7 +49,11 @@ namespace irr
 		EMIE_MMOUSE_LEFT_UP,
 
 		//! The mouse cursor changed its position.
-		EMIE_MOUSE_MOVED
+		EMIE_MOUSE_MOVED,
+
+		//! The mouse wheel was moved. Use Wheel value in event data to find out 
+		//! in what direction and how fast.
+		EMIE_MOUSE_WHEEL, 
 	};
 
 	namespace gui
@@ -55,11 +64,8 @@ namespace irr
 		//! Enumeration for all events which are sendable by the gui system
 		enum EGUI_EVENT_TYPE
 		{
-			//! A gui element has lost its key focus.
-			EGET_ELEMENT_KEY_FOCUS_LOST = 0,
-
-			//! A gui element has lost its mouse focus.
-			EGET_ELEMENT_MOUSE_FOCUS_LOST,
+			//! A gui element has lost its focus.
+			EGET_ELEMENT_FOCUS_LOST = 0,
 
 			//! A gui element was hovered.
 			EGET_ELEMENT_HOVERED,
@@ -87,6 +93,28 @@ namespace irr
 
 			//! A file open dialog has been closed without choosing a file
 			EGET_FILE_CHOOSE_DIALOG_CANCELLED,
+
+			//! 'Yes' was clicked on a messagebox
+			EGET_MESSAGEBOX_YES,
+
+			//! 'No' was clicked on a messagebox
+			EGET_MESSAGEBOX_NO,
+
+			//! 'OK' was clicked on a messagebox
+			EGET_MESSAGEBOX_OK,
+
+			//! 'Cancel' was clicked on a messagebox
+			EGET_MESSAGEBOX_CANCEL,
+
+			//! In an editbox was pressed 'ENTER'
+			EGET_EDITBOX_ENTER,
+
+			//! The tab was changed in an tab control
+			EGET_TAB_CHANGED,
+
+			//! A menu item was selected in a (context) menu
+			EGET_MENU_ITEM_SELECTED,
+
 		};
 	} // end namespace gui
 
@@ -107,14 +135,29 @@ struct SEvent
 		struct
 		{
 			s32 X, Y; // mouse positions;
+
+			//! mouse wheel delta, usually 1.0 or -1.0. Only valid if event was
+			//! EMIE_MOUSE_WHEEL
+			f32 Wheel; 
+
+			//! type of more event
 			EMOUSE_INPUT_EVENT Event;
 		} MouseInput;
 
 		struct
 		{
-			s32 Key; // TODO key
+			wchar_t Char; // Character corresponding to the key (0, if not a character)
+			EKEY_CODE Key; // Key pressed
 			bool PressedDown; // if not pressed, then left up
+			bool Shift; // true if shift was also pressed
+			bool Control; // true if ctrl was also pressed
 		} KeyInput;
+
+		struct
+		{
+			const c8* Text;
+			ELOG_LEVEL Level;
+		} LogEvent;
 
 	};
 

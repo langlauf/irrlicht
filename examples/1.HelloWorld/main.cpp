@@ -73,11 +73,11 @@ int main()
 	The most important function of the engine is the 'createDevice'
 	function. The Irrlicht Device can be created with it, which is the
 	root object for doing everything with the engine.
-	createDevice() has 5 paramters:
+	createDevice() has 6 paramters:
 	deviceType: Type of the device. This can currently be the Null-device,
-	   the Software device, DirectX8 or OpenGL. In this example we use
-	   DT_SOFTWARE, but to try out, you might want to change it to
-	   DT_NULL, DT_DIRECTX8 or DT_OPENGL. 
+	   the Software device, DirectX8, DirectX9, or OpenGL. In this example we use
+	   EDT_SOFTWARE, but to try out, you might want to change it to
+	   EDT_NULL, EDT_DIRECTX8 , EDT_DIRECTX9, or EDT_OPENGL. 
 	windowSize: Size of the Window or FullscreenMode to be created. In this 
 	   example we use 640x480.
 	bits: Amount of bits per pixel when in fullscreen mode. This should 
@@ -90,7 +90,7 @@ int main()
 	*/
 
 	IrrlichtDevice *device =
-		createDevice(DT_SOFTWARE, dimension2d<s32>(512, 384), 16, false, false, 0);
+		createDevice(EDT_SOFTWARE, dimension2d<s32>(512, 384), 16, false, false, 0);
 
 	/*
 	Set the caption of the window to some nice text. Note that there is 
@@ -113,7 +113,7 @@ int main()
 	We add a hello world label to the window, using the GUI environment.
 	*/
 	guienv->addStaticText(L"Hello World! This is the Irrlicht Software engine!",
-		true, rect<int>(10,10,200,30));
+		rect<int>(10,10,200,30), true);
 
 	/*
 	To display something interesting, we load a Quake 2 model 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -7,24 +7,24 @@
 
 #include "IUnknown.h"
 #include "IReadFile.h"
-#include "ISurface.h"
+#include "IImage.h"
 
 namespace irr
 {
 namespace video
 {
 
-//!	Class which is able to create a surface from a file.
+//!	Class which is able to create a image from a file.
 /** If you want the Irrlicht Engine be able to load textures of 
 currently unsupported file formats (e.g .gif), then implement
 this and add your new Surface loader with 
-IVideoDriver::addExternalSurfaceLoader() to the engine. */
-class ISurfaceLoader : public IUnknown
+IVideoDriver::addExternalImageLoader() to the engine. */
+class IImageLoader : public IUnknown
 {
 public:
 
 	//! destructor
-	virtual ~ISurfaceLoader() {};
+	virtual ~IImageLoader() {};
 
 	//! returns true if the file maybe is able to be loaded by this class
 	//! based on the file extension (e.g. ".tga")
@@ -34,7 +34,7 @@ public:
 	virtual bool isALoadableFileFormat(irr::io::IReadFile* file) = 0;
 
 	//! creates a surface from the file
-	virtual ISurface* loadImage(irr::io::IReadFile* file) = 0;
+	virtual IImage* loadImage(irr::io::IReadFile* file) = 0;
 };
 
 

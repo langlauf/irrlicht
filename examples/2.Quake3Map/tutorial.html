@@ -34,10 +34,10 @@
   <tr> 
     <td height="90" bgcolor="#eeeeff" valign="top"> <div align="left"> 
         <p>Lets start like the HelloWorld example: We include the irrlicht header 
-          files. This time we also include the stdio.h for the swprintf function.</p>
+          files. </p>
         <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
           <tr> 
-            <td> <pre>#include &lt;irrlicht.h&gt;<br>#include &lt;wchar.h&gt;</pre> </td>
+            <td> <pre>#include &lt;irrlicht.h&gt;<br></pre> </td>
           </tr>
         </table>
         <p>As already written in the HelloWorld example, in the Irrlicht Engine, 
@@ -62,29 +62,8 @@
             <td> <pre>#pragma comment(lib, &quot;Irrlicht.lib&quot;)</pre> </td>
           </tr>
         </table>
-        <p>To store a pointer to our camera, we create this global variable. As 
-          you can see, the Camera scene node classis located in the namespace<br>
-          'scene', like everything which has to do with the 3d scene: Meshes, 
-          Cameras, Animators and stuff like that.</p>
-        <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
-          <tr> 
-            <td> <pre>scene::ICameraSceneNode* camera = 0;</pre> </td>
-          </tr>
-        </table>
-        <p>To get events like mouse and keyboard input, or GUI events like &quot;the 
-          OK button has been clicked&quot;, we need an object wich is derived<br>
-          from the IEventReceiver object. There is only one method to override: 
-          OnEvent. This method will be called by the engine when an event happened. 
-          In our example we simply delegate every event to our camera object, 
-          because we want the camera to be moved by the input of the user.</p>
+        
       </div>
-      <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
-        <tr> 
-          <td> <pre>class MyEventReceiver : public IEventReceiver<br>{<br>public:<br> virtual bool OnEvent(SEvent event)<br> {<br>    if (camera)<br>      return camera-&gt;OnEvent(event);
-
-    return false;<br> }<br>};</pre> </td>
-        </tr>
-      </table>
       <p>Ok, lets start. Again, we use the main() method as start, not the WinMain(), 
         because its shorter to write.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
@@ -93,18 +72,16 @@
         </tr>
       </table>
       <p> Like in the HelloWorld example, we create an IrrlichtDevice with createDevice(). 
-        The difference now is that we use the DirectX8 driver<br>
-        because the Software device would be too slow to draw a huge Quake 3 map. 
-        Also, we create an EventReceiver we declared above and set a pointer to 
-        it as last parameter of the createDevice() function. In this way, the 
-        Irrlicht Engine will send all events to this event Receiver.<br>
-      </p>
+        The difference now is that we use the DirectX8 driver because the Software 
+        device would be too slow to draw a huge Quake 3 map. If you do not have 
+        DirectX8 installed or working on your pc, you could try some other drivers 
+        by replacing EDT_DIRECTX8 with EDT_OPENGL or EDT_DIRECTX9. </p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>MyEventReceiver receiver;</pre> 
-            <pre>IrrlichtDevice *device =
-               createDevice(video::DT_DIRECTX8,
-               core::dimension2d&lt;s32&gt;(640, 480), 16, false, false, &amp;receiver);</pre></td>
+          <td> <pre>IrrlichtDevice *device =
+               createDevice(video::EDT_DIRECTX8,
+               core::dimension2d&lt;s32&gt;(640, 480), 16);</pre> 
+            </td>
         </tr>
       </table>
       <p>Get a pointer to the video driver and the SceneManager so that we do 
@@ -161,7 +138,7 @@ if (mesh)<br>    node = smgr-&gt;addOctTreeSceneNode(mesh-&gt;getMesh(0));</pre>
         which behaves like the ones in first person shooter games (FPS):</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
-          <td> <pre>camera = smgr-&gt;addCameraSceneNodeFPS();</pre> </td>
+          <td> <pre>smgr-&gt;addCameraSceneNodeFPS();</pre> </td>
         </tr>
       </table>
       <p>The mouse cursor needs not to be visible, so we make it invisible. </p>

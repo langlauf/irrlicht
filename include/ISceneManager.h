@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -11,9 +11,11 @@
 #include "dimension2d.h"
 #include "SColor.h"
 #include "SMaterial.h"
+#include "IEventReceiver.h"
 
 namespace irr
 {
+	struct SKeyMap;
 
 namespace io
 {
@@ -63,6 +65,7 @@ namespace scene
 	class ISceneNodeAnimatorCollisionResponse;
 	class ILightSceneNode;
 	class IBillboardSceneNode;
+	class ITerrainSceneNode;
 	class IMeshLoader;
 	class ISceneCollisionManager;
 	class IParticleSystemSceneNode;
@@ -94,8 +97,10 @@ namespace scene
 		//! Gets pointer to an animateable mesh. Loads it if needed.
 		//! Currently there are the following mesh formats supported:
 		//! .obj(Alias Wavefront Maya), .ms3d(Milkshape3D), .bsp(Quake3 Level),
-		//! .md2(Quake2 Model), .3ds (3D Studio). More formats coming soon,
+		//! .md2(Quake2 Model), .3ds(3D Studio), .x(Microsoft DirectX) More formats coming soon,
 		//! make a feature request on the Irrlicht Engine homepage if you like.
+		//! Special thanks go to Dean P. Macri who extended the Quake 3
+		//! .bsp loader with the curved surfaces feature.
 		//! \param filename: Filename of the mesh to load.
 		//! \return Returns NULL if failed and the pointer to the mesh if 
 		//! successful. 
@@ -187,7 +192,22 @@ namespace scene
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
 		virtual IBspTreeSceneNode* addBspTreeSceneNode(IMesh* mesh, ISceneNode* parent=0, s32 id=-1) = 0;
 
-		//! Adss a scene node for rendering using a octtree to the scene graph. This a good method for rendering 
+		//! Adds a scene node for rendering using a octtree to the scene graph. This a good method for rendering 
+		//! scenes with lots of geometry. The Octree is built on the fly from the mesh, much
+		//! faster then a bsp tree.
+		//! \param mesh: The mesh containing all geometry from which the octtree will be build.
+		//! If this animated mesh has more than one frames in it, the first frame is taken.
+		//! \param parent: Parent node of the octtree node.
+		//! \param id: id of the node. This id can be used to identify the node.
+		//! \param minimalPolysPerNode: Specifies the minimal polygons contained a octree node.
+		//! If a node gets less polys the this value, it will not be splitted into
+		//! smaller nodes.
+		//! \return Returns the pointer to the octtree if successful, otherwise 0. 
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		virtual ISceneNode* addOctTreeSceneNode(IAnimatedMesh* mesh, ISceneNode* parent=0, 
+			s32 id=-1, s32 minimalPolysPerNode=128) = 0;
+
+		//! Adds a scene node for rendering using a octtree to the scene graph. This a good method for rendering 
 		//! scenes with lots of geometry. The Octree is built on the fly from the mesh, much
 		//! faster then a bsp tree.
 		//! \param mesh: The mesh containing all geometry from which the octtree will be build.
@@ -227,17 +247,50 @@ namespace scene
 
 		//! Adds a camera scene node which is able to be controled with the mouse and keys
 		//! like in most first person shooters (FPS): 
-		//! Look with the mouse, move with cursor keys.
+		//! Look with the mouse, move with cursor keys. If you do not like the default
+		//! key layout, you may want to specify your own. For example to make the camera
+		//! be controlled by the cursor keys AND the keys W,A,S, and D, do something
+		//! like this:
+		//! \code
+		//! SKeyMap keyMap[8];
+		//! keyMap[0].Action = EKA_MOVE_FORWARD;
+		//! keyMap[0].KeyCode = KEY_UP;
+		//! keyMap[1].Action = EKA_MOVE_FORWARD;
+		//! keyMap[1].KeyCode = KEY_KEY_W;
+		//!
+		//! keyMap[2].Action = EKA_MOVE_BACKWARD;
+		//! keyMap[2].KeyCode = KEY_DOWN;
+		//! keyMap[3].Action = EKA_MOVE_BACKWARD;
+		//! keyMap[3].KeyCode = KEY_KEY_S;
+		//!
+		//! keyMap[4].Action = EKA_STRAFE_LEFT;
+		//! keyMap[4].KeyCode = KEY_LEFT;
+		//! keyMap[5].Action = EKA_STRAFE_LEFT;
+		//! keyMap[5].KeyCode = KEY_KEY_A;
+		//!
+		//! keyMap[6].Action = EKA_STRAFE_RIGHT;
+		//! keyMap[6].KeyCode = KEY_RIGHT;
+		//! keyMap[7].Action = EKA_STRAFE_RIGHT;
+		//! keyMap[7].KeyCode = KEY_KEY_D;
+		//!
+		//! camera = sceneManager->addCameraSceneNodeFPS(0, 100, 500, -1, keyMap, 8);
+		//! \endcode
 		//! \param parent: Parent scene node of the camera. Can be null.
 		//! \param rotateSpeed: Speed with wich the camera is rotated. This can be done
 		//! only with the mouse.
 		//! \param movespeed: Speed with which the camera is moved. Movement is done with
 		//! the cursor keys.
 		//! \param id: id of the camera. This id can be used to identify the camera.
+		//! \param keyMapArray: Optional pointer to an array of a keymap, specifying what
+		//! keys should be used to move the camera. If this is null, the default keymap
+		//! is used. You can define actions more then one time in the array, to bind 
+		//! multiple keys to the same action.
+		//! \param keyMapSize: Amount of items in the keymap array.
 		//! \return Returns a pointer to the interface of the camera if successful, otherwise 0.
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
 		virtual ICameraSceneNode* addCameraSceneNodeFPS(ISceneNode* parent = 0,
-			f32 rotateSpeed = 100.0f, f32 moveSpeed = 500.0f, s32 id=-1) = 0;
+			f32 rotateSpeed = 100.0f, f32 moveSpeed = 500.0f, s32 id=-1,
+			SKeyMap* keyMapArray=0, s32 keyMapSize=0) = 0;
 
 		//! Adds a dynamic light scene node to the scene graph. The light will cast dynamic light on all
 		//! other scene nodes in the scene, which have the material flag video::MTF_LIGHTING
@@ -306,11 +359,49 @@ namespace scene
 			const core::vector3df& rotation = core::vector3df(0,0,0),
 			const core::vector3df& scale = core::vector3df(1.0f, 1.0f, 1.0f)) = 0;
 
+		//! Adds a terrain scene node to the scene graph. This node 
+		//! implements is a simple terrain renderer which uses a quad 
+		//! tree for culling and a technique known as geo mip mapping
+		//! for reducing the detail of triangle blocks which are far away.
+		//! Please note, that this is still a very early alpha version. LOD support is currently
+		//! disabled for example, so using this with big heightmaps will be extremely slow.
+		//! \param parent: Parent scene node of the camera. Can be null.
+		//! \param id: id of the camera. This id can be used to identify the camera.
+		//! \param texture: Texture for the terrain. This can be a very huge 
+		//! texture, for example 8000x8000 pixels, because it will be splitted
+		//! into smaller ones. Please note that this is not a 
+		//! hardware texture as usual (ITexture), but an IImage software texture.
+		//! You can load this texture with IVideoDriver::createImageFromFile(). 
+		//! \param heightmap: A grayscaled heightmap image. Like the texture,
+		//! it can be created with IVideoDriver::createImageFromFile(). The amount
+		//! of triangles created depends on the size of this texture, so use a small
+		//! heightmap to increase rendering speed.
+		//! \param detailmap: Detail map for the terrain. Can be null.
+		//! \param stretchSize: Parameter defining how big a is pixel on the heightmap. 
+		//! \param maxHeight: Defines how height a white pixel on the heighmap is.
+		//! \return Returns pointer to the created scene node.
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		virtual ITerrainSceneNode* addTerrainSceneNode(
+			ISceneNode* parent, s32 id,
+			video::IImage* texture,
+			video::IImage* heightmap, video::ITexture* detailmap, 
+			const core::dimension2d<f32>& stretchSize = core::dimension2d<f32>(10.0f,10.0f),
+			f32 maxHeight=200.0f, 
+			const core::dimension2d<s32>& defaultVertexBlockSize = core::dimension2d<s32>(64,64)) = 0;
+
+		//! Adds an empty scene node. Can be used for doing advanced transformations
+		//! or structuring the scene graph.
+		//! \return Returns pointer to the created scene node.
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		virtual ISceneNode* addEmptySceneNode(ISceneNode* parent=0, s32 id=-1) = 0;
+
 		//! Adds a dummy transformation scene node to the scene graph.
 		//! This scene node does not render itself, and does not respond to set/getPosition,
 		//! set/getRotation and set/getScale. Its just a simple scene node that takes a 
 		//! matrix as relative transformation, making it possible to insert any transformation
 		//! anywhere into the scene graph.
+		//! \return Returns pointer to the created scene node.
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
 		virtual IDummyTransformationSceneNode* addDummyTransformationSceneNode(
 			ISceneNode* parent=0, s32 id=-1) = 0;
 
@@ -320,7 +411,7 @@ namespace scene
 		//! on the plane and how high they should be. Also you must specify a name for
 		//! the mesh, because the mesh is added to the mesh pool, and can be retieved
 		//! again using ISceneManager::getMesh() with the name as parameter.
-		//! \param filename: The name of this mesh which must be specified in order
+		//! \param name: The name of this mesh which must be specified in order
 		//! to be able to retrieve the mesh later with ISceneManager::getMesh().
 		//! \param tileSize: Size of a tile of the mesh. (10.0f, 10.0f) would be a
 		//! good value to start, for example.
@@ -345,6 +436,33 @@ namespace scene
 			video::SMaterial* material = 0,	f32 hillHeight = 0.0f, 
 			const core::dimension2d<f32>& countHills = core::dimension2d<f32>(0.0f, 0.0f),
 			const core::dimension2d<f32>& textureRepeatCount = core::dimension2d<f32>(1.0f, 1.0f)) = 0;
+
+		//! Adds a static terrain mesh to the mesh pool. The mesh is generated on the fly
+		//! from a texture file and a height map file. Both files may be huge
+		//! (8000x8000 pixels would be no problem) because the generator splits the
+		//! files into smaller textures if necessary. 
+		//! You must specify a name for the mesh, because the mesh is added to the mesh pool,
+		//! and can be retieved again using ISceneManager::getMesh() with the name as parameter.
+		//! \param meshname: The name of this mesh which must be specified in order
+		//! to be able to retrieve the mesh later with ISceneManager::getMesh().
+		//! \param texture: Texture for the terrain. Please note that this is not a 
+		//! hardware texture as usual (ITexture), but an IImage software texture.
+		//! You can load this texture with IVideoDriver::createImageFromFile(). 
+		//! \param heightmap: A grayscaled heightmap image. Like the texture,
+		//! it can be created with IVideoDriver::createImageFromFile(). The amount
+		//! of triangles created depends on the size of this texture, so use a small
+		//! heightmap to increase rendering speed.
+		//! \param stretchSize: Parameter defining how big a is pixel on the heightmap. 
+		//! \param maxHeight: Defines how height a white pixel on the heighmap is.
+		//! \return Returns null if the creation failed. The reason could be that you 
+		//! specified some invalid parameters, that a mesh with that name already
+		//! exists, or that a texture could not be found. If successful, a pointer to the mesh is returned. 
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		virtual IAnimatedMesh* addTerrainMesh(const c8* meshname,
+			video::IImage* texture, video::IImage* heightmap,
+			const core::dimension2d<f32>& stretchSize = core::dimension2d<f32>(10.0f,10.0f),
+			f32 maxHeight=200.0f, 
+			const core::dimension2d<s32>& defaultVertexBlockSize = core::dimension2d<s32>(64,64)) = 0;
 
 		//! Returns the root scene node. This is the scene node wich is parent 
 		//! of all scene nodes. The root scene node is a special scene node which
@@ -482,6 +600,17 @@ namespace scene
 			const core::vector3df& ellipsoidTranslation = core::vector3df(0,0,0),
 			f32 slidingValue = 0.0005f) = 0;
 
+		//! Creates a follow spline animator. The animator modifies the position of
+		//! the attached scene node to make it follow a hermite spline. 
+		//! The code of the is based on a scene node
+		//! Matthias Gall sent in. Thanks! I adapted the code just a little bit. Matthias 
+		//! wrote:
+ 		//! Uses a subset of hermite splines: either cardinal splines (tightness != 0.5) or catmull-rom-splines (tightness == 0.5)
+		//! but this is just my understanding of this stuff, I'm not a mathematician, so this might be wrong ;)
+        virtual ISceneNodeAnimator* createFollowSplineAnimator(s32 startTime,
+			const core::array< core::vector3df >& points,
+			f32 speed = 1.0f, f32 tightness = 0.5f) = 0;
+
 		//! Creates a simple ITriangleSelector, based on a mesh. Triangle selectors
 		//! can be used for doing collision detection. Don't use this selector
 		//! for a huge amount of triangles like in Quake3 maps.
@@ -565,6 +694,10 @@ namespace scene
 		//! See ISceneManager::createDeleteAnimator() for details.
 		//! \param node: Node to detete.
 		virtual void addToDeletionQueue(ISceneNode* node) = 0;
+
+		//! Posts an input event to the environment. Usually you do not have to
+		//! use this method, it is used by the internal engine.
+		virtual bool postEventFromUser(SEvent event) = 0;
 	};
 
 

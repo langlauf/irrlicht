@@ -118,7 +118,7 @@ public:
 		video::IVideoDriver* driver = SceneManager->getVideoDriver();
 
 		driver->setMaterial(Material);
-		driver->setTransform(video::TS_WORLD, AbsoluteTransformation);
+		driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
 		driver->drawIndexedTriangleList(&Vertices[0], 4, &indices[0], 4);
 	}
 
@@ -156,7 +156,7 @@ int main()
 	// create engine and camera
 
 	IrrlichtDevice *device =
-		createDevice(video::DT_OPENGL, core::dimension2d<s32>(640, 480), 16, false);
+		createDevice(video::EDT_OPENGL, core::dimension2d<s32>(640, 480), 16, false);
 
 	device->setWindowCaption(L"Custom Scene Node - Irrlicht Engine Demo");
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -478,7 +478,7 @@ namespace scene
 		//! check if there is already a selector in this node by calling
 		//! ISceneNode::getTriangleSelector(). 
 		//! \param selector: New triangle selector for this scene node.
-        virtual void setTriangleSelector(ITriangleSelector* selector) 
+		virtual void setTriangleSelector(ITriangleSelector* selector) 
 		{
 			if (TriangleSelector)
 				TriangleSelector->drop();
@@ -487,10 +487,8 @@ namespace scene
 			TriangleSelector->grab();
 		}
 
-	protected:
-
 		//! updates the absolute position based on the relative and the parents position
-		void updateAbsolutePosition()
+		virtual void updateAbsolutePosition()
 		{
 			if (Parent)
 				AbsoluteTransformation = 
@@ -498,6 +496,8 @@ namespace scene
 			else
 				AbsoluteTransformation = getRelativeTransformation();
 		}
+
+	protected:
 
 		//! name of the scene node.
 		core::stringw Name;	

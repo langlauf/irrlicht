@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -14,7 +14,7 @@ namespace gui
 {
 	class IGUIFont;
 
-	//! GUI static text interface.
+	//! Multi or single line text label.
 	class IGUIStaticText : public IGUIElement
 	{
 	public:
@@ -46,7 +46,19 @@ namespace gui
 		//! \param enable: If set to true, the override color, which can be set
 		//! with IGUIStaticText::setOverrideColor is used, otherwise the
 		//! EGDC_BUTTON_TEXT color of the skin.
-		virtual void enableOverrrideColor(bool enable) = 0;
+		virtual void enableOverrideColor(bool enable) = 0;
+
+		//! Enables or disables word wrap for using the static text as
+		//! multiline text control.
+		//! \param enable: If set to true, words going over one line are 
+		//! breaked to the next line.
+		virtual void setWordWrap(bool enable) = 0;
+
+		//! Returns the height of the text in pixels when it is drawn. This is
+		//! useful for adjusting the layout of gui elements based on the height 
+		//! of the multiline text in this element.
+		//! \return Returns height of text in pixels.
+		virtual s32 getTextHeight() = 0;
 	};
 
 

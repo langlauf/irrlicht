@@ -1,6 +1,6 @@
-/* Irrlicht.h -- interface of the 'Irrlicht Engine' version 0.1
+/* Irrlicht.h -- interface of the 'Irrlicht Engine' version 0.5
 
-  Copyright (C) 2002-2003 Nikolaus Gebhardt
+  Copyright (C) 2002-2004 Nikolaus Gebhardt
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -17,6 +17,13 @@
   2. Altered source versions must be plainly marked as such, and must not be
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
+
+  Please note that the Irrlicht Engine is based in part on the work of the 
+  Independent JPEG Group and the zlib. This means that if you use the Irrlicht 
+  Engine in your product, you must acknowledge somewhere in your documentation
+  that you've used the IJG code. It would also be nice to mention that you use
+  the Irrlicht Engine and the zlib. See the README files in the jpeglib and 
+  the zlib for further informations.
 */
 
 #ifndef __IRRLICHT_H_INCLUDED__
@@ -32,6 +39,7 @@
 #include "IAnimatedMesh.h"
 #include "IAnimatedMeshMD2.h"
 #include "IAnimatedMeshMS3D.h"
+#include "IAnimatedMeshX.h"
 #include "IAnimatedMeshSceneNode.h"
 #include "IBspTreeSceneNode.h"
 #include "ICameraSceneNode.h"
@@ -41,7 +49,9 @@
 #include "IFileSystem.h"
 #include "IGUIButton.h"
 #include "IGUICheckBox.h"
+#include "IGUIContextMenu.h"
 #include "IGUIElement.h"
+#include "IGUIEditBox.h"
 #include "IGUIEnvironment.h"
 #include "IGUIFileOpenDialog.h"
 #include "IGUIFont.h"
@@ -52,7 +62,10 @@
 #include "IGUIScrollBar.h"
 #include "IGUISkin.h"
 #include "IGUIStaticText.h"
+#include "IGUITabControl.h"
 #include "IGUIWindow.h"
+#include "ILightSceneNode.h"
+#include "ILogger.h"
 #include "IMesh.h"
 #include "IMeshBuffer.h"
 #include "IMeshManipulator.h"
@@ -64,11 +77,11 @@
 #include "ISceneManager.h"
 #include "ISceneNode.h"
 #include "ITriangleSelector.h"
-#include "ILightSceneNode.h"
 #include "ISceneNodeAnimator.h"
 #include "ISceneCollisionManager.h"
 #include "ISceneNodeAnimatorCollisionResponse.h"
 #include "IParticleSystemSceneNode.h"
+#include "ITerrainSceneNode.h"
 #include "IParticleEmitter.h"
 #include "IParticleAffector.h"
 #include "IBillboardSceneNode.h"
@@ -87,15 +100,21 @@
 #include "vector3d.h"
 #include "triangle3d.h"
 #include "position2d.h"
+#include "quaternion.h"
 #include "rect.h"
 #include "S3DVertex.h"
+#include "SAnimatedMesh.h"
+#include "SKeyMap.h"
 #include "SMaterial.h"
 #include "SMesh.h"
 #include "SMeshBuffer.h"
 #include "SMeshBufferLightMap.h"
 #include "irrTypes.h"
 
-/*! \mainpage Irrlicht Engine API documentation
+//! Irrlicht SDK Version
+#define IRRLICHT_SDK_VERSION L"0.5"
+
+/*! \mainpage Irrlicht Engine 0.5 API documentation
  *
  * \section intro Introduction
  *
@@ -121,10 +140,11 @@
  *
  * \section example Short example
  *
- * A simple application, starting up the engine, loading a Quake2 animated 
+ * A simple application, starting up the engine, loading a Quake 2 animated 
  * model file and the corresponding texture, animating and displaying it
- * in front of a blue background and placing a 3d camera would look like
- * the following code. I think this example shows the usage of the engine quite good:
+ * in front of a blue background and placing a user controlable 3d camera
+ * would look like the following code. I think this example shows the usage
+ * of the engine quite well:
  *
  * \code
  * #include <Irrlicht.h>
@@ -132,7 +152,8 @@
  *
  * int main()
  * {
- *	IrrlichtDevice *device = createDevice(video::DT_DIRECTX8,
+ *	// start up the engine
+ *	IrrlichtDevice *device = createDevice(video::EDT_DIRECTX8,
  *		core::dimension2d<s32>(640,480), false);
  *
  *	video::IVideoDriver* driver = device->getVideoDriver();
@@ -140,13 +161,21 @@
  *
  *	device->setWindowCaption(L"Hello World!");
  *
+ *	// load and show quake2 .md2 model
  *	scene::ISceneNode* node = scenemgr->addAnimatedMeshSceneNode(
  *		scenemgr->getMesh("quake2model.md2"));
- *	node->setMaterialTexture(0, driver->getTexture("texture.bmp"));
- *	node->setMaterialFlag(video::EMF_LIGHTING, false);
  *
- *	scenemgr->addCameraSceneNode(0, core::vector3df(0,0,-40));
+ *	// if everything worked, add a texture and disable lighting
+ *	if (node)
+ *	{
+ *		node->setMaterialTexture(0, driver->getTexture("texture.bmp"));
+ *		node->setMaterialFlag(video::EMF_LIGHTING, false);
+ *	}
+ *
+ *	// add a first person shooter style user controlled camera
+ *	scenemgr->addCameraSceneNodeFPS();
  * 
+ *	// draw everything
  *	while(device->run() && driver)
  *	{
  *		driver->beginScene(true, true, video::SColor(255,0,0,255));
@@ -154,19 +183,23 @@
  *		driver->endScene();
  *	}
  *
+ *	// delete device
  *	device->drop();
  *	return 0;
  * }
  * \endcode
  *
- * If you would like to replace the simple blue screen by a cool Quake 3 Map,
- * optimized by an octtree, just insert this code somewhere
- * before the while loop:
+ * If you would like to replace the simple blue screen background by
+ * a cool Quake 3 Map, optimized by an octtree, just insert this code
+ * somewhere before the while loop:
  *
  * \code
- * device->getFileSystem()->addZipFileArchive("quake3map.pk3");
- * scene::IAnimatedMesh* mesh = scenemgr->getMesh("quake3map.bsp");
- * node = scenemgr->addOctTreeSceneNode(mesh->getMesh(0));
+ *	// add .pk3 archive to the file system
+ *	device->getFileSystem()->addZipFileArchive("quake3map.pk3");
+ *
+ *	// load .bsp file and show it using an octtree
+ *	scenemgr->addOctTreeSceneNode(
+ *		scenemgr->getMesh("quake3map.bsp"));
  * \endcode
  *
  * As you can see, the engine uses namespaces. Everything in the engine is
@@ -205,6 +238,7 @@
 #define IRRLICHT_API 
 #endif // WIN32
 
+
 //! Everything in the Irrlicht Engine can be found in this namespace.
 namespace irr
 {
@@ -219,16 +253,19 @@ namespace irr
 	    if you want the engine be able to draw stencil buffer shadows. Note that not all
 		devices are able to use the stencil buffer. If they don't no shadows will be drawn.
 	\param receiver: A user created event receiver.
+	\param sdk_version_do_not_use: Don't use or change this parameter. Always set it to
+	IRRLICHT_SDK_VERSION, which is done by default. This is needed for sdk version checks.
 	\return Returns pointer to the created IrrlichtDevice or null if the 
 	device could not be created.
 	*/
 	IRRLICHT_API IrrlichtDevice* createDevice(
-		video::EDriverType deviceType = video::DT_SOFTWARE, 
+		video::EDriverType deviceType = video::EDT_SOFTWARE, 
 		const core::dimension2d<s32>& windowSize = core::dimension2d<s32>(640,480),
 		u32 bits = 16,
 		bool fullscreen = false,
 		bool stencilbuffer=false,
-		IEventReceiver* receiver = 0);
+		IEventReceiver* receiver = 0,
+		const wchar_t* sdk_version_do_not_use = IRRLICHT_SDK_VERSION);
 
 	// THE FOLLOWING IS AN EMPTY LIST OF ALL SUB NAMESPACES
 	// EXISTING ONLY FOR THE DOCUMENTION SOFTWARE DOXYGEN.

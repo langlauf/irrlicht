@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -8,7 +8,7 @@
 namespace irr
 {
 
-	enum EKEY_CODES
+	enum EKEY_CODE
 	{
 		KEY_LBUTTON          = 0x01,  // Left mouse button  
 		KEY_RBUTTON          = 0x02,  // Right mouse button  
@@ -141,6 +141,10 @@ namespace irr
 		KEY_RCONTROL         = 0xA3,  // Right CONTROL key 
 		KEY_LMENU            = 0xA4,  // Left MENU key 
 		KEY_RMENU            = 0xA5,  // Right MENU key 
+		KEY_COMMA            = 0xBC,  // Comma Key  (,)
+		KEY_PLUS             = 0xBB,  // Plus Key   (+)
+		KEY_MINUS            = 0xBD,  // Minus Key  (-)
+		KEY_PERIOD           = 0xBE,  // Period Key (.)
 		KEY_ATTN             = 0xF6,  // Attn key 
 		KEY_CRSEL            = 0xF7,  // CrSel key 
 		KEY_EXSEL            = 0xF8,  // ExSel key 

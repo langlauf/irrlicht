@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -14,42 +14,53 @@
 #include "IReadFile.h"
 #include "SMaterial.h"
 #include "SLight.h"
-#include "ISurfaceLoader.h"
+#include "IImageLoader.h"
 #include "triangle3d.h"
 
 namespace irr
 {
+namespace scene
+{
+	class IMeshBuffer;
+}
 
 namespace video
 {
 	struct S3DVertex;
 	struct S3DVertex2TCoords;
 
-	enum EK3D_VIDEO_DRIVER_FEATURE
+	//! enumeration for querying features of the video driver.
+	enum E_VIDEO_DRIVER_FEATURE
 	{
 		//! Is driver able to render to a surface?
-		EK3DVDF_RENDER_TO_TARGET = 0,	
+		EVDF_RENDER_TO_TARGET = 0,	
+
 		//! Is driver able to render with a bilinear filter applied?
-		EK3DVDF_BILINEAR_FILER,			
+		EVDF_BILINEAR_FILER,			
+
 		//! Is hardeware transform and lighting supported?
-		EK3DVDF_HARDWARE_TL,			
+		EVDF_HARDWARE_TL,			
+
 		//! Can the driver handle mip maps?
-		EK3DVDF_MIP_MAP,		
+		EVDF_MIP_MAP,		
+
 		//! Are stencilbuffers switched on and does the device support stencil buffers?
-		EK3DVDF_STENCIL_BUFFER
+		EVDF_STENCIL_BUFFER
 	};
 
+	//! enumeration for geometry transformation states
 	enum E_TRANSFORMATION_STATE
 	{
 		//! View transformation
-		TS_VIEW = 0,
+		ETS_VIEW = 0,
 		//! World transformation
-		TS_WORLD,
+		ETS_WORLD,
 		//! Projection transformation
-		TS_PROJECTION,
+		ETS_PROJECTION,
 		//! Not used
-		TS_COUNT
+		ETS_COUNT
 	};
+
 
 	//! Interface to driver which is able to perform 2d and 3d gfx functions.
 	/** The IVideoDriver interface is one of the most important interfaces of
@@ -84,7 +95,7 @@ namespace video
 		//! Queries the features of the driver, returns true if a feature is available
 		//! \param feature: A feature to query.
 		//! \return Returns true if the feature is available, false if not.
-		virtual bool queryFeature(EK3D_VIDEO_DRIVER_FEATURE feature) = 0;
+		virtual bool queryFeature(E_VIDEO_DRIVER_FEATURE feature) = 0;
 
 		//! Sets the view, world or projection transformation. 
 		//! \param state: Transformation type to be set. Can be view, world or projection.
@@ -98,41 +109,58 @@ namespace video
 
 		//! Returns a pointer to a texture. Loads the texture if it is not
 		//! already loaded, and generates mipmap levels if wished.
-		//! The texture can be in BMP, JPG, TGA and PSD format.
-		//! For loading BMP, TGA and PSD files, the engine uses its own methods.
+		//! The texture can be in BMP, JPG, TGA, PCX and PSD format.
+		//! For loading BMP, TGA, PCX and PSD files, the engine uses its own methods.
+		//! PCX loading is based on some code by Dean P. Macri, who sent
+		//! it in for free use by the engine. It currently not supports
+		//! all .pcx formats. Also, compressed BMP's and TGAs don't work correctly.
 		//! For loading JPG-Files the JPEG LIB 6b, written by 
 		//! The Independent JPEG Group is used by the engine. Thanx for such a great
 		//! library!
 		//! \param filename: Filename of the texture to be loaded.
-		//! \param generateMipLevels: Automaticly generates mip map levels if set to true.
 		//! \return Returns a pointer to the texture and NULL if the texture
 		//! could not be loaded. 
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
-		virtual ITexture* getTexture(const c8* filename, bool generateMipLevels=false) = 0;
+		virtual ITexture* getTexture(const c8* filename) = 0;
 
 		//! Returns a pointer to a texture. Loads the texture if it is not
 		//! already loaded, and generates mipmap levels if wished.
-		//! The texture can be in BMP, JPG, TGA and PSD format.
-		//! For loading BMP, TGA and PSD files, the engine uses its own methods.
+		//! The texture can be in BMP, JPG, TGA, PCX and PSD format.
+		//! For loading BMP, TGA, PCX and PSD files, the engine uses its own methods.
+		//! PCX loading is based on some code by Dean P. Macri, who sent
+		//! it in for free use by the engine. It currently not supports
+		//! all .pcx formats. Also, compressed BMP's and TGAs don't work correctly.
 		//! For loading JPG-Files the JPEG LIB 6b, written by 
 		//! The Independent JPEG Group is used by the engine. Thanx for such a great
 		//! library!
 		//! \param file: Pointer to an already opened file.
-		//! \param generateMipLevels: Automaticly generates mip map levels if set to true.
 		//! \return Returns a pointer to the texture and NULL if the texture
 		//! could not be loaded. 
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
-		virtual ITexture* getTexture(io::IReadFile* file, bool generateMipLevels=false) = 0;
+		virtual ITexture* getTexture(io::IReadFile* file) = 0;
 
 		//! Creates an empty Texture of specified size.
 		//! \param size: Size of the texture.
 		//! \param name: A name for the texture. Later calls of getTexture() with this name
 		//! will return this texture
+		//! \param format: Desired color format of the texture. Please note that
+		//! the driver may choose to create the texture in another color format.
 		//! \return Returns a pointer to the new created Texture. 
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
 		//! The format of the new texture will be chosen by the driver, and will in most 
-		//! cases have the EHCF_R5G5B5 format.
-		virtual ITexture* addTexture(const core::dimension2d<s32>& size, const c8* name) = 0;
+		//! cases have the ECF_A1R5G5B5 or ECF_A8R8G8B8 format.
+		virtual ITexture* addTexture(const core::dimension2d<s32>& size,
+			const c8* name, ECOLOR_FORMAT format = ECF_A1R5G5B5) = 0;
+
+		//! Creates a texture from a loaded IImage.
+		//! \param name: A name for the texture. Later calls of getTexture() with this name
+		//! will return this texture
+		//! \param image: Image from which the texture is created from.
+		//! \return Returns a pointer to the new created Texture. 
+		//! This pointer should not be dropped. See IUnknown::drop() for more information.
+		//! The format of the new texture will be chosen by the driver, and will in most 
+		//! cases have the ECF_A1R5G5B5 or ECF_A8R8G8B8 format.
+		virtual ITexture* addTexture(const c8* name, IImage* image) = 0;
 
 		//! Removes a texture from the texture cache and deletes it, freeing lot of
 		//! memory. Please note that after calling this, the pointer to the ITexture
@@ -174,7 +202,7 @@ namespace video
 			core::position2d<s32> colorKeyPixelPos) = 0;
 
 		//! Sets a new render target. This will only work, if the driver
-		//! supports the EK3DVDF_RENDER_TO_TARGET feature, which can be 
+		//! supports the EVDF_RENDER_TO_TARGET feature, which can be 
 		//! queried with queryFeature().
 		//! \param texture: New render target.
 		virtual void setRenderTarget(video::ITexture* texture) = 0;
@@ -212,6 +240,34 @@ namespace video
 		virtual void drawIndexedTriangleList(const S3DVertex2TCoords* vertices,
 			s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
 
+		//! Draws an indexed triangle fan.
+		//! Note that there may be at maximum 65536 vertices, because the
+		//! index list is a array of 16 bit values each with a maximum value 
+		//! of 65536. If there are more than 65536 vertices in the list, 
+		//! results of this operation are not defined.
+		//! Please note that some of the implementation code for this method is based on 
+		//! free code sent in by Mario Gruber, lots of thanks go to him!
+		//! \param vertices: Pointer to array of vertices.
+		//! \param vertexCount: Amount of vertices in the array.
+		//! \param indexList: Pointer to array of indizes.
+		//! \param triangleCount: amount of Triangles. Usually amount of indizes - 2.
+		virtual void drawIndexedTriangleFan(const S3DVertex* vertices,
+			s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
+
+		//! Draws an indexed triangle fan.
+		//! Note that there may be at maximum 65536 vertices, because the
+		//! index list is a array of 16 bit values each with a maximum value 
+		//! of 65536. If there are more than 65536 vertices in the list, 
+		//! results of this operation are not defined.
+		//! Please note that some of the implementation code for this method is based on 
+		//! free code sent in by Mario Gruber, lots of thanks go to him!
+		//! \param vertices: Pointer to array of vertices.
+		//! \param vertexCount: Amount of vertices in the array.
+		//! \param indexList: Pointer to array of indizes.
+		//! \param triangleCount: amount of Triangles. Usually amount of indizes - 2.
+		virtual void drawIndexedTriangleFan(const S3DVertex2TCoords* vertices,
+			s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
+
 		//! Draws a 3d line.
 		//! This method usually simply calls drawIndexedTriangles with some 
 		//! triangles. Note that the line is drawed using the current transformation
@@ -223,8 +279,7 @@ namespace video
 		//! \param end: End of the 3d line.
 		//! \param color: Color of the line. 
 		virtual void draw3DLine(const core::vector3df& start,
-			const core::vector3df& end, SColor color = SColor(255,255,255,255),
-			f32 thickness = 1.0f) = 0;
+			const core::vector3df& end, SColor color = SColor(255,255,255,255)) = 0;
 
 		//! Draws a 3d triangle.
 		//! This method usually simply calls drawIndexedTriangles with some 
@@ -235,9 +290,8 @@ namespace video
 		//! hence is not very fast but it might be useful for further development. 
 		//! \param triangle: The triangle to draw.
 		//! \param color: Color of the line. 
-		//! \param thickness: Thickness of every line of the triangle.
 		virtual void draw3DTriangle(const core::triangle3df& triangle,
-			SColor color = SColor(255,255,255,255), f32 thickness = 1.0f) = 0;
+			SColor color = SColor(255,255,255,255)) = 0;
 
 		//! Draws a 3d axis aligned box.
 		//! This method usually simply calls drawIndexedTriangles with some 
@@ -248,10 +302,8 @@ namespace video
 		//! hence is not very fast but it might be useful for further development. 
 		//! \param box: The axis aligned box to draw
 		//! \param color: Color to use while drawing the box.
-		//! \param thickness: Thickness of every line of the box.
 		virtual void draw3DBox(const core::aabbox3d<f32> box,
-			SColor color = SColor(255,255,255,255),
-			f32 thickness = 1.0f) = 0;
+			SColor color = SColor(255,255,255,255)) = 0;
 
 		//! Simply draws an 2d image, without any special effects
 		//! \param texture: Pointer to texture to use.
@@ -259,7 +311,7 @@ namespace video
 		virtual void draw2DImage(video::ITexture* texture,
 			const core::position2d<s32>& destPos) = 0;
 
-		//! Draws an 2d image, using a color (if color is other then 
+		//! Draws an 2d image, using a color (if color is other than 
 		//! Color(255,255,255,255)) and the alpha channel of the texture if wanted.
 		//! \param texture: Texture to be drawn.
 		//! \param destPos: Upper left 2d destination position where the image will be drawn.
@@ -295,6 +347,8 @@ namespace video
 		//! Draws a shadow volume into the stencil buffer. To draw a stencil shadow, do
 		//! this: Frist, draw all geometry. Then use this method, to draw the shadow
 		//! volume. Then, use IVideoDriver::drawStencilShadow() to visualize the shadow.
+		//! Please note that the code for the opengl version of the method is based on 
+		//! free code sent in by Philipp Dortmann, lots of thanks go to him!
 		//! \param triangles: Pointer to array of 3d vectors, specifing the shadow volume.
 		//! \param count: Amount of triangles in the array.
 		//! \param zfail: If set to true, zfail method is used, otherwise zpass.
@@ -303,6 +357,8 @@ namespace video
 		//! Fills the stencil shadow with color. After the shadow volume has been drawn
 		//! into the stencil buffer using IVideoDriver::drawStencilShadowVolume(), use this
 		//! to draw the color of the shadow. 
+		//! Please note that the code for the opengl version of the method is based on 
+		//! free code sent in by Philipp Dortmann, lots of thanks go to him!
 		//! \param clearStencilBuffer: Set this to false, if you want to draw every shadow 
 		//! with the same color, and only want to call drawStencilShadow() once after all
 		//! shadow volumes have been drawn. Set this to true, if you want to paint every
@@ -317,12 +373,30 @@ namespace video
 			video::SColor leftDownEdge = video::SColor(255,0,0,0),
 			video::SColor rightDownEdge = video::SColor(255,0,0,0)) = 0;
 
+		//! Draws a mesh buffer
+		//! \param mb: Buffer to draw;
+		virtual void drawMeshBuffer(scene::IMeshBuffer* mb) = 0;
+
+		//! Sets the fog mode. These are global values attached to each 3d object
+		//! rendered, which has the fog flag enabled in its material.
+		//! \param color: Color of the fog
+		//! \param linearFog: Set this to true for linear fog, otherwise exponential fog is applied.
+		//! \param start: Only used in linear fog mode (linearFog=true). Specifies where fog starts.
+		//! \param end: Only used in linear fog mode (linearFog=true). Specifies where fog ends.
+		//! \param density: Only used in expotential fog mode (linearFog=false). Must be a value between 0 and 1.
+		//! \param pixelFog: Set this to false for vertex fog, and true if you want pixel fog.
+		//! \param rangeFog: Set this to true to enable range-based vertex fog. The distance
+		//! from the viewer is used to compute the fog, not the z-coordinate. This is
+		//! better, but slower. This is only available with D3D and vertex fog.
+		virtual void setFog(SColor color=SColor(0,255,255,255), bool linearFog=true, f32 start=50.0f, f32 end=100.0f, 
+			f32 density=0.01f, bool pixelFog=false, bool rangeFog=false) = 0;
+
 		//! Returns the size of the screen or render window.
 		//! \return Size of screen or render window.
 		virtual core::dimension2d<s32> getScreenSize() = 0;
 
 		//! Returns current frames per second value.
-		//! \return Returns amount of frames per second drawed.
+		//! \return Returns amount of frames per second drawn.
 		virtual s32 getFPS() = 0;
 
 		//! Returns amount of primitives (mostly triangles) which were drawn in the last frame.
@@ -360,13 +434,52 @@ namespace video
 		//! driver, it would return "Direct3D8.1".
 		virtual const wchar_t* getName() = 0;
 
-		//! Adds an external surface loader to the engine. This is useful if 
+		//! Adds an external image loader to the engine. This is useful if 
 		//! the Irrlicht Engine should be able to load textures of currently 
-		//! unsupported file formats (e.g .gif). The ISurfaceLoader only needs
+		//! unsupported file formats (e.g .gif). The IImageLoader only needs
 		//! to be implemented for loading this file format. A pointer to
 		//! the implementation can be passed to the engine using this method.
 		//! \param loader: Pointer to the external loader created.
-		virtual void addExternalSurfaceLoader(ISurfaceLoader* loader) = 0;
+		virtual void addExternalImageLoader(IImageLoader* loader) = 0;
+
+		//! Returns the maximum amount of primitives (mostly vertices) which
+		//! the device is able to render with one drawIndexedTriangleList
+		//! call.
+		virtual s32 getMaximalPrimitiveCount() = 0;
+
+		//! Enables or disables a texture creation flag. This flag defines how
+		//! textures should be created. By changing this value, you can influence
+		//! the speed of rendering a lot. But please note that the video drivers
+		//! take this value only as recommendation. It could happen that you
+		//! enable the ETCM_ALWAYS_16_BIT mode, but the driver creates 32 bit
+		//! textures.
+		//! \param flag: Texture creation flag.
+		//! \param enbabled: Specifies if the given flag should be enabled or disabled.
+		virtual void setTextureCreationFlag(E_TEXTURE_CREATION_FLAG flag, bool enabled) = 0;
+
+		//! Returns if a texture creation flag is enabled or disabled.
+		//! You can change this value using setTextureCreationMode().
+		//! \param flag: Texture creation flag.
+		//! \return Returns the current texture creation mode.
+		virtual bool getTextureCreationFlag(E_TEXTURE_CREATION_FLAG flag) = 0;
+
+		//! Creates a software image from a file. No hardware texture will
+		//! be created for this image. This method is useful for example if
+		//! you want to read a heightmap for a terrain renderer.
+		//! \param filename: Name of the file from which the image is created.
+		//! \return Returns the created image.
+		//! If you no longer need the image, you should call IImage::drop().
+		//! See IUnknown::drop() for more information.
+		virtual IImage* createImageFromFile(const char* filename) = 0;
+
+		//! Creates a software image from a file. No hardware texture will
+		//! be created for this image. This method is useful for example if
+		//! you want to read a heightmap for a terrain renderer.
+		//! \param file: File from which the image is created.
+		//! \return Returns the created image.
+		//! If you no longer need the image, you should call IImage::drop().
+		//! See IUnknown::drop() for more information.
+		virtual IImage* createImageFromFile(io::IReadFile* file) = 0;
 	};
 
 } // end namespace video

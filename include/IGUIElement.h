@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -70,6 +70,14 @@ public:
 	}
 
 
+	//! Sets the relative rectangle of this element.
+	void setRelativePosition(const core::rect<s32>& r)
+	{
+		RelativeRect = r;
+		updateAbsolutePosition();
+	}
+
+
 	//! Returns the absolute rectangle of element.
 	core::rect<s32> getAbsolutePosition()
 	{
@@ -89,6 +97,17 @@ public:
 		core::list<IGUIElement*>::Iterator it = Children.begin();
 		for (; it != Children.end(); ++it)
 			(*it)->updateAbsolutePosition(AbsoluteRect);
+	}
+
+	//! Updates the absolute position.
+	void updateAbsolutePosition()
+	{
+		core::rect<s32> parentRect(0,0,0,0);
+
+		if (Parent)
+			parentRect = Parent->getAbsolutePosition();
+
+		updateAbsolutePosition(parentRect);
 	}
 
 
@@ -119,7 +138,7 @@ public:
 
 
 	//! Adds a GUI element as new child of this element.
-	void addChild(IGUIElement* child)
+	virtual void addChild(IGUIElement* child)
 	{
 		if (child)
 		{
@@ -130,7 +149,7 @@ public:
 
 
 	//! Removes a child.
-	void removeChild(IGUIElement* child)
+	virtual void removeChild(IGUIElement* child)
 	{
 		core::list<IGUIElement*>::Iterator it = Children.begin();
 		for (; it != Children.end(); ++it)
@@ -144,7 +163,7 @@ public:
 
 
 	//! Removes this element.
-	void remove()
+	virtual void remove()
 	{
 		if (Parent)
 			Parent->removeChild(this);
@@ -154,6 +173,9 @@ public:
 	//! Draws the element and its children.
 	virtual void draw()
 	{
+		if (!IsVisible)
+			return;
+
 		core::list<IGUIElement*>::Iterator it = Children.begin();
 		for (; it != Children.end(); ++it)
 			(*it)->draw();
@@ -217,9 +239,15 @@ public:
 
 
 	//! Returns id. Can be used to identify the element.
-	s32 getID()
+	virtual s32 getID()
 	{
 		return ID;
+	}
+
+	//! Sets the id of this element
+	virtual void setID(s32 id)
+	{
+		ID = id;
 	}
 
 
@@ -230,7 +258,58 @@ public:
 			Parent->OnEvent(event);
 		return true;
 	}
-	
+
+
+	//! Brings a child to front
+	//! \return Returns true if successful, false if not.
+	virtual bool bringToFront(IGUIElement* element)
+	{
+		core::list<IGUIElement*>::Iterator it = Children.begin();
+		for (; it != Children.end(); ++it)
+		{
+			if (element == (*it))
+			{
+				Children.erase(it);
+				Children.push_back(element);
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	//! Returns list with children of this element
+	virtual const core::list<IGUIElement*>& getChildren() const
+	{
+		return Children;
+	}
+
+	//! Finds the first element with the given id.
+	//! \param id: Id to search for.
+	//! \param searchchildren: Set this to true, if also children of this 
+	//! element may contain the element with the searched id and they 
+	//! should be searched too.
+	//! \return Returns the first element with the given id. If no element
+	//! with this id was found, 0 is returned.
+	virtual IGUIElement* getElementFromId(s32 id, bool searchchildren=false) const
+	{
+		IGUIElement* e = 0;
+
+		core::list<IGUIElement*>::Iterator it = Children.begin();
+		for (; it != Children.end(); ++it)
+		{
+			if ((*it)->getID() == id)
+				return (*it);
+
+			if (searchchildren)
+				e = (*it)->getElementFromId(id, true);
+
+			if (e)
+				return e;
+		}		
+
+		return e;
+	}
 
 protected:
 

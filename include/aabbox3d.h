@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -58,6 +58,12 @@ class aabbox3d
 		{
 			MaxEdge.set(x,y,z);
 			MinEdge = MaxEdge;
+		}
+
+		//! Resets the bounding box.
+		void reset(const aabbox3d<T>& initValue)
+		{
+			*this = initValue;
 		}
 
 		//! Resets the bounding box.
@@ -276,6 +282,10 @@ class aabbox3d
 		vector3d<T> MaxEdge;
 };
 
+	//! Typedef for a f32 3d bounding box.
+	typedef aabbox3d<f32> aabbox3df;
+	//! Typedef for an integer 3d bounding box.
+	typedef aabbox3d<s32> aabbox3di;
 
 
 } // end namespace core

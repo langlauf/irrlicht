@@ -10,7 +10,9 @@
 #include <irrlicht.h>
 
 #ifdef USE_AUDIERE
-#include <audiere.h>
+#include <audiere.h> // your compiler throws an error here? get audiere from 
+                     // http://audiere.sourceforge.net/ or uncomment 
+                     // the define USE_AUDIERE above.
 using namespace audiere;
 #pragma comment (lib, "audiere.lib")
 #endif
@@ -22,7 +24,7 @@ class CDemo : public IEventReceiver
 {
 public:
 
-	CDemo(bool fullscreen, bool music, bool shadows, video::EDriverType driver);
+	CDemo(bool fullscreen, bool music, bool shadows, bool additive, video::EDriverType driver);
 
 	~CDemo();
 
@@ -41,6 +43,7 @@ private:
 	bool fullscreen;
 	bool music;
 	bool shadows;
+	bool additive;
 	video::EDriverType driverType;
 	IrrlichtDevice *device;
 

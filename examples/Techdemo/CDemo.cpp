@@ -4,11 +4,12 @@
 #include "CDemo.h"
 #include <stdio.h>
 
-CDemo::CDemo(bool f, bool m, bool s, video::EDriverType d)
+CDemo::CDemo(bool f, bool m, bool s, bool a, video::EDriverType d)
 : fullscreen(f), driverType(d), currentScene(-2),
  model1(0), model2(0), music(m), 
 shadows(s), quakeLevelMesh(0), quakeLevelNode(0), timeForThisScene(0),
-skyboxNode(0), mapSelector(0), metaSelector(0), campFire(0)
+skyboxNode(0), mapSelector(0), metaSelector(0), campFire(0), device(0),
+additive(a)
 {
 }
 
@@ -77,12 +78,18 @@ void CDemo::run()
 
 bool CDemo::OnEvent(SEvent event)
 {
+	if (!device)
+		return false;
+
 	if (event.EventType == EET_KEY_INPUT_EVENT &&
 		event.KeyInput.Key == KEY_ESCAPE &&
 		event.KeyInput.PressedDown == false)
 	{
 		// user wants to quit.
-		device->closeDevice();
+		if (currentScene < 3)
+			timeForThisScene = 0;
+		else
+			device->closeDevice();
 	}
 	else
 	if ((event.EventType == EET_KEY_INPUT_EVENT &&
@@ -96,6 +103,19 @@ bool CDemo::OnEvent(SEvent event)
 		shoot();
 	}
 	else
+#ifdef _DEBUG
+	if (event.EventType == irr::EET_MOUSE_INPUT_EVENT &&
+		event.MouseInput.Event == EMIE_LMOUSE_LEFT_UP)
+	{
+		char tmp[255];
+		core::vector3df pos = device->getSceneManager()->getActiveCamera()->getAbsolutePosition();
+		sprintf(tmp, "points.push_back(core::vector3df(%ff, %ff, %ff)); // %d\n", pos.X, pos.Y, pos.Z,
+			sceneStartTime - device->getTimer()->getTime());
+		OutputDebugString(tmp);
+		return true;
+	}
+	else
+#endif
 	if (device->getSceneManager()->getActiveCamera())
 	{
 		device->getSceneManager()->getActiveCamera()->OnEvent(event);
@@ -137,18 +157,74 @@ void CDemo::switchToNextScene()
 		break;
 
 	case 1: // panorama camera
-		camera = sm->addCameraSceneNode(0, core::vector3df(0,0,0), core::vector3df(-586,708,52));
-		sa = sm->createFlyStraightAnimator(core::vector3df(509,600,812),
-			core::vector3df(844,670,-885), 15000, true);
-		camera->addAnimator(sa);
-		timeForThisScene = 14000;
-		sa->drop();
+		{
+			#if 0
+			camera = sm->addCameraSceneNodeFPS(0, 100, 500);
+			timeForThisScene = 14000000;
+			#else
+			timeForThisScene = 39664;
+			currentScene += 1;
+			camera = sm->addCameraSceneNode(0, core::vector3df(0,0,0), core::vector3df(-586,708,52));
+			camera->setTarget(core::vector3df(0,400,0));
+			
+			core::array<core::vector3df> points;
+		
+			points.push_back(core::vector3df(1114.336792f, 242.206009f, -56.976807f));
+			points.push_back(core::vector3df(1116.545166f, 378.685272f, -56.083183f));
+			points.push_back(core::vector3df(1118.940186f, 516.664307f, -56.338856f));
+			points.push_back(core::vector3df(1130.007935f, 662.745605f, -56.157753f));
+			points.push_back(core::vector3df(1154.303345f, 814.303101f, -57.683624f));
+			points.push_back(core::vector3df(1007.227173f, 757.994019f, 226.902283f));
+			points.push_back(core::vector3df(913.370850f, 667.597168f, 469.352020f));
+
+			points.push_back(core::vector3df(804.647400f, 625.486145f, 637.515320f));
+			points.push_back(core::vector3df(799.796814f, 625.486145f, 971.678223f));
+			points.push_back(core::vector3df(576.089050f, 573.689880f, 1024.815430f));
+			points.push_back(core::vector3df(492.829620f, 545.776917f, 940.990051f));
+			points.push_back(core::vector3df(502.472015f, 563.155029f, 811.918396f));
+			points.push_back(core::vector3df(456.350525f, 545.089233f, 587.798828f));
+			points.push_back(core::vector3df(477.665680f, 545.019470f, 350.156158f));
+			points.push_back(core::vector3df(462.408508f, 534.190247f, 55.671730f));
+			points.push_back(core::vector3df(455.176117f, 548.591370f, -195.685745f));
+			points.push_back(core::vector3df(445.013641f, 561.275391f, -481.564636f));
+			points.push_back(core::vector3df(470.327087f, 554.699463f, -914.740601f));
+			points.push_back(core::vector3df(215.299149f, 478.205139f, -890.992554f));
+			points.push_back(core::vector3df(40.725445f, 406.419464f, -856.153564f));
+			points.push_back(core::vector3df(-139.619537f, 367.475952f, -832.361145f));
+			points.push_back(core::vector3df(-372.134460f, 353.153320f, -718.145630f));
+			points.push_back(core::vector3df(-396.479126f, 399.665192f, -464.819946f));
+			points.push_back(core::vector3df(-401.636963f, 400.320068f, -85.747185f));
+			points.push_back(core::vector3df(-399.067566f, 405.603760f, 78.287315f));
+			points.push_back(core::vector3df(-142.541534f, 390.756897f, 108.415192f));
+			points.push_back(core::vector3df(110.264053f, 388.120453f, 91.955513f));
+			points.push_back(core::vector3df(358.585236f, 392.355316f, 98.712135f));
+			points.push_back(core::vector3df(573.278687f, 396.884125f, 109.258797f));
+			points.push_back(core::vector3df(631.992310f, 419.328979f, 281.179108f));
+			points.push_back(core::vector3df(607.874084f, 413.811523f, 535.857849f));
+			points.push_back(core::vector3df(614.861389f, 400.083984f, 751.252869f));
+			points.push_back(core::vector3df(557.560303f, 341.482758f, 924.299133f));
+			points.push_back(core::vector3df(430.859222f, 331.369476f, 985.138367f));
+			points.push_back(core::vector3df(263.945251f, 215.380280f, 968.150269f));
+			points.push_back(core::vector3df(202.371033f, 213.545090f, 943.107300f));
+			points.push_back(core::vector3df(114.756012f, 199.799759f, 805.014160f));
+			points.push_back(core::vector3df(96.783348f, 181.639481f, 648.188110f));
+			points.push_back(core::vector3df(97.865623f, 138.905975f, 484.812561f));
+			points.push_back(core::vector3df(99.612457f, 102.463669f, 347.603210f));
+			points.push_back(core::vector3df(99.612457f, 102.463669f, 347.603210f));
+			points.push_back(core::vector3df(99.612457f, 102.463669f, 347.603210f));
+			
+			sa = sm->createFollowSplineAnimator(device->getTimer()->getTime(), 
+				points);
+			camera->addAnimator(sa);
+			sa->drop();			
+			#endif
 		model1->setVisible(false);
 		model2->setVisible(false);
 		campFire->setVisible(false);
 		inOutFader->fadeIn(7000);
+	
 		break;
-
+		}
 	case 2:	// down fly anim camera
 		camera = sm->addCameraSceneNode(0, core::vector3df(100,40,-80), core::vector3df(844,670,-885));
 		sa = sm->createFlyStraightAnimator(	core::vector3df(94, 1002, 127),
@@ -162,21 +238,45 @@ void CDemo::switchToNextScene()
 		break;
 
 	case 3: // interactive, go around
-		model1->setVisible(true);
-		model2->setVisible(true);
-		campFire->setVisible(true);
-		timeForThisScene = -1;
-		camera = sm->addCameraSceneNodeFPS(0, 100.0f, 300.0f);
-		camera->setPosition(core::vector3df(108,140,-140));
-		
-		scene::ISceneNodeAnimatorCollisionResponse* collider = 
-			sm->createCollisionResponseAnimator(
-			metaSelector, camera, core::vector3df(30,50,30), 
-			core::vector3df(0, quakeLevelMesh ? -100.0f : 0.0f,0), 100.0f,
-				core::vector3df(0,40,0), 0.0005f);
-	    
-		camera->addAnimator(collider);
-		collider->drop();
+		{
+			model1->setVisible(true);
+			model2->setVisible(true);
+			campFire->setVisible(true);
+			timeForThisScene = -1;
+
+			SKeyMap keyMap[8];
+			keyMap[0].Action = EKA_MOVE_FORWARD;
+			keyMap[0].KeyCode = KEY_UP;
+			keyMap[1].Action = EKA_MOVE_FORWARD;
+			keyMap[1].KeyCode = KEY_KEY_W;
+	        
+			keyMap[2].Action = EKA_MOVE_BACKWARD;
+			keyMap[2].KeyCode = KEY_DOWN;
+			keyMap[3].Action = EKA_MOVE_BACKWARD;
+			keyMap[3].KeyCode = KEY_KEY_S;
+	        
+			keyMap[4].Action = EKA_STRAFE_LEFT;
+			keyMap[4].KeyCode = KEY_LEFT;
+			keyMap[5].Action = EKA_STRAFE_LEFT;
+			keyMap[5].KeyCode = KEY_KEY_A;
+	        
+			keyMap[6].Action = EKA_STRAFE_RIGHT;
+			keyMap[6].KeyCode = KEY_RIGHT;
+			keyMap[7].Action = EKA_STRAFE_RIGHT;
+			keyMap[7].KeyCode = KEY_KEY_D;
+
+			camera = sm->addCameraSceneNodeFPS(0, 100.0f, 300.0f, -1, keyMap, 8);
+			camera->setPosition(core::vector3df(108,140,-140));
+			
+			scene::ISceneNodeAnimatorCollisionResponse* collider = 
+				sm->createCollisionResponseAnimator(
+				metaSelector, camera, core::vector3df(30,50,30), 
+				core::vector3df(0, quakeLevelMesh ? -100.0f : 0.0f,0), 100.0f,
+					core::vector3df(0,40,0), 0.0005f);
+		    
+			camera->addAnimator(collider);
+			collider->drop();
+		}
 		break;
 	}
 
@@ -210,6 +310,10 @@ void CDemo::loadSceneData()
 			// create map triangle selector
 			mapSelector = sm->createOctTreeTriangleSelector(quakeLevelMesh->getMesh(0),
 				quakeLevelNode, 128);
+
+			// set additive blending if wanted
+			if (additive)
+				quakeLevelNode->setMaterialType(video::EMT_LIGHTMAP_ADD);
 		}
 	}
 
@@ -238,7 +342,7 @@ void CDemo::loadSceneData()
 			model2->setScale(core::vector3df(2,2,2));
 			model2->setMD2Animation(scene::EMAT_RUN);
 			model2->setAnimationSpeed(20);
-			model2->setMaterialTexture(0, device->getVideoDriver()->getTexture("..\\..\\media\\sydney.BMP"));
+			model2->setMaterialTexture(0, device->getVideoDriver()->getTexture("../../media/sydney.BMP"));
 			model2->setMaterialFlag(video::EMF_LIGHTING, true);
 			model2->addShadowVolumeSceneNode();
 		}
@@ -386,13 +490,13 @@ void CDemo::createLoadingScreen()
 	// loading text
 
 	const int lwidth = 170;
-	const int lheight = 20;
+	const int lheight = 15;
 
 	core::rect<int> pos(10, size.Height-lheight-10, 10+lwidth, size.Height-10);
 	
 	device->getGUIEnvironment()->addImage(pos);
-	statusText = device->getGUIEnvironment()->addStaticText(L"Loading...",	true, pos);
-	statusText->setOverrideColor(video::SColor(255,200,200,200));
+	statusText = device->getGUIEnvironment()->addStaticText(L"Loading...",	pos, true);
+	statusText->setOverrideColor(video::SColor(255,205,200,200));
 
 	// load bigger font
 
@@ -519,7 +623,7 @@ void CDemo::createParticleImpacts()
 			paf->drop();
 
 			pas->setMaterialFlag(video::EMF_LIGHTING, false);
-			pas->setMaterialTexture(0, device->getVideoDriver()->getTexture("..\\..\\media\\smoke.bmp"));
+			pas->setMaterialTexture(0, device->getVideoDriver()->getTexture("../../media/smoke.bmp"));
 			pas->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
 
 			scene::ISceneNodeAnimator* anim = sm->createDeleteAnimator(2000);

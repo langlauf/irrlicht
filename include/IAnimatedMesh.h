@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -31,7 +31,10 @@ namespace scene
 		EAMT_BSP,
 
 		//! 3D Studio .3ds file
-		EAMT_3DS
+		EAMT_3DS,
+
+		//! X file
+		EAMT_X
 	};
 
 	//! Interface for an animated mesh.

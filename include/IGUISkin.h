@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -68,14 +68,53 @@ namespace gui
 	{
 		//! default with / height of scrollbar
 		EGDS_SCROLLBAR_SIZE = 0,	
+
 		//! height of menu
 		EGDS_MENU_HEIGHT,			
+
+		//! width of a window button
 		EGDS_WINDOW_BUTTON_WIDTH,	
+
 		//! width of a checkbox check
 		EGDS_CHECK_BOX_WIDTH,		
+
+		//! width of a messagebox
+		EGDS_MESSAGE_BOX_WIDTH,
+
+		//! height of a messagebox
+		EGDS_MESSAGE_BOX_HEIGHT,
+
+		//! width of a default button
+		EGDS_BUTTON_WIDTH,
+
+		//! height of a default button
+		EGDS_BUTTON_HEIGHT,
 		
+		//! this value is not used, it only specifies the amount of default sizes
+		//! available.
 		EGDS_COUNT
 	};
+
+
+	enum EGUI_DEFAULT_TEXT
+	{
+		//! Text for the OK button on a message box
+		EGDT_MSG_BOX_OK,
+
+		//! Text for the Cancel button on a message box
+		EGDT_MSG_BOX_CANCEL,
+
+		//! Text for the Yes button on a message box
+		EGDT_MSG_BOX_YES,
+
+		//! Text for the No button on a message box
+		EGDT_MSG_BOX_NO,
+
+		//! this value is not used, it only specifies the amount of default texts
+		//! available.
+		EGDT_COUNT
+	};
+
 
 	//! A skin modifies the look of the GUI elements.
 	class IGUISkin : public IUnknown
@@ -93,6 +132,14 @@ namespace gui
 
 		//! returns default color
 		virtual s32 getSize(EGUI_DEFAULT_SIZE size) = 0;
+
+		//! Returns a default text. For example for Message box button captions:
+		//! "OK", "Cancel", "Yes", "No" and so on.
+		virtual const wchar_t* getDefaultText(EGUI_DEFAULT_TEXT text) = 0;
+
+		//! Sets a default text. For example for Message box button captions:
+		//! "OK", "Cancel", "Yes", "No" and so on.
+		virtual void setDefaultText(EGUI_DEFAULT_TEXT which, const wchar_t* newText) = 0;
 
 		//! sets a default size
 		virtual void setSize(s32 size) = 0;

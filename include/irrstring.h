@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -292,7 +292,6 @@ public:
 		array[used-1] = 0;
 	}
 
-
 	//! Appends a string to this string
 	//! \param other: String to append.
 	void append(const string<T>& other)
@@ -381,6 +380,9 @@ public:
 	//! \param length: Length of substring.
 	string<T> subString(s32 begin, s32 length)
 	{
+		if (length <= 0)
+			return string<T>("");
+
 		string<T> o;
 		o.reserve(length+1);
 
@@ -391,6 +393,17 @@ public:
 		o.used = o.allocated;
 
 		return o;
+	}
+
+
+	void operator += (T c)
+	{
+		append(c);
+	}
+
+	void operator += (const string<T>& other)
+	{
+		append(other);
 	}
     	
 

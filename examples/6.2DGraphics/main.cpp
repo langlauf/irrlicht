@@ -20,7 +20,7 @@ to the video driver.
 */
 int main()
 {
-	IrrlichtDevice *device = createDevice(video::DT_DIRECTX8,
+	IrrlichtDevice *device = createDevice(video::EDT_DIRECTX8,
 		core::dimension2d<s32>(512, 384));
 
 	device->setWindowCaption(L"Irrlicht Engine - 2D Graphics Demo");
@@ -50,7 +50,7 @@ int main()
 	Also, we define two rectangles, which specify the position of the
 	images of the red imps (little flying creatures) in the texture.
 */
-	gui::IGUIFont* font = device->getGUIEnvironment()->getBuildInFont();
+	gui::IGUIFont* font = device->getGUIEnvironment()->getBuiltInFont();
 	gui::IGUIFont* font2 = device->getGUIEnvironment()->getFont("../../media/fonthaettenschweiler.bmp");
 
 	core::rect<s32> imp1(349,15,385,78);

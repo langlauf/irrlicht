@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -76,6 +76,12 @@ namespace scene
 
 		//! returns an axis aligned bounding box
 		virtual const core::aabbox3d<f32>& getBoundingBox() const
+		{
+			return BoundingBox;
+		}
+
+		//! returns an axis aligned bounding box
+		virtual core::aabbox3d<f32>& getBoundingBox()
 		{
 			return BoundingBox;
 		}

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -75,8 +75,8 @@ typedef double				f64;
 */
 typedef unsigned short wchar_t;
 #define _WCHAR_T_DEFINED
-#endif
-#endif
+#endif // wchar is not defined
+#endif // microsoft compiler
 
-#endif
+#endif // __IRR_TYPES_H_INCLUDED__
 

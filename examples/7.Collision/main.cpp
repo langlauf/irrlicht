@@ -6,8 +6,8 @@ scene node picking.
 
 To start, we take the program from tutorial 2, which loaded and displayed a quake 3
 level. We will use the level to walk in it and to pick triangles from it. In addition
-we'll place 3 animated models into it for scene node picking. The following code creates
-an event receiver for sending events to the camera, starts up the engine and loads
+we'll place 3 animated models into it for scene node picking. The following code 
+starts up the engine and loads
 a quake 3 level. I will not explain it, because it should already be known from tutorial
 2.
 */
@@ -17,27 +17,11 @@ using namespace irr;
 
 #pragma comment(lib, "Irrlicht.lib")
 
-scene::ICameraSceneNode* camera = 0;
-
-class MyEventReceiver : public IEventReceiver
-{
-public:
-	virtual bool OnEvent(SEvent event)
-	{
-		if (camera)
-			return camera->OnEvent(event);
-
-		return false;
-	}
-};
-
 
 int main()
 {
-	MyEventReceiver receiver;
-
 	IrrlichtDevice *device =
-		createDevice(video::DT_DIRECTX8, core::dimension2d<s32>(640, 480), 16, false, false, &receiver);
+		createDevice(video::EDT_DIRECTX8, core::dimension2d<s32>(640, 480), 16, false);
 
 	video::IVideoDriver* driver = device->getVideoDriver();
 	scene::ISceneManager* smgr = device->getSceneManager();
@@ -107,7 +91,8 @@ int main()
 	ellipsoid with this parameter. And that's it, collision detection works now. 
 	*/
 
-	camera = smgr->addCameraSceneNodeFPS(0,100.0f,300.0f);
+	scene::ICameraSceneNode* camera = 
+		smgr->addCameraSceneNodeFPS(0,100.0f,300.0f);
 	camera->setPosition(core::vector3df(0,100,0));
 
 	scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
@@ -217,7 +202,7 @@ int main()
 		{
 			bill->setPosition(intersection);
 				
-			driver->setTransform(video::TS_WORLD, core::matrix4());
+			driver->setTransform(video::ETS_WORLD, core::matrix4());
 			driver->setMaterial(material);
 			driver->draw3DTriangle(tri, video::SColor(0,255,0,0));
 		}

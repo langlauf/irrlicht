@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -103,6 +103,14 @@ namespace scene
 		//! Returns the view frustrum. Needed sometimes by bspTree or LOD render nodes.
 		//! \return Returns the current view frustrum.
 		virtual const SViewFrustrum* getViewFrustrum() = 0;
+
+		//! Disables or enables the camera to get key or mouse inputs.
+		//! If this is set to true, the camera will respond to key inputs
+		//! otherwise not.
+		virtual void setInputReceiverEnabled(bool enabled) = 0;
+
+		//! Returns if the input receiver of the camera is currently enabled.
+		virtual bool isInputReceiverEnabled() = 0;
 	};
 
 } // end namespace scene

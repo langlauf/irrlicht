@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -46,12 +46,26 @@ namespace scene
 	{
 	public:
 
-		//! Returns frame loop data for a special MD2 animation type.
+		//! Returns frame loop data for a default MD2 animation type.
 		//! \Returns Returns the beginframe, endframe and frames per 
-		//! second for a special MD2 animation type.
+		//! second for a default MD2 animation type.
 		virtual void getFrameLoop(EMD2_ANIMATION_TYPE l, s32& outBegin,
 			s32& outEnd, s32& outFPS) const = 0;
 
+		//! Returns frame loop data for a special MD2 animation type, identified
+		//! by a string.
+		//! \Returns Returns the beginframe, endframe and frames per 
+		//! second for a special MD2 animation type.
+		virtual bool getFrameLoop(const c8* name, 
+			s32& outBegin, s32& outEnd, s32& outFps) const = 0;
+
+		//! Returns amount of md2 animations in this file.
+		virtual s32 getAnimationCount() const = 0;
+
+		//! Returns name of md2 animation. 
+		//! \param nr: Zero based index of animation. 
+		virtual const c8* getAnimationName(s32 nr) const = 0;
+        
 	};
 
 } // end namespace scene

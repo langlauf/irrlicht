@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -85,7 +85,7 @@ namespace scene
 		//! ms3d mesh or the name of the joint could not be found.
 		virtual ISceneNode* getMS3DJointNode(const c8* jointName) = 0;
 
-		//! Starts a MD2 animation. 
+		//! Starts a default MD2 animation. 
 		//! With this method it is easily possible to start a Run, Attack,
 		//! Die or whatever animation, if the mesh contained in this scene
 		//! node is a md2 mesh. Otherwise, nothing happenes.
@@ -94,6 +94,22 @@ namespace scene
 		//! \return Returns true if successful, and false if not, for example
 		//! if the mesh in the scene node is not a md2 mesh.
 		virtual bool setMD2Animation(EMD2_ANIMATION_TYPE anim) = 0;
+
+		//! Starts a special MD2 animation. 
+		//! With this method it is easily possible to start a Run, Attack,
+		//! Die or whatever animation, if the mesh contained in this scene
+		//! node is a md2 mesh. Otherwise, nothing happenes. This method uses
+		//! a character string to identify the animation. If the animation is a
+		//! standard md2 animation, you might want to start this animation
+		//! with the EMD2_ANIMATION_TYPE enumeraition instead.
+		//! \param animationName: Name of the animation which should be played.
+        //! \return Returns true if successful, and false if not, for example
+		//! if the mesh in the scene node is not a md2 mesh, or no animation
+		//! with this name could be found.
+		virtual bool setMD2Animation(const c8* animationName) = 0;
+
+		//! Returns the current displayed frame number.
+		virtual s32 getFrameNr() = 0;
 	};
 
 } // end namespace scene

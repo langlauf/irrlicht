@@ -28,9 +28,11 @@ IrrlichtDevice* device = 0;
 
 
 /*
-As in some previous tutorials, we create an IEventReceiver, to get
-events like keyboard input from the engine. We will use this input
-to move the camera and to move the scene node.
+To get events like mouse and keyboard input, or GUI events like 
+"the OK button has been clicked", we need an object wich is derived from the 
+IEventReceiver object. There is only one method to override: OnEvent. 
+This method will be called by the engine when an event happened. 
+We will use this input to move the scene node with the keys W and S.
 */
 class MyEventReceiver : public IEventReceiver
 {
@@ -59,14 +61,6 @@ public:
 			}
 		}
 
-		/*
-		We send all other key and mouse input to the currently active camera
-		if there is	one, so that the camera can move itself.
-		*/
-
-		if (device->getSceneManager()->getActiveCamera())
-			return device->getSceneManager()->getActiveCamera()->OnEvent(event);
-
 		return false;
 	}
 };
@@ -82,7 +76,7 @@ int main()
 {
 	MyEventReceiver receiver;
 
-	device = createDevice(video::DT_DIRECTX8, core::dimension2d<s32>(640, 480),
+	device = createDevice(video::EDT_DIRECTX8, core::dimension2d<s32>(640, 480),
 		16, false, false, &receiver);
 
 	video::IVideoDriver* driver = device->getVideoDriver();

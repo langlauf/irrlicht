@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -66,6 +66,9 @@ namespace core
 			//! Make a rotation matrix from Euler angles. The 4th row and column are unmodified.
 			void setRotationDegrees( const vector3df& rotation );			
 
+			//! Returns the rotation, as set by setRotation(). This code was orginally written by by Chev.
+			core::vector3df getRotationDegrees() const;			
+
 			//! Make an inverted rotation matrix from Euler angles. The 4th row and column are unmodified.
 			void setInverseRotationRadians( const vector3df& rotation );	
 
@@ -80,6 +83,9 @@ namespace core
 
 			//! Rotate a vector by the inverse of the rotation part of this matrix.
 			void inverseRotateVect( vector3df& vect ) const;				
+
+			//! Rotate a vector by the rotation part of this matrix.
+			void rotateVect( vector3df& vect ) const;				
 
 			//! Transforms the vector by this matrix
 			void transformVect( vector3df& vect) const;
@@ -135,8 +141,17 @@ namespace core
 			//! Builds a right-handed look-at matrix.
 			void buildCameraLookAtMatrixRH(const vector3df& position, const vector3df& target, const vector3df& upVector);
 
+			//! Builds a matrix that flattens geometry into a plane.
+			//! \param light: light source
+			//! \param plane: plane into which the geometry if flattened into
+			//! \param point: value between 0 and 1, describing the light source. 
+			//! If this is 1, it is a point light, if it is 0, it is a directional light.
+			void buildShadowMatrix(core::vector3df light, core::plane3df plane, f32 point=1.0f);
 			
-		private:
+			//! creates a new matrix as interpolated matrix from to other ones.
+			//! \param b: other matrix to interpolate with
+			//! \param time: Must be a value between 0 and 1.
+			matrix4 interpolate(core::matrix4& b, f32 time);
 
 			//! Matrix data, stored in column-major order
 			f32 M[16];
@@ -277,6 +292,43 @@ namespace core
 		M[10] = (f32)( cr*cp );
 	}
 
+	//! Returns the rotation, as set by setRotation(). This code was sent
+	//! in by Chev.
+	inline core::vector3df matrix4::getRotationDegrees() const
+	{
+		const matrix4 &mat = *this;
+		
+		f32 Y = -asinf(mat(2,0)); 
+		f32 D = Y;
+		f32 C = cosf(Y); 
+		Y *= 180.000f/PI; 
+
+		f32 rotx, roty, X, Z;
+ 
+		if (fabs(Y)>0.0005f) 
+		{ 
+			rotx = mat(2,2) / C; 
+			roty = mat(2,1)  / C; 
+			X = atan2f( roty, rotx ) * (f32)GRAD_PI; 
+			rotx =  mat(0,0) / C; 
+			roty = mat(1,0) / C; 
+			Z = atan2f( roty, rotx ) * (f32)GRAD_PI; 
+		} 
+		else 
+		{
+			X  = 0.0f; 
+			rotx = -mat(1,1); 
+			roty = mat(1,0); 
+			Z  = atan2f( roty, rotx ) * (f32)GRAD_PI; 
+		} 
+ 
+		if (fabs(X)>=360.00f) X=0.00f; 
+		if (fabs(Y)>=360.00f) Y=0.00f; 
+		if (fabs(Z)>=360.00f) Z=0.00f; 
+ 
+		return vector3df(X,Y,Z); 
+	}
+
 	inline void matrix4::setInverseRotationRadians( const vector3df& rotation )
 	{
 		f64 cr = cos( rotation.X );
@@ -307,6 +359,14 @@ namespace core
 		for (s32 i=0; i<16; ++i)
 			M[i] = 0.0f;
 		M[0] = M[5] = M[10] = M[15] = 1;
+	}
+
+	inline void matrix4::rotateVect( vector3df& vect ) const
+	{
+		vector3df tmp = vect;
+		vect.X = -(tmp.X*M[0] + tmp.Y*M[1] + tmp.Z*M[2]);
+		vect.Y = -(tmp.X*M[4] + tmp.Y*M[5] + tmp.Z*M[6]);
+		vect.Z = -(tmp.X*M[8] + tmp.Y*M[9] + tmp.Z*M[10]);
 	}
 
 	inline void matrix4::inverseRotateVect( vector3df& vect ) const
@@ -644,7 +704,32 @@ namespace core
 	}
 
 
+	//! Builds a matrix that flattens geometry into a plane.
+	inline void matrix4::buildShadowMatrix(core::vector3df light, core::plane3df plane, f32 point)
+	{
+		plane.Normal.normalize();
+		f32 d = plane.Normal.dotProduct(light);
 
+		(*this)(0,0) = plane.Normal.X * light.X + d;
+		(*this)(1,0) = plane.Normal.X * light.Y;
+		(*this)(2,0) = plane.Normal.X * light.Z;
+		(*this)(3,0) = plane.Normal.X * point;
+
+		(*this)(0,1) = plane.Normal.Y * light.X;
+		(*this)(1,1) = plane.Normal.Y * light.Y + d;
+		(*this)(2,1) = plane.Normal.Y * light.Z;
+		(*this)(3,1) = plane.Normal.Y * point;
+
+		(*this)(0,2) = plane.Normal.Z * light.X;
+		(*this)(1,2) = plane.Normal.Z * light.Y;
+		(*this)(2,2) = plane.Normal.Z * light.Z + d;
+		(*this)(3,2) = plane.Normal.Z * point;
+
+		(*this)(0,3) = plane.D * light.X + d;
+		(*this)(1,3) = plane.D * light.Y;
+		(*this)(2,3) = plane.D * light.Z;
+		(*this)(3,3) = plane.D * point;
+	}
 
 	//! Builds a left-handed look-at matrix.
 	inline void matrix4::buildCameraLookAtMatrixLH(	const vector3df& position,
@@ -714,6 +799,19 @@ namespace core
 		(*this)(1,3) = -yaxis.dotProduct(position);
 		(*this)(2,3) = -zaxis.dotProduct(position);
 		(*this)(3,3) = 1.0f;
+	}
+
+
+	//! creates a new matrix as interpolated matrix from to other ones.
+	//! \param time: Must be a value between 0 and 1.
+	inline matrix4 matrix4::interpolate(core::matrix4& b, f32 time)
+	{
+		f32 ntime = 1.0f - time;
+		matrix4 mat;
+		for (s32 i=0; i<16; ++i)
+			mat.M[i] = M[i]*ntime + b.M[i]*time;
+
+		return mat;
 	}
 
 

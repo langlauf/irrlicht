@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -21,6 +21,12 @@ namespace video
 	inline s16 X8R8G8B8toA1R5G5B5(s32 color)
 	{
 		return RGB16(color>>16, color>>8, color);
+	}
+
+	//! Returns the red component from the color
+	inline s32 getAlpha(s16 color)
+	{
+		return ((color >> 11)&0x1);
 	}
 
 	//! Returns the red component from the color
@@ -49,6 +55,13 @@ namespace video
 	{
 		return	(((color >> 15)&0x1)<<31) |	(((color >> 10)&0x1F)<<19) |
 				(((color >> 5)&0x1F)<<11) |	(color&0x1F)<<3;
+	}
+
+	//! Returns A8R8G8B8 Color from R5G6B5 color
+	inline s32 R5G6B5toA8R8G8B8(s16 color)
+	{
+		return	0xFF000000 & ((((color >> 11)&0x1F)<<19) |
+				(((color >> 5)&0x3F)<<11) |	(color&0x1F)<<3);
 	}
 
 

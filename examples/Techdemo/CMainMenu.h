@@ -14,11 +14,14 @@ public:
 
 	CMainMenu();
 
-	bool run(bool& outFullscreen, bool& outMusic, bool& outShadows, video::EDriverType& outDriver);
+	bool run(bool& outFullscreen, bool& outMusic, bool& outShadows,
+		bool& outAdditive, video::EDriverType& outDriver);
 
 	virtual bool OnEvent(SEvent event);
 
 private:
+
+	void setTransparency();
 
 	gui::IGUIButton* startButton;
 	IrrlichtDevice *device;
@@ -27,6 +30,8 @@ private:
 	bool fullscreen;
 	bool music;
 	bool shadows;
+	bool additive;
+	bool transparent;
 
 	scene::IAnimatedMesh* quakeLevel;
 	scene::ISceneNode* lightMapNode;

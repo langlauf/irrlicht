@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -55,7 +55,7 @@ namespace scene
 		//! fall down. For bigger gravity, make increase the length of the vector.
 		//! You can disable gravity by setting it to core::vector3df(0,0,0);
 		//! \param gravity: New gravity vector.
-		virtual void setGravity(const core::vector3df gravity) = 0;
+		virtual void setGravity(const core::vector3df& gravity) = 0;
 
 		//! Returns current vector of gravity.
 		//! \return Returns the gravity vector.

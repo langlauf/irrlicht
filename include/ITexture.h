@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -6,6 +6,7 @@
 #define __I_TEXTURE_H_INCLUDED__
 
 #include "IUnknown.h"
+#include "IImage.h"
 #include "dimension2d.h"
 #include "EDriverTypes.h"
 
@@ -13,24 +14,70 @@ namespace irr
 {
 namespace video  
 {
-	//! An enum for the color format of textures used by the Irrlicht Engine.
-	/** A color format specifies how color information is stored. The Irrlicht Engine
-	Mostly uses the format EHCF_R5G5B5.
-	*/
-	enum ECOLOR_FORMAT
-	{
-		//! 16 bit color format used by the software driver, and thus preferred
-		//! by all other irrlicht engine video drivers. There are 5 bits for every
-		//! color component, and a single bit is left for alpha information.
-		EHCF_R5G5B5 = 0,	
 
-		//! Standard 16 bit color format.
-		EHCF_R5G6B5,
 
-		//! Default 32 bit color format. 8 bits are used for every component:
-		//! red, green, blue and alpha.
-		EHCF_A8R8G8B8,
-	};
+//! Enumeration flags telling the video driver in which format textures
+//! should be created.
+enum E_TEXTURE_CREATION_FLAG
+{
+	//! Forces the driver to create 16 bit textures always, indepenent of
+	//! which format the file on disk has. When choosing this you may loose
+	//! some color detail, but gain much speed and memory. 16 bit textures
+	//! can be transferred twice as fast as 32 bit textures and only use 
+	//! half of the space in memory.
+	//! When using this flag, it does not make sence to use the flags
+	//! ETCF_ALWAYS_32_BIT, ETCF_OPTIMIZED_FOR_QUALITY,
+	//! or ETCF_OPTIMIZED_FOR_SPEED at the same time.
+	ETCF_ALWAYS_16_BIT = 0x00000001,
+
+	//! Forces the driver to create 32 bit textures always, indepenent of
+	//! which format the file on disk has. Please note that some drivers 
+	//! (like the software device) will ignore this, because they only are
+	//! able to create and use 16 bit textures.
+	//! When using this flag, it does not make sence to use the flags
+	//! ETCF_ALWAYS_16_BIT, ETCF_OPTIMIZED_FOR_QUALITY,
+	//! or ETCF_OPTIMIZED_FOR_SPEED at the same time.
+	ETCF_ALWAYS_32_BIT = 0x00000002,
+
+	//! Lets the driver decide in which format the texutures are created and
+	//! tries to make the textures look as good as possible.
+	//! Usually it simply chooses the format in which the texture was stored on disk.
+	//! When using this flag, it does not make sence to use the flags
+	//! ETCF_ALWAYS_16_BIT, ETCF_ALWAYS_32_BIT, 
+	//! or ETCF_OPTIMIZED_FOR_SPEED at the same time.
+	ETCF_OPTIMIZED_FOR_QUALITY  = 0x00000004,
+
+	//! Lets the driver decide in which format the texutures are created and
+	//! tries to create them maximizing render speed.
+	//! When using this flag, it does not make sence to use the flags
+	//! ETCF_ALWAYS_16_BIT, ETCF_ALWAYS_32_BIT, or ETCF_OPTIMIZED_FOR_QUALITY,
+	//! at the same time.
+	ETCF_OPTIMIZED_FOR_SPEED = 0x00000008,
+
+	//! Automaticly creates mip map levels for the textures.
+	ETCF_CREATE_MIP_MAPS = 0x00000010,
+
+	//! This flag is never used, it only foreces the compiler to 
+    //! compile this enumeration to 32 bit.
+	ETCF_FORCE_32_BIT_DO_NOT_USE = 0x7fffffff,
+};
+
+
+//! Helper function, helps to get the wished texture creation format from the flags.
+//! Returns either ETCF_ALWAYS_32_BIT, ETCF_ALWAYS_16_BIT, ETCF_OPTIMIZED_FOR_QUALITY,
+//! or ETCF_OPTIMIZED_FOR_SPEED.
+inline E_TEXTURE_CREATION_FLAG getTextureFormatFromFlags(u32 flags)
+{
+	if (flags & ETCF_OPTIMIZED_FOR_SPEED)
+		return ETCF_OPTIMIZED_FOR_SPEED;
+	if (flags & ETCF_ALWAYS_16_BIT)
+		return ETCF_ALWAYS_16_BIT;
+	if (flags & ETCF_ALWAYS_32_BIT)
+		return ETCF_ALWAYS_32_BIT;
+	if (flags & ETCF_OPTIMIZED_FOR_QUALITY)
+		return ETCF_OPTIMIZED_FOR_QUALITY;
+	return ETCF_OPTIMIZED_FOR_SPEED;
+}
 
 
 //! Interface for a Video Driver dependent Texture.
@@ -61,9 +108,19 @@ public:
 	//! Unlock function. Must be called after a lock() to the texture.
 	virtual void unlock() = 0;
 
-	//! Returns dimension of texture (=size)
+	//! Returns original size of the texture. The texture is usually
+	//! scaled, if it was created with an unoptimal size. For example if the size
+	//! of the texture file it was loaded from was not a power of two. This returns
+	//! the size of the texture, it had before it was scaled. Can be useful
+	//! when drawing 2d images on the screen, which should have the exact size
+	//! of the original texture. Use ITexture::getSize() if you want to know 
+	//! the real size it has now stored in the system.
+	//! \return Returns the original size of the texture.
+	virtual const core::dimension2d<s32>& getOriginalSize() = 0;
+
+	//! Returns (=size) of the texture.
 	//! \return Returns the size of the texture.
-	virtual const core::dimension2d<s32>& getDimension() = 0;
+	virtual const core::dimension2d<s32>& getSize() = 0;
 
 	//! Returns driver type of texture. This is the driver, which created the texture.
 	//! This method is used internally by the video devices, to check, if they may
@@ -72,7 +129,8 @@ public:
 	//! \return Returns driver type of texture.
 	virtual EDriverType getDriverType() = 0;
 
-	//! Returns the color format of texture. This format is EHCF_R5G5B5 in most cases.
+	//! Returns the color format of texture. This format is in most cases
+	//! ECF_A1R5G5B5 or ECF_A8R8G8B8.
 	//! \return Returns the color format of texture.
 	virtual ECOLOR_FORMAT getColorFormat() = 0;
 

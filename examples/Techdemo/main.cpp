@@ -18,17 +18,17 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 	bool fullscreen = false;
 	bool music = true;
 	bool shadows = false;
+	bool additive = false;
 
-	video::EDriverType driverType = video::DT_DIRECTX8;
+	video::EDriverType driverType = video::EDT_DIRECTX8;
 
 	CMainMenu menu;
 
-	if (menu.run(fullscreen, music, shadows, driverType))
+	if (menu.run(fullscreen, music, shadows, additive, driverType))
 	{
-		CDemo demo(fullscreen, music, shadows, driverType);
+		CDemo demo(fullscreen, music, shadows, additive, driverType);
 		demo.run();		
-	}
-	
+	}	
 
 	return 0;
 }

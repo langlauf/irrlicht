@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -64,7 +64,7 @@ namespace core
 
 			position2d<T> operator+(const position2d<T>& other) const
 			{
-				return position2d<T>(X-other.X, Y-other.Y);
+				return position2d<T>(X+other.X, Y+other.Y);
 			}
 
 			const position2d<T>& operator=(const position2d<T>& other) 

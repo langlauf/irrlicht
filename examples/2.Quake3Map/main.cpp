@@ -4,11 +4,9 @@ engine, create a SceneNode for optimizing the speed of
 rendering and how to create a user controlled camera.
 
 Lets start like the HelloWorld example: We include
-the irrlicht header files. This time we also include
-the stdio.h for the swprintf function.
+the irrlicht header files.
 */
 #include <irrlicht.h>
-#include <wchar.h>
 
 /*
 As already written in the HelloWorld example, in the Irrlicht
@@ -33,36 +31,6 @@ to make it easy, we use a pragma comment lib:
 #pragma comment(lib, "Irrlicht.lib")
 
 /*
-To store a pointer to our camera, we create this global variable.
-As you can see, the Camera scene node classis located in the namespace
-'scene', like everything which has to do with the 3d scene: Meshes,
-Cameras, Animators and stuff like that.
-*/
-scene::ICameraSceneNode* camera = 0;
-
-/*
-To get events like mouse and keyboard input, or GUI events like 
-"the OK button has been clicked", we need an object wich is derived
-from the IEventReceiver object. There is only one method to 
-override: OnEvent. This method will be called by the engine when
-an event happened. 
-In our example we simply delegate every event to our camera object,
-because we want the camera to be moved by the input of the user.
-*/
-class MyEventReceiver : public IEventReceiver
-{
-public:
-	virtual bool OnEvent(SEvent event)
-	{
-		if (camera)
-			return camera->OnEvent(event);
-
-		return false;
-	}
-};
-
-
-/*
 Ok, lets start. Again, we use the main() method as start, not the
 WinMain(), because its shorter to write.
 */
@@ -72,15 +40,13 @@ int main()
 	Like in the HelloWorld example, we create an IrrlichtDevice with
 	createDevice(). The difference now is that we use the DirectX8 driver
 	because the Software device would be too slow to draw a huge Quake 3 map.
-	Also, we create an EventReceiver we declared above and set a pointer to
-	it as last parameter of the createDevice() function. In this way,
-	the Irrlicht Engine will send all events to this event Receiver.
+	If you do not have DirectX8 installed or working on your pc, you could
+	try some other drivers by replacing EDT_DIRECTX8 with EDT_OPENGL or
+	EDT_DIRECTX9.
 	*/
 
-	MyEventReceiver receiver;
-
 	IrrlichtDevice *device =
-		createDevice(video::DT_DIRECTX8, core::dimension2d<s32>(640, 480), 16, false, false, &receiver);
+		createDevice(video::EDT_DIRECTX8, core::dimension2d<s32>(640, 480));
 
 	/*
 	Get a pointer to the video driver and the SceneManager so that
@@ -138,7 +104,7 @@ int main()
 	addCameraSceneNodeMaya(). But for this example, we want to create a 
 	camera which behaves like the ones in first person shooter games (FPS).
 	*/
-	camera = smgr->addCameraSceneNodeFPS();
+	smgr->addCameraSceneNodeFPS();
 
 	/*
 	The mouse cursor needs not to be visible, so we make it invisible.

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -29,6 +29,33 @@ namespace video
 		//! There should be 2 textures: The first texture layer is a diffuse map,
 		//! the second is a light map. Vertex light is ignored.
 		EMT_LIGHTMAP,
+
+		//! Material type with lightmap technique like EMT_LIGHTMAP, but
+		//! lightmap and diffuse texture are not modulated, but added instead.
+		EMT_LIGHTMAP_ADD,
+
+		//! Material type with standard lightmap technique: 
+		//! There should be 2 textures: The first texture layer is a diffuse map,
+		//! the second is a light map. Vertex light is ignored.
+		//! The texture colors are effectively multiplyied by 2 for brightening.
+		//! like known in DirectX as D3DTOP_MODULATE2X.
+		EMT_LIGHTMAP_M2,
+
+		//! Material type with standard lightmap technique: 
+		//! There should be 2 textures: The first texture layer is a diffuse map,
+		//! the second is a light map. Vertex light is ignored.
+		//! The texture colors are effectively multiplyied by 4 for brightening.
+		//! like known in DirectX as D3DTOP_MODULATE4X.
+		EMT_LIGHTMAP_M4,
+
+		//! Like EMT_LIGHTMAP, but also supports dynamic lighting.
+		EMT_LIGHTMAP_LIGHTING,
+
+		//! Like EMT_LIGHTMAP_M2, but also supports dynamic lighting.
+		EMT_LIGHTMAP_LIGHTING_M2,
+
+		//! Like EMT_LIGHTMAP_4, but also supports dynamic lighting.
+		EMT_LIGHTMAP_LIGHTING_M4,
 
 		//! Makes the material look like it was reflection the environment
 		//! around it. To make this possible, a texture called 'sphere map'
@@ -68,7 +95,7 @@ namespace video
 		//! in OpenGL. It works in DirectX8.
 		EMT_TRANSPARENT_REFLECTION_2_LAYER,
 
-		//! This value is not used. it only forces this enumeration to compile in 32 bit. 
+		//! This value is not used. It only forces this enumeration to compile in 32 bit. 
 		EMT_FORCE_32BIT = 0x7fffffff	
 	};
 
@@ -102,8 +129,8 @@ namespace video
 		//! the bilinear filtering flag is ignored.
 		EMF_TRILINEAR_FILTER,
 
-		//! Clamp texture coordinates instead of wrapping them. Default: false
-		EMF_CLAMP_TEXTURE_COORDINATES,
+		//! Is fog enabled? Default: false
+		EMF_FOG_ENABLE,
 
 		//! This is not a flag, but a value indicating how much flags there are.
 		EMF_MATERIAL_FLAG_COUNT 
@@ -122,7 +149,7 @@ namespace video
 			MaterialType(EMT_SOLID), Wireframe(false), Lighting(true),
 			ZBuffer(true), ZWriteEnable(true), BackfaceCulling(true),
 			GouraudShading(true), Shininess(0.0f), BilinearFilter(true),
-			TrilinearFilter(false),	ClampTextureCooridnates(false)
+			TrilinearFilter(false),	FogEnable(false)
 		{}
 
 		//! Type of the material. Specifies how everything is blended together
@@ -197,8 +224,8 @@ namespace video
 				//! the bilinear filtering flag is ignored.
 				bool TrilinearFilter;
 
-				//! Clamp texture coordinates instead of wrapping them. Default: false
-				bool ClampTextureCooridnates;
+				//! Is fog enabled? Default: false
+				bool FogEnable;
 			};
 
 			bool Flags[EMF_MATERIAL_FLAG_COUNT];

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -37,6 +37,10 @@ namespace scene
 		//! Returns an axis aligned bounding box of the mesh.
 		//! \return A bounding box of this mesh is returned.
 		virtual const core::aabbox3d<f32>& getBoundingBox() const = 0;
+
+		//! Returns an axis aligned bounding box of the mesh.
+		//! \return A bounding box of this mesh is returned.
+		virtual core::aabbox3d<f32>& getBoundingBox() = 0;
 
 		//! Sets a flag of all contained materials to a new value.
 		//! \param flag: Flag to set in all materials.

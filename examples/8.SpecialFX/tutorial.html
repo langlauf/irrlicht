@@ -8,7 +8,7 @@
 <br>
 <table width="95%" border="0" cellspacing="0" cellpadding="2" align="center">
   <tr> 
-    <td bgcolor="#666699" width="10"><b><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="file:///C|/Development/projektK/releases/irrlicht0.2/media/irrlichtlogo.jpg" width="88" height="31" border="0"></a></b></td>
+    <td bgcolor="#666699" width="10"><b><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="../../media/irrlichtlogo.jpg" width="88" height="31" border="0"></a></b></td>
     <td bgcolor="#666699" width="100%">
 <div align="center">
 <div align="left"><b><font color="#FFFFFF">Tutorial 8. Special Effects</font></b></div>
@@ -36,8 +36,7 @@
   <tr> 
     <td height="90" bgcolor="#eeeeff" valign="top"> <div align="left"> 
         <div align="left"> 
-          <p>We start like in some tutorials before: Create an event receiver 
-            for our camera, and initialize the engine. Please note that this time, 
+          <p>We start like in some tutorials before. Please note that this time, 
             the 'shadows' flag in createDevice() is set to true, for we want to 
             have a dynamic shadow casted from an animated character. If your this 
             example runs to slow, set it to false. The Irrlicht Engine checks 
@@ -51,28 +50,11 @@
 
 <font color="#008000">#pragma comment(lib, &quot;Irrlicht.lib&quot;)
 
-</font>scene::ICameraSceneNode* camera = <font color="#800080">0</font>;
-
-<b>class </b>MyEventReceiver : <b>public </b>IEventReceiver
+</font><b>int </b>main()
 {
-<b>public</b>:
-	<b>virtual bool </b>OnEvent(SEvent event)
-	{
-		<b>if </b>(camera)
-			<b>return </b>camera-&gt;OnEvent(event);
-
-		<b>return false</b>;
-	}
-};
-
-
-<b>int </b>main()
-{
-	MyEventReceiver receiver;
-
 	IrrlichtDevice *device = createDevice(video::DT_DIRECTX8,
 		core::dimension2d&lt;s32&gt;(<font color="#800080">640</font>, <font color="#800080">480</font>),
-		<font color="#800080">16</font>, <b>false</b>, <b>true</b>, &amp;receiver);
+		<font color="#800080">16</font>, <b>false</b>, <b>true</b>);
 
 	video::IVideoDriver* driver = device-&gt;getVideoDriver();
 	scene::ISceneManager* smgr = device-&gt;getSceneManager();</font></font><font  size=3 face="Courier New">
@@ -87,7 +69,10 @@
             and so the Irrlicht Engine is able to create a cool texture mapping 
             for me: Just use the mesh manipulator and create a planar texture 
             mapping for the mesh. If you want to see the mapping I made with Anim8or, 
-            uncomment this line. </p>
+            uncomment this line. I also did not figure out how to<br>
+            set the material right in Anim8or, it has an emissive light color 
+            which I don't really<br>
+            like. I'll switch it off too with this code.</p>
           <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
             <tr> 
               <td> <pre><font  size=2>	scene::IAnimatedMesh* mesh = smgr-&gt;getMesh(
@@ -100,7 +85,7 @@
 
 	node = smgr-&gt;addAnimatedMeshSceneNode(mesh);
 	node-&gt;setMaterialTexture(<font color="#800080">0</font>,	driver-&gt;getTexture(<font color="#FF0000">&quot;../../media/wall.jpg&quot;</font>));
-</font></pre></td>
+	node-&gt;getMaterial(0).EmissiveColor.set(0,0,0,0);</font></pre></td>
             </tr>
           </table>
           <p> Now, for the first special effect: Animated water. It works like 
@@ -238,7 +223,7 @@
         <p> Finally we simply have to draw everything, that's all.</p>
         <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
           <tr> 
-            <td><pre><font  size=2>	camera = smgr-&gt;addCameraSceneNodeFPS();
+            <td><pre><font  size=2>	scene::ICameraSceneNode* camera = smgr-&gt;addCameraSceneNodeFPS();
 	camera-&gt;setPosition(core::vector3df(-<font color="#800080">50</font>,<font color="#800080">50</font>,-<font color="#800080">150</font>));
 
 

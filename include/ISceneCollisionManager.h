@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -59,6 +59,8 @@ namespace scene
 		//! \param gravityDirectionAndSpeed: Direction and force of gravity.
 		//! \param triout: Optional parameter where the last triangle causing a 
 		//! collision is stored, if there is a collision.
+		//! \param outFallint: Is set to true if the ellipsoid is falling down, caused
+		//! by gravity.
 		//! \return Returns the new position of the ellipsoid.
 		virtual core::vector3df getCollisionResultPosition(
 			ITriangleSelector* selector,
@@ -66,9 +68,34 @@ namespace scene
 			const core::vector3df& ellipsoidRadius, 
 			const core::vector3df& ellipsoidDirectionAndSpeed,
 			core::triangle3df& triout,
+			bool& outFalling,
 			f32 slidingSpeed = 0.0005f,
 			const core::vector3df& gravityDirectionAndSpeed 
 			= core::vector3df(0.0f, 0.0f, 0.0f)) = 0;
+
+		//! Returns a 3d ray which would go through the 2d screen coodinates.
+		//! \param pos: Screen coordinates in pixels.
+		//! \param camera: Camera from which the ray starts. If null, the
+		//! active camera is used. 
+		//! \return Returns a ray starting from the position of the camera
+		//! and ending at a lenght of the far value of the camera at a position
+		//! which would be behind the 2d screen coodinates.
+		virtual core::line3d<f32> getRayFromScreenCoordinates(
+			core::position2d<s32> pos, ICameraSceneNode* camera = 0) = 0;
+
+		//! Calculates 2d screen position from a 3d position.
+		//! \param pos: 3D position in world space to be transformed into
+		//! 2d.
+		//! \param camera: Camera to be used. If null, the currently active
+		//! camera is used.
+		//! \return Returns the 2d screen coordinates which a object in the 
+		//! 3d world would have if it would be rendered to the screen. If the 
+		//! 3d position is behind the camera, it is set to (-10000,-10000). In
+		//! most cases you can ignore this fact, because if you use this method
+		//! for drawing a decorator over a 3d object, it will be clipped by the
+		//! screen borders.
+		virtual core::position2d<s32> getScreenCoordinatesFrom3DPosition(
+			core::vector3df pos, ICameraSceneNode* camera=0) = 0;
 
 		//! Returns the scene node, which is currently visible under the overgiven 
 		//! screencoordinates, viewed from the currently active camera. The collision

@@ -8,7 +8,7 @@
 <br>
 <table width="95%" border="0" cellspacing="0" cellpadding="2" align="center">
   <tr> 
-    <td bgcolor="#666699" width="10"><b><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="file:///C|/Development/projektK/releases/irrlicht0.2/media/irrlichtlogo.jpg" width="88" height="31" border="0"></a></b></td>
+    <td bgcolor="#666699" width="10"><b><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="../../media/irrlichtlogo.jpg" width="88" height="31" border="0"></a></b></td>
     <td bgcolor="#666699" width="100%">
 <div align="center">
 <div align="center"></div>
@@ -53,7 +53,7 @@
           to the video driver.</p>
         <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
           <tr> 
-            <td> <pre>int main()<br>{<br>  IrrlichtDevice *device = createDevice(video::DT_DIRECTX8,<br>     core::dimension2d&lt;s32&gt;(512, 384));</pre>
+            <td> <pre>int main()<br>{<br>  IrrlichtDevice *device = createDevice(video::EDT_DIRECTX8,<br>     core::dimension2d&lt;s32&gt;(512, 384));</pre>
               <pre>  device-&gt;setWindowCaption(L&quot;Irrlicht Engine - 2D Graphics Demo&quot;);</pre>
               <pre>  video::IVideoDriver* driver = device-&gt;getVideoDriver();
 </pre></td>
@@ -81,7 +81,7 @@
           of the red imps (little flying creatures) in the texture.</p>
         <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
           <tr> 
-            <td> <pre>gui::IGUIFont* font = device-&gt;getGUIEnvironment()-&gt;getBuildInFont();<br>gui::IGUIFont* font2 = device-&gt;getGUIEnvironment()-&gt;getFont(
+            <td> <pre>gui::IGUIFont* font = device-&gt;getGUIEnvironment()-&gt;getBuiltInFont();<br>gui::IGUIFont* font2 = device-&gt;getGUIEnvironment()-&gt;getFont(
   &quot;../../media/fonthaettenschweiler.bmp&quot;);</pre>
               <pre>core::rect&lt;s32&gt; imp1(349,15,385,78);
 core::rect&lt;s32&gt; imp2(387,15,423,78);</pre></td>

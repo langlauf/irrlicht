@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -17,6 +17,8 @@
 #include "ICursorControl.h"
 #include "IVideoModeList.h"
 #include "ITimer.h"
+#include "ILogger.h"
+#include "IOSOperator.h"
 
 namespace irr
 {
@@ -52,6 +54,9 @@ namespace irr
 		//! \return Returns a pointer to the mouse cursor control interface.
 		virtual gui::ICursorControl* getCursorControl() = 0;
 
+		//! \return Returns a pointer to the logger.
+		virtual ILogger* getLogger() = 0;
+
 		//! Gets a list with all video modes available. If you are confused 
 		//! now, because you think you have to create an Irrlicht Device with a video
 		//! mode before being able to get the video mode list, let me tell you that
@@ -61,6 +66,12 @@ namespace irr
 		//! \return Returns a pointer to a list with all video modes supported
 		//! by the gfx adapter.
 		virtual video::IVideoModeList* getVideoModeList() = 0;
+
+		//! Returns the operation system opertator object. It provides methods for
+		//! getting operation system specific informations and doing operation system
+		//! specific operations. Like for example exchanging data with the clipboard
+		//! or reading the operation system version.
+		virtual IOSOperator* getOSOperator() = 0;
 
 		//! \return Returns a pointer to the ITimer object. With it the
 		//! current Time can be received.
@@ -81,6 +92,9 @@ namespace irr
 		//! Returns the version of the engine. The returned string
 		//! will look like this: "1.2.3" or this: "1.2". 
 		virtual const wchar_t* getVersion() = 0;
+
+		//! Sets a new event receiver to receive events.
+		virtual void setEventReceiver(IEventReceiver* receiver) = 0;
 	};
 
 } // end namespace

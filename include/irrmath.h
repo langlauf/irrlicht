@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2004 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -12,7 +12,7 @@ namespace irr
 namespace core
 {
 	//! Rounding error constant often used when comparing f32 values.
-	const f32 ROUNDING_ERROR	= 0.001f;
+	const f32 ROUNDING_ERROR	= 0.0001f;
 
 	//! Constant for PI.
 	const f32 PI				= 3.14159f;
