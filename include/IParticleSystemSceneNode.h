@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -49,6 +49,11 @@ public:
 	//! Sets the size of all particles.
 	virtual void setParticleSize(
 		const core::dimension2d<f32> &size = core::dimension2d<f32>(5.0f, 5.0f)) = 0;
+
+	//! Sets if the particles should be global. If it is, the particles are affected by 
+	//! the movement of the particle system scene node too, otherwise they completely 
+	//! ignore it. Default is true.
+	virtual void setParticlesAreGlobal(bool global) = 0;
 
 	//! Sets the particle emitter, which creates the particles.
 	//! A particle emitter can be created using one of the 

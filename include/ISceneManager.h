@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -595,8 +595,6 @@ namespace scene
 		//! core::vector3df(0,-100.0f,0) for letting gravity affect all object to
 		//! fall down. For bigger gravity, make increase the length of the vector.
 		//! You can disable gravity by setting it to core::vector3df(0,0,0).
-		//! \param accelerationPerSecond: Sets the acceleration per second value. This value controls how much
-		//! gravity is increased by time, if the scene node is falling down.
 		//! \param ellipsoidTranslation: By default, the ellipsoid for collision detection is created around
 		//! the center of the scene node, which means that the ellipsoid surrounds
 		//! it completely. If this is not what you want, you may specify a translation
@@ -609,7 +607,6 @@ namespace scene
 			ITriangleSelector* world, ISceneNode* sceneNode, 
 			const core::vector3df& ellipsoidRadius = core::vector3df(30,60,30),
 			const core::vector3df& gravityPerSecond = core::vector3df(0,-100.0f,0),
-			f32 accelerationPerSecond=100.0f,
 			const core::vector3df& ellipsoidTranslation = core::vector3df(0,0,0),
 			f32 slidingValue = 0.0005f) = 0;
 

@@ -210,9 +210,9 @@ int main()
 	if (font)
 		skin->setFont(font);
 
-
-	IGUIImage* img = env->addImage(rect<int>(10,10,98,41));
-	img->setImage(driver->getTexture("../../media/irrlichtlogoaligned.jpg"));
+	IGUIImage* img = env->addImage(
+		driver->getTexture("../../media/irrlichtlogoalpha.tga"),
+		position2d<int>(10,10));
 
 	/*
 	That's all, we only have to draw everything.

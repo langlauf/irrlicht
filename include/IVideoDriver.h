@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -32,6 +32,7 @@ namespace video
 {
 	struct S3DVertex;
 	struct S3DVertex2TCoords;
+	struct S3DVertexTangents;
 
 	//! enumeration for querying features of the video driver.
 	enum E_VIDEO_DRIVER_FEATURE
@@ -153,7 +154,7 @@ namespace video
 		//! For loading BMP, TGA, PCX and PSD files, the engine uses its own methods.
 		//! PCX loading is based on some code by Dean P. Macri, who sent
 		//! it in for free use by the engine. It currently not supports
-		//! all .pcx formats. Also, compressed BMP's and TGAs don't work correctly.
+		//! all .pcx formats. Also, compressed BMP's don't work correctly.
 		//! For loading JPG-Files the JPEG LIB 6b, written by 
 		//! The Independent JPEG Group is used by the engine. Thanx for such a great
 		//! library!
@@ -169,7 +170,7 @@ namespace video
 		//! For loading BMP, TGA, PCX and PSD files, the engine uses its own methods.
 		//! PCX loading is based on some code by Dean P. Macri, who sent
 		//! it in for free use by the engine. It currently not supports
-		//! all .pcx formats. Also, compressed BMP's and TGAs don't work correctly.
+		//! all .pcx formats. Also, compressed BMP's don't work correctly.
 		//! For loading JPG-Files the JPEG LIB 6b, written by 
 		//! The Independent JPEG Group is used by the engine. Thanx for such a great
 		//! library!
@@ -241,6 +242,11 @@ namespace video
 		virtual void makeColorKeyTexture(video::ITexture* texture,
 			core::position2d<s32> colorKeyPixelPos) = 0;
 
+		//! Creates a normal map from a height map texture. 
+		//! \param texture: Texture of which its alpha channel is modified.
+		//! \param amplitude: Constant value by which the height information is multiplied.
+		virtual void makeNormalMapTexture(video::ITexture* texture, f32 amplitude=1.0f) = 0;
+
 		//! Sets a new render target. This will only work, if the driver
 		//! supports the EVDF_RENDER_TO_TARGET feature, which can be 
 		//! queried with queryFeature().
@@ -278,6 +284,18 @@ namespace video
 		//! \param indexList: Pointer to array of indizes.
 		//! \param triangleCount: amount of Triangles. Usually amount of indizes / 3.
 		virtual void drawIndexedTriangleList(const S3DVertex2TCoords* vertices,
+			s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
+
+		//! Draws an indexed triangle list.
+		//! Note that there may be at maximum 65536 vertices, because the
+		//! index list is a array of 16 bit values each with a maximum value 
+		//! of 65536. If there are more than 65536 vertices in the list, 
+		//! results of this operation are not defined.
+		//! \param vertices: Pointer to array of vertices.
+		//! \param vertexCount: Amount of vertices in the array.
+		//! \param indexList: Pointer to array of indizes.
+		//! \param triangleCount: amount of Triangles. Usually amount of indizes / 3.
+		virtual void drawIndexedTriangleList(const S3DVertexTangents* vertices,
 			s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
 
 		//! Draws an indexed triangle fan.
@@ -567,6 +585,9 @@ namespace video
 		//! \param idx: Id of the material renderer. Can be a value of the E_MATERIAL_TYPE or a 
 		//! value which was returned by addMaterialRenderer().
 		virtual IMaterialRenderer* getMaterialRenderer(s32 idx) = 0;
+
+		//! Returns amount of currently available material renderers.
+		virtual s32 getMaterialRendererCount() = 0;
 
 		//! Returns driver and operating system specific data about the IVideoDriver. This
 		//! method should only be used if the engine should be extended without having

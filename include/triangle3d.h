@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -168,7 +168,7 @@ namespace core
 		//! \param lookDirection: Look direction.
 		//! \return Returns true if the plane is front facing, which mean it would
 		//! be visible, and false if it is backfacing.
-		bool isFrontFacting(const vector3d<T>& lookDirection) const
+		bool isFrontFacing(const vector3d<T>& lookDirection) const
 		{
 			vector3d<T> n = getNormal();
 			n.normalize();

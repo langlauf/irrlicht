@@ -8,9 +8,10 @@ The Irrlicht Engine SDK version 0.7
 
   1. Directory structure overview
   2. How to start
-  3. Release Notes
-  4. License
-  5. Contact
+  3. Requirements
+  4. Release Notes
+  5. License
+  6. Contact
 
 
 
@@ -47,7 +48,7 @@ The Irrlicht Engine SDK version 0.7
 
   To see the engine in action in Windows, just go to the \bin\VisualStudio
   directory, and start some applications. There should also be an
-  application named TechDemo.exe, this should show the most
+  application named Demo.exe, this should show the most
   interesting things.
 
   The Irrlicht Engine is a static lib under linux. A precomipled version can be
@@ -64,7 +65,36 @@ The Irrlicht Engine SDK version 0.7
 
 
 ==========================================================================
-3. Release Notes
+3. Requirements
+==========================================================================
+
+  You can use one of the following compilers/IDEs to develop applications
+  with Irrlicht or recompile the engine. However, other compilers/IDEs make work 
+  as well, we simply didn't test them. 
+  
+  * gcc 3.2
+  * gcc 3.3
+  * Visual Studio 6.0
+  * Visual Studio.NET (7.0)
+  * Visual Studio.NET 2003 (7.1)
+  * Visual Studio.NET 2005 Beta (8.0) [experimental]
+  * DevC++ 4.9 & gcc (project files included)
+     
+  If you ever want to (re)compile the engine yourself (which means you don't
+  want to use the precompiled version) you need the following:
+  
+  * Windows:
+  	* Needed: PlatformSDK (which usually comes with all IDEs)
+  	* Optional: DirectX 9 SDK (for D3D9 support)
+  	* Optional: DirectX 8 SDK (for D3D9 support)
+  	
+  * Linux:
+  	* Needed: XServer with GLX + XF86VidMode extension (should be there by default)
+  	* Optional: OpenGL headers and libraries (for OpenGL support)
+  	
+  	
+==========================================================================
+4. Release Notes
 ==========================================================================
 
   This is an alpha version of the SDK. Therefore please note that there are
@@ -74,7 +104,7 @@ The Irrlicht Engine SDK version 0.7
   found in changes.txt.
 
 ==========================================================================
-4. License
+5. License
 ==========================================================================
 
   The license of the Irrlicht Engine is based on the zlib/libpng license.
@@ -94,7 +124,7 @@ The Irrlicht Engine SDK version 0.7
   The Irrlicht Engine License
   ===========================
 
-  Copyright (C) 2002-2004 Nikolaus Gebhardt
+  Copyright (C) 2002-2005 Nikolaus Gebhardt
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -115,7 +145,7 @@ The Irrlicht Engine SDK version 0.7
 
   
 ==========================================================================
-5. Contact
+6. Contact
 ==========================================================================
 
   If you have problems, questions or suggestions, please visit the 

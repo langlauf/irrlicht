@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -27,6 +27,9 @@ namespace gui
 
 		//! sets an image
 		virtual void setImage(video::ITexture* image) = 0;
+
+		//! sets if the image should use its alpha channel to draw itself
+		virtual void setUseAlphaChannel(bool use) = 0;
 	};
 
 

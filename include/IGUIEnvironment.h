@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -17,6 +17,7 @@ namespace irr
 	namespace video
 	{
 		class IVideoDriver;
+		class ITexture;
 	}
 
 namespace gui
@@ -131,10 +132,23 @@ public:
 	virtual IGUIScrollBar* addScrollBar(bool horizontal, const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
 
 	//! Adds an image element. 
+	//! \param image: Image to be displayed.
+	//! \param pos: Position of the image. The width and height of the image is taken
+	//! from the image.
+	//! \param useAlphaChannel: Sets if the image should use the alpha channel of the texture
+	//! to draw itself.
 	//! \return
 	//! Returns a pointer to the created image element. Returns 0 if an error occured.
 	//! This pointer should not be dropped. See IUnknown::drop() for more information.
-	virtual IGUIImage* addImage(const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+	virtual IGUIImage* addImage(video::ITexture* image, core::position2d<s32> pos,
+		bool useAlphaChannel=true, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+
+	//! Adds an image element. Use IGUIImage::setImage later to set the image to be displayed.
+	//! \return
+	//! Returns a pointer to the created image element. Returns 0 if an error occured.
+	//! This pointer should not be dropped. See IUnknown::drop() for more information.
+	virtual IGUIImage* addImage(const core::rect<s32>& rectangle,
+		IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
 
 	//! Adds a checkbox element.
 	//! \return

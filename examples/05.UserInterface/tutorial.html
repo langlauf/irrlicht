@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Irrlicht Engine Official Homepage</title>
+<title>Irrlicht Engine Tutorial</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
@@ -209,8 +209,7 @@ listbox = env-&gt;addListBox(rect&lt;s32&gt;(50, 110, 250, 180));</pre></td>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> <pre>IGUISkin* skin = env-&gt;getSkin();<br>IGUIFont* font = env-&gt;getFont(&quot;../../media/fonthaettenschweiler.bmp&quot;);<br>if (font)<br>	skin-&gt;setFont(font);</pre>
-            <pre>IGUIImage* img = env-&gt;addImage(rect&lt;int&gt;(10,10,98,41));
-img-&gt;setImage(driver-&gt;getTexture(&quot;../../media/irrlichtlogoaligned.jpg&quot;));</pre></td>
+            <pre>IGUIImage* img = env-&gt;addImage(<br>		driver-&gt;getTexture(&quot;../../media/irrlichtlogoalpha.tga&quot;),<br>		position2d&lt;int&gt;(10,10));</pre></td>
         </tr>
       </table>
       <p>That's all, we only have to draw everything.</p>

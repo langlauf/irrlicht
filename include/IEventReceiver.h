@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -167,6 +167,8 @@ struct SEvent
 class IEventReceiver
 {
 public:
+
+	virtual ~IEventReceiver() {};
 
 	//! called if an event happened. returns true if event was processed
 	virtual bool OnEvent(SEvent event) = 0;

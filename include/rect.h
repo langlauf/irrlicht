@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -141,8 +141,12 @@ namespace core
 		//! or if the area described by the rect is 0.
 		bool isValid()
 		{
-			return ((LowerRightCorner.X - UpperLeftCorner.X) *
-				(LowerRightCorner.Y - UpperLeftCorner.Y) >= 0);
+			// thx to jox for a correction to this method
+
+			s32 xd = LowerRightCorner.X - UpperLeftCorner.X;
+			s32 yd = LowerRightCorner.Y - UpperLeftCorner.Y;
+
+			return !(xd < 0 || yd < 0 || (xd == 0 && yd == 0));
 		}
 
 		//! Returns the center of the rectangle

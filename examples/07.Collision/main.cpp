@@ -109,8 +109,7 @@ int main()
 	The third defines how big the object is, it is the radius of an ellipsoid. Try it out 
 	and change the radius to smaller values, the camera will be able to move closer to walls
 	after this. The next parameter is the direction and speed of gravity. You could
-	set it to (0,0,0) to disable gravity. The value	following after this defines the
-	acceleration value when falling down. And the last value is just a translation: Without
+	set it to (0,0,0) to disable gravity. And the last value is just a translation: Without
 	this, the ellipsoid with which collision detection is done would be around the camera,
 	and the camera would be in the middle of the ellipsoid. But as human beings, we are 
 	used to have our eyes on top of the body, with which we collide with our world, not
@@ -124,7 +123,7 @@ int main()
 
 	scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
 		selector, camera, core::vector3df(30,50,30),
-		core::vector3df(0,-100,0), 100.0f, 
+		core::vector3df(0,-3,0), 
 		core::vector3df(0,50,0));
 	camera->addAnimator(anim);
 	anim->drop();
@@ -201,6 +200,7 @@ int main()
 	int lastFPS = -1;
 
 	while(device->run())
+	if (device->isWindowActive())
 	{
 		driver->beginScene(true, true, 0);
 

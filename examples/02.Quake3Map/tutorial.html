@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Irrlicht Engine Official Homepage</title>
+<title>Irrlicht Engine Tutorial</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
@@ -80,7 +80,7 @@
         <tr> 
           <td> <pre>// ask user for driver<br><br>video::E_DRIVER_TYPE driverType = video::EDT_DIRECTX9;<br>printf(&quot;Please select the driver you want for this example:\n&quot;\<br>       &quot; (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.2\n&quot;\<br>       &quot; (d) Software Renderer\n (e) NullDevice\n (otherKey) exit\n\n&quot;);<br>
 char i;<br>std::cin &gt;&gt; i;<br><br>switch(i)
-{<br>   case 'a': driverType = video::EDT_DIRECTX9;	break;<br>   case 'b': driverType = video::EDT_DIRECTX8;	break;<br>   case 'c': driverType = video::EDT_OPENGL;   break;<br>   case 'd': driverType = video::EDT_SOFTWARE; break;<br>   case 'e': driverType = video::EDT_NULL;     break;<br>  default: return 1;<br>}<br><br>// create device and exit if creation failed<br><br>IrrlichtDevice *device =<br>    createDevice(driverType, core::dimension2d&lt;s32&gt;(640, 480));<br><br>if (device == 0)<br>   return 1;</pre></td>
+{<br>   case 'a': driverType = video::EDT_DIRECTX9; break;<br>   case 'b': driverType = video::EDT_DIRECTX8; break;<br>   case 'c': driverType = video::EDT_OPENGL;   break;<br>   case 'd': driverType = video::EDT_SOFTWARE; break;<br>   case 'e': driverType = video::EDT_NULL;     break;<br>  default: return 1;<br>}<br><br>// create device and exit if creation failed<br><br>IrrlichtDevice *device =<br>    createDevice(driverType, core::dimension2d&lt;s32&gt;(640, 480));<br><br>if (device == 0)<br>   return 1;</pre></td>
         </tr>
       </table>
       <p>Get a pointer to the video driver and the SceneManager so that we do 
@@ -147,7 +147,10 @@ if (mesh)<br>    node = smgr-&gt;addOctTreeSceneNode(mesh-&gt;getMesh(0));</pre>
         </tr>
       </table>
       <p>We have done everything, so lets draw it. We also write the current frames 
-        per second and the drawn primitives to the caption of the window.</p>
+        per second and the drawn primitives to the caption of the window. The 
+        'if (device-&gt;isWindowActive())' line is optional, but prevents the 
+        engine render to set the position of the mouse cursor after task switching 
+        when other program are active.</p>
       <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
         <tr> 
           <td> <pre>int lastFPS = -1;</pre> 
@@ -159,7 +162,7 @@ if (mesh)<br>    node = smgr-&gt;addOctTreeSceneNode(mesh-&gt;getMesh(0));</pre>
             <pre>  int fps = driver-&gt;getFPS();</pre>
             <pre>  if (lastFPS != fps)
   {
-     core::stringw str = L&quot;Irrlicht Engine - Vertex and pixel shader example [&quot;;<br>     str += driver-&gt;getName();<br>     str += &quot;] FPS:&quot;;<br>     str += fps;<br>     device-&gt;setWindowCaption(str.c_str());<br>     lastFPS = fps;
+     core::stringw str = L&quot;Irrlicht Engine - Quake 3 Map example [&quot;;<br>     str += driver-&gt;getName();<br>     str += &quot;] FPS:&quot;;<br>     str += fps;<br>     device-&gt;setWindowCaption(str.c_str());<br>     lastFPS = fps;
   }
 }</pre> </td>
         </tr>

@@ -210,10 +210,14 @@ int main()
 	scene::ICameraSceneNode* camera = smgr->addCameraSceneNodeFPS();
 	camera->setPosition(core::vector3df(-50,50,-150));
 
+	// disable mouse cursor
+	device->getCursorControl()->setVisible(false);
+
 
 	int lastFPS = -1;
 
 	while(device->run())
+	if (device->isWindowActive())
 	{
 		driver->beginScene(true, true, 0);
 

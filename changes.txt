@@ -1,5 +1,150 @@
 -------------------------------------------------------------------------------------
-Changes in version 0.7: (fffff)
+Changes in version 0.8 (19 Feb 2005)
+
+- Irrlicht now supports HLSL. This is possible using the new 
+  IGPUProgrammingServices::addHighLevelShaderMaterial() methods. Also, methods for setting high
+  level shader constants have been added. 
+  
+- Irrlicht.NET now supports events and cursor control. This means now you can read mouse
+  and keyboard input from .NET projects like C# and VB.net too.
+
+- There are three new built in materials for doing normal/bump mapping available: 
+  EMT_NORMAL_MAP_SOLID, EMT_NORMAL_MAP_TRANSPARENT_ADD_COLOR and 
+  EMT_NORMAL_MAP_TRANSPARENT_VERTEX_ALPHA. If the hardware does not 
+  support these, the materials will fall back to their base materials. To be able to 
+  use these materials, there is the new vertex type 'S3DVertexTangents', the material 
+  does not work with any other vertex types. There are some new methods to create meshes
+  with this vertex type (IMeshManipulator::createMeshWithTangents()).
+  
+- A new example/tutorial (11.PerPixelLighting) shows how to use per pixel lighting 
+  in your applications.
+  
+- The software renderer now works in Linux too.
+  
+- Irrlicht now has a built-in normal map generator. It creates on the fly 32 and 16 bit 
+  normal maps from height maps (IVideoDriver::makeNormalMapTexture). As most other things
+  in Irrlicht, the generator does not depend on D3D, D3DX or OpenGL.
+  
+- Added shader debugging capabilities to Irrlicht. If _IRR_D3D_SHADER_DEBUGGING is
+  defined in IrrCompileConfig.h (commented out by default), it is now possible to
+  debug all D3D9 shaders in VisualStudio. All shaders (which have been generated in memory
+  or read from archives for example) will be emitted into a temporary file for this purpose. 
+  To debug your shaders, choose  Debug->Direct3D->StartWithDirect3DDebugging in Visual Studio,
+  and for every shader a file named 'irr_dbg_shader_%%.vsh' or 'irr_dbg_shader_%%.psh'
+  will be created. Drag'n'drop the file you want to debug into visual studio. That's it.
+  You can now set breakpoints and watch registers etc. This works both with ASM, HLSL,
+  pixel and vertex shaders.
+  Note that the engine will run in D3D REF for this, which is a lot slower than HAL.
+
+- Support for compressed .tga texture loading added. (Support from 0.4.1 was buggy)
+  Thanks to neojzs for posting his improvement. 
+  
+- Support for 32 bit .bmp texture loading added.
+
+- Global particles are now possible. Use IParticleSystem::setParticlesAreGlobal()
+  to switch between global and local particles. A demonstration of this can be seen in the
+  new tutorial (11.SpecialFX2).
+  
+- It is now possible to let IGUIImages draw themselves using the alpha channel of the texture
+  they show. Use IGUIImage::setUseAlphaChannel() for this.
+  
+- ITexture now has a method for rebuilding the mip map levels: regenerateMipMapLevels().
+  This is useful for example after locking and modifying the texture.
+  
+- Gravity acceleration speed in CollisionResponseAnimator was changed thanks to a suggestion
+  by Morrog. The accelerationPerSecond value has been removed beacause of this, you
+  can now control everything just with the gravity vector. Note that the gravity value
+  must now be a little bit smaller to achieve the same effect as before.
+  
+- Fixed a problem with several material renderers which weren't able to update their states
+  at the right time sometimes. A new method OnRender() will be called every time the
+  material is actually used.
+  
+- Adjusted all tutorials to fit some interface changes.
+
+- Changed the opengl shader of tutorial 10 to fit the d3d shaders. The now look the same.
+  
+- The MeshManipulator has a new method createMeshWithTangents() which creates a mesh
+  with normals, tangents and binormals from any mesh.
+  
+- Wrong 2D alpha channel renderstates have been set when using  D3D9 and 8. This has been fixed now.
+
+- When loading 32 bit images with an alpha channel and storing them internally as 16 bit, the
+  alpha channel got lost. This is now fixed, the remaining one bit alpha channel is now
+  stored correctly.
+  
+- There is a new overloaded IGUIEnvironment::addImage method, which creates an image directly with
+  a texture as parameter, adjusting its size to the original size of the texture.
+    
+- A small bug in rect<T>::isValid() has been fixed, thanks to jox.
+  
+- Fixed a bug in D3D8, D3D9 and OpenGL, which caused Materials be set and unset with an unequal
+  amount when mixing 3d with 2d grafics or stencil buffer shadows.
+
+- If you are recompiling the whole engine with Visual Studio 6 (which means 
+  Irrlicht.dll, NOT the application which is using Irrlicht), DirectX9 support is disabled
+  now by default, because Microsoft stopped support for DX9 on VS6 in December
+  2004. You can reenable this by uncommenting the new define at the bottom of 
+  IrrCompileConfig.h, if you have an old SDK for example.
+  
+- The mixed fvf and vertex shader system in D3D8 caused a slight issue in Irrlicht ending up
+  in really messed up render states sometimes. This is now fixed.
+  
+- A major bug with the OpenGL renderer which occured on some OpenGL implementations 
+  has been removed thanks to a bugfix by Murphy and a great report and some investigations
+  by ElectroDruid.
+  
+- Sorting transparent scene nodes was broken in all previous versions of Irrlicht. This
+  didn't attract a lot attention because most users used the ADD_COLOR transparencies for which
+  the sorting is not relevant. Thanks to Morrog and mmm76, sorting now is right.
+
+- After the application window is resized, getViewport() no longer returns viewport as the  
+  first time the window has been created.   
+  
+- The draw primitive functions are no longer wrongly checking the maximum primitive count with
+  the vertex amount value. Thanks to Spintz for the bug report.
+  
+- Template materials in X files just like exported in the panda exporter are now 
+  supported, thanks to JoeWright.
+  
+- Changed the stringc typedef slightly to make it work with people not using namespace irr. Thanks
+  to schick.
+  
+- Refactored the MeshManipulator code, which in some cases now uses template methods for performing
+  calculations on different vertex types.
+  
+- Fixed an interface problem with newer versions of libJPEG. 
+  Thanks to Fabien Coutant and Simon Barner for some help and clues into the right direction. 
+  Was not able to add system specific zlib/jpeglib support due to issues on 
+  some strange systems/users and a lack of time, sorry.
+  
+- Typo in plane3d and triangle3d: method isFrontFacting renamed to isFrontFacing.
+
+-------------------------------------------------------------------------------------
+Changes in version 0.7.1: (26 Sep 2004)
+
+- Fixed some bugs which prevented the engine to compile with gcc 3.4.1.
+
+- Fixed a problem with the OpenGL driver, which caused the renderstates not to be reset correctly
+  when drawing scene nodes with reflective materials.
+
+- Fixed error in Irrlicht's software mip map generation, which caused that some mipmap levels
+  looked strange. This fix was found by jox, the hardcore bug fixer, 
+  so many things go to him. Again. :)
+
+- Disabled hardware mip map generation in D3D9 again, because I seems to cause problems on
+  some hardware. I don't have any hardware where this problem occurs, but I hope this helps.
+  
+- Fixed a small bug in fast_atof submitted into the forum by da_dude.
+
+- Fixed string operator + after a bug report by osre and a fix suggestion by jox.
+
+- IEventReceiver now has a virtual destructor for the people who needed it.
+
+- 3DS-Loader patched due to some suggestions of Daniel Azkona Coya.
+
+-------------------------------------------------------------------------------------
+Changes in version 0.7: (11 Sep 2004)
 
 - The first version of Irrlicht.NET is included in this release. It is a managed C++
   wrapper .DLL which makes the most important features of the engine available for all

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -138,6 +138,10 @@ public:
 	//! used for a row of pixels in a texture.
 	//! \return Returns pitch of texture in bytes.
 	virtual s32 getPitch() = 0;
+
+	//! Regenerates the mip map levels of the texture. Useful after locking and 
+	//! modifying the texture
+	virtual void regenerateMipMapLevels() = 0;
 };
 
 

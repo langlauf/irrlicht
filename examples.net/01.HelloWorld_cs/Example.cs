@@ -65,6 +65,7 @@ namespace _01.HelloWorld
 				device.SceneManager.AddCameraSceneNodeFPS(null, 100, 100, -1);
 			cam.Position = new Vector3D(20,0,-50);
 
+
 			ISceneNode node = device.SceneManager.AddTestSceneNode(15,
 				null, -1, new Vector3D(30,-15,0));
 			node.SetMaterialTexture(0, texWall);
@@ -72,6 +73,9 @@ namespace _01.HelloWorld
 			node = device.SceneManager.AddAnimatedMeshSceneNode(mesh, null, -1);
 			node.SetMaterialTexture(0, texSydney);
 			node.SetMaterialFlag(MaterialFlag.LIGHTING, false);
+
+			// make cursor invisible
+			device.CursorControl.Visible = false;
 
 			// start drawing loop
 

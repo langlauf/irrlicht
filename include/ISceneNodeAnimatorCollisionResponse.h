@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -75,15 +75,6 @@ namespace scene
 		//! \return Returns the tranlation of the ellipsoid relative to the position
 		//! of the scene node.
 		virtual core::vector3df getEllipsoidTranslation() const = 0;
-
-		//! Returns the acceleration per second, if the scene node is falling down.
-		//! \return Returns acceleration per second.
-		virtual f32 getAccelerationPerSecond() const = 0;
-
-		//! Sets a new acceleration per second value. This value controls how much
-		//! gravity is increased by time, if the scene node is falling down.
-		//! \param accel: New acceleration per second value.
-		virtual void setAccelerationPerSecond(f32 accel) = 0;
 
 		//! Sets a triangle selector holding all triangles of the world with which
 		//! the scene node may collide.

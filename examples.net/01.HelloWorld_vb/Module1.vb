@@ -60,6 +60,9 @@ Module Module1
         node.SetMaterialTexture(0, texSydney)
         node.SetMaterialFlag(MaterialFlag.LIGHTING, False)
 
+        ' disable mouse cursor
+        device.CursorControl.Visible = False
+
         ' start drawing loop
 
         Dim fps As Integer = 0

@@ -142,11 +142,14 @@ int main()
 	/*
 	We have done everything, so lets draw it. We also write the current
 	frames per second and the drawn primitives to the caption of the
-	window.
+	window. The 'if (device->isWindowActive())' line is optional, but 
+	prevents the engine render to set the position of the mouse cursor 
+	after task switching when other program are active.
 	*/
 	int lastFPS = -1;
 
 	while(device->run())
+	if (device->isWindowActive())
 	{
 		driver->beginScene(true, true, video::SColor(0,200,200,200));
 		smgr->drawAll();
@@ -156,7 +159,7 @@ int main()
 
 		if (lastFPS != fps)
 		{
-			core::stringw str = L"Irrlicht Engine - Vertex and pixel shader example [";
+			core::stringw str = L"Irrlicht Engine - Quake 3 Map example [";
 			str += driver->getName();
 			str += "] FPS:";
 			str += fps;

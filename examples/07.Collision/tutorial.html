@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Irrlicht Engine Official Homepage</title>
+<title>Irrlicht Engine Tutorial</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
@@ -123,15 +123,13 @@
             and change the radius to smaller values, the camera will be able to 
             move closer to walls after this. The next parameter is the direction 
             and speed of gravity. You could set it to (0,0,0) to disable gravity. 
-            The value following after this defines the acceleration value when 
-            falling down. And the last value is just a translation: Without this, 
-            the ellipsoid with which collision detection is done would be around 
-            the camera, and the camera would be in the middle of the ellipsoid. 
-            But as human beings, we are used to have our eyes on top of the body, 
-            with which we collide with our world, not in the middle of it. So 
-            we place the scene node 50 units over the center of the ellipsoid 
-            with this parameter. And that's it, collision detection works now. 
-            <br>
+            And the last value is just a translation: Without this, the ellipsoid 
+            with which collision detection is done would be around the camera, 
+            and the camera would be in the middle of the ellipsoid. But as human 
+            beings, we are used to have our eyes on top of the body, with which 
+            we collide with our world, not in the middle of it. So we place the 
+            scene node 50 units over the center of the ellipsoid with this parameter. 
+            And that's it, collision detection works now. <br>
           </p>
           <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
             <tr> 
@@ -140,7 +138,7 @@
 
 	scene::ISceneNodeAnimator* anim =<br>    smgr-&gt;createCollisionResponseAnimator(
 		selector, camera, core::vector3df(<font color="#800080">30</font>,<font color="#800080">50</font>,<font color="#800080">30</font>),
-		core::vector3df(<font color="#800080">0</font>,-<font color="#800080">100</font>,<font color="#800080">0</font>), <font color="#800080">100.0f</font>, 
+		core::vector3df(<font color="#800080">0</font>,<font color="#800080">-3</font>,<font color="#800080">0</font>),
 		core::vector3df(<font color="#800080">0</font>,<font color="#800080">50</font>,<font color="#800080">0</font>));<br>
 	camera-&gt;addAnimator(anim);
 	anim-&gt;drop();</font></pre></td>
@@ -216,7 +214,7 @@
 	
 	<b>int </b>lastFPS = -<font color="#800080">1</font>;
 
-	<b>while</b>(device-&gt;run())
+	<b>while</b>(device-&gt;run())<br>  <strong>if</strong> (device-&gt;isWindowActive())
 	{
 		driver-&gt;beginScene(<b>true</b>, <b>true</b>, <font color="#800080">0</font>);
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -21,14 +21,119 @@ namespace video
 class IVideoDriver;
 class IShaderConstantSetCallBack;
 
+//! Compile target enumeration for the addHighLevelShaderMaterial() method. 
+enum E_VERTEX_SHADER_TYPE
+{
+	EVST_VS_1_1 = 0,
+	EVST_VS_2_0,
+	EVST_VS_2_a,
+
+	//! This is not a type, but a value indicating how much types there are.
+	EVST_COUNT
+};
+
+//! Names for all vertex shader types, each entry corresponds to a E_VERTEX_SHADER_TYPE entry.
+const char* const VERTEX_SHADER_TYPE_NAMES[] = {
+	"vs_1_1",
+	"vs_2_0",
+	"vs_2_a",
+	0 };
+
+//! Compile target enumeration for the addHighLevelShaderMaterial() method. 
+enum E_PIXEL_SHADER_TYPE
+{
+	EPST_PS_1_1 = 0,
+	EPST_PS_1_2,
+	EPST_PS_1_3,	
+	EPST_PS_1_4,
+	EPST_PS_2_0,
+	EPST_PS_2_a,
+
+	//! This is not a type, but a value indicating how much types there are.
+	EPST_COUNT
+};
+
+//! Names for all pixel shader types, each entry corresponds to a E_PIXEL_SHADER_TYPE entry.
+const char* const PIXEL_SHADER_TYPE_NAMES[] = {
+	"ps_1_1", 
+	"ps_1_2",
+	"ps_1_3",
+	"ps_1_4",
+	"ps_2_0",
+	"ps_2_a",
+	0 };
+
 //!	Interface making it possible to create and use programs running on the GPU.
 class IGPUProgrammingServices
 {
 public:
 
+	//! Adds a new material renderer to the VideoDriver, based on a high level shading 
+	//! language. Currently only HLSL/D3D9 is supported. 
+	//! \param vertexShaderProgram: String containing the source of the vertex shader program.
+	//! This can be 0 if no vertex program should be used. 
+	//! \param Entry name of the function of the vertexShaderProgram
+	//! \param vsCompileTarget: Vertex shader version where the high level shader should be compiled to.
+	//! \param pixelShaderProgram: String containing the source of the pixel shader program.
+	//! This can be 0 if no pixel shader should be used. 
+	//! \param pixelShaderEntryPointName: Entry name of the function of the pixelShaderEntryPointName
+	//! \param psCompileTarget: Pixel shader version where the high level shader should be compiled to.
+	//! \param callback: Pointer to an implementation of IShaderConstantSetCallBack in which you 
+	//! can set the needed vertex and pixel shader program constants. Set this to 0 if you don't need this.
+	//! \param baseMaterial: Base material which renderstates will be used to shade the
+	//! material.
+	//! \return Returns the number of the
+	//! material type which can be set in SMaterial::MaterialType to use the renderer.
+	//! -1 is returned if an error occured. -1 is returned for example if a vertex or pixel shader
+	//! program could not be compiled or a compile target is not reachable.
+	//! The error strings are then printed out into the error log, and
+	//! can be catched with a custom event receiver.
+    virtual s32 addHighLevelShaderMaterial(
+		const c8* vertexShaderProgram,
+		const c8* vertexShaderEntryPointName = "main",
+		E_VERTEX_SHADER_TYPE vsCompileTarget = EVST_VS_1_1,
+		const c8* pixelShaderProgram = 0, 
+		const c8* pixelShaderEntryPointName = "main",
+		E_PIXEL_SHADER_TYPE psCompileTarget = EPST_PS_1_1,
+		IShaderConstantSetCallBack* callback = 0,
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0;    
+
+	//! Like IGPUProgrammingServices::addShaderMaterial() (look there for a detailed description),
+	//! but tries to load the programs from files. 
+	//! \param vertexShaderProgram: Text file containing the source of the vertex shader program.
+	//! Set to null if no shader should be created.
+	//! \param pixelShaderProgram: Text file containing the source of the pixel shader program. Set to 
+	//! 0 if no shader should be created.
+	virtual s32 addHighLevelShaderMaterialFromFiles(
+		const c8* vertexShaderProgram,
+		const c8* vertexShaderEntryPointName = "main",
+		E_VERTEX_SHADER_TYPE vsCompileTarget = EVST_VS_1_1,
+		const c8* pixelShaderProgram = 0, 
+		const c8* pixelShaderEntryPointName = "main",
+		E_PIXEL_SHADER_TYPE psCompileTarget = EPST_PS_1_1,
+		IShaderConstantSetCallBack* callback = 0,
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0; 
+
+
+	//! Like IGPUProgrammingServices::addShaderMaterial() (look there for a detailed description),
+	//! but tries to load the programs from files. 
+	//! \param vertexShaderProgram: Text file containing the source of the vertex shader program.
+	//! Set to null if no shader should be created.
+	//! \param pixelShaderProgram: Text file containing the source of the pixel shader program. Set to 
+	//! 0 if no shader should be created.
+	virtual s32 addHighLevelShaderMaterialFromFiles(
+		io::IReadFile* vertexShaderProgram,
+		const c8* vertexShaderEntryPointName = "main",
+		E_VERTEX_SHADER_TYPE vsCompileTarget = EVST_VS_1_1,
+		io::IReadFile* pixelShaderProgram = 0, 
+		const c8* pixelShaderEntryPointName = "main",
+		E_PIXEL_SHADER_TYPE psCompileTarget = EPST_PS_1_1,
+		IShaderConstantSetCallBack* callback = 0,
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0; 
+
 	//! Adds a new material renderer to the VideoDriver, using pixel and/or 
 	//! vertex shaders to render geometry.
-	//! Note that you should call IVideoDriver::queryFeature() before to check 
+	//! Note that it is a good idea to call IVideoDriver::queryFeature() before to check 
 	//! if the IVideoDriver supports the vertex and/or pixel shader version your are using.  
 	//! The material is added to the VideoDriver like with IVideoDriver::addMaterialRenderer()
 	//! and can be used like it had been added with that method.
@@ -75,21 +180,9 @@ public:
 	virtual s32 addShaderMaterialFromFiles(const c8* vertexShaderProgramFileName = 0,
 		const c8* pixelShaderProgramFileName = 0,
 		IShaderConstantSetCallBack* callback = 0,
-		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0;
-
+		E_MATERIAL_TYPE baseMaterial =	 video::EMT_SOLID) = 0;
 };
 
-class IShaderConstantSetCallBack : public IUnknown
-{
-public:
-
-	//! Destructor.
-	virtual ~IShaderConstantSetCallBack() {}
-
-	//! Called by the engine when the vertex and/or pixel shader constants for an
-	//! material renderer should be set.
-	virtual void OnSetConstants(IMaterialRendererServices* services) = 0;
-};
 
 } // end namespace video
 } // end namespace irr

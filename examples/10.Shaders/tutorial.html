@@ -1,6 +1,6 @@
 <html>
 <head>
-<title>Irrlicht Engine Official Homepage</title>
+<title>Irrlicht Engine Tutorial</title>
 <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 </head>
 
@@ -60,10 +60,13 @@
             its only method, namely OnSetConstants(). This method will be called 
             every time the material is set. <br>
             The method setVertexShaderConstant() of the IMaterialRendererServices 
-            interface is used to set the data the shader needs. </p>
+            interface is used to set the data the shader needs. If you would use 
+            a High Level shader language like HLSL instead of Assembler as we 
+            use it in this example, you would have to set the variable name as 
+            parameter instead of the register index.</p>
           <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
             <tr> 
-              <td> <pre>IrrlichtDevice* device = 0;<br><br>class MyShaderCallBack : public video::IShaderConstantSetCallBack<br>{<br>public:<br>	virtual void OnSetConstants(video::IMaterialRendererServices* services)<br>	{<br>		video::IVideoDriver* driver = device-&gt;getVideoDriver();<br><font color="#006600"><br>		// set inverted world matrix</font><br><br>		core::matrix4 invWorld = driver-&gt;getTransform(video::ETS_WORLD);<br>		invWorld.makeInverse();<br>		services-&gt;setVertexShaderConstant(&amp;invWorld.M[0], 0, 4);<br><br>	<font color="#006600">	// set clip matrix</font><br><br>		core::matrix4 worldViewProj;<br>		worldViewProj = driver-&gt;getTransform(video::ETS_PROJECTION);			<br>		worldViewProj *= driver-&gt;getTransform(video::ETS_VIEW);<br>		worldViewProj *= driver-&gt;getTransform(video::ETS_WORLD);<br>		core::matrix4 tr = worldViewProj;<br>		services-&gt;setVertexShaderConstant(&amp;tr.M[0], 4, 4);<br><br><font color="#006600">		// set camera position</font><br><br>		core::vector3df pos = <br>			device-&gt;getSceneManager()-&gt;getActiveCamera()-&gt;getAbsolutePosition();<br>		services-&gt;setVertexShaderConstant(reinterpret_cast&lt;f32*&gt;(&amp;pos), 8, 1);<br><br><font color="#006600">		// set light color</font> <br><br>		video::SColorf col(0.0f,1.0f,1.0f,0.0f);<br>		services-&gt;setVertexShaderConstant(reinterpret_cast&lt;f32*&gt;(&amp;col), 9, 1);<br><font color="#006600"><br>		// set transposed world matrix</font><br>			<br>		core::matrix4 world = driver-&gt;getTransform(video::ETS_WORLD);<br>		world = world.getTransposed();<br>		services-&gt;setVertexShaderConstant(&amp;world.M[0], 10, 4);<br>	}<br>};</pre></td>
+              <td> <pre>IrrlichtDevice* device = 0;<br><br>class MyShaderCallBack : public video::IShaderConstantSetCallBack<br>{<br>public:<br>	virtual void OnSetConstants(video::IMaterialRendererServices* services)<br>	{<br>		video::IVideoDriver* driver = services-&gt;getVideoDriver();<br><font color="#006600"><br>		// set inverted world matrix</font><br><br>		core::matrix4 invWorld = driver-&gt;getTransform(video::ETS_WORLD);<br>		invWorld.makeInverse();<br>		services-&gt;setVertexShaderConstant(&amp;invWorld.M[0], 0, 4);<br><br>	<font color="#006600">	// set clip matrix</font><br><br>		core::matrix4 worldViewProj;<br>		worldViewProj = driver-&gt;getTransform(video::ETS_PROJECTION);			<br>		worldViewProj *= driver-&gt;getTransform(video::ETS_VIEW);<br>		worldViewProj *= driver-&gt;getTransform(video::ETS_WORLD);<br>		core::matrix4 tr = worldViewProj;<br>		services-&gt;setVertexShaderConstant(&amp;tr.M[0], 4, 4);<br><br><font color="#006600">		// set camera position</font><br><br>		core::vector3df pos = <br>			device-&gt;getSceneManager()-&gt;getActiveCamera()-&gt;getAbsolutePosition();<br>		services-&gt;setVertexShaderConstant(reinterpret_cast&lt;f32*&gt;(&amp;pos), 8, 1);<br><br><font color="#006600">		// set light color</font> <br><br>		video::SColorf col(0.0f,1.0f,1.0f,0.0f);<br>		services-&gt;setVertexShaderConstant(reinterpret_cast&lt;f32*&gt;(&amp;col), 9, 1);<br><font color="#006600"><br>		// set transposed world matrix</font><br>			<br>		core::matrix4 world = driver-&gt;getTransform(video::ETS_WORLD);<br>		world = world.getTransposed();<br>		services-&gt;setVertexShaderConstant(&amp;world.M[0], 10, 4);<br>	}<br>};</pre></td>
             </tr>
           </table>
           <p> The next few lines start up the engine. Just like in most other 
@@ -84,7 +87,7 @@
             and use later addShaderMaterial() instead of addShaderMaterialFromFiles().</p>
           <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
             <tr> 
-              <td> <pre>	c8* vsFileName = 0<font color="#006600">; // filename for the vertex shader</font><br>	c8* psFileName = 0<font color="#006600">; // filename for the pixel shader</font><br><br>	switch(driverType)<br>	{<br>	case video::EDT_DIRECTX8:<br>		psFileName = &quot;../../media/d3d8.ps&quot;;<br>		vsFileName = &quot;../../media/d3d8.vs&quot;;<br>		break;<br>	case video::EDT_DIRECTX9:<br>		psFileName = &quot;../../media/d3d9.ps&quot;;<br>		vsFileName = &quot;../../media/d3d9.vs&quot;;<br>		break;<br>	case video::EDT_OPENGL:<br>		psFileName = &quot;../../media/opengl.ps&quot;;<br>		vsFileName = &quot;../../media/opengl.vs&quot;;<br>		break;<br>	}<br></pre> 
+              <td> <pre>	c8* vsFileName = 0<font color="#006600">; // filename for the vertex shader</font><br>	c8* psFileName = 0<font color="#006600">; // filename for the pixel shader</font><br><br>	switch(driverType)<br>	{<br>	case video::EDT_DIRECTX8:<br>		psFileName = &quot;../../media/d3d8.psh&quot;;<br>		vsFileName = &quot;../../media/d3d8.vsh&quot;;<br>		break;<br>	case video::EDT_DIRECTX9:<br>		psFileName = &quot;../../media/d3d9.psh&quot;;<br>		vsFileName = &quot;../../media/d3d9.vsh&quot;;<br>		break;<br>	case video::EDT_OPENGL:<br>		psFileName = &quot;../../media/opengl.psh&quot;;<br>		vsFileName = &quot;../../media/opengl.vsh&quot;;<br>		break;<br>	}<br></pre> 
               </td>
             </tr>
           </table>

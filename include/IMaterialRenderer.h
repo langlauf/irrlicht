@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -7,12 +7,14 @@
 
 #include "IUnknown.h"
 #include "SMaterial.h"
+#include "S3DVertex.h"
 
 namespace irr
 {
 namespace video  
 {
 
+class IVideoDriver;
 class IMaterialRendererServices;
 
 //!	Interface for material rendering. Can be used to extend the engine with new materials.
@@ -47,6 +49,22 @@ public:
 	virtual void OnSetMaterial(SMaterial& material, const SMaterial& lastMaterial,
 		bool resetAllRenderstates, IMaterialRendererServices* service) {};
 
+	//! Called every time before a new bunch of geometry is being drawn using this material with
+	//! for example drawIndexedTriangleList() call. OnSetMaterial should normally only be called
+	//! if the renderer decides that the renderstates should be changed, it won't be called if for
+	//! example two drawIndexedTriangleList() will be called with the same material set. This 
+	//! method will be called every time. This is useful for example for materials with shaders,
+	//! which don't only set new renderstates but also shader constants.
+	//! \param service: Pointer to interface providing methos for setting constants and other things.
+	//! \param vtxtype: Vertex type with which the next rendering will be done. This can be used
+	//! by the material renderer to set some specific optimized shaders or if this is an incompatible
+	//! vertex type for this renderer, to refuse rendering for example.
+	//! \return Returns true if everything is ok, and false if nothing should be rendered. 
+	//! The material renderer can choose to return false for example if he doesn't support the
+	//! specified vertex type. This is actually done in D3D8 and D3D9 when using a 
+	//! normal mapped material with a vertex type other than EVT_TANGENTS. 
+	virtual bool OnRender(IMaterialRendererServices* service, E_VERTEX_TYPE vtxtype) { return true; };
+
 	//! Called by the IVideoDriver to unset this material. Called during the 
 	//! IVideoDriver::setMaterial() call before the new material will get the OnSetMaterial()
 	//! call.
@@ -71,17 +89,57 @@ public:
 		const SMaterial& lastMaterial,
 		bool resetAllRenderstates) = 0;
 
-	//! Sets a vertex shader constant.
+	//! Sets a constant for the vertex shader based on a name. This can be used if you used
+	//! a high level shader language like CG or HLSL to create a shader. Example: If you
+	//! created a shader which has variables named 'mWorldViewProj' (containing the 
+	//! WorldViewProjection matrix) and another one named 'fTime' containing one float, 
+	//! you can set them in your IShaderConstantSetCallBack derived class like this:
+	//! \code
+	//! virtual void OnSetConstants(video::IMaterialRendererServices* services)
+	//! {
+	//! 	video::IVideoDriver* driver = services->getVideoDriver();
+	//! 
+	//! 	float time = (float)os::Timer::getTime()/100000.0f;
+	//! 	services->setVertexShaderConstant("fTime", &time, 1);
+	//! 
+	//! 	core::matrix4 worldViewProj;
+	//! 	worldViewProj = driver->getTransform(video::ETS_PROJECTION);			
+	//! 	worldViewProj *= driver->getTransform(video::ETS_VIEW);
+	//! 	worldViewProj *= driver->getTransform(video::ETS_WORLD);
+	//! 	services->setVertexShaderConstant("mWorldViewProj", worldViewProj.M, 16);
+	//! }
+	//! \endcode
+	//! \param name: Name of the variable
+	//! \param floats: Pointer to array of floats
+	//! \param count: Amount of floats in array.
+	//! \return: Returns true if successful.
+	virtual bool setVertexShaderConstant(const c8* name, const f32* floats, int count) = 0;
+
+	//! Sets a vertex shader constant. Can be used if you created a shader using 
+	//! pixel/vertex shader assembler or ARB_fragment_program or ARB_vertex_program.
 	//! \param data: Data to be set in the constants
 	//! \param startRegister: First register to be set
-	//! \oaram constantAmount: Amount of registers to be set
+	//! \param constantAmount: Amount of registers to be set. One register consists of 4 floats.
 	virtual void setVertexShaderConstant(f32* data, s32 startRegister, s32 constantAmount=1) = 0;
 
-	//! Sets a pixel shader constant.
+	//! Sets a constant for the pixel shader based on a name. This can be used if you used
+	//! a high level shader language like CG or HLSL to create a shader. See 
+	//! setVertexShaderConstant() for an example on how to use this.
+	//! \param name: Name of the variable
+	//! \param floats: Pointer to array of floats
+	//! \param count: Amount of floats in array.
+	//! \return: Returns true if successful.
+	virtual bool setPixelShaderConstant(const c8* name, const f32* floats, int count) = 0;
+
+	//! Sets a pixel shader constant. Can be used if you created a shader using 
+	//! pixel/vertex shader assembler or ARB_fragment_program or ARB_vertex_program.
 	//! \param data: Data to be set in the constants
-	//! \param startRegister: First register to be set
-	//! \oaram constantAmount: Amount of registers to be set
+	//! \param startRegister: First register to be set.
+	//! \param constantAmount: Amount of registers to be set. One register consists of 4 floats.
 	virtual void setPixelShaderConstant(f32* data, s32 startRegister, s32 constantAmount=1) = 0;
+
+	//! Returns a pointer to the IVideoDriver interface
+	virtual IVideoDriver* getVideoDriver() = 0;
 };
 
 } // end namespace video

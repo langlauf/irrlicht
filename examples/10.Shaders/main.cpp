@@ -33,7 +33,9 @@ IShaderConstantSetCallBack interface and override its only method,
 namely OnSetConstants(). This method will be called every time the material
 is set. 
 The method setVertexShaderConstant() of the IMaterialRendererServices interface
-is used to set the data the shader needs. 
+is used to set the data the shader needs. If you would use a High Level shader
+language like HLSL instead of Assembler as we use it in this example, you would 
+have to set the variable name as parameter instead of the register index.
 */
 
 IrrlichtDevice* device = 0;
@@ -44,7 +46,7 @@ public:
 
 	virtual void OnSetConstants(video::IMaterialRendererServices* services)
 	{
-		video::IVideoDriver* driver = device->getVideoDriver();
+		video::IVideoDriver* driver = services->getVideoDriver();
 
 		// set inverted world matrix
 
@@ -136,16 +138,16 @@ int main()
 	switch(driverType)
 	{
 	case video::EDT_DIRECTX8:
-		psFileName = "../../media/d3d8.ps";
-		vsFileName = "../../media/d3d8.vs";
+		psFileName = "../../media/d3d8.psh";
+		vsFileName = "../../media/d3d8.vsh";
 		break;
 	case video::EDT_DIRECTX9:
-		psFileName = "../../media/d3d9.ps";
-		vsFileName = "../../media/d3d9.vs";
+		psFileName = "../../media/d3d9.psh";
+		vsFileName = "../../media/d3d9.vsh";
 		break;
 	case video::EDT_OPENGL:
-		psFileName = "../../media/opengl.ps";
-		vsFileName = "../../media/opengl.vs";
+		psFileName = "../../media/opengl.psh";
+		vsFileName = "../../media/opengl.vsh";
 		break;
 	}
 

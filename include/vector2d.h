@@ -1,11 +1,12 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
 #ifndef __IRR_POINT_2D_H_INCLUDED__
 #define __IRR_POINT_2D_H_INCLUDED__
 
-#include "irrTypes.h"
+#include <math.h> 
+#include "irrMath.h"
 
 namespace irr
 {

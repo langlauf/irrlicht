@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -16,6 +16,15 @@ namespace video
 	{
 		return (((r>>3) & 0x1F)<<10) | (((g>>3) & 0x1F)<<5) | ((b>>3) & 0x1F);
 	}
+
+	//! Creates a 16 bit A1R5G5B5 color 
+	inline s16 RGBA16(s32 r, s32 g, s32 b, s32 a)
+	{
+		return  (((a>>7) & 0x1)<<15) |
+			    (((r>>3) & 0x1F)<<10) |
+				(((g>>3) & 0x1F)<<5) |
+				 ((b>>3) & 0x1F);
+	}
 	
 	//! Converts a 32 bit (X8R8G8B8) color to a 16 A1R5G5B5 color
 	inline s16 X8R8G8B8toA1R5G5B5(s32 color)
@@ -23,30 +32,39 @@ namespace video
 		return RGB16(color>>16, color>>8, color);
 	}
 
-	//! Returns the red component from the color
+	//! Returns the red component from A1R5G5B5 color
 	inline s32 getAlpha(s16 color)
 	{
 		return ((color >> 11)&0x1);
 	}
 
-	//! Returns the red component from the color
+	//! Returns the red component from A1R5G5B5 color. 
+	//! Shift left by 3 to get 8 bit value.
 	inline s32 getRed(s16 color)
 	{
 		return ((color >> 10)&0x1F);
 	}
 
 
-	//! Returns the green component from the color
+	//! Returns the green component from A1R5G5B5 color
+	//! Shift left by 3 to get 8 bit value.
 	inline s32 getGreen(s16 color)
 	{
 		return ((color >> 5)&0x1F);
 	}
 
 
-	//! Returns the blue component from the color
+	//! Returns the blue component from A1R5G5B5 color
+	//! Shift left by 3 to get 8 bit value.
 	inline s32 getBlue(s16 color)
 	{
 		return ((color)&0x1F);
+	}
+
+	//! Returns the luminance from a 16 bit A1R5G5B5 color 
+	inline s32 getLuminance(s16 color)
+	{
+		return ((getRed(color)<<3) + (getGreen(color)<<3) + (getBlue(color)<<3)) / 3;
 	}
 
 
@@ -132,7 +150,7 @@ namespace video
 
 		//! Calculates a 16 bit A1R5G5B5 value of this color.
 		//! \return Returns the 16 bit A1R5G5B5 value of this color.
-		inline s16 toA1R5G5B5() const { return RGB16(color>>16, color>>8, color); };
+		inline s16 toA1R5G5B5() const { return RGBA16(color>>16, color>>8, color, color>>24); };
 
 		//! Converts color to open gl color format.
 		//! \return Returns the 32 bit openGL color value.

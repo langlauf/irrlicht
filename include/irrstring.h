@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -192,54 +192,23 @@ public:
 		return *this;
 	}
 
+	//! Add operator for other strings
+	string<T> operator+(const string<T>& other) 
+	{ 
+		string<T> str(*this); 
+		str.append(other); 
 
+		return str; 
+	} 
 
-	//! Add operator
-	string<T>& operator+(const string<T>& other)
-	{
-		--used;
+	//! Add operator for strings, ascii and unicode 
+	template <class B> 
+	string<T> operator+(const B* c) 
+	{ 
+		string<T> str(*this); 
+		str.append(c); 
 
-		s32 len = (s32)other.size() + 1;
-
-		if (used + len > allocated)
-			reallocate((s32)used + len);
-
-		const T* p = other.c_str();
-		for (s32 i=0; i<len; ++i, ++p)
-			array[used+i] = *p;
-
-		used = used+len;
-
-		return *this;
-	}
-
-
-
-	//! Add operator for strings, ascii and unicode
-	template <class B>
-	string<T>& operator+(const B* c)
-	{
-		--used;
-
-		s32 len = 0;
-		const B* p = c;
-		while(*p)
-		{
-			++len;
-			++p;
-		}
-
-		++len;
-
-		if (used + len > allocated)
-			reallocate((s32)used + (s32)len);
-
-		for (s32 l = 0; l<len; ++l)
-			array[l+used] = (T)c[l];
-
-		used = used + len;
-
-		return *this;
+		return str; 
 	}
 
 
@@ -540,7 +509,7 @@ private:
 
 
 //! Typedef for character strings
-typedef string<c8> stringc;
+typedef string<irr::c8> stringc;
 
 //! Typedef for wide character strings
 typedef string<wchar_t> stringw;

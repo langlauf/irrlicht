@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2004 Nikolaus Gebhardt
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -12,7 +12,7 @@ namespace irr
 {
 namespace video
 {
-	//! Abstracted and easy to use fixed function pipeline material modes.
+	//! Abstracted and easy to use fixed function/programmable pipeline material modes.
 	enum E_MATERIAL_TYPE
 	{
 		//! Standard solid material. Only first texture is used, which is
@@ -94,6 +94,40 @@ namespace video
 		//! Please note that this material type is currently not 100% implemented
 		//! in OpenGL. It works in DirectX8.
 		EMT_TRANSPARENT_REFLECTION_2_LAYER,
+
+		//! A solid normal map renderer. First texture is the color map, the 
+		//! second should be the normal map. Note that you should use this material
+		//! only when drawing geometry consisting of vertices of type S3DVertexTangents 
+		//! (EVT_TANGENTS). You can convert any mesh into this format using
+		//! IMeshManipulator::createMeshWithTangents() (See SpecialFX2 Tutorial).
+		//! This shader runs on vertex shader 1.1 and pixel shader 1.1 capable hardware and 
+		//! falls back on a fixed function lighted material if this hardware is not available.
+		//! Only two lights are supported by this shader, if there are more, the nearest two
+		//! are chosen. Currently, this shader is only implemented for the D3D8 and D3D9 renderers.
+		EMT_NORMAL_MAP_SOLID,
+
+		//! A transparent normal map renderer. First texture is the color map, the 
+		//! second should be the normal map. Note that you should use this material
+		//! only when drawing geometry consisting of vertices of type S3DVertexTangents 
+		//! (EVT_TANGENTS). You can convert any mesh into this format using
+		//! IMeshManipulator::createMeshWithTangents() (See SpecialFX2 Tutorial).
+		//! This shader runs on vertex shader 1.1 and pixel shader 1.1 capable hardware and 
+		//! falls back on a fixed function lighted material if this hardware is not available.
+		//! Only two lights are supported by this shader, if there are more, the nearest two
+		//! are chosen. Currently, this shader is only implemented for the D3D8 and D3D9 renderers.
+		EMT_NORMAL_MAP_TRANSPARENT_ADD_COLOR,
+
+		//! A transparent (based on the vertex alpha value) normal map renderer.
+		//! First texture is the color map, the 
+		//! second should be the normal map. Note that you should use this material
+		//! only when drawing geometry consisting of vertices of type S3DVertexTangents 
+		//! (EVT_TANGENTS). You can convert any mesh into this format using
+		//! IMeshManipulator::createMeshWithTangents() (See SpecialFX2 Tutorial).
+		//! This shader runs on vertex shader 1.1 and pixel shader 1.1 capable hardware and 
+		//! falls back on a fixed function lighted material if this hardware is not available.
+		//! Only two lights are supported by this shader, if there are more, the nearest two
+		//! are chosen. Currently, this shader is only implemented for the D3D8 and D3D9 renderers.
+		EMT_NORMAL_MAP_TRANSPARENT_VERTEX_ALPHA,
 
 		//! This value is not used. It only forces this enumeration to compile in 32 bit. 
 		EMT_FORCE_32BIT = 0x7fffffff	

@@ -1,6 +1,6 @@
 /* Irrlicht.h -- interface of the 'Irrlicht Engine' version 0.6
 
-  Copyright (C) 2002-2004 Nikolaus Gebhardt
+  Copyright (C) 2002-2005 Nikolaus Gebhardt
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -83,6 +83,7 @@
 #include "ISceneCollisionManager.h"
 #include "IMaterialRenderer.h"
 #include "ISceneNodeAnimatorCollisionResponse.h"
+#include "IShaderConstantSetCallBack.h"
 #include "IParticleSystemSceneNode.h"
 #include "ITerrainSceneNode.h"
 #include "IParticleEmitter.h"
@@ -115,12 +116,13 @@
 #include "SMesh.h"
 #include "SMeshBuffer.h"
 #include "SMeshBufferLightMap.h"
+#include "SMeshBufferTangents.h"
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION L"0.7"
+#define IRRLICHT_SDK_VERSION L"0.8"
 
-/*! \mainpage Irrlicht Engine 0.7 API documentation
+/*! \mainpage Irrlicht Engine 0.8 API documentation
  *
  * \section intro Introduction
  *
