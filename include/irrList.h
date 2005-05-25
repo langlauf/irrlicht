@@ -240,8 +240,8 @@ public:
 		it.current->prev = node;
 		++size;
 
-		if (it.current == last) 
-			last = node;
+		if (it.current == root) 
+             root = node;
 	}
 
 

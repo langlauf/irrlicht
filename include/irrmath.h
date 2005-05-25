@@ -37,6 +37,13 @@ namespace core
 		return a < b ? b : a;
 	}
 
+	//! returns if a float equals the other one, taking floating 
+	//! point rounding errors into account
+	inline bool equals(f32 a, f32 b)
+	{
+		return (a + ROUNDING_ERROR > b) && (a - ROUNDING_ERROR < b);
+	}
+
 } // end namespace core
 }// end namespace irr
 

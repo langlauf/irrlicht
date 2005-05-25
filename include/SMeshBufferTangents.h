@@ -5,7 +5,7 @@
 #ifndef __S_MESH_BUFFER_TANGENTS_H_INCLUDED__
 #define __S_MESH_BUFFER_TANGENTS_H_INCLUDED__
 
-#include "array.h"
+#include "irrArray.h"
 #include "IMeshBuffer.h"
 
 namespace irr

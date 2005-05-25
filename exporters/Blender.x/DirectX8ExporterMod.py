@@ -1,19 +1,20 @@
 #!BPY
 
 """ Registration info for Blender menus:
-Name: 'DirectX8 mod1.2.1 (.x)...'
+Name: 'DirectX8 mod1.3.1 (.x)...'
 Blender: 234
 Group: 'Export'
 Tip: 'Export to DirectX8 text file format format.'
 """
 
 
-# DirectX8ExporterMod.py version 1.2.1
+# DirectX8ExporterMod.py version 1.3.1
 # Modification (c) 2004 by Jonas Petersen (jonas at mindfloaters dot de)
-MOD_VERSION = '1.2.1'
+# http://development.mindfloaters.de/
+MOD_VERSION = '1.3.1'
 #
 # DirectX8Exporter.py version 1.0
-# Copyright (C) 2003  Arben OMARI -- omariarben@everyday.com 
+# Copyright (C) 2003  Arben OMARI -- omariarben@everyday.com
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -38,11 +39,25 @@ MOD_VERSION = '1.2.1'
 # It is based on the original version by Arben Omari from Jun-20-2004 for Blender 2.34.
 #
 # Btw. this is my local CVS, not the Blender CVS.
-# $Id: DirectX8ExporterMod.py,v 1.17 2004/11/03 23:08:17 jonas Exp $
+# $Id: DirectX8ExporterMod.py,v 1.21 2005/05/20 15:20:03 Jonas Exp $
 #
 # --
 #
 # Version history (of the modification):
+#
+# Version 1.3.1 - May 20th 2005
+#   - Added check for SubSurf meshes. SubSurf meshes must be converted to
+#     polygon meshes before exporting. I might add support for exporting
+#     SubSurf meshes later.
+#
+# Version 1.3 - April 24th 2005
+#   - Fixed problem with animations that have a modified pose at frame 1
+#     (see Version 1.2.1). Fix provided by Ben Omari, thanks a lot!
+#   - Fixed bug where error may occur with meshes that have no texture.
+#     Fix also provided by Ben Omari, thanks another lot!
+#   - Fixed bug where exception occurs when a mesh has uv coords and
+#     contains vertices that does not belong to any face.
+#     Thanks Trident from the Irrlicht forums for reporting!
 #
 # Version 1.2.1 - November 3rd 2004
 #   - Again (This time really... :) ) fixed bug with the 'Flip Z axis'
@@ -119,7 +134,7 @@ MOD_VERSION = '1.2.1'
 #     - Inverse Normals (inverts the direction
 #       of the vertex normals).
 #
-#     - Flip Faces (flips the faces by reversing 
+#     - Flip Faces (flips the faces by reversing
 #       the order of the face's vertices).
 #
 #     - 'Export XSkinMeshHeader' Turning it of helped me once loading
@@ -250,7 +265,7 @@ def resetDefaultConfig():
 
 
 resetDefaultConfig()
-		
+
 # Looking for a saved key in Blender.Registry dict:
 rd = Blender.Registry.GetKey('XExport')
 if rd:
@@ -294,17 +309,17 @@ def draw():
 	Blender.BGL.glClearColor(0.5, 0.5, 0.5, 1)
 	Blender.BGL.glColor3f(1.,1.,1.)
 	Blender.BGL.glClear(Blender.BGL.GL_COLOR_BUFFER_BIT)
-	
+
 	#Text
 	Blender.BGL.glColor3f(1, 1, 1)
 
 	width, height = Blender.Window.GetAreaSize()
-	
+
 	x = width / 2 - 335 / 2
 	y = height / 2 + 330 / 2
 	if x < 10: x = 10
 	if y < 350: y = 345
-	 
+
 	#if False and CURRENT_FILENAME: y = 390
 	#else: y = 350
 
@@ -351,7 +366,7 @@ def draw():
 	# Buttons
 	y -= 40
 	col2x = x+170
-	
+
 	Blender.BGL.glRasterPos2d(x, y+10)
 	Blender.Draw.Text("Export options:")
 	Blender.Draw.Toggle("Flip faces", 4, col2x+80, y+4, 75, 14, FLIP_FACES, "Flips the faces by reversing the vertex order (default: ON). It is neccesary if one of the two options 'Swap Y and Z axis' or 'Flip Z axis' is selected.")
@@ -380,7 +395,7 @@ def draw():
 		for i in range(2):
 			Blender.BGL.glRasterPos2d(x+110+i, y+6)
 			len = Blender.Draw.Text(os.path.basename(CURRENT_FILENAME))
-		
+
 		Blender.BGL.glRasterPos2d(x+120+len, y+6)
 		current = "( %s )" % (CURRENT_FILENAME)
 		Blender.Draw.Text(current)
@@ -401,7 +416,7 @@ def bevent(evt):
 	elif evt == 2: # Export
 		update_RegistryInfo()
 		Blender.Draw.Exit()
-		Blender.Window.FileSelector(my_callback, "Export DirectX8")	
+		Blender.Window.FileSelector(my_callback, "Export DirectX8")
 	elif evt == 3:
 		INVERT_NORMALS = 1 - INVERT_NORMALS
 		Blender.Draw.Redraw(1)
@@ -453,8 +468,8 @@ def bevent(evt):
 		updateZMUL()
 		Blender.Draw.Redraw(1)
 
-	
-		
+
+
 
 #***********************************************
 #***********************************************
@@ -481,7 +496,7 @@ class xExport:
 			self.findTextures(obj, tex)
 			self.createNewVertices(obj, mesh)
 
-			self.openMeshBlock(obj, mesh, amt_obj)
+			self.openMeshBlock(obj, amt_obj)
 
 			self.writeMeshNormals(obj, mesh)
 			self.writeMeshTextureCoords(obj, mesh)
@@ -489,14 +504,14 @@ class xExport:
 			if amt_obj: self.writeSkinWeights(amt_obj.getData(), mesh)
 
 			self.closeMeshBlock()
-			
+
 			info = {'name': obj.getName(), 'verts1': len(mesh.verts), 'faces': len(mesh.faces), 'verts2': len(new_verts)}
 			if mesh.hasFaceUV(): info['uv'] = "yes"
 			else: info['uv'] = "no"
 			info['face_types'] = self.face_types
 
 			info['materials'] = len(mesh.materials)
-			
+
 			self.exported_objects.append(info)
 
 
@@ -531,38 +546,38 @@ class xExport:
 				amt = armatures[i].getData()
 				Blender.Set('curframe',1)
 				amt_mat = armatures[i].getMatrix()
-				
+
 				if RESET_ORIGIN == 1:
 					translation = [0, 0, 0, 1]
 				else:
 					translation = [amt_mat[3][0],amt_mat[3][1],amt_mat[3][2],amt_mat[3][3]]
-					
+
 				mat_o = Matrix([amt_mat[0][0],amt_mat[0][1],amt_mat[0][2],amt_mat[0][3]],
 								[amt_mat[1][0],amt_mat[1][1],amt_mat[1][2],amt_mat[1][3]],
 								[amt_mat[2][0],amt_mat[2][1],amt_mat[2][2],amt_mat[2][3]],
 								translation)
-	
+
 				self.openFrameBlock(mat_o, "RootFrame") # opens "Frame {"
-	
+
 				root_bon = amt.getBones()
-				mat_r = self.getCombineMatrix(root_bon[0])  
+				mat_r = self.getCombineMatrix(root_bon[0])
 				name_r = root_bon[0].getName()
-				
+
 				self.openFrameBlock(mat_r, name_r) # opens "Frame {"
-				
+
 				self.writeListOfChildrens(root_bon[0])
-	
+
 				self.closeBlock()
-				
+
 				self.exportMesh(obj, armatures[i])
-				
+
 				self.closeBlock()
-				
+
 				if EXPORT_ANIMATIONS == 1:
 					self.writeAnimation(amt)
 			else:
 				self.exportMesh(objects[i], 0)
-		
+
 	#***********************************************
 	#Export Children Bones
 	#***********************************************
@@ -577,38 +592,38 @@ class xExport:
 			mat = self.getCombineMatrix(bon_c[nch])
 			name_ch = bon_c[nch].getName()
 			self.openFrameBlock(mat, name_ch)
-			
+
 			self.recurseChildren(bon_c[nch])
 
 			self.closeBlock()
-		
-			
+
+
 	#***********************************************
 	#Create Children structure
 	#***********************************************
 	def recurseChildren(self,bon_c):
 		bon_cc = bon_c
 		self.writeListOfChildrens(bon_cc)
-	
-	
+
+
 	#***********************************************
 	#Offset Matrix
 	#***********************************************
 	def getMatrixOffset(self,bon):
 		Blender.Set('curframe',1)
-		mat_b = bon.getRestMatrix()       
-		mat_b.invert() 
+		mat_b = bon.getRestMatrix()
+		mat_b.invert()
 		return mat_b
 
 
-	
+
 
 	#***********************************************
 	#Combine Matrix
 	#***********************************************
 	def getCombineMatrix(self,bon):
 		Blender.Set('curframe',1)
-		mat_b = bon.getRestMatrix()     
+		mat_b = bon.getRestMatrix()
 		if bon.hasParent():
 			pare = bon.getParent()
 			mat_p = pare.getRestMatrix()
@@ -622,8 +637,8 @@ class xExport:
 	#Combine Matrix
 	#***********************************************
 	def getCombineAnimMatrix(self,bon):
-		
-		mat_b = bon.getRestMatrix()     
+
+		mat_b = bon.getRestMatrix()
 		if bon.hasParent():
 			pare = bon.getParent()
 			mat_p = pare.getRestMatrix()
@@ -646,13 +661,13 @@ class xExport:
 			nMaxSkinWeightsPerVertex = 0
 			nMaxSkinWeightsPerFace = 0
 			nBones = 0
-			
+
 			vert_weight_count = {}
 
 			# calculate nBones and nMaxSkinWeightsPerVertex
 
 			for bo in amt.getBones() :
-				name = bo.getName() 
+				name = bo.getName()
 
 				vert_list = False
 				try : vert_list = mesh.getVertsFromGroup(name)
@@ -662,19 +677,19 @@ class xExport:
 					for inde in vert_list:
 						if vert_weight_count.has_key(inde): vert_weight_count[inde].append(name)
 						else: vert_weight_count[inde] = [name]
-					
+
 			for bonename_list in vert_weight_count.values():
 				num = len(bonename_list)
 				if num > nMaxSkinWeightsPerVertex:
 					nMaxSkinWeightsPerVertex = num
-					
+
 #						vert_infl = mesh.getVertexInfluences(inde)
 #						ln_infl = len(vert_infl)
 #						if ln_infl > max_infl :
 #							max_infl = ln_infl
 
 			# calculate nMaxSkinWeightsPerFace
-			
+
 			for face in mesh.faces:
 				tmp_list = []
 				for v in face.v:
@@ -683,7 +698,7 @@ class xExport:
 							tmp_list.append(bone_name)
 				if len(tmp_list) > nMaxSkinWeightsPerFace:
 					nMaxSkinWeightsPerFace = len(tmp_list)
-				
+
 
 			self.file_indent()
 			self.file.write("XSkinMeshHeader {\n")
@@ -695,14 +710,14 @@ class xExport:
 			self.file_indent()
 			self.file.write("%d;\n" % (nBones))
 			self.closeBlock()
-		
+
 		for bo in amt.getBones() :
-			name = bo.getName() 
-			
+			name = bo.getName()
+
 			fixed_name = replace(name, ".", "_")
 
 			vert_list = False
-			
+
 			try :
 				vert_list = mesh.getVertsFromGroup(name,1)
 			except:
@@ -717,14 +732,14 @@ class xExport:
 					if duplicates.has_key(ind[0]):
 						for dup in duplicates[ind[0]]:
 							new_vert_list.append(dup)
-	
+
 				#vert_list = mesh.getVertsFromGroup(name,1)
-				
+
 				# open SkinWeights
-				
+
 				self.file_indent()
 				self.file.write("SkinWeights {\n")
-	
+
 				self.indent(1)
 				self.file_indent()
 				self.file.write("\"%s\";\n" % (fixed_name))
@@ -742,53 +757,53 @@ class xExport:
 				for ind in new_vert_list :
 					cou += 1
 					ver_infl = mesh.getVertexInfluences(new_verts[ind])
-				
+
 					len_infl = float(len(ver_infl))
 					if len_infl != 0.0:
 						infl = 1 / len_infl
 					else:
 						infl = 0.0
-				
+
 					self.file_indent()
 					if cou == len(new_vert_list):
 						self.file.write("%f;\n" % (round(infl,6)))
 					else :
 						self.file.write("%f,\n" % (round(infl,6)))
-	
-			
+
+
 				matx = self.getMatrixOffset(bo)
-			
+
 				self.writeOffsFrames(matx, name)
-	
+
 				# close SkinWeights
 				self.closeBlock()
 
-		
+
 
 	#***********************************************
 	# Write Matrices
 	#***********************************************
 	def openFrameBlock(self, matx, name):
 		global ZMUL, SWAP_YZ_AXIS
-		
+
 		fixed_name = replace(name, ".", "_")
-		
+
 		self.file_indent()
-		self.file.write("Frame ")  
+		self.file.write("Frame ")
 		self.file.write("%s {\n\n" % (fixed_name))
-		
+
 		self.indent(1)
 
 		self.file_indent()
 		self.file.write("FrameTransformMatrix {\n")
-		
+
 		self.indent(1)
-		
+
 		if SWAP_YZ_AXIS:
 			self.file_indent()
 			self.file.write("%f,%f,%f,%f,\n" % (round(matx[0][0],4),round(ZMUL*matx[0][2],4),round(matx[0][1],4),round(matx[0][3],4)))
 			self.file_indent()
-			self.file.write("%f,%f,%f,%f,\n" % (round(ZMUL*matx[2][0],4),round(matx[2][2],4),round(ZMUL*matx[2][1],4),round(ZMUL*matx[2][3],4)))	
+			self.file.write("%f,%f,%f,%f,\n" % (round(ZMUL*matx[2][0],4),round(matx[2][2],4),round(ZMUL*matx[2][1],4),round(ZMUL*matx[2][3],4)))
 			self.file_indent()
 			self.file.write("%f,%f,%f,%f,\n" % (round(matx[1][0],4),round(ZMUL*matx[1][2],4),round(matx[1][1],4),round(matx[1][3],4)))
 			self.file_indent()
@@ -797,14 +812,14 @@ class xExport:
 			self.file_indent()
 			self.file.write("%f,%f,%f,%f,\n" % (round(matx[0][0],4),round(matx[0][1],4),round(ZMUL*matx[0][2],4),round(matx[0][3],4)))
 			self.file_indent()
-			self.file.write("%f,%f,%f,%f,\n" % (round(matx[1][0],4),round(matx[1][1],4),round(ZMUL*matx[1][2],4),round(matx[1][3],4)))	
+			self.file.write("%f,%f,%f,%f,\n" % (round(matx[1][0],4),round(matx[1][1],4),round(ZMUL*matx[1][2],4),round(matx[1][3],4)))
 			self.file_indent()
 			self.file.write("%f,%f,%f,%f,\n" % (round(ZMUL*matx[2][0],4),round(ZMUL*matx[2][1],4),round(matx[2][2],4),round(ZMUL*matx[2][3],4)))
 			self.file_indent()
 			self.file.write("%f,%f,%f,%f;;\n"% (round(matx[3][0],4),round(matx[3][1],4),round(ZMUL*matx[3][2],4),round(matx[3][3],6)))
-		
+
 		self.closeBlock()
-	
+
 	#***********************************************
 	# Write Matrices
 	#***********************************************
@@ -814,21 +829,21 @@ class xExport:
 		self.file_indent()
 		if SWAP_YZ_AXIS:
 			self.file.write("%f,%f,%f,%f," % (round(matx[0][0],4),round(ZMUL*matx[0][2],4),round(matx[0][1],4),round(matx[0][3],4)))
-			self.file.write("%f,%f,%f,%f," % (round(ZMUL*matx[2][0],4),round(matx[2][2],4),round(ZMUL*matx[2][1],4),round(ZMUL*matx[2][3],4)))	
+			self.file.write("%f,%f,%f,%f," % (round(ZMUL*matx[2][0],4),round(matx[2][2],4),round(ZMUL*matx[2][1],4),round(ZMUL*matx[2][3],4)))
 			self.file.write("%f,%f,%f,%f," % (round(matx[1][0],4),round(ZMUL*matx[1][2],4),round(matx[1][1],4),round(matx[1][3],4)))
 			self.file.write("%f,%f,%f,%f;;\n"% (round(matx[3][0],4),round(ZMUL*matx[3][2],4),round(matx[3][1],4),round(matx[3][3],6)))
 		else:
 			self.file.write("%f,%f,%f,%f," % (round(matx[0][0],4),round(matx[0][1],4),round(ZMUL*matx[0][2],4),round(matx[0][3],4)))
-			self.file.write("%f,%f,%f,%f," % (round(matx[1][0],4),round(matx[1][1],4),round(ZMUL*matx[1][2],4),round(matx[1][3],4)))	
+			self.file.write("%f,%f,%f,%f," % (round(matx[1][0],4),round(matx[1][1],4),round(ZMUL*matx[1][2],4),round(matx[1][3],4)))
 			self.file.write("%f,%f,%f,%f," % (round(ZMUL*matx[2][0],4),round(ZMUL*matx[2][1],4),round(matx[2][2],4),round(ZMUL*matx[2][3],4)))
 			self.file.write("%f,%f,%f,%f;;\n"% (round(matx[3][0],4),round(matx[3][1],4),round(ZMUL*matx[3][2],4),round(matx[3][3],6)))
-	
-	 
+
+
 #*********************************************************************************************************************************************
-	
+
 	#***********************************************
 	#HEADER
-	#***********************************************  
+	#***********************************************
 	def writeHeader(self):
 		global MOD_VERSION
 		self.file.write("xof 0303txt 0032\n\n")
@@ -854,7 +869,7 @@ template SkinWeights {\n\
   array float weights[nWeights];\n\
   Matrix4x4 matrixOffset;\n\
 }\n\n")
-		
+
 	#***********************************************
 	#CLOSE FILE
 	#***********************************************
@@ -879,13 +894,14 @@ template SkinWeights {\n\
 	#***********************************************
 	#EXPORT MESH DATA
 	#***********************************************
-	def openMeshBlock(self, obj, mesh, armat):
+	def openMeshBlock(self, obj, armat):
 		global FLIP_FACES, ZMUL, new_verts, SWAP_YZ_AXIS
 
+		mesh = NMesh.GetRawFromObject(obj.name)
 		len_new_verts = len(new_verts)
-	
+
 		#ROTATION
-		mat_obj = obj.getMatrix() 
+		mat_obj = obj.getMatrix()
 		if armat == 0:
 			if RESET_ORIGIN:
 				mat_reset = Matrix([mat_obj[0][0],mat_obj[0][1],mat_obj[0][2],mat_obj[0][3]],
@@ -903,7 +919,7 @@ template SkinWeights {\n\
 
 		self.file_indent()
 		self.file.write("Mesh object {\n")
-		
+
 		self.indent(1)
 
 		self.file_indent()
@@ -911,7 +927,7 @@ template SkinWeights {\n\
 
 		# VERTEX COORDINATES
 
-		for idx in range(len_new_verts):
+		for idx in new_verts.keys():
 			vertex = mesh.verts[new_verts[idx]]
 			self.file_indent()
 
@@ -919,18 +935,18 @@ template SkinWeights {\n\
 				self.file.write("%f;%f;%f;" % (round(vertex[0],6), ZMUL*round((vertex[2]),6), round(vertex[1],6)))
 			else:
 				self.file.write("%f;%f;%f;" % (round(vertex[0],6), round(vertex[1],6), ZMUL*round((vertex[2]),6)))
-			
+
 			if idx+1 == len_new_verts:
 				self.file.write(";\n")
-			else: 
+			else:
 				self.file.write(",\n")
-		
+
 		# FACE COUNT
-		
+
 		numfaces=len(mesh.faces)
 		self.file_indent()
-		self.file.write("%d;\n" % (numfaces))   
-		
+		self.file.write("%d;\n" % (numfaces))
+
 		# FACES INDICES
 
 		if FLIP_FACES == 0:
@@ -952,7 +968,7 @@ template SkinWeights {\n\
 
 		for counter in range(numfaces) :
 			face = new_faces[counter]
-			
+
 			if len(face) == 3:
 				self.file_indent()
 				self.file.write("3;%d,%d,%d;" % (face[a3], face[b3], face[c3]))
@@ -962,26 +978,26 @@ template SkinWeights {\n\
 			elif len(face) == 2:
 				print "WARNING:the mesh has faces with less then 3 vertices"
 				continue
-				
+
 			if counter+1 == numfaces:
 				self.file.write(";\n\n")
 			else:
 				self.file.write(",\n")
-				
 
-		
-		
-	
-		
+
+
+
+
+
 	#***********************************************
 	#MESH MATERIAL LIST
 	#***********************************************
 	def writeMeshMaterialList(self, name, obj, tex):
 		self.file_indent()
 		self.file.write("MeshMaterialList {\n")
-		
+
 		self.indent(1)
-		
+
 		#HOW MANY MATERIALS ARE USED
 		count = 0
 		for mat in Material.Get():
@@ -1008,15 +1024,15 @@ template SkinWeights {\n\
 				self.file.write(";\n")
 			else:
 				self.file.write(",\n")
-			
+
 		##MATERIAL NAME
 		for mat in Material.Get():
 			self.file_indent()
 
 			self.file.write("Material")
-			
+
 			fixed_name = replace(mat.name, ".", "_")
-			
+
 			self.file.write(" %s "%(fixed_name))
 			self.file.write("{\n")
 
@@ -1034,7 +1050,7 @@ template SkinWeights {\n\
 
 			# close Material
 			self.closeBlock()
-		
+
 		for mat in tex:
 			self.file_indent()
 			self.file.write("Material Mat")
@@ -1055,7 +1071,7 @@ template SkinWeights {\n\
 			self.file.write("TextureFilename {\n")
 			self.indent(1)
 			self.file_indent()
-			self.file.write("\"%s\";\n" % (face.image.name))
+			self.file.write("\"%s\";\n" % (mat))
 
 			# close TextureFilename
 			self.closeBlock()
@@ -1090,20 +1106,20 @@ template SkinWeights {\n\
 		# VERTEX NORMALS
 
 		counter = 0
-		
+
 		if INVERT_NORMALS == 0:
 			mul = 1.0
 		else:
 			mul = -1.0
 
 
-		for idx in range(len_new_verts):
+		for idx in new_verts.keys():
 			vert = mesh.verts[new_verts[idx]]
 			if RECALC_VERTEX_NORMALS == 1:
 				no = new_normals[new_verts[idx]]
 			else:
 				no = mesh.verts[new_verts[idx]].no
-		
+
 			self.file_indent()
 
 			if SWAP_YZ_AXIS:
@@ -1118,15 +1134,15 @@ template SkinWeights {\n\
 
 
 		# FACE COUNT
-		
+
 		numfaces=len(obj.faces)
 		self.file_indent()
-		self.file.write("%d;\n" % (numfaces))  
+		self.file.write("%d;\n" % (numfaces))
 
 		# FACE INDICES
 
 		counter = 0
-		
+
 		if FLIP_FACES == 0:
 			a3 = 0
 			b3 = 1
@@ -1143,7 +1159,7 @@ template SkinWeights {\n\
 			b4 = 2
 			c4 = 1
 			d4 = 0
-		
+
 		for counter in range(numfaces) :
 			face = new_faces[counter]
 			if len(face) == 3:
@@ -1157,7 +1173,7 @@ template SkinWeights {\n\
 				self.file.write(";\n")
 			else:
 				self.file.write(",\n")
-			
+
 		# close MeshNormals
 		self.closeBlock()
 
@@ -1176,9 +1192,9 @@ template SkinWeights {\n\
 		total_count = len(mesh.verts)
 		count = 0
 		mod = total_count / PROGRESS_BAR_STEPS
-		
+
 		for vert in mesh.verts:
-		
+
 			if SHOW_PROGRESS_BAR:
 				if not mod or not count%mod:
 					Blender.Window.DrawProgressBar(float(count)/total_count, "Recalc vnormals")
@@ -1196,7 +1212,7 @@ template SkinWeights {\n\
 						sum[2] += face.no[2]
 			sum = self.vector_normalize(sum)
 			new_normals.append(sum)
-			
+
 
 
 	#***********************************************
@@ -1214,7 +1230,7 @@ template SkinWeights {\n\
 
 		numverts = len(mesh.verts)
 		##		print "Faces: %d" % len(mesh.faces)##		print "Vertices: %d" % numverts
-		
+
 		if not mesh.hasFaceUV():
 #			print "Mesh has no uv coordinates."
 			# do not calculate new vertices
@@ -1222,7 +1238,7 @@ template SkinWeights {\n\
 			for idx in range(numverts):
 				new_verts[idx] = idx
 				new_verts_uv[idx] = 0.0, 0.0
-			
+
 			for face in mesh.faces:
 				cur_new_face = []
 				new_faces.append(cur_new_face)
@@ -1230,19 +1246,19 @@ template SkinWeights {\n\
 					idx = face.v[n].index
 					cur_new_face.append(idx)
 			return
-		
+
 #		print "Calculating new vertices..."
 		for face in mesh.faces:
 			cur_new_face = []
 			new_faces.append(cur_new_face)
-			
+
 			for n in range(len(face.v)):
 				idx = face.v[n].index
 				cur_new_face.append(idx)
 
 				if new_verts.has_key(idx):
 					# already exits
-					
+
 					# does it have different tx coords?
 					if new_verts_uv[idx][0] != face.uv[n][0] or new_verts_uv[idx][1] != face.uv[n][1]:
 						makenew = 1
@@ -1269,7 +1285,7 @@ template SkinWeights {\n\
 					# new
 					new_verts_uv[idx] = face.uv[n][0], face.uv[n][1]
 					new_verts[idx] = idx
-		 	
+
 #		print "Vertices: %d" % len(new_verts)
 
 	#***********************************************
@@ -1287,17 +1303,17 @@ template SkinWeights {\n\
 			self.indent(1)
 
 			# VERTEX COUNT
-			
+
 			mesh = name.data
-			
+
 			self.file_indent()
 			self.file.write("%d;\n" % (len_new_verts))
-			
+
 			# UV COORDS
-			
+
 			counter = -1
 
-			for idx in range(len_new_verts):
+			for idx in new_verts.keys():
 				uv = new_verts_uv[idx]
 				if idx+1 == len_new_verts:
 					self.file_indent()
@@ -1305,11 +1321,10 @@ template SkinWeights {\n\
 				else:
 					self.file_indent()
 					self.file.write("%f;%f;,\n" % (uv[0],1 - (uv[1])))
-			
+
 			# close MeshTextureCoords
 			self.closeBlock()
-			
-#***********************************************#***********************************************#***********************************************
+
 	#***********************************************
 	#FRAMES
 	#***********************************************
@@ -1318,24 +1333,24 @@ template SkinWeights {\n\
 
 		if SWAP_YZ_AXIS:
 			self.file.write("%f,%f,%f,%f," % (round(matx[0][0],4),round(ZMUL*matx[0][2],4),round(matx[0][1],4),round(matx[0][3],6)))
-			self.file.write("%f,%f,%f,%f," % (round(ZMUL*matx[2][0],4),round(matx[2][2],4),round(ZMUL*matx[2][1],4),round(ZMUL*matx[2][3],6)))	
+			self.file.write("%f,%f,%f,%f," % (round(ZMUL*matx[2][0],4),round(matx[2][2],4),round(ZMUL*matx[2][1],4),round(ZMUL*matx[2][3],6)))
 			self.file.write("%f,%f,%f,%f," % (round(matx[1][0],4),round(ZMUL*matx[1][2],4),round(matx[1][1],4),round(matx[1][3],6)))
 			self.file.write("%f,%f,%f,%f;;"% (round(matx[3][0],4),round(ZMUL*matx[3][2],4),round(matx[3][1],4),round(matx[3][3],6)))
 		else:
 			self.file.write("%f,%f,%f,%f," % (round(matx[0][0],4),round(matx[0][1],4),round(ZMUL*matx[0][2],4),round(matx[0][3],6)))
-			self.file.write("%f,%f,%f,%f," % (round(matx[1][0],4),round(matx[1][1],4),round(ZMUL*matx[1][2],4),round(matx[1][3],6)))	
+			self.file.write("%f,%f,%f,%f," % (round(matx[1][0],4),round(matx[1][1],4),round(ZMUL*matx[1][2],4),round(matx[1][3],6)))
 			self.file.write("%f,%f,%f,%f," % (round(ZMUL*matx[2][0],4),round(ZMUL*matx[2][1],4),round(matx[2][2],4),round(ZMUL*matx[2][3],6)))
 			self.file.write("%f,%f,%f,%f;;"% (round(matx[3][0],4),round(matx[3][1],4),round(ZMUL*matx[3][2],4),round(matx[3][3],6)))
-		
-		
-		
-		
+
+
+
+
 	#***********************************************
 	#WRITE ANIMATION KEYS
 	#***********************************************
 	def writeAnimation(self, amt):
 		global EXPORT_DX_SPEED, DIRECT_X_TICKS_PER_SECOND
-		
+
 		self.file_indent()
 		self.file.write("AnimationSet {\n")
 
@@ -1352,7 +1367,7 @@ template SkinWeights {\n\
 		total_count = len(amt.getBones())
 		count = 0
 		mod = total_count / PROGRESS_BAR_STEPS
-		
+
 		for bon in amt.getBones() :
 
 			if SHOW_PROGRESS_BAR:
@@ -1364,9 +1379,9 @@ template SkinWeights {\n\
 #			fixed_name = bon.getName()
 			self.file_indent()
 			self.file.write("Animation { \n")
-			
+
 			self.indent(1)
-			
+
 			self.file_indent()
 			self.file.write("{%s}\n" %(fixed_name))
 			self.file_indent()
@@ -1385,16 +1400,16 @@ template SkinWeights {\n\
 				self.file.write("%d;" % (fcount*frame_ticks+1))
 				self.file.write("16;")
 				Blender.Set('curframe',fr)
-				
+
 				mat_new = self.getCombineAnimMatrix(bon)
 				self.writeFrames(mat_new)
-				
+
 				if fr == endFr:
 					self.file.write(";\n")
 				else:
 					self.file.write(",\n")
 				fcount += 1
-			
+
 			# close Animation Key
 			self.closeBlock()
 
@@ -1403,8 +1418,8 @@ template SkinWeights {\n\
 
 		# close AnimationSet
 		self.closeBlock()
-		
-#***********************************************#***********************************************#***********************************************
+
+#***********************************************
 
 	def file_indent(self):
 		self.file.write("  " * self.level)
@@ -1447,13 +1462,13 @@ def my_callback(filename):
 
 	CURRENT_FILENAME = filename
 	update_RegistryInfo()
-	
+
 	start = time.clock()
 
 	is_editmode = Blender.Window.EditMode()
 	if is_editmode: Blender.Window.EditMode(0)
 
-	if filename.find('.x', -2) <= 0: filename += '.x' 
+	if filename.find('.x', -2) <= 0: filename += '.x'
 	xexport = xExport(filename)
 
 	# make that file gets closed under all circumstances:
@@ -1469,7 +1484,7 @@ def my_callback(filename):
 	stop = time.clock()
 
 	num = len(xexport.exported_objects)
-	
+
 	if num == 1: s = ""
 	else: s = "s"
 	duration = stop-start
@@ -1485,40 +1500,47 @@ def my_callback(filename):
 		for type in info['face_types']:
 			if face_types != "": face_types += " and "
 			face_types += "%d"%(type)
-			
+
 		message += "verts     : %d%s\n" % (info['verts2'], before)
 		message += "faces     : %d (with %s vertices)\n" % (info['faces'], face_types)
 		message += "has uv    : %s\n" % (info['uv'])
 		message += "materials : %d\n" % (info['materials'])
-	
+
 	print_boxed(message)
 	if is_editmode: Blender.Window.EditMode(1)
 	if BEEP_WHEN_FINISHED < 0 or duration > BEEP_WHEN_FINISHED: print("\a\n"),
 
-# check if at least one mesh object is selected
+# check if at least one mesh object is selected and none of it is in subsurf mode.
 ok = False
+subsurf = False
+
 sel_objs = Object.GetSelected()
 if len(sel_objs):
 	for obj in sel_objs:
 		if obj.getType() == 'Mesh':
+			if obj.getData().getMode() & NMesh.Modes['SUBSURF']:
+				subsurf = True
 			ok = True
 			break
 
-if ok:
+if subsurf:
+	Blender.Draw.PupMenu("DirectX Export error%t|At least one object is in \"SubSurf\" mode!|Please convert it using \"Convert Object Type\" in the Object menu.")
+
+elif ok:
 	if CURRENT_FILENAME: choose_file = "|%%l|Export as \"%s\" (%s)%%x3|" % (os.path.basename(CURRENT_FILENAME),CURRENT_FILENAME)
 	else: choose_file = ""
-	
+
 	name = "Export: DirectX8 - mod"+MOD_VERSION+" (.x)...%t|"
 	name += "Export to DX8 file format (choose filename)%x1|Help & Configuration%x2" + choose_file
 	menu = Blender.Draw.PupMenu(name)
-	
+
 	if menu == 1:
-		Blender.Window.FileSelector(my_callback, "Export DirectX8")	
+		Blender.Window.FileSelector(my_callback, "Export DirectX8")
 	elif menu == 2:
 		Blender.Draw.Register(draw,event,bevent)
 	elif menu == 3:
 		my_callback(CURRENT_FILENAME)
- 
+
 else:
 	Blender.Draw.PupMenu("DirectX Export error%t|Please select at least one Mesh object!")
-	
+

@@ -26,9 +26,11 @@ namespace scene
 		//! destructor
 		virtual ~ISceneNodeAnimator() {}
 
-		//! Animates a scene node.
-		//! \param node: Node to animate.
-		//! \param timeMs: Current time in milli seconds.
+		/// <summary>
+		/// Animates a scene node.
+		/// </summary>
+		/// \param node: Node to animate.
+		/// \param timeMs: Current time in milli seconds.
 		virtual void animateNode(ISceneNode* node, u32 timeMs) = 0;
 	};
 } // end namespace scene

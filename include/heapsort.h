@@ -9,6 +9,8 @@
 
 namespace irr
 {
+namespace core
+{
 
 //! Sinks an element into the heap.
 template<class T>
@@ -36,13 +38,13 @@ inline void heapsink(T*array, s32 element, s32 max)
 
 //! Sorts an array with size 'size' using heapsort.
 template<class T>
-inline void heapsort(T* array, s32 size)
+inline void heapsort(T* array_, s32 size)
 {
 	// for heapsink we pretent this is not c++, where
 	// arrays start with index 0. So we decrease the array pointer,
 	// the maximum always +2 and the element always +1
 
-	T* virtualArray = array - 1;
+	T* virtualArray = array_ - 1;
 	s32 virtualSize = size + 2;
 	s32 i;
 
@@ -55,14 +57,14 @@ inline void heapsort(T* array, s32 size)
 
 	for (i=size-1; i>=0; --i)	
 	{
-		T t = array[0];
-		array[0] = array[i];
-		array[i] = t;
+		T t = array_[0];
+		array_[0] = array_[i];
+		array_[i] = t;
 		heapsink(virtualArray, 1, i + 1);
 	}
 }
 
-
+} // end namespace core
 } // end namespace irr
 
 

@@ -214,7 +214,7 @@ namespace scene
 			if (child)
 			{
 				child->grab();
-				child->remove(); // remove from old parent				
+				child->remove(); // remove from old parent
 				Children.push_back(child);
 				child->Parent = this;				
 			}

@@ -1,4 +1,4 @@
-/* Irrlicht.h -- interface of the 'Irrlicht Engine' version 0.6
+/* Irrlicht.h -- interface of the 'Irrlicht Engine'
 
   Copyright (C) 2002-2005 Nikolaus Gebhardt
 
@@ -30,7 +30,7 @@
 #define __IRRLICHT_H_INCLUDED__
 
 #include "aabbox3d.h"
-#include "array.h"
+#include "irrArray.h"
 #include "SColor.h"
 #include "SLight.h"
 #include "dimension2d.h"
@@ -86,6 +86,7 @@
 #include "IShaderConstantSetCallBack.h"
 #include "IParticleSystemSceneNode.h"
 #include "ITerrainSceneNode.h"
+#include "ITextSceneNode.h"
 #include "IParticleEmitter.h"
 #include "IParticleAffector.h"
 #include "IBillboardSceneNode.h"
@@ -120,9 +121,9 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION L"0.9"
+#define IRRLICHT_SDK_VERSION L"0.10.0"
 
-/*! \mainpage Irrlicht Engine 0.9 API documentation
+/*! \mainpage Irrlicht Engine 0.10.0 API documentation
  *
  * <div align="center"><img src="logobig.png" ></div>
  *
@@ -138,7 +139,7 @@
  * The Irrlicht Engine is intended to be an easy-to-use 3d engine, so
  * this documentation is an important part of it. If you have any questions or
  * suggestions, just send a email to the author of the engine, Nikolaus Gebhardt
- * (niko (at) code3d.com).
+ * (niko (at) irrlicht3d.org).
  *
  *
  * \section links Links
@@ -148,7 +149,7 @@
  * <A HREF="annotated.html">Class list</A>: List of all classes with descriptions.<BR>
  * <A HREF="functions.html">Class members</A>: Good place to find forgotten features.<BR>
  *
- * \section example Short example
+ * \section irrexample Short example
  *
  * A simple application, starting up the engine, loading a Quake 2 animated 
  * model file and the corresponding texture, animating and displaying it
@@ -199,7 +200,8 @@
  * }
  * \endcode
  *
- * If you would like to replace the simple blue screen background by
+ * Irrlicht can load a lot of file formats automaticly, see irr::scene::ISceneManager::getMesh()
+ * for a detailed list. So if you would like to replace the simple blue screen background by
  * a cool Quake 3 Map, optimized by an octtree, just insert this code
  * somewhere before the while loop:
  *
@@ -256,17 +258,20 @@
 #define IRRCALLCONV
 #endif // STDCALL_SUPPORTED
 
+#include "SIrrCreationParameters.h"
 
 //! Everything in the Irrlicht Engine can be found in this namespace.
 namespace irr
 {
 	//! Creates an Irrlicht device. The Irrlicht device is the root object for using the engine.
-	/** \param deviceType: Type of the device. This can currently be video::EDT_NULL, 
+	/** If you need more parameters to be passed to the creation of the Irrlicht Engine device,
+	use the createDeviceEx() function.
+	\param deviceType: Type of the device. This can currently be video::EDT_NULL, 
 	video::EDT_SOFTWARE, video::EDT_DIRECTX8, video::EDT_DIRECTX9 and video::EDT_OPENGL.
 	\param windowSize: Size of the window or the video mode in fullscreen mode.
 	\param bits: Bits per pixel in fullscreen mode. Ignored if windowed mode.
 	\param fullscreen: Should be set to true if the device should run in fullscreen. Otherwise
-		the device runs in window mode.
+		the device runs in windowed mode.
 	\param stencilbuffer: Specifies if the stencil buffer should be enabled. Set this to true,
 	    if you want the engine be able to draw stencil buffer shadows. Note that not all
 		devices are able to use the stencil buffer. If they don't no shadows will be drawn.
@@ -278,11 +283,6 @@ namespace irr
 	\return Returns pointer to the created IrrlichtDevice or null if the 
 	device could not be created.
 	*/
-
-	#ifdef __cplusplus
-	extern "C" {     // do not use C++ decorations
-	#endif
-
 	IRRLICHT_API IrrlichtDevice* IRRCALLCONV createDevice(
 		video::E_DRIVER_TYPE deviceType = video::EDT_SOFTWARE, 
 		const core::dimension2d<s32>& windowSize = core::dimension2d<s32>(640,480),
@@ -293,12 +293,20 @@ namespace irr
 		IEventReceiver* receiver = 0,
 		const wchar_t* sdk_version_do_not_use = IRRLICHT_SDK_VERSION);
 
-	#ifdef __cplusplus
-	} // close extern C
-	#endif
+	//! Creates an Irrlicht device with the option to specify advanced parameters. 
+	/** Usually you should used createDevice() for creating an Irrlicht Engine device.
+	Use this function only if you wish to specify advanced parameters like a window
+	handle in which the device should be created.
+	\param parameters: Structure containing advanced parameters for the creation of the device.
+	See irr::SIrrlichtCreationParameters for details.
+	\return Returns pointer to the created IrrlichtDevice or null if the 
+	device could not be created. */
+	IRRLICHT_API IrrlichtDevice* IRRCALLCONV createDeviceEx(
+		const SIrrlichtCreationParameters& parameters);
+
 
 	// THE FOLLOWING IS AN EMPTY LIST OF ALL SUB NAMESPACES
-	// EXISTING ONLY FOR THE DOCUMENTION SOFTWARE DOXYGEN.
+	// EXISTING ONLY FOR THE DOCUMENTATION SOFTWARE DOXYGEN.
 
 	//! In this namespace can be found basic classes like vectors, planes, arrays, lists and so on.
 	namespace core
@@ -326,6 +334,9 @@ namespace irr
 	}
 }
 
+/*! \file irrlicht.h
+    \brief Main header file of the irrlicht, the only file needed to include.
+*/
 
 #endif
 

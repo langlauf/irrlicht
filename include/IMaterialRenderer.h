@@ -73,6 +73,17 @@ public:
 	//! Returns if the material is transparent. The scene managment needs to know this
 	//! for being able to sort the materials by opaque and transparent.
 	virtual bool isTransparent() { return false; }
+
+	//! Returns the render capability of the material. Because some more complex materials
+	//! are implemented in multiple ways and need special hardware capabilities, it is possible
+	//! to query how the current material renderer is performing on the current hardware with this
+	//! function.
+	//! \return Returns 0 if everything is running fine. Any other value is material renderer
+	//! specific and means for example that the renderer switched back to a fall back material because 
+	//! it cannot use the latest shaders. More specific examples: 
+	//! Fixed function pipeline materials should return 0 in most cases, parallax mapped
+	//! material will only return 0 when at least pixel shader 1.4 is available on that machine.
+	virtual s32 getRenderCapability() { return 0; }
 };
 
 //! Interface providing some methods for changing advanced, internal states of a IVideoDriver.

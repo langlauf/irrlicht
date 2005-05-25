@@ -79,10 +79,23 @@ namespace video
 		EMT_TRANSPARENT_ADD_COLOR,
 
 		//! Makes the material transparent based on the texture alpha channel.
+		//! The final color is blended together from the destination color and the
+		//! texture color, using the alpha channel value as blend factor.
 		//! Only first texture is used. If you are using this material with small
 		//! textures and 3d object, it is a good idea to load the texture in 32 bit
 		//! mode (video::IVideoDriver::setTextureCreationFlag()).
 		EMT_TRANSPARENT_ALPHA_CHANNEL,	
+
+		//! Makes the material transparent based on the texture alpha channel.
+		//! If the alpha channel value is greater than 127, a pixel is written to the
+		//! target, otherwise not. This material does not use alpha blending
+		//! and is a lot faster than EMT_TRANSPARENT_ALPHA_CHANNEL. It 
+		//! is ideal for drawing stuff like leafes of plants, because the borders
+		//! are not blurry but sharp.
+		//! Only first texture is used. If you are using this material with small
+		//! textures and 3d object, it is a good idea to load the texture in 32 bit
+		//! mode (video::IVideoDriver::setTextureCreationFlag()).
+		EMT_TRANSPARENT_ALPHA_CHANNEL_REF,	
 
 		//! Makes the material transparent based on the vertex alpha value.
 		EMT_TRANSPARENT_VERTEX_ALPHA,
@@ -129,6 +142,30 @@ namespace video
 		//! Only two lights are supported by this shader, if there are more, the nearest two
 		//! are chosen. Currently, this shader is only implemented for the D3D8 and D3D9 renderers.
 		EMT_NORMAL_MAP_TRANSPARENT_VERTEX_ALPHA,
+
+		//! Just like EMT_NORMAL_MAP_SOLID, but uses parallax mapping too, which 
+		//! looks a lot more realistic. This only works when the hardware supports at 
+		//! least vertex shader 1.1 and pixel shader 1.4. 
+		//! First texture is the color map, the  second should be the normal map.
+		//! The normal map texture should contain the height value in the 
+		//! alpha component. The IVideoDriver::makeNormalMapTexture() method writes 
+		//! this value automaticly when creating normal maps from a heightmap when using a 32 bit
+		//! texture. 
+		//! The height scale of the material (affecting the bumpiness) is being controlled 
+		//! by the SMaterial::MaterialTypeParam member. 
+		//! If set to zero, the default value (0.02f) will be applied. Otherwise
+		//! the value set in SMaterial::MaterialTypeParam is taken. This value depends on with which
+		//! scale the texture is mapped on the material. Too high or low values of MaterialTypeParam
+		//! can result in strange artifacts. 
+		EMT_PARALLAX_MAP_SOLID,
+
+		//! A material just like EMT_PARALLAX_MAP_SOLID, but it is transparent, using
+		//! EMT_TRANSPARENT_ADD_COLOR as base material.
+		EMT_PARALLAX_MAP_TRANSPARENT_ADD_COLOR,
+
+		//! A material just like EMT_PARALLAX_MAP_SOLID, but it is transparent, using
+		//! EMT_TRANSPARENT_VERTEX_ALPHA as base material.
+		EMT_PARALLAX_MAP_TRANSPARENT_VERTEX_ALPHA,
 
 		//! This value is not used. It only forces this enumeration to compile in 32 bit. 
 		EMT_FORCE_32BIT = 0x7fffffff	
@@ -180,35 +217,68 @@ namespace video
 		//! default constructor, creates a solid material with standard colors
 		SMaterial()
 		: AmbientColor(255,255,255,255), DiffuseColor(255,255,255,255),
-		EmissiveColor(0,0,0,0), SpecularColor(0,0,0,0), Texture1(0), Texture2(0),
+		EmissiveColor(0,0,0,0), SpecularColor(255,255,255,255), Texture1(0), Texture2(0),
 			MaterialType(EMT_SOLID), Wireframe(false), Lighting(true),
 			ZBuffer(true), ZWriteEnable(true), BackfaceCulling(true),
-			GouraudShading(true), Shininess(0.0f), BilinearFilter(true),
-			TrilinearFilter(false),	FogEnable(false)
+			GouraudShading(true), Shininess(0.0f), MaterialTypeParam(0.0f),
+			BilinearFilter(true), TrilinearFilter(false),	FogEnable(false)
 		{}
 
 		//! Type of the material. Specifies how everything is blended together
 		E_MATERIAL_TYPE MaterialType;	
 
 		//! How much ambient light (a global light) is reflected by this material.
-		//! The default is full white, meaning objects are completely globally illuminated.
-		//! Reduce this if you want to see diffuse or specular light effects, or change
-		//! the blend of colours to make the object have a base colour other than white.
+		/** The default is full white, meaning objects are completely globally illuminated.
+		 Reduce this if you want to see diffuse or specular light effects. */
 		SColor AmbientColor;		
 
 		//! How much diffuse light coming from a light source is reflected by this material.
-		//! The default is full white.
+		/** The default is full white. */
 		SColor DiffuseColor;		
 
 		//! Light emitted by this material. Default is to emitt no light.
 		SColor EmissiveColor;	
 
 		//! How much specular light (highlights from a light) is reflected. 
-		//! The default is to reflect no specular light. 
+		/** The default is to reflect white specular light.  See SMaterial::Shininess how to 
+		enable specular lights. */
 		SColor SpecularColor;	
 
-		//! Value affecting the size of specular highlights.
-		f32 Shininess;			
+		//! Value affecting the size of specular highlights. A value of 20 is common.
+		/** If set to 0, no specular highlights are being used. Currently, specular highlights
+		are only implemented in the D3D9 and D3D8 driver.
+		To activate, simply set the shininess of a material to a value other than 0: 
+		Using scene nodes: 
+		\code
+		sceneNode->getMaterial(0).Shininess = 20.0f;
+		\endcode
+
+		You can also change the color of the highlights using 
+		\code
+		sceneNode->getMaterial(0).SpecularColor.set(255,255,255,255);
+		\endcode
+
+		The specular color of the dynamic lights (SLight::SpecularColor) will influence
+		the the highlight color too, but they are set to a useful value by default when 
+		creating the light scene node. Here is a simple example on how
+		to use specular highlights:
+		\code
+		// load and display mesh
+		scene::IAnimatedMeshSceneNode* node = smgr->addAnimatedMeshSceneNode(
+		smgr->getMesh("data/faerie.md2"));
+		node->setMaterialTexture(0, driver->getTexture("data/Faerie2.pcx")); // set diffuse texture
+		node->setMaterialFlag(video::EMF_LIGHTING, true); // enable dynamic lighting
+		node->getMaterial(0).Shininess = 20.0f; // set size of specular highlights
+		
+		// add white light
+		scene::ILightSceneNode* light = smgr->addLightSceneNode(0,
+		    core::vector3df(5,5,5), video::SColorf(1.0f, 1.0f, 1.0f));
+		\endcode */
+		f32 Shininess;		
+
+		//! Free parameter dependend on the material type. 
+		/** Mostly ignored, used for example in EMT_PARALLAX_MAP_SOLID. */
+		f32 MaterialTypeParam;
 
 		//! Texture layer union.
 		union
@@ -222,12 +292,14 @@ namespace video
 				ITexture* Texture2;	
 			};
 
+			//! Array of textures, the same as accessing through Texture1 and Texture2
 			ITexture* Textures[MATERIAL_MAX_TEXTURES];
 		};
 
-		//! material flag union. This enables the user to access the
-		//! material flag using e.g: material.Wireframe = true or
-		//! material.flag[EMF_WIREFRAME] = true;
+		//! material flag union. 
+		/** This enables the user to access the
+		material flag using e.g: material.Wireframe = true or
+		material.flag[EMF_WIREFRAME] = true; */
 		union
 		{
 			struct
@@ -244,8 +316,9 @@ namespace video
 				//! Is the ZBuffer enabled? Default: true
 				bool ZBuffer;						
 
-				//! May be written to the zbuffer or is it readonly. Default: true
-				//! This flag is ignored, if the MaterialType is a transparent type.
+				//! May be written to the zbuffer or is it readonly.
+				/** Default: true This flag is ignored, if the MaterialType 
+				is a transparent type. */
 				bool ZWriteEnable;					
 
 				//! Is backfaceculling enabled? Default: true
@@ -255,14 +328,15 @@ namespace video
 				bool BilinearFilter;	
 
 				//! Is trilinear filtering enabled? Default: false
-				//! If the trilinear filter flag is enabled,
-				//! the bilinear filtering flag is ignored.
+				/* If the trilinear filter flag is enabled,
+				the bilinear filtering flag is ignored. */
 				bool TrilinearFilter;
 
 				//! Is fog enabled? Default: false
 				bool FogEnable;
 			};
 
+			//! Array representing all flags.
 			bool Flags[EMF_MATERIAL_FLAG_COUNT];
 		};
 
@@ -276,6 +350,7 @@ namespace video
 				EmissiveColor != b.EmissiveColor ||
 				SpecularColor != b.SpecularColor ||
 				Shininess != b.Shininess ||
+				MaterialTypeParam != b.MaterialTypeParam ||
 				Wireframe != b.Wireframe ||
 				GouraudShading != b.GouraudShading ||
 				Lighting != b.Lighting ||

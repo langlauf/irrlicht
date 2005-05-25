@@ -1,10 +1,173 @@
 -------------------------------------------------------------------------------------
+Changes in version 0.10.0 (26 May 2005)
+
+- The engine is now able to use parallax mapping. It's implemented for D3D9, D3D8 and OpenGL.
+  The perPixelLighing tutorial shows how to use it. Thanks go to Terry Welsh who wrote
+  the 'Parallax Mapping with Offset Limiting'-paper on which the Irrlicht implementation
+  is based and who allowed me to use his texture for use in the example.
+  
+- Added render to texture support. Currently, only the D3D9, D3D8 and the software renderer
+  are able to use this feature. There is a new example, showing how to render scenes into
+  a texture.
+  
+- Irrlicht now can load .png textures. There is also a new compile configuration
+  define to exclude the png loading option: _IRR_COMPILE_WITH_LIBPNG_. Thanks to 
+  rt who originally wrote the png loader and who allowed me to use and modify his code 
+  and place it under the Irrlicht Engine license.
+   
+- Added support for COLLADA files. COLLADA is an open Digital Asset Exchange Schema for the
+  interactive 3D industry. There are exporters and importers for this format available 
+  for most of the big 3d packages at http://collada.org. Irrlicht can import COLLADA files
+  by using the ISceneManager::getMesh() method. As COLLADA need not contain only one single mesh
+  but multiple meshes and a whole scene setup with lights, cameras and mesh instances,
+  this loader sets up a scene as described by the COLLADA file instead of loading 
+  and returning one mesh. The returned mesh is just a dummy object. However, if the 
+  COLLADA file does not include any <instance> tags, only meshes will be loaded by the 
+  engine and no scene nodes should be created. Meshes included in 
+  the scene will be added into the scene manager with the following naming scheme: 
+  path/to/file/file.dea#meshname. The loading of such meshes is logged. 
+  Currently, this loader is able to create meshes (made of only polygons), lights,
+  and cameras. Materials and animations are currently not supported but this will
+  change with future releases.
+  
+- Added Delgine DeleD .dmf mesh loading support. I simply added Salvatore Russo's .dmf loader to
+  Irrlicht, and changed some parts of it. Thanks to Salvatore for his work and for allowing
+  me to use his code in Irrlicht and put it under Irrlicht's license.
+  
+- Specular highlights are now finally usable the engine. To activate, simply set the shininess
+  of a scene node to a value other than 0: sceneNode->getMaterial(0).Shininess = 20.0f;
+  You can also change the color of the highlights using 
+  sceneNode->getMaterial(0).SpecularColor.set(255,255,255,255);. The specular color of the
+  dynamic lights will influence the the highlight color too, but they are set to a useful
+  value by default when creating the light. This feature is currently only available in 
+  the D3D drivers.
+  
+- Added a new material type: EMT_TRANSPARENT_ALPHA_CHANNEL_REF. This draws a pixel of the 
+  material only when the alpha channel has a value greater than 128. It is ideal for drawing
+  for example leafes of plants and does not use alpha blending, so it is a lot faster than
+  EMT_TRANSPARENT_ALPHA_CHANNEL.
+  
+- There is now a createDeviceEx() method with which it is possible to create an Irrlicht Engine
+  device into an already existing window. This currently only works in Windows.
+  This method will be extended in the future with other options. 
+  
+- Irrlicht.NET has been extended with ports of the SceneNodeAnimators, TriangleSelectors 
+  the FileSystem and Font drawing. Also the documentation of it has been improved a lot.
+  
+- There are two new tutorials/examples available. One demonstrates how to use render to texture
+  feature, the other one shows how to run Irrlicht inside a precreated Win32 window/widget.
+  This means there are now 17 examples available in the SDK.
+  
+- The software renderer now renders 3d geometry transparent when its material is 
+  somewhat transparent.
+  
+- The XML Parser has been enhanced. Several small bugs have been fixed and there are some
+  new features: The parser can now read ASCII, UTF-8, UTF-16 and UTF-32 (both little and
+  big endian) files, and return the parsed string data in one selectable format from the
+  same list. In addition, it is now completely independent from Irrlicht. If you wish to 
+  use the parser without the engine, take a look at the newly created project at 
+  http://irrxml.sourceforge.net.
+  
+- Upgraded to DirectX Exporter Mod 1.3.1
+  
+- Upgraded dev-cpp project file to Dev-C++ 4.9.9.2. Removed dependency to zlib and
+  jpeglib for devcpp, the necessary .c files are now simply included in the project.
+  
+- Renamed the VisualStudio and DevCpp sub directories in the SDK to Win32-gcc, 
+  Win32-VisualStudio.
+  
+- Fixed a bug in irrXML causing it to replace xml characters wrongly sometimes.
+  
+- The C++ decorations at createDevice() have been added again, because lots of people
+  started to mix the gcc and the microsoft .DLL and got confused why the thing crashed
+  at random positions.
+  
+- Moved heapsink and heapsort into the core namespace.
+  
+- Updated to My3D version 3.15
+
+- Fixed the wrongly drawn alpha channel material in OpenGL driver and a problem with the
+  VertexAlpha material in the same driver.
+
+- Implemented multipass rendering in the OCTTree scene node now too. This means that octtrees can
+  now contain transparent materials as well.
+  
+- Improved string comparison speed, especially when comparing to pointer to char or w_char,
+  no more temporary strings are being constructed now. In addition, there are some new
+  string comparison methods have been added to this class.
+  
+- Added string::replace() method.
+
+- Added string::trim() method.
+
+- Addes string::erase() method.
+
+- Fixed a bug in array which caused data corruption if an element which already inside the 
+  the array was pushed_back. Thanks to vox for reporting this and to provide a solutin
+
+- Added ISceneManager::addMesh() method.
+
+- Added IMeshManipulator::recalculateNormals(IMeshBuffer*) method.
+  
+- The file array.h has been renamed to irrArray.h
+ 
+- Due to a bug, Irrlicht 0.9 didn't cull the scene nodes anymore which resulted in a huge
+  performance loss. This is fixed now.
+  
+- After lots releases ignoring the 'make the fps camera smoother request', it is now 
+  finally integrated. 
+  
+- Removed audiere dependency and the mp3 file, reeducing SDK download size.
+  
+- A bug was fixed causing the binding of the wrong fragment program sometimes in OpenGL.
+
+- Lots of internal filenames have been renamed. All CVideo* files have been renamed to
+  fit the other name conventions, CD3D9Driver.h into CD3D9Driver.h for example.
+  
+- The IMaterialRenderer interface now has the new method getRenderCapability() which
+  returns if the material is able to be rendererd with all settings on current hardware.
+  
+- Added IMeshManipulator::setVertexColors();
+
+- Added float color reading support in the 3DS loader.
+
+- video::EVDF_BILINEAR_FILER renamed to EVDF_BILINEAR_FILTER
+  
+- core::equals function added.
+
+- fixed a small bug in fast_aotf thanks to jox
+
+- Added a method ICamera::isOrthogonal() which is being used by 
+  ISceneCollisionManager::getRayFromScreenCoordinates(), thanks to a bug report and fix by
+  jox in this thread: http://irrlicht.sourceforge.net/phpBB2/viewtopic.php?t=6243
+  
+- Added some fixes to the GUI environment to make the parent and child pointers be more
+  consistent as suggested by jox in this thread: http://irrlicht.sourceforge.net/phpBB2/viewtopic.php?t=6220
+
+- Fixed a bug which caused the ambient light not to be reset after a window resize in D3D8 and 9.
+  Thanks to jox for this bug report and fix.
+
+- vector3df equals method added.
+
+- added SColorf::getInterpolated() method
+
+- Moved ITextSceneNode interface to include folder.
+
+- Fixed a small bug in the My3DLoader which failed sometimes finding the right textures.
+  
+- Fixed bounding box problem with meshes without joints in .X file loader, thanks to
+  jox. (http://irrlicht.sourceforge.net/phpBB2/viewtopic.php?t=6669)
+  
+- Fixed IFileSystem::getWorkingDirectory in Linux version.
+  (http://irrlicht.sourceforge.net/phpBB2/viewtopic.php?t=6678)
+  
+-------------------------------------------------------------------------------------
 Changes in version 0.9 (28 Mar 2005)
 
 - There is now a 100% working terrain renderer available. The old buggy and unfinished terrain  
   scene node has been replaced by a new TerrainSceneNode which is based on Spintz's 
-  GeoMipMapSceneNode. Lots of thanks for his work on this and that he allowed it to be 
-  modified and integrated into Irrlicht.
+  GeoMipMapSceneNode and Soconnes terrain renderer. Lots of thanks for their work on
+  this and that they allowed it to be modified and integrated into Irrlicht.
   
 - It is now possible for a scene node to draw itself in multiple passes. This means it can
   register itself for multiple render passes (E_SCENE_NODE_RENDER_PASS) and during rendering
@@ -96,7 +259,7 @@ Changes in version 0.9 (28 Mar 2005)
   not that much artifact triangles drawn anymore. But this means also that drawing is 
   a lot faster and that triangles clipped at the border of the screen will disappear 
   too fast. If anyone wants to finish the drawClippedIndexedTriangleListT() method
-  in the CVideoSoftware class, he is welcome :)
+  in the CSoftwareDriver class, he is welcome :)
 
 - There is a new parameter in the IVideoDriver::createImageFromData() which causes the 
   image to be able to own foreign memory.

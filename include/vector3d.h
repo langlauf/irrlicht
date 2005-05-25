@@ -54,6 +54,14 @@ namespace core
 
 		// functions
 
+		//! returns if this vector equals the other one, taking floating point rounding errors into account
+		bool equals(const vector3d<T>& other)
+		{
+			return core::equals(X, other.X) &&
+				   core::equals(Y, other.Y) &&
+				   core::equals(Z, other.Z);
+		}
+
 		void set(const T nx, const T ny, const T nz) {X=nx; Y=ny; Z=nz; }
 		void set(const vector3d<T>& p) { X=p.X; Y=p.Y; Z=p.Z;}
 
@@ -61,8 +69,8 @@ namespace core
 		f64 getLength() const { return sqrt(X*X + Y*Y + Z*Z); }
 
 		//! Returns squared length of the vector.
-		//! This is useful because it is much faster then
-		//! getLength().
+		/** This is useful because it is much faster then
+		getLength(). */
 		f64 getLengthSQ() const { return X*X + Y*Y + Z*Z; }
 
 		//! Returns the dot product with another vector.
@@ -71,8 +79,8 @@ namespace core
 			return X*other.X + Y*other.Y + Z*other.Z;
 		}
 
-		//! Returns distance from an other point. Here, the vector is interpreted as
-		//! point in 3 dimensional space.
+		//! Returns distance from an other point.
+		/** Here, the vector is interpreted as point in 3 dimensional space. */
 		f64 getDistanceFrom(const vector3d<T>& other) const
 		{
 			f64 vx = X - other.X; f64 vy = Y - other.Y; f64 vz = Z - other.Z;
@@ -80,18 +88,21 @@ namespace core
 		}
 
 		//! Returns squared distance from an other point. 
-		//! Here, the vector is interpreted as point in 3 dimensional space.
+		/** Here, the vector is interpreted as point in 3 dimensional space. */
 		f32 getDistanceFromSQ(const vector3d<T>& other) const
 		{
 			f32 vx = X - other.X; f32 vy = Y - other.Y; f32 vz = Z - other.Z;
 			return (vx*vx + vy*vy + vz*vz);
 		}
 
+		//! Calculates the cross product with another vector
 		vector3d<T> crossProduct(const vector3d<T>& p) const
 		{
 			return vector3d<T>(Y * p.Z - Z * p.Y, Z * p.X - X * p.Z, X * p.Y - Y * p.X);
 		}
 
+		//! Returns if this vector interpreted as a point is on a line between two other points.
+		/** It is assumed that the point is on the line. */
 		bool isBetweenPoints(const vector3d<T>& begin, const vector3d<T>& end) const
 		{
 			f32 f = (f32)(end - begin).getLengthSQ();
@@ -164,9 +175,9 @@ namespace core
 			Y += center.Y;
 		}
 
-		//! returns interpolated vector
-		//! \param other: other vector to interpolate between
-		//! \param d: value between 0.0f and 1.0f.
+		//! Returns interpolated vector.
+		/** \param other: other vector to interpolate between
+		\param d: value between 0.0f and 1.0f. */
 		vector3d<T> getInterpolated(const vector3d<T>& other, f32 d) const
 		{
 			f32 inv = 1.0f - d;
@@ -175,10 +186,10 @@ namespace core
 								other.Z*inv + Z*d);
 		}
 
-		//! Gets the Y and Z rotations of a vector
-		//! Thanks to Arras on the Irrlicht forums to add this method.
-		//! \return A vector representing the rotation in degrees of
-		//! this vector. The Z component of the vector will always be 0.
+		//! Gets the Y and Z rotations of a vector.
+		/** Thanks to Arras on the Irrlicht forums to add this method.
+		 \return A vector representing the rotation in degrees of
+		this vector. The Z component of the vector will always be 0. */
 		vector3d<T> getHorizontalAngle()
 		{
 			vector3d<T> angle;
@@ -201,6 +212,18 @@ namespace core
 
 			return angle;
 		}
+
+		//! Fills an array of 4 values with the vector data (usually floats).
+		/** Useful for setting in shader constants for example. The fourth value
+		 will always be 0. */
+		void getAs4Values(T* array)
+		{
+			array[0] = X;
+			array[1] = Y;
+			array[2] = Z;
+			array[3] = 0;
+		}
+
 
 		// member variables
 

@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.9
+The Irrlicht Engine SDK version 0.10.0
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -48,7 +48,7 @@ The Irrlicht Engine SDK version 0.9
 2. How to start
 ==========================================================================
 
-  To see the engine in action in Windows, just go to the \bin\VisualStudio
+  To see the engine in action in Windows, just go to the \bin\Win32-VisualStudio
   directory, and start some applications. There should also be an
   application named Demo.exe, this should show the most
   interesting things.
@@ -76,10 +76,11 @@ The Irrlicht Engine SDK version 0.9
   
   * gcc 3.2
   * gcc 3.3
+  * gcc 3.4
   * Visual Studio 6.0
   * Visual Studio.NET (7.0)
   * Visual Studio.NET 2003 (7.1)
-  * Visual Studio.NET 2005 Beta (8.0) [experimental]
+  * Visual Studio.NET 2005 Beta (8.0)
   * DevC++ 4.9 & gcc (project files included)
      
   If you ever want to (re)compile the engine yourself (which means you don't
@@ -88,7 +89,7 @@ The Irrlicht Engine SDK version 0.9
   * Windows:
   	* Needed: PlatformSDK (which usually comes with all IDEs)
   	* Optional: DirectX 9 SDK (for D3D9 support)
-  	* Optional: DirectX 8 SDK (for D3D9 support)
+  	* Optional: DirectX 8 SDK (for D3D8 support)
   	
   * Linux:
   	* Needed: XServer with GLX + XF86VidMode extension (should be there by default)

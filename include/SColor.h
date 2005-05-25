@@ -267,7 +267,7 @@ namespace video
 		//! alpha color component
 		f32 a;
 
-		//! Sets the three color comonents to new values at once.
+		//! Sets three color components to new values at once.
 		//! \param rr: Red color component. Should be a value between 0.0f meaning
 		//! very dark red (=black) and 1.0f, meaning full red.
 		//! \param gg: Green color component. Should be a value between 0.0f meaning
@@ -275,6 +275,27 @@ namespace video
 		//! \param bb: Blue color component. Should be a value between 0.0f meaning
 		//! very dark blue (=black) and 1.0f, meaning full blue.
 		void set(f32 rr, f32 gg, f32 bb) {r = rr; g =gg; b = bb; };
+
+		//! Sets all four color components to new values at once.
+		//! \param a: Alpha component. 
+		//! \param rr: Red color component. Should be a value between 0.0f meaning
+		//! very dark red (=black) and 1.0f, meaning full red.
+		//! \param gg: Green color component. Should be a value between 0.0f meaning
+		//! very dark green (=black) and 1.0f, meaning full green.
+		//! \param bb: Blue color component. Should be a value between 0.0f meaning
+		//! very dark blue (=black) and 1.0f, meaning full blue.
+		void set(f32 aa, f32 rr, f32 gg, f32 bb) {a = aa; r = rr; g =gg; b = bb; };
+
+		//! Interpolates the color with a f32 value to an other color 
+		//! \param other: Other color
+		//! \param d: value between 0.0f and 1.0f
+		//! \return Returns interpolated color.
+		inline SColorf getInterpolated(SColorf other, f32 d) const
+		{
+			f32 inv = 1.0f - d;
+			return SColorf(other.r*inv + r*d,
+				other.g*inv + g*d, other.b*inv + b*d, other.a*inv + a*d);
+		}
 	};
 
 } // end namespace video

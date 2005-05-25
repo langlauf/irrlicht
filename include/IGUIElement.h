@@ -26,10 +26,13 @@ public:
 	//! Constructor
 	IGUIElement(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
 		: Environment(environment), IsVisible(true), IsEnabled(true),
-			Parent(parent), RelativeRect(rectangle), ID(id)
+			Parent(0), RelativeRect(rectangle), ID(id)
 	{
 		AbsoluteRect = RelativeRect;
 		AbsoluteClippingRect = AbsoluteRect;
+
+		if (parent)
+			parent->addChild(this);
 
 		if (Parent)
 		{
@@ -37,9 +40,6 @@ public:
 			AbsoluteClippingRect = AbsoluteRect;
 			AbsoluteClippingRect.clipAgainst(Parent->AbsoluteClippingRect);
 		}
-
-		if (Parent)
-			Parent->addChild(this);
 	}
 
 
@@ -143,8 +143,10 @@ public:
 	{
 		if (child)
 		{
-			Children.push_back(child);
 			child->grab();
+			child->remove();  // remove from old parent
+			child->Parent = this;
+			Children.push_back(child);						
 		}
 	}
 
@@ -156,6 +158,7 @@ public:
 		for (; it != Children.end(); ++it)
 			if ((*it) == child)
 			{
+				(*it)->Parent = 0;
 				(*it)->drop();
 				Children.erase(it);
 				return;

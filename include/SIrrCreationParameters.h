@@ -1,0 +1,116 @@
+// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// This file is part of the "Irrlicht Engine".
+// For conditions of distribution and use, see copyright notice in Irrlicht.h
+
+#ifndef __I_IRRLICHT_CREATION_PARAMETERS_H_INCLUDED__
+#define __I_IRRLICHT_CREATION_PARAMETERS_H_INCLUDED__
+
+namespace irr
+{
+	//! Structure for holding advanced Irrlicht Device creation parameters.
+	/** This structure is only used in the createDeviceEx() function. */
+	struct SIrrlichtCreationParameters
+	{
+		//! Constructs a SIrrlichtCreationParameters structure with default values.
+		SIrrlichtCreationParameters()
+		{
+			DriverType = video::EDT_SOFTWARE;
+			WindowSize = core::dimension2d<s32>(800, 600);
+			Bits = 16;
+			Fullscreen = false;
+			Stencilbuffer = false;
+			Vsync = false;
+			EventReceiver = 0;
+			WindowId = 0;
+			SDK_version_do_not_use = IRRLICHT_SDK_VERSION;
+		}
+
+		//! Type of the device. 
+		/** This can currently be video::EDT_NULL, 
+		video::EDT_SOFTWARE, video::EDT_DIRECTX8, video::EDT_DIRECTX9 and video::EDT_OPENGL. 
+		Default: Software. */
+		video::E_DRIVER_TYPE DriverType;
+
+		//! Size of the window or the video mode in fullscreen mode. Default: 800x600
+		core::dimension2d<s32> WindowSize;
+
+		//! Bits per pixel in fullscreen mode. Ignored if windowed mode. Default: 16.
+		u32 Bits;
+
+		//! Should be set to true if the device should run in fullscreen. 
+		/** Otherwise the device runs in windowed mode. Default: false.  */
+		bool Fullscreen;
+
+		//! Specifies if the stencil buffer should be enabled. 
+		/** Set this to true,
+	    if you want the engine be able to draw stencil buffer shadows. Note that not all
+		devices are able to use the stencil buffer. If they don't no shadows will be drawn. 
+		Default: false. */
+		bool Stencilbuffer;
+
+		//! Specifies vertical syncronisation.
+		/** If set to true, the driver will wait for the vertical retrace period, otherwise not.
+		Default: false */
+		bool Vsync;
+
+		//! A user created event receiver.
+		IEventReceiver* EventReceiver;
+
+		//! Window Id.
+		/** If this is set to a value other than 0, the Irrlicht Engine will be created in 
+		an already existing window. For windows, set this to the HWND of the window you want.
+		The windowSize and FullScreen options will be ignored when using the WindowId parameter.
+		Default this is set to 0. 
+		To make Irrlicht run inside the custom window, you still will have to draw Irrlicht
+		on your own. You can use this loop, as usual:
+		\code
+		while (device->run())
+		{
+			driver->beginScene(true, true, 0);
+			smgr->drawAll();
+			driver->endScene();
+		}
+		\endcode
+		Instead of this, you can also simply use your own message loop
+		using GetMessage, DispatchMessage and whatever. Calling
+		IrrlichtDevice::run() will cause Irrlicht to dispatch messages internally too. 
+		You need not call Device->run() if you want to do your own message 
+		dispatching loop, but Irrlicht will not be able to fetch
+		user input then and you have to do it on your own using the window
+		messages, DirectInput, or whatever.
+		An alternative, own message dispatching loop without device->run() would
+		look like this:
+		\code
+		MSG msg;
+		while (true)
+		{
+			if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+
+				if (msg.message == WM_QUIT)
+					break;
+			}
+
+			// draw engine picture
+			driver->beginScene(true, true, 0);
+			smgr->drawAll();
+			driver->endScene();
+		}
+		\endcode
+		However, there is no need to draw the picture this often. Just do it how you like.
+		*/
+		s32 WindowId;
+
+		//! Don't use or change this parameter. 
+		/** Always set it to IRRLICHT_SDK_VERSION, which is done by default.
+		This is needed for sdk version checks. */
+		const wchar_t* SDK_version_do_not_use;
+	};
+
+
+} // end namespace
+
+#endif
+

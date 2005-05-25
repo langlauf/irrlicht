@@ -52,6 +52,9 @@ namespace scene
 		//! \return Returns the animated mesh based on a detail level. 
 		virtual IMesh* getMesh(s32 frame, s32 detailLevel, s32 startFrameLoop=-1, s32 endFrameLoop=-1)
 		{
+			if (Meshes.empty())
+				return 0;
+
 			return Meshes[frame];
 		}
 

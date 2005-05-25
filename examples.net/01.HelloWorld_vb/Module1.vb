@@ -7,7 +7,7 @@ Imports Irrlicht.Scene
 ' Some solutions wich might help:
 '
 ' - If your compiler complains that 'Irrlicht' cannot be found,
-'  add the Irrlicht.NET.dll file (in bin\visualStudio) as Reference
+'  add the Irrlicht.NET.dll file (in bin\Win32-VisualStudio) as Reference
 '  in the solution browser.
 ' 
 ' - It compiles, but your program throws an exception like this:

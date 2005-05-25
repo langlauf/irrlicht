@@ -18,6 +18,14 @@ using namespace irr;
 
 int main()
 {
+	// ask if user would like shadows
+
+	char i;
+	printf("Please press 'y' if you want to use realtime shadows.\n");
+
+	std::cin >> i;
+	bool shadows = (i == 'y');
+
 	// ask user for driver
 
 	video::E_DRIVER_TYPE driverType;
@@ -26,7 +34,6 @@ int main()
 		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.2\n"\
 		" (d) Software Renderer\n (e) NullDevice\n (otherKey) exit\n\n");
 
-	char i;
 	std::cin >> i;
 
 	switch(i)
@@ -43,7 +50,7 @@ int main()
 
 	IrrlichtDevice *device =
 		createDevice(driverType, core::dimension2d<s32>(640, 480),
-		16, false, true);
+		16, false, shadows);
 
 	if (device == 0)
 		return 1; // could not create selected driver.
@@ -68,12 +75,12 @@ int main()
 		"../../media/room.3ds");
 
 	smgr->getMeshManipulator()->makePlanarTextureMapping(
-		mesh->getMesh(0), 0.008f);
+		mesh->getMesh(0), 0.004f);
 
 	scene::ISceneNode* node = 0;
 
 	node = smgr->addAnimatedMeshSceneNode(mesh);
-	node->setMaterialTexture(0,	driver->getTexture("../../media/wall.jpg"));
+	node->setMaterialTexture(0,	driver->getTexture("../../media/rockwall.bmp"));
 	node->getMaterial(0).EmissiveColor.set(0,0,0,0);
 
 	/*
@@ -159,11 +166,11 @@ int main()
 	ps->setPosition(core::vector3df(-70,60,40));
 	ps->setScale(core::vector3df(2,2,2));
 
-	ps->setParticleSize(core::dimension2d<f32>(20.0f, 10.0f));
+	ps->setParticleSize(core::dimension2d<f32>(20.0f, 20.0f));
 
 	scene::IParticleEmitter* em = ps->createBoxEmitter(
 		core::aabbox3d<f32>(-7,0,-7,7,1,7), 
-		core::vector3df(0.0f,0.03f,0.0f),
+		core::vector3df(0.0f,0.06f,0.0f),
 		80,100, 
 		video::SColor(0,255,255,255), video::SColor(0,255,255,255),
 		800,2000);
@@ -195,12 +202,13 @@ int main()
 	scene::IAnimatedMeshSceneNode* anode = 0;
 
 	anode = smgr->addAnimatedMeshSceneNode(mesh);
-	anode->setPosition(core::vector3df(-50,45,-60));
+	anode->setPosition(core::vector3df(-50,65,-60));
+	anode->setScale(core::vector3df(2,2,2));
 	anode->setMD2Animation(scene::EMAT_STAND);
 	anode->setMaterialTexture(0, driver->getTexture("../../media/Faerie5.BMP"));
 
 	anode->addShadowVolumeSceneNode();	
-	smgr->setShadowColor(video::SColor(220,0,0,0));
+	smgr->setShadowColor(video::SColor(150,0,0,0));
 
 
 	/*

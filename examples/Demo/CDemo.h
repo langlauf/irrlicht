@@ -9,7 +9,7 @@
 #endif
 
 #ifndef LINUX
-#define USE_AUDIERE
+//#define USE_AUDIERE
 #endif
 
 #include <irrlicht.h>

@@ -2,9 +2,10 @@
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
-// The code for the TerrainSceneNode is based on the GeoMipMapSceneNode
-// developed by Spinz. He made it available for Irrlicht and allowed it to be 
-// distributed under this licence. I only modified some parts. A lot of thanks go to him. 
+// The code for the TerrainSceneNode is based on the terrain renderer by Soconne and
+// the GeoMipMapSceneNode developed by Spinz.  They made their code available for Irrlicht 
+// and allowed it to be  distributed under this licence. I only modified some parts.
+// A lot of thanks go to them. 
 
 #ifndef __I_TERRAIN_SCENE_NODE_H__
 #define __I_TERRAIN_SCENE_NODE_H__
@@ -12,7 +13,7 @@
 #include "ISceneNode.h"
 #include "SMeshBufferLightMap.h"
 #include "IMesh.h"
-#include "array.h"
+#include "irrArray.h"
 
 namespace irr
 {
@@ -40,9 +41,10 @@ namespace scene
 	class ISceneManager;
 
 	//! A scene node for displaying terrain using the geo mip map algorithm.
-	/** The code for the TerrainSceneNode is based on the GeoMipMapSceneNode
-	 * developed by Spinz. He made it available for Irrlicht and allowed it to be 
-	 * distributed under this licence. I only modified some parts. A lot of thanks go to him. 
+	/** The code for the TerrainSceneNode is based on the Terrain renderer by Soconne and 
+	 * the GeoMipMapSceneNode developed by Spinz. They made their code available for Irrlicht 
+	 * and allowed it to be  distributed under this licence. I only modified some parts.
+	 * A lot of thanks go to them. 
 	 *
 	 * This scene node is capable of very quickly loading
 	 * terrains and updating the indices at runtime to enable viewing very large terrains.  It uses a

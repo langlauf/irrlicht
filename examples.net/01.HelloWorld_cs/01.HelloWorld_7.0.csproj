@@ -80,7 +80,7 @@
                 <Reference
                     Name = "Irrlicht.NET"
                     AssemblyName = "Irrlicht.NET"
-                    HintPath = "..\..\bin\VisualStudio\Irrlicht.NET.dll"
+                    HintPath = "..\..\bin\Win32-VisualStudio\Irrlicht.NET.dll"
                 />
             </References>
         </Build>

@@ -59,6 +59,37 @@ Cartography shop 4 (.csm)  Cartography Shop is a modeling program for creating
                            SceneManager->getStringParameters()->setParameter(
                            scene::CSM_TEXTURE_PATH, "path/to/your/textures");
                            
+COLLADA (.dae, .xml)       COLLADA is an open Digital Asset Exchange Schema for the 
+                           interactive 3D industry. There are exporters and importers for
+                           this format available for most of the big 3d packages at 
+                           http://collada.org. Irrlicht can import COLLADA files by 
+                           using the ISceneManager::getMesh() method. As COLLADA need 
+                           not contain only one single mesh but multiple meshes and a whole 
+                           scene setup with lights, cameras and mesh instances, this loader 
+                           sets up a scene as described by the COLLADA file instead of 
+                           oading and returning one mesh. Created scene nodes will be 
+                           named as the names of the nodes in the COLLADA file. The 
+                           returned mesh is just a dummy object. However, if the COLLADA
+                           file does not include any <instance> tags, only meshes will 
+                           be loaded by the engine and no scene nodes should be created.
+                           Meshes included in the scene will be added into the scene 
+                           manager with the following naming scheme: 
+                           path/to/file/file.dea#meshname. The loading of such meshes is
+                           logged. Currently, this loader is able to create meshes (made of 
+                           only polygons), lights, and cameras. Materials and animations 
+                           are currently not supported but this will change with future 
+                           releases. 
+                           
+Delgine DeleD (.dmf)       DeleD (delgine.com) is a 3D editor and level-editor combined 
+                           into one and is specifically designed for 3D game-development. 
+                           With this loader, it is possible to directly load all geometry 
+                           is as well as textures and lightmaps from .dmf files. The loader 
+                           is based on Salvatore Russo's .dmf loader, I just changed some 
+                           parts of it. Thanks to Salvatore for his work and for allowing me 
+                           to use his code in Irrlicht and put it under Irrlicht's license. 
+                           For newer and more enchanced versions of the loader, take a look 
+                           at delgine.com. 
+                           
 DirectX (.x)               Platform independent importer (so not D3D-only) for .x 
                            files. Most 3D packages can export these natively and 
                            there are several tools for them available. (e.g.

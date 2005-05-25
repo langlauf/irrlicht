@@ -17,6 +17,18 @@ Here is the list of changes that I've made to it so far:
  
 Version history (latest first)
 
+Version 1.3.1 - May 20th 2005
+
+    * Added check for SubSurf meshes. SubSurf meshes must be converted to polygon meshes before exporting. I might add support for exporting SubSurf meshes later.
+ 
+
+Version 1.3 - April 24th 2005
+
+    * Fixed problem with animations that have a modified pose at frame 1 (see Version 1.2.1). Fix provided by Ben Omari, thanks a lot!
+    * Fixed bug where error may occur with meshes that have no texture. Fix also provided by Ben Omari, thanks another lot!
+    * Fixed bug where exception occurs when a mesh has uv coords and contains vertices that does not belong to any face. Thanks Trident from the Irrlicht forums for reporting!
+
+
 Version 1.2.1 - November 3rd 2004
 
     * Again (This time really... :) ) fixed bug with the 'Flip Z axis' switch (would internally sometimes not be set correctly).

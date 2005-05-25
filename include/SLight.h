@@ -19,18 +19,19 @@ by the irrlicht engine.
 struct SLight
 {
 	SLight() : AmbientColor(0.0f,0.0f,0.0f), DiffuseColor(1.0f, 1.0f, 1.0f), 
-		SpecularColor(0.0f,0.0f,0.0f), Position(0.0f, 0.0f, 0.0f), Radius(100.0f),
+		SpecularColor(1.0f,1.0f,1.0f), Position(0.0f, 0.0f, 0.0f), Radius(100.0f),
 		CastShadows(true)
 		 {};
 
 	//! Ambient color emitted by the light
 	SColorf AmbientColor; 
 
-	//! Diffuse color emitted by the light. This is the primary color you
-	//! might want to set.
+	//! Diffuse color emitted by the light. 
+	/** This is the primary color you might want to set. */
 	SColorf DiffuseColor; 
 
 	//! Specular color emitted by the light. 
+	/** For details how to use specular highlights, see SMaterial::Shininess */
 	SColorf SpecularColor; 
 
 	//! Position of the light.

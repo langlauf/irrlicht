@@ -18,7 +18,7 @@ class line2d
 {
 	public:
 
-		line2d(): start(0,0,0), end(1,1,1) {};
+		line2d(): start(0,0), end(1,1) {};
 		line2d(T xa, T ya, T xb, T yb) : start(xa, ya), end(xb, yb) {};
 		line2d(const vector2d<T>& start, const vector2d<T>& end) : start(start), end(end) {};
 		line2d(const line2d<T>& other) :start(other.start), end(other.end) {};

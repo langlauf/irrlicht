@@ -7,7 +7,7 @@
 
 #include "IUnknown.h"
 #include "SMaterial.h"
-#include "array.h"
+#include "irrArray.h"
 #include "aabbox3d.h"
 #include "S3DVertex.h"
 

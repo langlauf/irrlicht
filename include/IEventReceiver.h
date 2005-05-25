@@ -132,42 +132,66 @@ struct SEvent
 	{
 		struct 
 		{
+			//! IGUIElement who called the event
 			gui::IGUIElement* Caller;
+
+			//! Type of GUI Event
 			gui::EGUI_EVENT_TYPE EventType;			
 		} GUIEvent;
 
 		struct
 		{
-			s32 X, Y; // mouse positions;
+			//! X position of mouse cursor
+			s32 X;
 
-			//! mouse wheel delta, usually 1.0 or -1.0. Only valid if event was
-			//! EMIE_MOUSE_WHEEL
+			//! Y position of mouse cursor
+			s32 Y;
+
+			//! mouse wheel delta, usually 1.0 or -1.0.
+			/** Only valid if event was EMIE_MOUSE_WHEEL */
 			f32 Wheel; 
 
-			//! type of more event
+			//! type of mouse event
 			EMOUSE_INPUT_EVENT Event;
 		} MouseInput;
 
 		struct
 		{
-			wchar_t Char; // Character corresponding to the key (0, if not a character)
-			EKEY_CODE Key; // Key pressed
-			bool PressedDown; // if not pressed, then left up
-			bool Shift; // true if shift was also pressed
-			bool Control; // true if ctrl was also pressed
+			//! Character corresponding to the key (0, if not a character)
+			wchar_t Char; 
+
+			//! Key which has been pressed or released
+			EKEY_CODE Key; 
+
+			//! if not pressed, then the key was left up
+			bool PressedDown; 
+
+			//! true if shift was also pressed
+			bool Shift; 
+
+			//! true if ctrl was also pressed
+			bool Control; 
 		} KeyInput;
 
 		struct
 		{
+			//! pointer to text which has been logged
 			const c8* Text;
+
+			//! log level in which the text has been logged
 			ELOG_LEVEL Level;
 		} LogEvent;
 
 		struct
 		{
-			s32 UserData1; // Some user specified data as int
-			s32 UserData2; // Another user specified data as int
-			f32 UserData3; // Some user specified data as float
+			//! Some user specified data as int
+			s32 UserData1; 
+
+			//! Another user specified data as int
+			s32 UserData2; 
+
+			//! Some user specified data as float
+			f32 UserData3; 
 		} UserEvent;
 
 	};
