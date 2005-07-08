@@ -1,4 +1,107 @@
 -------------------------------------------------------------------------------------
+Changes in version 0.11.0 (08 July 2005)
+
+- Antialiasing is now supported by Irrlicht in the D3D8 and D3D9 renderer. To switch
+  it on, use createDeviceEx() and set SIrrlichtCreationParameters::AntiAlias to true.
+  
+- Irrlicht.NET can now run inside a pre created Windows.Form window.
+
+- I'm no longer providing a Visual Studio 7.0 project/solution file for the Irrlicht
+  Engine sourcecode, only 7.1 and 6.0 are supported. If you are using Visual Studio 7.0,
+  just open the .dsp file for Visual Studio 6.0, it will be converted automaticly.
+
+- Irrlicht.NET includes now all basic GUI Elements and can capture GUI events. There are
+  still some features missing, but it is already enough to do simple things like showing
+  message boxes, displaying images, getting input strings, etc.
+  
+- Improved the .NET documentation a bit.
+  
+- There is a full implemented ISceneCollisionManager now available in Irrlicht.NET.
+  
+- The Linux OpenGL renderer now supports mip mapping.
+
+- It is now possible to compile Irrlicht as shared lib in Linux. To do this, go into the source
+  folder and run 'make sharedlib'. This should create a libIrrlicht.so.0.11.0 file in
+  lib/Linux. To install it in /usr/local/lib, you can run 'make install'. 
+  
+- The drawing of the GUI system has been refactored and a lot of redundant code has
+  been removed. 
+  
+- The new method IVideoDriver::draw2DRectangle() is able to draw rectangles not only
+  filled with a single color, but with a gradient from four colors. This is implemented
+  in all drivers except the Software driver which still uses one color for this method.
+  
+- It is now possible to customize the GUI system's skin a lot more: Simply implement your
+  own IGUISkin interface and implement the draw..() methods. 
+  
+- There are now two build-in skins available: Windows Classic and Windows Metallic. The 
+  default skin is now Windows Metallic, if you want to change back to the old skin, use the
+  following code:
+  gui::IGUISkin* newskin = environment->createSkin(gui::EGST_WINDOWS_CLASSIC);
+  environment->setSkin(newskin);
+  newskin->drop();
+  
+- Added improved keyboard input handling for the Linux version of Irrlicht, thanks to
+  Fabien Coutant for the fix.
+  
+- Fixed a bug in the Linux OpenGLDriver which caused to load a wrong OpenGL extension 
+  and made multitexturing look quite strange. Thanks to hybrid for spotting out that
+  bug.
+  
+- COLLADA file loading now works the same like the loading of other meshes: Just
+  call ISceneManager::getMesh("yourfile") and display it using for example
+  ISceneManager::addAnimatedMesh(yourLoadedMesh);
+  To make it possible to create instances from meshes, lights and cameras in COLLADA
+  files again as in irrlicht 0.10, just enable the collada instance creating mode:
+  SceneManager->getParameters()->setParameter(COLLADA_CREATE_SCENE_INSTANCES, true);
+
+- Added lots of useful methods to the IStringParameters class. It is now possible to
+  set not only strings but also boolean, integer and float values as parameters.
+  
+- Fixed a bug with the TRANSPARENT_ALPHA_CHANNEL materials in all renderers to make them
+  work more as expected: They didn't write to the zbuffer. If you are using this
+  material and you don't want the new setting, just set the ZWriteEnable flag in the
+  SMaterial structure of your transparent material to false. Thanks to Fabien to
+  point this out.  
+  
+- There are now some new defines making it possible to use system installed libs instead of 
+  the ones which come with Irrlicht: _IRR_USE_NON_SYSTEM_JPEG_LIB_, 
+  _IRR_USE_NON_SYSTEM_LIB_PNG_ and _IRR_USE_NON_SYSTEM_ZLIB_, which are defined by default
+  in the file IrrCompileConfig.h
+  
+- Renamed ISceneManager::getStringParameters() to ISceneManager::getParameters()
+
+- Changed the define _IRR_D3D_SHADER_DEBUGGING to _IRR_D3D_NO_SHADER_DEBUGGING to be 
+  able to make it defined by default and to let it be included in the doxygen documentation.
+
+- The SceneManager now does not do any culling tests for cameras, lights and skyboxes.
+
+- Added a transformBoxEx() method to matrix4 which transforms a bounding box more accurate.
+  
+- Small edit box copy & paste bug fixed thanks to Fish HF
+
+- Fixed a bug which caused the engine to read windows messages when embedded in 
+  a custom win32 control when called IrrlichtDevice::setResizeAble(). Thanks for
+  Duncan Mac Leod to find that bug.  
+  
+- Fixed a bug in the HLSL renderer which caused Irrlicht to crash, if no vertex shader
+  was specified. Thanks to mightypanda for reporting this.  
+  
+- Fixed a bug in the normal map generation thanks to jox. Parallax mapping and
+  normalmapping now even looks a lot better because of this. ;)
+  
+- Updated to irrXML 1.1:
+  - The XML parser is now also able to parse embedded text correctly when it is shorter than
+  2 characters. 
+  - The XML parser now treats whitespace quite intelligent and doesn't report it when it is
+  obviously used for formatting the xml file. (Text won't be reported when it only contains
+  whitespace and is shorter than 3 characters) 
+  - The XML parser won't crash anymore when the xml file is malformatted and an attribute has
+  an opening but no closing attribute. 
+  - Removed a documentation which claimed that the xml parser doesn't work as the xml standard
+  when replacing special characters, which wasn't true.
+
+-------------------------------------------------------------------------------------
 Changes in version 0.10.0 (26 May 2005)
 
 - The engine is now able to use parallax mapping. It's implemented for D3D9, D3D8 and OpenGL.

@@ -137,6 +137,7 @@ struct SEvent
 
 			//! Type of GUI Event
 			gui::EGUI_EVENT_TYPE EventType;			
+
 		} GUIEvent;
 
 		struct

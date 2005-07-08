@@ -123,6 +123,14 @@ void createToolBox()
 
 	env->addButton(core::rect<s32>(10,150,100,190), t1, 1101, L"set");
 
+	// add senseless checkbox
+	env->addCheckBox(true, core::rect<s32>(10,220,200,240), t1, -1, L"Senseless Checkbox");
+
+	// add undocumentated transparent control
+	env->addStaticText(L"Transparent Control:", core::rect<s32>(10,240,150,260), true, false, t1);
+	IGUIScrollBar* scrollbar = env->addScrollBar(true, core::rect<s32>(10,260,150,275), t1, 104);
+	scrollbar->setMax(255);
+
 	// bring irrlicht engine logo to front, because it
 	// now may be below the newly created toolbox
 	root->bringToFront(root->getElementFromId(666, true));
@@ -196,6 +204,21 @@ public:
 					loadModel(core::stringc(dialog->getFilename()).c_str());
 				}
 
+			case EGET_SCROLL_BAR_CHANGED:
+
+				// control skin transparency 
+				if (id == 104)
+				{
+					s32 pos = ((IGUIScrollBar*)event.GUIEvent.Caller)->getPos();
+					for (s32 i=0; i<irr::gui::EGDC_COUNT ; ++i)
+					{
+						video::SColor col = env->getSkin()->getColor((EGUI_DEFAULT_COLOR)i);
+						col.setAlpha(pos);
+						env->getSkin()->setColor((EGUI_DEFAULT_COLOR)i, col);
+					}
+				}
+				break;
+
 			case EGET_BUTTON_CLICKED:
 
 				switch(id)
@@ -248,12 +271,11 @@ public:
 	As you can see, there is also a unusual call to IrrlichtDevice::setResizeAble(). 
 	This makes the render window resizeable, which is quite useful for a mesh viewer.
 */
-
 int main()
 {
 	// ask user for driver
 
-	video::E_DRIVER_TYPE driverType;
+	video::E_DRIVER_TYPE driverType = video::EDT_DIRECTX8;
 
 	printf("Please select the driver you want for the mesh viewer:\n"\
 		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.2\n"\

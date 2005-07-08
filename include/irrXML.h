@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-/** \mainpage irrXML 1.0 API documentation
+/** \mainpage irrXML 1.1 API documentation
  <div align="center"><img src="logobig.png" ></div>
 
  \section intro Introduction
@@ -47,11 +47,8 @@
 
 	 Although irrXML has some strenghts, it currently also has the following limitations:
 
-	 - It only recognizes some special xml characters, not the full xml standard:
-       &(&amp;amp;), <(&amp;lt;), >(&amp;gt;), "(&amp;quot;), and '(&amp;apos;)
-	   are supported. However, lots of xml parsers are doing this just like irrXML, and 
-	   in future releases this will be improved.
 	 - The input xml file is not validated and assumed to be correct. 
+	 - Currently, CData-Sections are only supported as text elements.
 
     \section irrxmlexample Example
 

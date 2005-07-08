@@ -42,7 +42,7 @@ namespace scene
 	//! Name of the parameter for changing the texture path of the built-in csm loader.
 	/** Use it like this:
 	 \code
-	 SceneManager->getStringParameters()->setParameter(
+	 SceneManager->getParameters()->setParameter(
 	    scene::CSM_TEXTURE_PATH, "path/to/your/textures");
 	\endcode
 	**/ 
@@ -51,7 +51,7 @@ namespace scene
 	//! Name of the parameter for changing the texture path of the built-in lmts loader.
 	/** Use it like this:
 	 \code
-	 SceneManager->getStringParameters()->setParameter(
+	 SceneManager->getParameters()->setParameter(
 	   scene::LMTS_TEXTURE_PATH, "path/to/your/textures");
 	\endcode
 	**/ 
@@ -60,11 +60,26 @@ namespace scene
 	//! Name of the parameter for changing the texture path of the built-in my3d loader.
 	/** Use it like this:
 	 \code
-	 SceneManager->getStringParameters()->setParameter(
+	 SceneManager->getParameters()->setParameter(
 	   scene::MY3D_TEXTURE_PATH, "path/to/your/textures");
 	\endcode
 	**/ 
 	const char* const MY3D_TEXTURE_PATH = "MY3D_TexturePath";
+
+	//! Name of the parameter specifying the COLLADA mesh loading mode
+	/**
+	Specifies if the COLLADA loader should create instances of the models, lights and
+	cameras when loading COLLADA meshes. By default, this is set to false. If this is
+	set to true, the ISceneManager::getMesh() method will only return a pointer to a
+	dummy mesh and create instances of all meshes and lights and cameras in the collada
+	file by itself. Example:
+	\code
+	 SceneManager->getParameters()->setParameter(
+	   scene::COLLADA_CREATE_SCENE_INSTANCES, true);
+	\endcode
+	*/
+	const char* const COLLADA_CREATE_SCENE_INSTANCES = "COLLADA_CreateSceneInstances";
+
 
 	//! Enumeration for render passes.
 	/** A parameter passed to the registerNodeForRendering() method of the ISceneManager, 
@@ -165,7 +180,7 @@ namespace scene
 		 *      lighting. Irrlicht can directly import .csm files thanks to the IrrCSM library 
 		 *      created by Saurav Mohapatra which is now integrated directly in Irrlicht. 
 		 *      If you are using this loader, please note that you'll have to set the path 
-		 *      of the textures before loading .csm files. You can do this using SceneManager-&gt;getStringParameters()-&gt;setParameter(scene::CSM_TEXTURE_PATH, 
+		 *      of the textures before loading .csm files. You can do this using SceneManager-&gt;getParameters()-&gt;setParameter(scene::CSM_TEXTURE_PATH, 
 		 *      &quot;path/to/your/textures&quot;);</TD>
 		 *  </TR>
 		 *  <TR> 
@@ -173,18 +188,20 @@ namespace scene
 		 *    <TD>COLLADA is an open Digital Asset Exchange Schema for the interactive 3D industry. There are 
 		 *        exporters and importers for this format available for most of the big 3d packages
 		 *        at http://collada.org. Irrlicht can import COLLADA files by using the 
-		 *        ISceneManager::getMesh() method. As COLLADA need not contain only one single mesh
+		 *        ISceneManager::getMesh() method. COLLADA files need not contain only one single mesh
 		 *        but multiple meshes and a whole scene setup with lights, cameras and mesh instances,
-		 *        this loader sets up a scene as described by the COLLADA file instead of loading 
-		 *        and returning one mesh. Created scene nodes will be named as the names of the nodes in the
-		 *        COLLADA file. The returned mesh is just a dummy object. However, if the 
-		 *        COLLADA file does not include any <instance> tags, only meshes will be loaded by the 
-		 *        engine and no scene nodes should be created. Meshes included in 
+		 *        this loader can set up a scene as described by the COLLADA file instead of loading 
+		 *        and returning one single mesh. By default, this loader behaves like the other loaders
+		 *        and does not create instances, but it can be switched into this mode by using 
+		 *        SceneManager->getParameters()->setParameter(COLLADA_CREATE_SCENE_INSTANCES, true);
+		 *        Created scene nodes will be named as the names of the nodes in the
+		 *        COLLADA file. The returned mesh is just a dummy object in this mode. Meshes included in 
 		 *        the scene will be added into the scene manager with the following naming scheme: 
 		 *        path/to/file/file.dea#meshname. The loading of such meshes is logged. 
 		 *        Currently, this loader is able to create meshes (made of only polygons), lights,
 		 *        and cameras. Materials and animations are currently not supported but this will
-		 *        change with future releases.</TD>
+		 *        change with future releases. 
+		 *    </TD>
 		 *  </TR>
 		 *  <TR> 
 		 *    <TD>Delgine DeleD (.dmf)</TD>
@@ -222,7 +239,7 @@ namespace scene
 		 *        Irrlicht can read and display those files directly. This loader was written 
 		 *        by Zhuck Dimitry who also created the whole My3DTools package. If you are using this loader, please 
 		 *      note that you can set the path of the textures before loading .my3d files. 
-		 *      You can do this using SceneManager-&gt;getStringParameters()-&gt;setParameter(scene::MY3D_TEXTURE_PATH, 
+		 *      You can do this using SceneManager-&gt;getParameters()-&gt;setParameter(scene::MY3D_TEXTURE_PATH, 
 		 *      &quot;path/to/your/textures&quot;); </TD>
 		 *    </TR>
 		 *    <TR> 
@@ -239,7 +256,7 @@ namespace scene
 		 *        Irrlicht can directly read .lmts files thanks to<br>
 		 *        the importer created by Jonas Petersen. If you are using this loader, please 
 		 *        note that you can set the path of the textures before loading .lmts files. 
-		 *        You can do this using SceneManager-&gt;getStringParameters()-&gt;setParameter(scene::LMTS_TEXTURE_PATH, 
+		 *        You can do this using SceneManager-&gt;getParameters()-&gt;setParameter(scene::LMTS_TEXTURE_PATH, 
 		 *        &quot;path/to/your/textures&quot;); Notes for<br>
 		 *        this version of the loader:<br>
 		 *        - It does not recognice/support user data in the *.lmts files.<br>
@@ -946,8 +963,10 @@ namespace scene
 		//! Returns interface to the parameters set in this scene.
 		/** String parameters can be used by plugins and mesh loaders.
 		 For example the CMS and LMTS loader want a parameter named 'CSM_TexturePath'
-		 and 'LMTS_TexturePath' set to the path were attached textures can be found. */
-		virtual IStringParameters* getStringParameters() = 0;
+		 and 'LMTS_TexturePath' set to the path were attached textures can be found. See
+		 CSM_TEXTURE_PATH, LMTS_TEXTURE_PATH, MY3D_TEXTURE_PATH,
+		 COLLADA_CREATE_SCENE_INSTANCES*/
+		virtual IStringParameters* getParameters() = 0;
 
 		//! Returns current render pass.
 		/** All scene nodes are being rendered in a specific order.

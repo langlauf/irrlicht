@@ -106,7 +106,14 @@ namespace core
 			void transformPlane( const core::plane3d<f32> &in, core::plane3d<f32> &out) const;
 
 			//! Transforms a axis aligned bounding box
-			void transformBox( core::aabbox3d<f32> &box) const;
+			/** The result box of this operation may not be very accurate. For
+			accurate results, use transformBoxEx() */
+			void transformBox(core::aabbox3d<f32>& box) const;
+
+			//! Transforms a axis aligned bounding box more accurately than transformBox()
+			/** The result box of this operation should by quite accurate, but this operation
+			is slower than transformBox(). */
+			void transformBoxEx(core::aabbox3d<f32>& box) const;
 
 			//! Multiplies this matrix by a 1x4 matrix
 			void multiplyWith1x4Matrix(f32* matrix) const;
@@ -452,11 +459,27 @@ namespace core
 	}
 
 	//! Transforms a axis aligned bounding box
-	inline void matrix4::transformBox( core::aabbox3d<f32> &box) const
+	inline void matrix4::transformBox(core::aabbox3d<f32>& box) const
 	{
 		transformVect(box.MinEdge);
 		transformVect(box.MaxEdge);
 		box.repair();
+	}
+
+	//! Transforms a axis aligned bounding box more accurately than transformBox()
+	inline void matrix4::transformBoxEx(core::aabbox3d<f32>& box) const
+	{
+		core::vector3df edges[8];
+		box.getEdges(edges);
+
+		int i;
+		for (i=0; i<8; ++i)
+			transformVect(edges[i]);
+
+		box.reset(edges[0]);
+
+		for (i=1; i<8; ++i)
+			box.addInternalPoint(edges[i]);
 	}
 
 	//! Multiplies this matrix by a 1x4 matrix

@@ -279,7 +279,7 @@ int main()
 
 		room->setMaterialFlag(video::EMF_FOG_ENABLE, true);
 		room->setMaterialType(video::EMT_PARALLAX_MAP_SOLID); 
-		room->getMaterial(0).MaterialTypeParam = 0.02f; // adjust height for parallax effect
+		room->getMaterial(0).MaterialTypeParam = 0.035f; // adjust height for parallax effect
 
 		// drop mesh because we created it with a create.. call.
 		tangentMesh->drop();

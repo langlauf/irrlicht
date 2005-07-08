@@ -10,6 +10,7 @@
 #include "IEventReceiver.h"
 #include "irrTypes.h"
 #include "IGUIWindow.h"
+#include "IGUISkin.h"
 
 namespace irr
 {
@@ -24,7 +25,6 @@ namespace gui
 {
 
 class IGUIElement;
-class IGUISkin;
 class IGUIFont;
 class IGUIScrollBar;
 class IGUIImage;
@@ -76,6 +76,26 @@ public:
 
 	//! Returns pointer to the current gui skin.
 	virtual IGUISkin* getSkin() = 0;
+
+	//! Sets a new GUI Skin
+	/** You can used this to change the appearance of the whole GUI Environment. You
+	can set one ot the built-in skins or implement your own class derived from 
+	IGUISkin and set this useing this method.
+	To set for example the built-in Windows classic skin, use the following code:
+	\code
+	gui::IGUISkin* newskin = environment->createSkin(gui::EGST_WINDOWS_CLASSIC);
+	environment->setSkin(newskin);
+	newskin->drop();
+	\endcode
+	*/
+	virtual void setSkin(IGUISkin* skin) = 0;
+
+	//! Creates a new GUI Skin based on a template.
+	/** Use setSkin() to set the created skin.
+	\return Returns a pointer to the created skin.
+	If you no longer need the image, you should call IGUISkin::drop().
+	See IUnknown::drop() for more information. */
+	virtual IGUISkin* createSkin(EGUI_SKIN_TYPE type) = 0;
 
 	//! Returns pointer to the font with the specified file name. 
 	/** Loads the font if it was not loaded before. Returns 0 if the font could not be loaded.
@@ -132,7 +152,8 @@ public:
 	/** \return
 	Returns a pointer to the created scrollbar. Returns 0 if an error occured.
 	This pointer should not be dropped. See IUnknown::drop() for more information. */
-	virtual IGUIScrollBar* addScrollBar(bool horizontal, const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1) = 0;
+	virtual IGUIScrollBar* addScrollBar(bool horizontal, const core::rect<s32>& rectangle,
+		IGUIElement* parent=0, s32 id=-1) = 0;
 
 	//! Adds an image element. 
 	/** \param image: Image to be displayed.
@@ -158,7 +179,8 @@ public:
 	/** \return
 	 Returns a pointer to the created check box. Returns 0 if an error occured.
 	 This pointer should not be dropped. See IUnknown::drop() for more information. */
-	virtual IGUICheckBox* addCheckBox(bool checked, const core::rect<s32>& rectangle, IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
+	virtual IGUICheckBox* addCheckBox(bool checked, const core::rect<s32>& rectangle,
+		IGUIElement* parent=0, s32 id=-1, const wchar_t* text=0) = 0;
 
 	//! Adds a list box element.
 	/** \return
@@ -180,7 +202,8 @@ public:
 	 \return
 	 Returns a pointer to the created file open dialog. Returns 0 if an error occured.
 	 This pointer should not be dropped. See IUnknown::drop() for more information. */
-	virtual IGUIFileOpenDialog* addFileOpenDialog(const wchar_t* title = 0, bool modal=true, IGUIElement* parent=0, s32 id=-1) = 0;
+	virtual IGUIFileOpenDialog* addFileOpenDialog(const wchar_t* title = 0, 
+		bool modal=true, IGUIElement* parent=0, s32 id=-1) = 0;
 
 	//! Adds a static text. 
 	/** The returned pointer must not be dropped.

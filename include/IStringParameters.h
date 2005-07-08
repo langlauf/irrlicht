@@ -22,9 +22,36 @@ public:
 
 	//! Gets a string parameter.
 	//! \param parameterName: Name of the parameter to get.
-	//! \return Returns value of the parameter previously set by setParameter() 
+	//! \return Returns value of the parameter previously set by setParameter() as string
 	//! or 0 if parameter is not set.
 	virtual const c8* getParameter(const c8* parameterName) = 0;
+
+	//! Sets a parameter as boolean value
+	virtual void setParameter(const c8* parameterName, bool value) = 0;
+
+	//! Gets a parameter as boolean value
+	//! \param parameterName: Name of the parameter to get.
+	//! \return Returns value of the parameter previously set by setParameter() as bool
+	//! or 0 if parameter is not set.
+	virtual bool getParameterAsBool(const c8* parameterName) = 0;
+
+	//! Sets a parameter as integer value
+	virtual void setParameter(const c8* parameterName, s32 value) = 0;
+
+	//! Gets a parameter as integer value
+	//! \param parameterName: Name of the parameter to get.
+	//! \return Returns value of the parameter previously set by setParameter() as integer
+	//! or 0 if parameter is not set.
+	virtual s32 getParameterAsInt(const c8* parameterName) = 0;
+
+	//! Sets a parameter as float value
+	virtual void setParameter(const c8* parameterName, f32 value) = 0;
+
+	//! Gets a parameter as integer value
+	//! \param parameterName: Name of the parameter to get.
+	//! \return Returns value of the parameter previously set by setParameter() as float value
+	//! or 0 if parameter is not set.
+	virtual f32 getParameterAsFloat(const c8* parameterName) = 0;
 
 	//! Returns amount of string parameters set in this scene manager.
 	virtual s32 getParameterCount() = 0;

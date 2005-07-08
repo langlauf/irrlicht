@@ -8,20 +8,34 @@
 #include "IUnknown.h"
 #include "SColor.h"
 #include "IGUISkin.h"
+#include "rect.h"
 
 namespace irr
 {
 namespace gui
 {
 	class IGUIFont;
+	class IGUIElement;
 
 	//! Enumeration of available default skins.
+	/** To set one of the skins, use the following code, for example to set
+	the Windows classic skin:
+	\code
+	gui::IGUISkin* newskin = environment->createSkin(gui::EGST_WINDOWS_CLASSIC);
+	environment->setSkin(newskin);
+	newskin->drop();
+	\endcode
+	*/
 	enum EGUI_SKIN_TYPE
 	{
-		EGST_WINDOWS_STANDARD,
-		EGST_BLACK_WINDOWS,
+		//! Default windows look and feel
+		EGST_WINDOWS_CLASSIC,
+
+		//! Like EGST_WINDOWS_CLASSIC, but with metallic shaded windows and buttons
+		EGST_WINDOWS_METALLIC,
 	};
 
+	//! Enumeration for skin colors
 	enum EGUI_DEFAULT_COLOR
 	{
 		//! Dark shadow for three-dimensional display elements. 
@@ -133,12 +147,14 @@ namespace gui
 		//! returns default color
 		virtual s32 getSize(EGUI_DEFAULT_SIZE size) = 0;
 
-		//! Returns a default text. For example for Message box button captions:
-		//! "OK", "Cancel", "Yes", "No" and so on.
+		//! Returns a default text. 
+		/** For example for Message box button captions:
+		"OK", "Cancel", "Yes", "No" and so on. */
 		virtual const wchar_t* getDefaultText(EGUI_DEFAULT_TEXT text) = 0;
 
-		//! Sets a default text. For example for Message box button captions:
-		//! "OK", "Cancel", "Yes", "No" and so on.
+		//! Sets a default text.
+		/** For example for Message box button captions:
+		"OK", "Cancel", "Yes", "No" and so on. */
 		virtual void setDefaultText(EGUI_DEFAULT_TEXT which, const wchar_t* newText) = 0;
 
 		//! sets a default size
@@ -149,11 +165,112 @@ namespace gui
 
 		//! sets a default font
 		virtual void setFont(IGUIFont* font) = 0;
+
+		//! draws a standard 3d button pane
+		/**	Used for drawing for example buttons in normal state. 
+		It uses the colors EGDC_3D_DARK_SHADOW, EGDC_3D_HIGH_LIGHT, EGDC_3D_SHADOW and
+		EGDC_3D_FACE for this. See EGUI_DEFAULT_COLOR for details. 
+		\param element: Pointer to the element which whiches to draw this. This parameter
+		is usually not used by ISkin, but can be used for example by more complex 
+		implementations to find out how to draw the part exactly. 
+		\param rect: Defining area where to draw.
+		\param clip: Clip area.	*/
+		virtual void draw3DButtonPaneStandard(IGUIElement* element,
+			const core::rect<s32>& rect,
+			const core::rect<s32>* clip=0) = 0;
+
+		//! draws a pressed 3d button pane
+		/**	Used for drawing for example buttons in pressed state. 
+		It uses the colors EGDC_3D_DARK_SHADOW, EGDC_3D_HIGH_LIGHT, EGDC_3D_SHADOW and
+		EGDC_3D_FACE for this. See EGUI_DEFAULT_COLOR for details. 
+		\param element: Pointer to the element which whiches to draw this. This parameter
+		is usually not used by ISkin, but can be used for example by more complex 
+		implementations to find out how to draw the part exactly. 
+		\param rect: Defining area where to draw.
+		\param clip: Clip area.	*/
+		virtual void draw3DButtonPanePressed(IGUIElement* element, 
+			const core::rect<s32>& rect,
+			const core::rect<s32>* clip=0) = 0;
+
+		//! draws a sunken 3d pane
+		/** Used for drawing the background of edit, combo or check boxes.
+		\param element: Pointer to the element which whiches to draw this. This parameter
+		is usually not used by ISkin, but can be used for example by more complex 
+		implementations to find out how to draw the part exactly. 
+		\param bgcolor: Background color.
+		\param flat: Specifies if the sunken pane should be flat or displayed as sunken 
+		 deep into the ground.
+		\param fillBackGround: Specifies if the background should be filled with the background
+		color or not be drawn at all.
+		\param rect: Defining area where to draw.
+		\param clip: Clip area.	*/
+		virtual void draw3DSunkenPane(IGUIElement* element,
+			video::SColor bgcolor, bool flat, bool fillBackGround,
+			const core::rect<s32>& rect,
+			const core::rect<s32>* clip=0) = 0;
+
+		//! draws a window background
+		/** Used for drawing the background of dialogs and windows.
+		\param element: Pointer to the element which whiches to draw this. This parameter
+		is usually not used by ISkin, but can be used for example by more complex 
+		implementations to find out how to draw the part exactly. 
+		\param titleBarColor: Title color.
+		\param drawTitleBar: True to enable title drawing.
+		\param rect: Defining area where to draw.
+		\param clip: Clip area.	
+		\return Returns rect where it would be good to draw title bar text. */
+		virtual core::rect<s32> draw3DWindowBackground(IGUIElement* element,
+			bool drawTitleBar, video::SColor titleBarColor,
+			const core::rect<s32>& rect,
+			const core::rect<s32>* clip=0) = 0;
+
+		//! draws a standard 3d menu pane
+		/**	Used for drawing for menus and context menus. 
+		It uses the colors EGDC_3D_DARK_SHADOW, EGDC_3D_HIGH_LIGHT, EGDC_3D_SHADOW and
+		EGDC_3D_FACE for this. See EGUI_DEFAULT_COLOR for details. 
+		\param element: Pointer to the element which whiches to draw this. This parameter
+		is usually not used by ISkin, but can be used for example by more complex 
+		implementations to find out how to draw the part exactly. 
+		\param rect: Defining area where to draw.
+		\param clip: Clip area.	*/
+		virtual void draw3DMenuPane(IGUIElement* element,
+			const core::rect<s32>& rect,
+			const core::rect<s32>* clip=0) = 0;
+
+		//! draws a standard 3d tool bar
+		/**	Used for drawing for toolbars and menus.
+		\param element: Pointer to the element which whiches to draw this. This parameter
+		is usually not used by ISkin, but can be used for example by more complex 
+		implementations to find out how to draw the part exactly. 
+		\param rect: Defining area where to draw.
+		\param clip: Clip area.	*/
+		virtual void draw3DToolBar(IGUIElement* element,
+			const core::rect<s32>& rect,
+			const core::rect<s32>* clip=0) = 0;
+
+		//! draws a tab button
+		/**	Used for drawing for tab buttons on top of tabs.
+		\param element: Pointer to the element which whiches to draw this. This parameter
+		is usually not used by ISkin, but can be used for example by more complex 
+		implementations to find out how to draw the part exactly. 
+		\param active: Specifies if the tab is currently active.
+		\param rect: Defining area where to draw.
+		\param clip: Clip area.	*/
+		virtual void draw3DTabButton(IGUIElement* element, bool active,
+			const core::rect<s32>& rect, const core::rect<s32>* clip=0) = 0;
+
+		//! draws a tab control body
+		/**	\param element: Pointer to the element which whiches to draw this. This parameter
+		is usually not used by ISkin, but can be used for example by more complex 
+		implementations to find out how to draw the part exactly. 
+		\param border: Specifies if the border should be drawn.
+		\param background: Specifies if the background should be drawn.
+		\param rect: Defining area where to draw.
+		\param clip: Clip area.	*/
+		virtual void draw3DTabBody(IGUIElement* element, bool border, bool background,
+			const core::rect<s32>& rect, const core::rect<s32>* clip=0) = 0;
 	};
 
-
-	//! creates a color skin
-	IGUISkin* createSkin(EGUI_SKIN_TYPE type);
 
 } // end namespace gui
 } // end namespace irr

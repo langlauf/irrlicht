@@ -166,7 +166,7 @@ public:
 	}
 
 
-	//! Removes this element.
+	//! Removes this element from its parent.
 	virtual void remove()
 	{
 		if (Parent)

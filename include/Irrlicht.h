@@ -121,9 +121,9 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION L"0.10.0"
+#define IRRLICHT_SDK_VERSION L"0.11.0"
 
-/*! \mainpage Irrlicht Engine 0.10.0 API documentation
+/*! \mainpage Irrlicht Engine 0.11.0 API documentation
  *
  * <div align="center"><img src="logobig.png" ></div>
  *

@@ -452,6 +452,22 @@ namespace video
 		virtual void draw2DRectangle(SColor color, const core::rect<s32>& pos,
 			const core::rect<s32>* clip = 0) = 0;
 
+		//!Draws an 2d rectangle with a gradient.
+		/** \param colorLeftUp: Color of the left upper corner to draw. 
+		The alpha component will not be ignored and specifies how transparent the rectangle will be.
+		\param colorRightUp: Color of the right upper corner to draw. 
+		The alpha component will not be ignored and specifies how transparent the rectangle will be.
+		\param colorLeftDown: Color of the left lower corner to draw. 
+		The alpha component will not be ignored and specifies how transparent the rectangle will be.
+		\param colorRightDown: Color of the right lower corner to draw. 
+		The alpha component will not be ignored and specifies how transparent the rectangle will be.
+		\param pos: Position of the rectangle.
+		\param clip: Pointer to rectangle against which the rectangle will be clipped.
+		If the pointer is null, no clipping will be performed. */
+		virtual void draw2DRectangle(const core::rect<s32>& pos,
+			SColor colorLeftUp, SColor colorRightUp, SColor colorLeftDown, SColor colorRightDown,
+			const core::rect<s32>* clip = 0) = 0;
+
 		//! Draws a 2d line. 
 		/** \param start: Screen coordinates of the start of the line in pixels.
 		\param end: Screen coordinates of the start of the line in pixels.

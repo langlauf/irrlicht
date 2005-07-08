@@ -20,6 +20,7 @@ namespace irr
 			Fullscreen = false;
 			Stencilbuffer = false;
 			Vsync = false;
+			AntiAlias = false;
 			EventReceiver = 0;
 			WindowId = 0;
 			SDK_version_do_not_use = IRRLICHT_SDK_VERSION;
@@ -52,6 +53,17 @@ namespace irr
 		/** If set to true, the driver will wait for the vertical retrace period, otherwise not.
 		Default: false */
 		bool Vsync;
+
+		//! Specifies if the device should use fullscreen anti aliasing
+		/** Makes sharp/pixellated edges softer, but requires more performance. Also, 2D 
+		elements might look blurier with this switched on. The resulting rendering quality 
+		also depends on the hardware and driver you are using, your program might look
+		different on different hardware with this. So if you are writing a 
+		game/application with antiAlias switched on, it would be a good idea to make it
+		possible to switch this option off again by the user.
+		This is only supported in D3D9 and D3D8. In D3D9, both sample types are supported,
+		D3DMULTISAMPLE_X_SAMPLES and D3DMULTISAMPLE_NONMASKABLE. Default value: false */
+		bool AntiAlias;
 
 		//! A user created event receiver.
 		IEventReceiver* EventReceiver;

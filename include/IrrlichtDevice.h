@@ -87,9 +87,9 @@ while(device->run())
 		/** If you are confused 
 		now, because you think you have to create an Irrlicht Device with a video
 		mode before being able to get the video mode list, let me tell you that
-		there is no need to start up an Irrlicht Device with DT_DIRECTX8, DT_OPENGL or
-		DT_SOFTWARE: For this (and for lots of other reasons) the null device,
-		DT_NULL exists.
+		there is no need to start up an Irrlicht Device with EDT_DIRECTX8, EDT_OPENGL or
+		EDT_SOFTWARE: For this (and for lots of other reasons) the null device,
+		EDT_NULL exists.
 		\return Returns a pointer to a list with all video modes supported
 		by the gfx adapter. */
 		virtual video::IVideoModeList* getVideoModeList() = 0;

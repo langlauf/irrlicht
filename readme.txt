@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.10.0
+The Irrlicht Engine SDK version 0.11.0
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -55,13 +55,19 @@ The Irrlicht Engine SDK version 0.10.0
 
   The Irrlicht Engine is a static lib under linux. A precomipled version can be
   found in \lib\Linux. 
+  
   If you wish to compile the engine in linux yourself, unzip the file source.zip
-  file in the \source directory. Run a 'make' in the now existing new subfolder 'Irrlicht'.
-  After this, you should be able to make all example applications in \examples.
-  Then just start an X Server and run them, from the directory where they are.
+  file in the \source directory. Run a 'make' in the now existing new subfolder
+  'Irrlicht'. After this, you should be able to make all example applications in 
+  \examples. Then just start an X Server and run them, from the directory where 
+  they are.
+  
+  It is also possible to use Irrlicht as shared object (libIrrlicht.so.versionNumber),
+  use the makefile target for this, running 'make sharedlib' in the source folder.
+  See Makefile for details.
   
   To start developing own applications and games with the engine take 
-  a look at the 1.HelloWorld example in the \examples directory.
+  a look at the 01.HelloWorld example in the \examples directory.
   There will also be a .html file with a tutorial which should be
   easy to understand.
 
