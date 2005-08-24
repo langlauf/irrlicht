@@ -7,7 +7,7 @@ Note that the Terrain Renderer in Irrlicht is based on Spintz' GeoMipMapSceneNod
 of thanks go to him.
 In the beginning there is nothing special. We include the needed header files and create
 an event listener to listen if the user presses the 'W' key so we can switch to wireframe
-mode.
+mode and if he presses 'D' we toggle to material between solid and detail mapped.
 */
 #include <irrlicht.h>
 #include <iostream>
@@ -29,13 +29,20 @@ public:
 
 	bool OnEvent(SEvent event)
 	{
-		// check if user presses the key 'W'
-		if (event.EventType == irr::EET_KEY_INPUT_EVENT &&
-			event.KeyInput.Key == irr::KEY_KEY_W && !event.KeyInput.PressedDown)
+		// check if user presses the key 'W' or 'D'
+		if (event.EventType == irr::EET_KEY_INPUT_EVENT && !event.KeyInput.PressedDown)
 		{
-			// switch wire frame mode
-			Terrain->setMaterialFlag(video::EMF_WIREFRAME, !Terrain->getMaterial(0).Wireframe);
-			return true;
+			switch (event.KeyInput.Key)
+			{
+			case irr::KEY_KEY_W: // switch wire frame mode
+				Terrain->setMaterialFlag(video::EMF_WIREFRAME, !Terrain->getMaterial(0).Wireframe);
+				return true;
+			case irr::KEY_KEY_D: // toggle detail map
+				Terrain->setMaterialType(
+					Terrain->getMaterial(0).MaterialType == video::EMT_SOLID ? 
+					video::EMT_DETAIL_MAP : video::EMT_SOLID);
+				return true;
+			}
 		}
 
 		return false;
@@ -99,9 +106,8 @@ int main()
 
 	// add some help text
 	gui::IGUIStaticText* text = env->addStaticText(
-		L"Press 'W' to change wireframe mode",
-		core::rect<s32>(10,465,200,475), true);
-	text->setOverrideColor(video::SColor(100,255,255,255));
+		L"Press 'W' to change wireframe mode\nPress 'D' to toggle detail map",
+		core::rect<s32>(10,453,200,475), true, true, 0, -1, true);
 
 	// add camera
 	scene::ICameraSceneNode* camera = 
@@ -122,9 +128,10 @@ int main()
 	the 3D terrain from it.
 	To make the terrain look more big, we change the scale factor of it to (40, 4.4, 40).
 	Because we don't have any dynamic lights in the scene, we switch off the lighting,
-	and last, we set the file terrain-texture.jpg as texture for the terrain. In this
-	example, the texture is not repeated over the whole terrain. But if you want this you
-	can call ITerrainSceneNode::scaleTexture() and make the texture scale.
+	and we set the file terrain-texture.jpg as texture for the terrain and 
+	detailmap3.jpg as second texture, called detail map. At last, we set
+	the scale values for the texture: The first texture will be repeated only one time over 
+	the whole terrain, and the second one (detail map) 20 times. 
 	*/
 
 	// add terrain scene node
@@ -135,7 +142,11 @@ int main()
 	terrain->setMaterialFlag(video::EMF_LIGHTING, false);
 
 	terrain->setMaterialTexture(0, driver->getTexture("../../media/terrain-texture.jpg"));
-	//terrain->scaleTexture(1.0f);
+	terrain->setMaterialTexture(1, driver->getTexture("../../media/detailmap3.jpg"));
+	
+	terrain->setMaterialType(video::EMT_DETAIL_MAP);
+
+	terrain->scaleTexture(1.0f, 20.0f);
 
 	/*
 	To be able to do collision with the terrain, we create a triangle selector.

@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_UNKNOWN_H_INCLUDED__
 #define __I_UNKNOWN_H_INCLUDED__
@@ -111,10 +111,7 @@ namespace irr
 		//! is stored somewhere by the driver.
 		bool drop()
 		{
-			#if defined(_DEBUG) && defined(_MSC_VER)
-			if (ReferenceCounter <= 0)
-				_asm int 3; // someone is doing bad reference counting.
-			#endif
+			_IRR_DEBUG_BREAK_IF(ReferenceCounter <= 0) // someone is doing bad reference counting.
 
 			--ReferenceCounter;
 			if (!ReferenceCounter)

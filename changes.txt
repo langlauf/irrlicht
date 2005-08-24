@@ -1,4 +1,139 @@
 -------------------------------------------------------------------------------------
+Changes in version 0.12.0 (24 August 2005)
+  
+- It is now possible to have multiple scene managers. Use ISceneManager::createNewSceneManager()
+  to create a new one. This can be used to easily draw and/or store two independent scenes at 
+  the same time.
+  
+- Irrlicht now supports GLSL, the OpenGL Shading Language, which means Irrlicht now 
+  supports 14 shading modes/languages: ARB Vertex Programs, ARB Pixel Programs, HLSL, 
+  GLSL 100, GLSL 110VS1.1, VS2.0, VS3.0, PS1.1, PS1.2, PS1.3, PS1.4, PS2.0, PS3.0.
+  Lots of thanks go to William Finlayson for implementing this and making available his code
+  to be used in Irrlicht. 
+  
+- Added support for pixel shader 3.0 and vertex shader 3.0.
+  
+- Irrlicht now supports detail maps, use EMT_DETAIL_MAP for this. The new terrain scene node
+  tutorial shows how to use detail maps.
+   
+- Again some changes have been made in Irrlicht.NET. For example it is now a little bit more memory 
+  friendly, I removed several bugs and made the terrain scene node, realtime shadows and key codes 
+  available. 
+  In addition, I extended the .net example application a lot, just try it out.
+  
+- I've worked around a heavy bug in the microsoft compiler which caused lots of bugs in Irrlicht.NET.
+  They are all fixed now. See http://support.microsoft.com/default.aspx?kbid=823071 for details. 
+  
+- The timer of the engine has been enhanced a lot, which maybe needs a little change in your
+  project if you are upgrading from an older version of Irrlicht. It is now possible
+  to set the speed of the timer, a new time value, and to start and stop it. Also, all
+  calls to getTime() will now return the same value within the same drawng frame. 
+  The timer will only advance when ITimer::tick() is called. IrrlichtDevice::run() will
+  call this method automaticly, but if you aren't using this method, and you are wondering 
+  why your scene is not animating anymore, just call Device->getTimer()->tick() before
+  drawing your scene. If you need the system time, not the new virtual time,
+  use ITimer::getRealTime().
+  
+- The material EMT_TRANSPARENT_ALPHA_CHANNEL now is using a configuratable alpha ref value.
+  The default value is 127, which means people who are using this material for drawing 
+  things like grass, trees etc will get nice results automaticly when changing to 0.12.0. 
+  To change to a different alpha ref value, just change SMaterial::MaterialTypeParam value.
+  See EMT_TRANSPARENT_ALPHA_CHANNEL for details.
+  Also, this fixes two bugs: 
+   - A bug causing the D3D versions not looking like the OpenGL version.
+   - A second bug which caused the texture to look like disappearing when looking at from far away.
+  
+- Upgraded to a new dmf loader version by Salvatore Russo which is able to use a texture path
+  and material directories. Set DMF_USE_MATERIALS_DIRS and DMF_TEXTURE_PATH using the 
+  ISceneManager::getParameters() method.
+  
+- It is now possible to set a separate scale for the second texture coordinate set in the 
+  terrain scene node when calling ITerrainSceneNode::scaleTexture(). This is useful when using
+  detail maps on the terrain.
+
+- Added a new material flag named EMF_NORMALIZE_NORMALS. You can enable this if you need 
+  to scale a dynamic lighted model. Usually, its normals will get scaled too then and it 
+  will get darker. If you enable the EMF_NORMALIZE_NORMALS flag, the normals will be
+  normalized again.  
+
+- When loading Milkshape .ms3d files, Irrlicht also loads materials and tries to apply the set textures.
+  Thanks to atomice for this patch.
+  
+- The ISceneManager::addCameraSceneNodeFPS() has a new parameter named 'noVerticalMovement' with which 
+  it is possible to disable vertical movement of the FPS camera and make the camera behave just like
+  in most ego shooters today.
+  
+- Made Irrlicht 64 bit compatible, removing some 32 bit only constructs. However, I wasn't able to
+  test it out extensively. If you are compiling Irrlicht for a 64 bit windows environment and get
+  a linker problem, try playerdark's solution:
+  "The linker settings are so that no machine is specified in the drop down field, instead,
+  the command line option /MACHINE:x86 is set manually which interferes with the 64 bit linker
+  of course. Removing that from the 64 bit version (and replacing it with the drop down selection 
+  in the 32 bit version for that matter) fixed the linker problem."
+  
+- There is now a IrrlichtDevice::postEventFromUser() method available, to make it possible to
+  post key or mouse input events to the engine if you are using an own input library for 
+  example for doing joystick input.
+  
+- The GUI Environment now has an own basic RTTI system, and all IGUIElement derived classes
+  have a method named getType(). This is needed for the .NET wrapper but will be used
+  later for serializing and deserializing.
+  If you wrote your own GUIElements, you need to set the type for your element as first parameter
+  in the constructor of IGUIElement. For own (=unknown) elements, simply use EGUIET_ELEMENT.
+  
+- Thanks to William Finlayson, Irrlicht now also supports RTT (render to texture) when
+  rendering using OpenGL.  
+  
+- Thanks to William Finlayson, the EMT_REFLECTION_2_LAYER is now implemented in the 
+  OpenGL version of Irrlicht too.
+    
+- There is now a mesh cache interface available. With this, is is possible to get access to 
+  all loaded meshes, and to remove them to free memory. You can get access to the cache 
+  using ISceneManager::getMeshCache(). Please note that the addMesh() method of ISceneManager 
+  now is now longer available, you can find it now in the IMeshCache interface.
+
+- The VideoDriver now has a method for clearing the zbuffer at any time: IVideoDriver::clearZBuffer().
+  With this, it is for example easily possible to overlay two scenes.
+    
+- Fixed a bug which caused Irrlicht to crash when loading grayscale jpeg files. 
+
+- Somebody sent me an .x file (tank_human1_crashes_irrlicht.zip) which caused Irrlicht to crash.
+  It seems I've lost that mail, but maybe you are reading this: It's fixed now. :)
+ 
+- Fixed a bug which caused the diffuse maps of lightmaps to disappear under certain circumstances
+  in OpenGL.
+  
+- Its now possible to make IGUIStaticText draw its background.
+  
+- Removed the first two default parameters from 
+  IGPUProgrammingServices::addShaderMaterialFromFiles() to prevent SWIG
+  to create non compilable wrapper code.
+  
+- Fixed a small bug which caused the terrain scene node to be culled incorrectly.
+
+- Changed the names the driver return (now "OpenGL 1.5", "Direct3D 9.0" and "Direct3D 8.1")
+  
+- Added a new macro _IRR_DEBUG_BREAK_IF which is now used instead of the _asm int 3 break points in
+  debug mode.
+  
+- Fixed a bug were the software renderer didn't clip 2d rectangles. This effect was visible for 
+  example when using list boxes, selecting an entry at the end an scrolling up so that it wasn't
+  visible anymore.
+ 
+- There is now a new gui event available (named EGET_COMBO_BOX_CHANGED) which will be
+  sent when the selected item in a combo box has been changed. Finally. 
+  
+- Fixed a Problem which caused an empty window to be created when a rendering device
+  could not be initialized under special circumstances. Thanks to Sascha Plumhoff for
+  the bug report.
+  
+- Fixed a bug with the FileList in Linux, reported and fixed by William Finlayson.
+  
+- Fixed some bad documentation bugs.
+
+- The XWindow handle is now exposed too, via IVideoDriver::getExposedVideoData().
+  
+-------------------------------------------------------------------------------------
 Changes in version 0.11.0 (08 July 2005)
 
 - Antialiasing is now supported by Irrlicht in the D3D8 and D3D9 renderer. To switch

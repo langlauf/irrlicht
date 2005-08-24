@@ -31,7 +31,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/12.TerrainRendering.exe"
+				OutputFile="..\..\bin\Win32-VisualStudio\TerrainRendering.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/12.TerrainRendering.pdb"
@@ -81,7 +81,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="$(OutDir)/12.TerrainRendering.exe"
+				OutputFile="..\..\bin\Win32-VisualStudio\TerrainRendering.exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="TRUE"
 				SubSystem="1"

@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __S_EXPOSED_VIDEO_DATA_H_INCLUDED__
 #define __S_EXPOSED_VIDEO_DATA_H_INCLUDED__
@@ -72,7 +72,8 @@ struct SExposedVideoData
 
 		struct 
 		{
-			// TODO
+			// XWindow handle
+			u32 Window;
 		} OpenGLLinux;
 	};
 };

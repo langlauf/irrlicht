@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.11.0
+The Irrlicht Engine SDK version 0.12.0
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -52,6 +52,11 @@ The Irrlicht Engine SDK version 0.11.0
   directory, and start some applications. There should also be an
   application named Demo.exe, this should show the most
   interesting things.
+  
+  To start developing own applications and games with the engine take 
+  a look at the 01.HelloWorld example in the \examples directory.
+  There will also be a .html file with a tutorial which should be
+  easy to understand.
 
   The Irrlicht Engine is a static lib under linux. A precomipled version can be
   found in \lib\Linux. 
@@ -65,11 +70,6 @@ The Irrlicht Engine SDK version 0.11.0
   It is also possible to use Irrlicht as shared object (libIrrlicht.so.versionNumber),
   use the makefile target for this, running 'make sharedlib' in the source folder.
   See Makefile for details.
-  
-  To start developing own applications and games with the engine take 
-  a look at the 01.HelloWorld example in the \examples directory.
-  There will also be a .html file with a tutorial which should be
-  easy to understand.
 
 
 ==========================================================================
@@ -94,12 +94,12 @@ The Irrlicht Engine SDK version 0.11.0
   
   * Windows:
   	* Needed: PlatformSDK (which usually comes with all IDEs)
-  	* Optional: DirectX 9 SDK (for D3D9 support)
-  	* Optional: DirectX 8 SDK (for D3D8 support)
+  	* Optional: DirectX 9 SDK, for D3D9 support
+  	* Optional: DirectX 8 SDK, for D3D8 support
   	
   * Linux:
   	* Needed: XServer with GLX + XF86VidMode extension (should be there by default)
-  	* Optional: OpenGL headers and libraries (for OpenGL support)
+  	* Optional: OpenGL headers and libraries (libGL and libGLU), for OpenGL support
   	
   	
 ==========================================================================

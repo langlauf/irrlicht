@@ -1,4 +1,4 @@
-/* Irrlicht.h -- interface of the 'Irrlicht Engine'
+/* irrlicht.h -- interface of the 'Irrlicht Engine'
 
   Copyright (C) 2002-2005 Nikolaus Gebhardt
 
@@ -19,16 +19,17 @@
   3. This notice may not be removed or altered from any source distribution.
 
   Please note that the Irrlicht Engine is based in part on the work of the 
-  Independent JPEG Group and the zlib. This means that if you use the Irrlicht 
-  Engine in your product, you must acknowledge somewhere in your documentation
-  that you've used the IJG code. It would also be nice to mention that you use
-  the Irrlicht Engine and the zlib. See the README files in the jpeglib and 
-  the zlib for further informations.
+  Independent JPEG Group, the zlib and the libPng. This means that if you use
+  the Irrlicht Engine in your product, you must acknowledge somewhere in your
+  documentation that you've used the IJG code. It would also be nice to mention
+  that you use the Irrlicht Engine, the zlib and libPng. See the README files 
+  in the jpeglib, the zlib and libPng for further informations.
 */
 
 #ifndef __IRRLICHT_H_INCLUDED__
 #define __IRRLICHT_H_INCLUDED__
 
+#include "IrrCompileConfig.h"
 #include "aabbox3d.h"
 #include "irrArray.h"
 #include "SColor.h"
@@ -121,9 +122,9 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION L"0.11.0"
+#define IRRLICHT_SDK_VERSION L"0.12.0"
 
-/*! \mainpage Irrlicht Engine 0.11.0 API documentation
+/*! \mainpage Irrlicht Engine 0.12.0 API documentation
  *
  * <div align="center"><img src="logobig.png" ></div>
  *
@@ -158,14 +159,14 @@
  * of the engine quite well:
  *
  * \code
- * #include <Irrlicht.h>
+ * #include <irrlicht.h>
  * using namespace irr;
  *
  * int main()
  * {
  *	// start up the engine
  *	IrrlichtDevice *device = createDevice(video::EDT_DIRECTX8,
- *		core::dimension2d<s32>(640,480), false);
+ *		core::dimension2d<s32>(640,480));
  *
  *	video::IVideoDriver* driver = device->getVideoDriver();
  *	scene::ISceneManager* scenemgr = device->getSceneManager();
@@ -235,13 +236,13 @@
  */
 
 #include <wchar.h>
-#ifdef _WIN32
+#ifdef _IRR_WINDOWS_
 //! Define for swprintf because this method does not match the ISO C standard
-//! on Win32 platforms, but it does on all other ones.
+//! on Windows platforms, but it does on all other ones.
 #define   swprintf   _snwprintf
-#endif // WIN32
+#endif // _IRR_WINDOWS_
 
-#ifdef WIN32
+#ifdef _IRR_WINDOWS_
 
 #ifdef IRRLICHT_EXPORTS
 #define IRRLICHT_API __declspec(dllexport)
@@ -250,7 +251,7 @@
 #endif // IRRLICHT_EXPORT
 #else
 #define IRRLICHT_API 
-#endif // WIN32
+#endif // _IRR_WINDOWS_
 
 #if defined(_STDCALL_SUPPORTED)
 #define IRRCALLCONV __stdcall  // Declare the calling convention.

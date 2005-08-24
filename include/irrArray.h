@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine" and the "irrXML" project.
-// For conditions of distribution and use, see copyright notice in Irrlicht.h and irrXML.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h and irrXML.h
 
 #ifndef __IRR_ARRAY_H_INCLUDED__
 #define __IRR_ARRAY_H_INCLUDED__
@@ -126,10 +126,7 @@ public:
 	//! \param index: Where position to insert the new element.
 	void insert(const T& element, u32 index=0) 
 	{
-		#ifdef _DEBUG
-		if (index>used)
-			_asm int 3 // access violation
-		#endif
+		_IRR_DEBUG_BREAK_IF(index>used) // access violation
 
 		if (used + 1 > allocated)
 			reallocate(used * 2 +1);
@@ -217,10 +214,7 @@ public:
 	//! Direct access operator
 	T& operator [](u32 index)
 	{
-		#if defined(_DEBUG) && defined(_MSC_VER)
-		if (index>=used)
-			_asm int 3 // access violation
-		#endif
+		_IRR_DEBUG_BREAK_IF(index>=used) // access violation
 
 		return data[index];
 	}
@@ -230,10 +224,7 @@ public:
 	//! Direct access operator
 	const T& operator [](u32 index) const
 	{
-		#if defined(_DEBUG) && defined(_MSC_VER)
-		if (index>=used)
-			_asm int 3 // access violation
-		#endif
+		_IRR_DEBUG_BREAK_IF(index>=used) // access violation
 
 		return data[index];
 	}
@@ -241,10 +232,7 @@ public:
     //! Gets last frame
 	const T& getLast() const
 	{
-		#if defined(_DEBUG) && defined(_MSC_VER)
-		if (!used)
-			_asm int 3 // access violation
-		#endif
+		_IRR_DEBUG_BREAK_IF(!used) // access violation
 
 		return data[used-1];
 	}
@@ -252,10 +240,7 @@ public:
     //! Gets last frame
 	T& getLast()
 	{
-		#if defined(_DEBUG) && defined(_MSC_VER)
-		if (!used)
-			_asm int 3 // access violation
-		#endif
+		_IRR_DEBUG_BREAK_IF(!used) // access violation
 
 		return data[used-1];
 	}
@@ -409,10 +394,7 @@ public:
 	//! \param index: Index of element to be erased.
 	void erase(u32 index)
 	{
-		#if defined(_DEBUG) && defined(_MSC_VER)
-		if (index>=used || index<0)
-			_asm int 3 // access violation
-		#endif
+		_IRR_DEBUG_BREAK_IF(index>=used || index<0) // access violation
 
 		for (u32 i=index+1; i<used; ++i)
 			data[i-1] = data[i];
@@ -427,10 +409,7 @@ public:
 	//! \param count: Amount of elements to be erased.
 	void erase(u32 index, s32 count)
 	{
-		#if defined(_DEBUG) && defined(_MSC_VER)
-		if (index>=used || index<0 || count<1 || index+count>used)
-			_asm int 3 // access violation
-		#endif
+		_IRR_DEBUG_BREAK_IF(index>=used || index<0 || count<1 || index+count>used) // access violation
 
 		for (u32 i=index+count; i<used; ++i)
 			data[i-count] = data[i];

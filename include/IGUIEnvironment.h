@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_GUI_ENVIRNMENT_H_INCLUDED__
 #define __I_GUI_ENVIRNMENT_H_INCLUDED__
@@ -213,11 +213,13 @@ public:
 	 \param wordWrap specifyes, if the text should be wrapped into multiple lines.
 	 \param parent is the parent item of the element. E.g. a window. Set it to 0 to place the fader directly in the environment.
 	 \param id is a s32 to identify the static text element.
+	 \param fillBackground specifies if the background will be filled. Default: false.
 	 \return
 	 Returns a pointer to the created static text. Returns 0 if an error occured.
 	 This pointer should not be dropped. See IUnknown::drop() for more information. */
 	virtual IGUIStaticText* addStaticText(const wchar_t* text, const core::rect<s32>& rectangle, 
-		bool border=false, bool wordWrap=true, IGUIElement* parent=0, s32 id=-1) = 0;
+		bool border=false, bool wordWrap=true, IGUIElement* parent=0, s32 id=-1, 
+		bool fillBackground = false) = 0;
 
 	//! Adds an edit box.  
 	/**  Supports unicode input from every keyboard around the world,

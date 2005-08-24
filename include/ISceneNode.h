@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_SCENE_NODE_H_INCLUDED__
 #define __I_SCENE_NODE_H_INCLUDED__
@@ -182,6 +182,7 @@ namespace scene
 		//! nothing to do with geometry culling
 		virtual bool isVisible()
 		{
+			_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 			return IsVisible;
 		}
 
@@ -235,6 +236,7 @@ namespace scene
 					return true;
 				}
 
+			_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 			return false;
 		}
 

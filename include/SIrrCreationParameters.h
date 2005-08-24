@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_IRRLICHT_CREATION_PARAMETERS_H_INCLUDED__
 #define __I_IRRLICHT_CREATION_PARAMETERS_H_INCLUDED__
@@ -89,7 +89,7 @@ namespace irr
 		You need not call Device->run() if you want to do your own message 
 		dispatching loop, but Irrlicht will not be able to fetch
 		user input then and you have to do it on your own using the window
-		messages, DirectInput, or whatever.
+		messages, DirectInput, or whatever. Also, you'll have to increment the Irrlicht timer.
 		An alternative, own message dispatching loop without device->run() would
 		look like this:
 		\code
@@ -104,6 +104,9 @@ namespace irr
 				if (msg.message == WM_QUIT)
 					break;
 			}
+
+			// increase virtual timer time
+			device->getTimer()->tick();
 
 			// draw engine picture
 			driver->beginScene(true, true, 0);

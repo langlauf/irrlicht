@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine" and the "irrXML" project.
-// For conditions of distribution and use, see copyright notice in Irrlicht.h and irrXML.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h and irrXML.h
 
 #ifndef __IRR_STRING_H_INCLUDED__
 #define __IRR_STRING_H_INCLUDED__
@@ -216,10 +216,7 @@ public:
 	//! Direct access operator
 	T& operator [](const s32 index)  const
 	{
-		#if defined(_DEBUG) && defined(_MSC_VER)
-		if (index>=used)
-			_asm int 3 // bad index
-		#endif
+		_IRR_DEBUG_BREAK_IF(index>=used) // bad index
 
 		return array[index];
 	}
@@ -606,10 +603,7 @@ public:
 	//! \param index: Index of element to be erased.
 	void erase(int index)
 	{
-		#if defined(_DEBUG) && defined(_MSC_VER)
-		if (index>=used || index<0)
-			_asm int 3 // access violation
-		#endif
+		_IRR_DEBUG_BREAK_IF(index>=used || index<0) // access violation
 
 		for (int i=index+1; i<used; ++i)
 			array[i-1] = array[i];

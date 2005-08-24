@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_GUI_ELEMENT_H_INCLUDED__
 #define __I_GUI_ELEMENT_H_INCLUDED__
@@ -10,6 +10,7 @@
 #include "rect.h"
 #include "irrString.h"
 #include "IEventReceiver.h"
+#include "EGUIElementTypes.h"
 
 namespace irr
 {
@@ -24,9 +25,10 @@ class IGUIElement : public IUnknown, public IEventReceiver
 public:
 
 	//! Constructor
-	IGUIElement(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
+	IGUIElement(EGUI_ELEMENT_TYPE type, IGUIEnvironment* environment, IGUIElement* parent,
+		s32 id, core::rect<s32> rectangle)
 		: Environment(environment), IsVisible(true), IsEnabled(true),
-			Parent(0), RelativeRect(rectangle), ID(id)
+			Parent(0), RelativeRect(rectangle), ID(id), Type(type)
 	{
 		AbsoluteRect = RelativeRect;
 		AbsoluteClippingRect = AbsoluteRect;
@@ -197,6 +199,7 @@ public:
 	//! Returns true if element is visible.
 	virtual bool isVisible()
 	{
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return IsVisible;
 	}
 
@@ -212,6 +215,7 @@ public:
 	//! Returns true if element is enabled.
 	virtual bool isEnabled()
 	{
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return IsEnabled;
 	}
 
@@ -255,12 +259,13 @@ public:
 	{
 		if (Parent)
 			Parent->OnEvent(event);
+
 		return true;
 	}
 
 
 	//! Brings a child to front
-	//! \return Returns true if successful, false if not.
+	/** \return Returns true if successful, false if not. */
 	virtual bool bringToFront(IGUIElement* element)
 	{
 		core::list<IGUIElement*>::Iterator it = Children.begin();
@@ -274,6 +279,7 @@ public:
 			}
 		}
 
+		_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 		return false;
 	}
 
@@ -284,12 +290,12 @@ public:
 	}
 
 	//! Finds the first element with the given id.
-	//! \param id: Id to search for.
-	//! \param searchchildren: Set this to true, if also children of this 
-	//! element may contain the element with the searched id and they 
-	//! should be searched too.
-	//! \return Returns the first element with the given id. If no element
-	//! with this id was found, 0 is returned.
+	/** \param id: Id to search for.
+	 \param searchchildren: Set this to true, if also children of this 
+	 element may contain the element with the searched id and they 
+	 should be searched too.
+	 \return Returns the first element with the given id. If no element
+	 with this id was found, 0 is returned. */
 	virtual IGUIElement* getElementFromId(s32 id, bool searchchildren=false) const
 	{
 		IGUIElement* e = 0;
@@ -308,6 +314,16 @@ public:
 		}		
 
 		return e;
+	}
+
+	//! Returns the type of the gui element. 
+	/** This is needed for the .NET wrapper but will be used
+	later for serializing and deserializing.
+	If you wrote your own GUIElements, you need to set the type for your element as first parameter
+	in the constructor of IGUIElement. For own (=unknown) elements, simply use EGUIET_ELEMENT as type */
+	EGUI_ELEMENT_TYPE getType()
+	{
+		return Type;
 	}
 
 protected:
@@ -341,6 +357,9 @@ protected:
 
 	//! GUI Environment
 	IGUIEnvironment* Environment;
+
+	//! type of element
+	EGUI_ELEMENT_TYPE Type;
 };
 
 

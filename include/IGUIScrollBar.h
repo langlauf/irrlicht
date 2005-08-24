@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_GUI_SCROLL_BAR_H_INCLUDED__
 #define __I_GUI_SCROLL_BAR_H_INCLUDED__
@@ -19,7 +19,7 @@ namespace gui
 
 		//! constructor
 		IGUIScrollBar(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
-			: IGUIElement(environment, parent, id, rectangle) {}
+			: IGUIElement(EGUIET_SCROLL_BAR, environment, parent, id, rectangle) {}
 
 		//! destructor
 		~IGUIScrollBar() {};

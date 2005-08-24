@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_EVENT_RECEIVER_H_INCLUDED__
 #define __I_EVENT_RECEIVER_H_INCLUDED__
@@ -119,6 +119,8 @@ namespace irr
 			//! A menu item was selected in a (context) menu
 			EGET_MENU_ITEM_SELECTED,
 
+			//! The selection in a combo box has been changed
+			EGET_COMBO_BOX_CHANGED
 		};
 	} // end namespace gui
 

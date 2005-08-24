@@ -80,9 +80,9 @@ int main()
 	scene::ISceneNode* node = 0;
 
 	node = smgr->addAnimatedMeshSceneNode(mesh);
-	node->setMaterialTexture(0,	driver->getTexture("../../media/rockwall.bmp"));
+	node->setMaterialTexture(0,	driver->getTexture("../../media/wall.jpg"));
 	node->getMaterial(0).EmissiveColor.set(0,0,0,0);
-
+ 
 	/*
 	Now, for the first special effect: Animated water. It works like this: The
 	WaterSurfaceSceneNode takes a mesh as input and makes
@@ -194,6 +194,12 @@ int main()
 	For creating the shadow, we simply need to call addShadowVolumeSceneNode().
 	The color of shadows is only adjustable globally for all shadows, by calling 
 	ISceneManager::setShadowColor(). Voila, here is our dynamic shadow.
+
+	Because the character is a little bit too small for this scene, we make it bigger 
+	using setScale(). And because the character is lighted by a dynamic light, we need
+	to normalize the normals to make the lighting on it correct. This is always necessary if
+	the scale of a dynamic lighted model is not (1,1,1). Otherwise it would get too dark or 
+	too bright because the normals will be scaled too.
 	*/
 
 	// add animated character
@@ -203,13 +209,17 @@ int main()
 
 	anode = smgr->addAnimatedMeshSceneNode(mesh);
 	anode->setPosition(core::vector3df(-50,65,-60));
-	anode->setScale(core::vector3df(2,2,2));
 	anode->setMD2Animation(scene::EMAT_STAND);
 	anode->setMaterialTexture(0, driver->getTexture("../../media/Faerie5.BMP"));
 
+	// add shadow
 	anode->addShadowVolumeSceneNode();	
 	smgr->setShadowColor(video::SColor(150,0,0,0));
 
+	// make the model a little bit bigger and normalize its normals 
+	// because of this for correct lighting
+	anode->setScale(core::vector3df(2,2,2));
+	anode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
 
 	/*
 	Finally we simply have to draw everything, that's all.

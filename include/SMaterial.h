@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __S_MATERIAL_H_INCLUDED__
 #define __S_MATERIAL_H_INCLUDED__
@@ -57,6 +57,15 @@ namespace video
 		//! Like EMT_LIGHTMAP_4, but also supports dynamic lighting.
 		EMT_LIGHTMAP_LIGHTING_M4,
 
+		//! Detail mapped material. The first texture is diffuse color map, the
+		//! second is added to this and usually displayed with a bigger scale value
+		//! so that it adds more detail. The detail map is added to the diffuse map using
+		//! ADD_SIGNED, so that it is possible to add and substract color from the diffuse 
+		//! map. For example a value of (127,127,127) will not change the appearance of 
+		//! the diffuse map at all.
+		//! Often used for terrain rendering. 
+		EMT_DETAIL_MAP,
+
 		//! Makes the material look like it was reflection the environment
 		//! around it. To make this possible, a texture called 'sphere map'
 		//! is used, which must be set as Texture1.
@@ -65,8 +74,6 @@ namespace video
 		//! A reflecting material with an 
 		//! optional additional non reflecting texture layer. The reflection
 		//! map should be set as Texture 1.
-		//! Please note that this material type is currently not 100% implemented
-		//! in OpenGL. It works in DirectX8 and 9.
 		EMT_REFLECTION_2_LAYER,
 
 		//! A transparent material. Only the first texture is used.
@@ -82,8 +89,13 @@ namespace video
 		//! The final color is blended together from the destination color and the
 		//! texture color, using the alpha channel value as blend factor.
 		//! Only first texture is used. If you are using this material with small
-		//! textures and 3d object, it is a good idea to load the texture in 32 bit
+		//! textures, it is a good idea to load the texture in 32 bit
 		//! mode (video::IVideoDriver::setTextureCreationFlag()).
+		//! Also, an alpha ref is used, which can be manipulated using SMaterial::MaterialTypeParam.
+		//! If set to 0, the alpha ref gets its default value which is 0.5f and which means
+		//! that pixels with an alpha value >127 will be written, others not.  In other, simple 
+		//! words: this value controls how sharp the edges become when going from a 
+		//! transparent to a solid spot on the texture.
 		EMT_TRANSPARENT_ALPHA_CHANNEL,	
 
 		//! Makes the material transparent based on the texture alpha channel.
@@ -204,6 +216,12 @@ namespace video
 		//! Is fog enabled? Default: false
 		EMF_FOG_ENABLE,
 
+		//! Normalizes normals.You can enable this if you need 
+		//! to scale a dynamic lighted model. Usually, its normals will get scaled 
+		//! too then and it will get darker. If you enable the EMF_NORMALIZE_NORMALS flag,
+		//! the normals will be normalized again, and the model will look as bright as it should.
+		EMF_NORMALIZE_NORMALS,
+
 		//! This is not a flag, but a value indicating how much flags there are.
 		EMF_MATERIAL_FLAG_COUNT 
 	};
@@ -221,7 +239,8 @@ namespace video
 			MaterialType(EMT_SOLID), Wireframe(false), Lighting(true),
 			ZBuffer(true), ZWriteEnable(true), BackfaceCulling(true),
 			GouraudShading(true), Shininess(0.0f), MaterialTypeParam(0.0f),
-			BilinearFilter(true), TrilinearFilter(false),	FogEnable(false)
+			BilinearFilter(true), TrilinearFilter(false), FogEnable(false),
+			NormalizeNormals(false)
 		{}
 
 		//! Type of the material. Specifies how everything is blended together
@@ -277,7 +296,8 @@ namespace video
 		f32 Shininess;		
 
 		//! Free parameter dependend on the material type. 
-		/** Mostly ignored, used for example in EMT_PARALLAX_MAP_SOLID. */
+		/** Mostly ignored, used for example in EMT_PARALLAX_MAP_SOLID and 
+		EMT_TRANSPARENT_ALPHA_CHANNEL. */
 		f32 MaterialTypeParam;
 
 		//! Texture layer union.
@@ -334,6 +354,9 @@ namespace video
 
 				//! Is fog enabled? Default: false
 				bool FogEnable;
+
+				//! Should normals be normalized? Default: false
+				bool NormalizeNormals;
 			};
 
 			//! Array representing all flags.
@@ -359,7 +382,8 @@ namespace video
 				BackfaceCulling != b.BackfaceCulling ||
 				BilinearFilter != b.BilinearFilter ||
 				TrilinearFilter != b.TrilinearFilter ||
-				FogEnable != b.FogEnable;
+				FogEnable != b.FogEnable ||
+				NormalizeNormals != NormalizeNormals;
 		}	
 	};
 

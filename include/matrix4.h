@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __IRR_MATRIX_H_INCLUDED__
 #define __IRR_MATRIX_H_INCLUDED__
@@ -314,12 +314,11 @@ namespace core
 		f64 Y = -asin(mat(2,0)); 
 		f64 D = Y; 
 		f64 C = cos(Y); 
-		Y *= GRAD_PI; // <- this was "180.000f/PI" before 
-		//   (not part of the bug) 
+		Y *= GRAD_PI; 
 
 		f64 rotx, roty, X, Z; 
 
-		if (fabs(C)>0.0005f) // <- C not Y 
+		if (fabs(C)>0.0005f)  
 		{ 
 			rotx = mat(2,2) / C; 
 			roty = mat(2,1)  / C; 
@@ -331,8 +330,8 @@ namespace core
 		else 
 		{ 
 			X  = 0.0f; 
-			rotx = mat(1,1); // <- no minus here 
-			roty = -mat(0,1); // <- but here, and not (1,0) 
+			rotx = mat(1,1); 
+			roty = -mat(0,1); 
 			Z  = atan2( roty, rotx ) * (f32)GRAD_PI; 
 		} 
 

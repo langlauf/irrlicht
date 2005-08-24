@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_SCENE_MANAGER_H_INCLUDED__
 #define __I_SCENE_MANAGER_H_INCLUDED__
@@ -80,6 +80,30 @@ namespace scene
 	*/
 	const char* const COLLADA_CREATE_SCENE_INSTANCES = "COLLADA_CreateSceneInstances";
 
+	//! Name of the parameter for changing the texture path of the built-in DMF loader.
+	/** Use it like this:
+	 \code
+	 SceneManager->getStringParameters()->setParameter(
+	   scene::DMF_TEXTURE_PATH, "path/to/your/textures");
+	\endcode
+	**/ 
+	const char* const DMF_TEXTURE_PATH = "DMF_TexturePath";
+	
+	//! Name of the parameter for preserving DMF textures dir structure with built-in DMF loader.
+	/** Use it like this:
+	 \code
+	 //this way you won't use this setting
+	 SceneManager->getParameters()->setParameter(
+	   scene::DMF_USE_MATERIALS_DIRS, false); 
+	 \endcode
+	 \code
+     //this way you'll use this setting
+     SceneManager->getParameters()->setParameter(
+	   scene::DMF_USE_MATERIALS_DIRS, true); 
+	\endcode
+	**/ 
+	const char* const DMF_USE_MATERIALS_DIRS = "DMF_MaterialsDir";
+
 
 	//! Enumeration for render passes.
 	/** A parameter passed to the registerNodeForRendering() method of the ISceneManager, 
@@ -121,6 +145,7 @@ namespace scene
 
 	class IMesh;
 	class IAnimatedMesh;
+	class IMeshCache;
 	class ISceneNode;
 	class ICameraSceneNode;
 	class IAnimatedMeshSceneNode;
@@ -163,6 +188,7 @@ namespace scene
 
 		//! Returns pointer to an animateable mesh. Loads the file if not loaded already.
 		/** 
+		 * If you want to remove a loaded mesh from the cache again, use removeMesh().
 		 *  Currently there are the following mesh formats supported:
 		 *  <TABLE border="1" cellpadding="2" cellspacing="0">
 		 *  <TR> 
@@ -207,7 +233,8 @@ namespace scene
 		 *    <TD>Delgine DeleD (.dmf)</TD>
 		 *    <TD>DeleD (delgine.com) is a 3D editor and level-editor combined into one and is specifically 
 		 *        designed for 3D game-development. With this loader, it is possible to directly load
-		 *        all geometry is as well as textures and lightmaps from .dmf files. The loader is 
+		 *        all geometry is as well as textures and lightmaps from .dmf files. To set texture and 
+		 *        material paths, see scene::DMF_USE_MATERIALS_DIRS and scene::DMF_TEXTURE_PATH. The loader is 
 		 *        based on Salvatore Russo's .dmf loader, I just changed some parts of it. Thanks to
 		 *        Salvatore for his work and for allowing me to use his code in Irrlicht and put it under Irrlicht's 
 		 *        license. For newer and more enchanced versions of the loader, take a look at delgine.com.
@@ -293,18 +320,11 @@ namespace scene
 		 **/
 		virtual IAnimatedMesh* getMesh(const c8* filename) = 0;
 
-		//! Adds a mesh to the internal list of loaded meshes.
-		/** Usually, getMesh() is called to load a mesh from file. That method searches the
-		list of loaded meshes if a mesh has already been loaded and returns a pointer to if
-		it is in that list and already in memory. Otherwise it loads the mesh. With addMesh(),
-		it is possible to pretend that a mesh already has been loaded. 
-		This method can be used for example by mesh loaders who need to load more than one 
-		mesh with one call. They can add additional meshes with this method to the scene manager.
-		The COLLADA loader for example uses this method.
-		\param filename: Filename of the mesh. When called getMesh() with this parameter, 
-		the method will return the mesh parameter given with this method. 
-		\param mesh: Pointer to a mesh which will now be referenced by this name. */ 
-		virtual void addMesh(const c8* filename, IAnimatedMesh* mesh) = 0;
+		//! Returns an interface to the mesh cache which is shared beween all existing scene managers.
+		/** With this interface, it is possible to manually add new loaded 
+		meshes (if ISceneManager::getMesh() is not sufficient), to remove them and to iterate
+		through already loaded meshes. */
+		virtual IMeshCache* getMeshCache() = 0;
 
 		//! Returns the video driver.
 		/** \return Returns pointer to the video Driver.
@@ -477,11 +497,14 @@ namespace scene
 		 is used. You can define actions more then one time in the array, to bind 
 		 multiple keys to the same action.
 		 \param keyMapSize: Amount of items in the keymap array.
+		 \param noVerticalMovement: Setting this to true makes the camera only move within a 
+		 horizontal plane, and disables vertical movement as known from most ego shooters. Default
+		 is 'false', with which it is possible to fly around in space, if no gravity is there.
 		 \return Returns a pointer to the interface of the camera if successful, otherwise 0.
 		 This pointer should not be dropped. See IUnknown::drop() for more information. */
 		virtual ICameraSceneNode* addCameraSceneNodeFPS(ISceneNode* parent = 0,
 			f32 rotateSpeed = 100.0f, f32 moveSpeed = 500.0f, s32 id=-1,
-			SKeyMap* keyMapArray=0, s32 keyMapSize=0) = 0;
+			SKeyMap* keyMapArray=0, s32 keyMapSize=0, bool noVerticalMovement=false) = 0;
 
 		//! Adds a dynamic light scene node to the scene graph.
 		/** The light will cast dynamic light on all
@@ -594,8 +617,8 @@ namespace scene
 		 terrain could not be created, for example because the heightmap could not be loaded.
 		 The returned pointer should not be dropped. See IUnknown::drop() for more information. */
 		virtual ITerrainSceneNode* addTerrainSceneNode(
-			const char* heightMapFileName, 
-			ISceneNode* parent=0, s32 id=-1, 
+				const char* heightMapFileName, 
+				ISceneNode* parent=0, s32 id=-1, 
 			const core::vector3df& position = core::vector3df(0.0f,0.0f,0.0f),
 			const core::vector3df& rotation = core::vector3df(0.0f,0.0f,0.0f),
 			const core::vector3df& scale = core::vector3df(1.0f,1.0f,1.0f),
@@ -965,7 +988,7 @@ namespace scene
 		 For example the CMS and LMTS loader want a parameter named 'CSM_TexturePath'
 		 and 'LMTS_TexturePath' set to the path were attached textures can be found. See
 		 CSM_TEXTURE_PATH, LMTS_TEXTURE_PATH, MY3D_TEXTURE_PATH,
-		 COLLADA_CREATE_SCENE_INSTANCES*/
+		 COLLADA_CREATE_SCENE_INSTANCES, DMF_TEXTURE_PATH and DMF_USE_MATERIALS_DIRS*/
 		virtual IStringParameters* getParameters() = 0;
 
 		//! Returns current render pass.
@@ -976,6 +999,21 @@ namespace scene
 		 twice, once for transparent geometry and once for solid. When knowing what rendering
 		 pass currently is active they can render the correct part of their geometry. */
 		virtual E_SCENE_NODE_RENDER_PASS getSceneNodeRenderPass() = 0;
+
+		//! Creates a new scene manager. 
+		/** This can be used to easily draw and/or store two independent scenes at the same time.
+		The mesh cache will be shared between all existing scene managers, which means if you load 
+		a mesh in the original scene manager using for example getMesh(), the mesh will be available
+		in all other scene managers too, without loading.
+		The original/main scene manager will still be there and accessible via IrrlichtDevice::getSceneManager().
+		If you need input event in this new scene manager, for example for FPS cameras, you'll need
+		to forward input to this manually: Just implement an IEventReceiver and call 
+		yourNewSceneManager->postEventFromUser(), and return true so that the original scene manager
+		doesn't get the event. Otherwise, all input will go automaticly to the main scene manager.
+		If you no longer need the new scene manager, you should call ISceneManager::drop().
+		See IUnknown::drop() for more information. */
+		virtual ISceneManager* createNewSceneManager() = 0;
+		
 	};
 
 

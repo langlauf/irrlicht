@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __I_IRRLICHT_DEVICE_H_INCLUDED__
 #define __I_IRRLICHT_DEVICE_H_INCLUDED__
@@ -34,7 +34,9 @@ namespace irr
 		virtual ~IrrlichtDevice() {};
 
         //! Runs the device. 
-		/** Returns false if device wants to be deleted. Use it in this way:
+		/** Also increments the virtual timer by calling ITimer::tick();. You can prevent this
+		by calling ITimer::stop(); before and ITimer::start() after calling IrrlichtDevice::run().
+		Returns false if device wants to be deleted. Use it in this way:
 		\code
 while(device->run())
 {
@@ -102,8 +104,8 @@ while(device->run())
 		virtual IOSOperator* getOSOperator() = 0;
 
 		//! Returns pointer to the timer.
-		/** \return Returns a pointer to the ITimer object. With it the
-		current Time can be received. */
+		/** \return Returns a pointer to the ITimer object. The system time can be retrieved by it as
+		well as the virtual time, which also can be manipulated. */
 		virtual ITimer* getTimer() = 0;
 
 		//! Sets the caption of the window.
@@ -137,6 +139,13 @@ while(device->run())
 
 		//! Returns poinhter to the current event receiver. Returns 0 if there is none.
 		virtual IEventReceiver* getEventReceiver() = 0;
+
+		//! Sends a user created event to the engine.
+		/** Is is usually not necessary to use this. However, if you are using an own
+		input library for example for doing joystick input, you can use this to post key or mouse input 
+		events to the engine. Internally, this method only delegates the events further to the 
+		scene manager and the GUI environment. */
+		virtual void postEventFromUser(SEvent event) = 0;
 
 		//! Sets if the window should be resizeable in windowed mode.
 		/** The default is false. This method only works in windowed mode. */

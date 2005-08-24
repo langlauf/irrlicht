@@ -1,6 +1,6 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __IRR_I_VIDEO_DRIVER_H_INCLUDED__
 #define __IRR_I_VIDEO_DRIVER_H_INCLUDED__
@@ -84,6 +84,15 @@ namespace video
 
 		//! Are ARB fragment programs v1.0 supported?
 		EVDF_ARB_FRAGMENT_PROGRAM_1,
+
+		//! Is GLSL v100 supported?  (GL_ARB_shading_language_100)
+		EVDF_ARB_GLSL_100,
+
+		//! Is GLSL v110 supported?  (GL_ARB_shading_language_110)
+		EVDF_ARB_GLSL_110,
+
+		//! Is HLSL supported?
+		EVDF_HLSL
 	};
 
 	//! enumeration for geometry transformation states
@@ -582,7 +591,7 @@ namespace video
         
 		//! Gets name of this video driver.
 		/** \return Returns the name of the video driver. Example: In case of the DirectX8
-		driver, it would return "Direct3D8.1". */
+		driver, it would return "Direct3D 8.1". */
 		virtual const wchar_t* getName() = 0;
 
 		//! Adds an external image loader to the engine. 
@@ -700,6 +709,14 @@ namespace video
 		videodriver does not support this. (For example the Software and the NULL device
 		will always return 0) */
 		virtual IGPUProgrammingServices* getGPUProgrammingServices() = 0;
+
+		//! Clears the ZBuffer. 
+		/** Note that you usually need not to call this method,
+		This is done automaticly during IVideoDriver::beginScene() or 
+		IVideoDriver::setRenderTarget() if you specify zBuffer=true.
+		But if you have to render some special things, you can clear the zbuffer
+		during the rendering process with this method another time. */
+		virtual void clearZBuffer() = 0;
 	};
 
 } // end namespace video

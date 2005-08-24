@@ -1,11 +1,12 @@
 // Copyright (C) 2002-2005 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
-// For conditions of distribution and use, see copyright notice in Irrlicht.h
+// For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __IRR_LINE_2D_H_INCLUDED__
 #define __IRR_LINE_2D_H_INCLUDED__
 
 #include "irrTypes.h"
+#include "vector2d.h"
 
 namespace irr
 {

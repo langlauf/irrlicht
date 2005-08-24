@@ -118,7 +118,7 @@ int main()
 	*/
 
 	scene::ICameraSceneNode* camera = 
-		smgr->addCameraSceneNodeFPS(0,100.0f,300.0f);
+		smgr->addCameraSceneNodeFPS(0, 100.0f, 300.0f, -1, 0, 0, true);
 	camera->setPosition(core::vector3df(-100,50,-150));
 
 	scene::ISceneNodeAnimator* anim = smgr->createCollisionResponseAnimator(
@@ -147,6 +147,7 @@ int main()
 	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR );
 	bill->setMaterialTexture(0, driver->getTexture("../../media/particle.bmp"));
 	bill->setMaterialFlag(video::EMF_LIGHTING, false);
+	bill->setMaterialFlag(video::EMF_ZBUFFER, false);
 	bill->setSize(core::dimension2d<f32>(20.0f, 20.0f));
 
 	// add 3 animated faeries.

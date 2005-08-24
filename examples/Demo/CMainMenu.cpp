@@ -50,9 +50,9 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 	// add list box
 
 	gui::IGUIListBox* box = guienv->addListBox(core::rect<int>(10,10,220,75), optTab, 1);
-	box->addItem(L"OpenGL 1.2");
+	box->addItem(L"OpenGL 1.5");
 	box->addItem(L"Direct3D 8.1");
-	box->addItem(L"Direct3D 9.0b");	
+	box->addItem(L"Direct3D 9.0c");	
 	box->addItem(L"Irrlicht Software Renderer 1.0");
 	box->setSelected(selected);
 

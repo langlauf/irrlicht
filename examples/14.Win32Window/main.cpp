@@ -2,14 +2,13 @@
 // can run inside a win32 window.
 
 #include <irrlicht.h>
-#include <windows.h>
+#include <windows.h> // this example only runs with windows
 
 using namespace irr;
 
 #pragma comment(lib, "irrlicht.lib")
 
 HWND hOKButton;
-HWND hCancelButton;
 HWND hWnd;
 
 static LRESULT CALLBACK CustomWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -21,8 +20,7 @@ static LRESULT CALLBACK CustomWndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 			HWND hwndCtl = (HWND)lParam;
 			int code = HIWORD(wParam);
 
-			if (hwndCtl == hOKButton ||
-				hwndCtl == hCancelButton)
+			if (hwndCtl == hOKButton)
 			{
 				DestroyWindow(hWnd);
 				PostQuitMessage(0);
@@ -52,7 +50,7 @@ int main()
 	const char* Win32ClassName = "CIrrlichtWindowsTestDialog";
 
 	WNDCLASSEX wcex;
-	wcex.cbSize = sizeof(WNDCLASSEX); 
+	wcex.cbSize			= sizeof(WNDCLASSEX); 
 	wcex.style			= CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc	= (WNDPROC)CustomWndProc;
 	wcex.cbClsExtra		= 0;
@@ -67,8 +65,8 @@ int main()
 
 	RegisterClassEx(&wcex);
 
-	DWORD style = WS_SYSMENU | WS_BORDER | WS_CAPTION |
-		WS_CLIPCHILDREN | WS_CLIPSIBLINGS;// | WS_CHILD;
+	DWORD style = WS_SYSMENU | WS_BORDER | WS_CAPTION | 
+		WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX;
 
 	int windowWidth = 440;
 	int windowHeight = 380;
@@ -82,62 +80,27 @@ int main()
 	windowWidth = clientRect.right;
 	windowHeight = clientRect.bottom;
 
-	int okButtonWidth = 100;
-	int okButtonHeight = 20;
-	int borderDistance = 10;
+	// create ok button
+
+	hOKButton = CreateWindow("BUTTON", "OK - Close", WS_CHILD | WS_VISIBLE | BS_TEXT, 
+		windowWidth - 160, windowHeight - 40, 150, 30, hWnd, NULL, hInstance, NULL);
+
+	// create some text
 	
-	// create ok and cancel button
-
-	hCancelButton = CreateWindow("BUTTON", "Cancel", WS_CHILD | WS_VISIBLE | BS_TEXT, 
-		windowWidth - okButtonWidth*2 - borderDistance*2, 
-		windowHeight - okButtonHeight - borderDistance,
-		okButtonWidth, okButtonHeight, hWnd, NULL, hInstance, NULL);
-
-	hOKButton = CreateWindow("BUTTON", "OK", WS_CHILD | WS_VISIBLE | BS_TEXT, 
-		windowWidth - okButtonWidth - borderDistance, 
-		windowHeight - okButtonHeight - borderDistance,
-		okButtonWidth, okButtonHeight, hWnd, NULL, hInstance, NULL);
-
-	// create a senseless scroll bar and some text
-	
-	int scrollBarWidth = 150;
-	int scrollBarHeight = 15;
-	int scrollBarXPos = borderDistance + 10;
-	int scrollBarYPos = 0;
-	int scrollBarHDistance = 35;
-	int labelHeight = 20;
-	int editControlWidth = 50;
-
-	CreateWindow("SCROLLBAR", "", WS_CHILD | WS_VISIBLE | SBS_HORZ,
-		scrollBarXPos, scrollBarYPos + (scrollBarHDistance + scrollBarHeight),
-		scrollBarWidth, scrollBarHeight, hWnd, NULL, hInstance, NULL);
-
-	CreateWindow("STATIC", "This is Irrlicht running inside a custom Win32 window.",
-		WS_CHILD | WS_VISIBLE, 
-		scrollBarXPos, scrollBarYPos + (scrollBarHDistance + scrollBarHeight) - labelHeight,
-		400,labelHeight, hWnd, NULL, hInstance, NULL);
-
-	CreateWindow("EDIT", "123", WS_CHILD | WS_VISIBLE | ES_NUMBER | WS_BORDER,
-		scrollBarXPos + scrollBarWidth + borderDistance, 
-		scrollBarYPos + (scrollBarHDistance + scrollBarHeight),
-		editControlWidth, scrollBarHeight, hWnd, NULL, hInstance, NULL);
+	CreateWindow("STATIC", "This is Irrlicht running inside a standard Win32 window.\n"\
+		"Also mixing with MFC and .NET Windows.Forms is possible.",
+		WS_CHILD | WS_VISIBLE, 20, 20, 400, 40, hWnd, NULL, hInstance, NULL);
 
 	// create window to put irrlicht in
 
-	int irrlichtWindowX = 50;
-	int irrlichtWindowY = 80;
-	int irrlichtWindowWidth = 320;
-	int irrlichtWindowHeight = 230;
-
 	HWND hIrrlichtWindow = CreateWindow("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_OWNERDRAW, 
-			irrlichtWindowX, irrlichtWindowY, irrlichtWindowWidth, irrlichtWindowHeight, hWnd, 
-			NULL, hInstance, NULL);
+			50, 80, 320, 220, hWnd, NULL, hInstance, NULL);
 
 	// create irrlicht device in the button window
 
 	irr::SIrrlichtCreationParameters param;
 	param.WindowId = reinterpret_cast<s32>(hIrrlichtWindow); // hColorButton
-	param.DriverType = video::EDT_DIRECTX8;
+	param.DriverType = video::EDT_OPENGL;
 
 	irr::IrrlichtDevice* device = irr::createDeviceEx(param);
 	
@@ -153,7 +116,7 @@ int main()
 	cam->addAnimator(anim);
 	anim->drop();
 
-	scene::ISceneNode* cube = smgr->addTestSceneNode();
+	scene::ISceneNode* cube = smgr->addTestSceneNode(25);
 	
 	cube->setMaterialTexture(0, driver->getTexture("../../media/rockwall.bmp"));
 
@@ -201,6 +164,9 @@ int main()
 			if (msg.message == WM_QUIT)
 				break;
 		}
+		
+		// advance virtual time
+		device->getTimer()->tick();
 
 		// draw engine picture
 		driver->beginScene(true, true, 0);
