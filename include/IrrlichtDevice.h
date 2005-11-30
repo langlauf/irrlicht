@@ -89,7 +89,7 @@ while(device->run())
 		/** If you are confused 
 		now, because you think you have to create an Irrlicht Device with a video
 		mode before being able to get the video mode list, let me tell you that
-		there is no need to start up an Irrlicht Device with EDT_DIRECTX8, EDT_OPENGL or
+		there is no need to start up an Irrlicht Device with EDT_DIRECT3D8, EDT_OPENGL or
 		EDT_SOFTWARE: For this (and for lots of other reasons) the null device,
 		EDT_NULL exists.
 		\return Returns a pointer to a list with all video modes supported
@@ -132,7 +132,7 @@ while(device->run())
 		//! Returns the version of the engine.
 		/** The returned string
 		will look like this: "1.2.3" or this: "1.2". */
-		virtual const wchar_t* getVersion() = 0;
+		virtual const char* getVersion() = 0;
 
 		//! Sets a new event receiver to receive events.
 		virtual void setEventReceiver(IEventReceiver* receiver) = 0;

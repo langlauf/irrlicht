@@ -91,7 +91,7 @@ int main()
 	deviceType: Type of the device. This can currently be the Null-device,
 	   the Software device, DirectX8, DirectX9, or OpenGL. In this example we use
 	   EDT_SOFTWARE, but to try out, you might want to change it to
-	   EDT_NULL, EDT_DIRECTX8 , EDT_DIRECTX9, or EDT_OPENGL. 
+	   EDT_NULL, EDT_DIRECT3D8 , EDT_DIRECT3D9, or EDT_OPENGL. 
 	windowSize: Size of the Window or FullscreenMode to be created. In this 
 	   example we use 640x480.
 	bits: Amount of bits per pixel when in fullscreen mode. This should 

@@ -54,9 +54,7 @@ namespace scene
 		virtual ~ISceneNode()
 		{
 			// delete all children
-			core::list<ISceneNode*>::Iterator it = Children.begin();
-			for (; it != Children.end(); ++it)
-				(*it)->drop();
+			removeAll();
 
 			// delete all animators
 			core::list<ISceneNodeAnimator*>::Iterator ait = Animators.begin();

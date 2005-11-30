@@ -27,7 +27,7 @@ int main()
 	bool additive = false;
 	bool vsync = false;
 
-	video::E_DRIVER_TYPE driverType = video::EDT_DIRECTX9;
+	video::E_DRIVER_TYPE driverType = video::EDT_DIRECT3D9;
 
 	CMainMenu menu;
 

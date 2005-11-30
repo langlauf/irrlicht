@@ -118,7 +118,7 @@ namespace video
 		//! alpha value in the vertex colors. A texture which will not reflect
 		//! can be set als Texture 2.
 		//! Please note that this material type is currently not 100% implemented
-		//! in OpenGL. It works in DirectX8.
+		//! in OpenGL. It works in Direct3D.
 		EMT_TRANSPARENT_REFLECTION_2_LAYER,
 
 		//! A solid normal map renderer. First texture is the color map, the 
@@ -213,6 +213,12 @@ namespace video
 		//! the bilinear filtering flag is ignored.
 		EMF_TRILINEAR_FILTER,
 
+		//! Is anisotropic filtering? Default: false
+		//! In Irrlicht you can use anisotropic texture filtering in conjunction with bilinear or trilinear 
+		//! texture filtering to improve rendering results. Primitives will look less blurry with this
+		//! flag switched on.
+		EMF_ANISOTROPIC_FILTER,
+
 		//! Is fog enabled? Default: false
 		EMF_FOG_ENABLE,
 
@@ -240,7 +246,7 @@ namespace video
 			ZBuffer(true), ZWriteEnable(true), BackfaceCulling(true),
 			GouraudShading(true), Shininess(0.0f), MaterialTypeParam(0.0f),
 			BilinearFilter(true), TrilinearFilter(false), FogEnable(false),
-			NormalizeNormals(false)
+			NormalizeNormals(false), AnisotropicFilter(false)
 		{}
 
 		//! Type of the material. Specifies how everything is blended together
@@ -348,9 +354,15 @@ namespace video
 				bool BilinearFilter;	
 
 				//! Is trilinear filtering enabled? Default: false
-				/* If the trilinear filter flag is enabled,
+				/** If the trilinear filter flag is enabled,
 				the bilinear filtering flag is ignored. */
 				bool TrilinearFilter;
+
+				//! Is anisotropic filtering enabled? Default: false
+				/** In Irrlicht you can use anisotropic texture filtering in conjunction with bilinear or trilinear 
+				texture filtering to improve rendering results. Primitives will look less blurry with this
+				flag switched on. */
+				bool AnisotropicFilter;
 
 				//! Is fog enabled? Default: false
 				bool FogEnable;
@@ -382,6 +394,7 @@ namespace video
 				BackfaceCulling != b.BackfaceCulling ||
 				BilinearFilter != b.BilinearFilter ||
 				TrilinearFilter != b.TrilinearFilter ||
+				AnisotropicFilter != b.AnisotropicFilter ||
 				FogEnable != b.FogEnable ||
 				NormalizeNormals != NormalizeNormals;
 		}	

@@ -98,7 +98,7 @@ namespace core
 			vector3d<T> bminusa = b - a;
 			vector3d<T> cp1 = bminusa.crossProduct(p1 - a);
 			vector3d<T> cp2 = bminusa.crossProduct(p2 - a);
-			return (cp1.dotProduct(cp2) > 0.0f);
+			return (cp1.dotProduct(cp2) >= 0.0f);
 		}
 
 
@@ -144,7 +144,7 @@ namespace core
 		bool getIntersectionOfPlaneWithLine(const vector3d<T>& linePoint,
 			const vector3d<T>& lineVect, vector3d<T>& outIntersection) const
 		{
-			vector3d<T> normal = getNormal();
+			vector3d<T> normal = getNormal().normalize();
 			T t2 = normal.dotProduct(lineVect);
             
 			if (t2 == 0.0f)

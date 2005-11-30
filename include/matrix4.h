@@ -9,6 +9,7 @@
 #include "vector3d.h"
 #include "plane3d.h"
 #include "aabbox3d.h"
+#include "rect.h"
 
 namespace irr
 {
@@ -96,6 +97,9 @@ namespace core
 			//! Transforms input vector by this matrix and stores result in output vector 
 			void transformVect( const vector3df& in, vector3df& out) const;
 
+			//! An alternate transform vector method, writing into an array of 4 floats
+			void transformVect(f32 *out,const core::vector3df &in) const;
+
 			//! Translate a vector by the translation part of this matrix.
 			void translateVect( vector3df& vect ) const;
 
@@ -157,6 +161,10 @@ namespace core
 			//! \param point: value between 0 and 1, describing the light source. 
 			//! If this is 1, it is a point light, if it is 0, it is a directional light.
 			void buildShadowMatrix(core::vector3df light, core::plane3df plane, f32 point=1.0f);
+
+			//! Builds a matrix which transforms a normalized Device Corrdinate to Device Coordinates. 
+			/** Used to scale <-1,-1><1,1> to viewport, for example from von <-1,-1> <1,1> to the viewport <0,0><0,640> */
+			void buildNDCToDCMatrix( const core::rect<s32>& area, f32 zScale);
 			
 			//! creates a new matrix as interpolated matrix from to other ones.
 			//! \param b: other matrix to interpolate with
@@ -879,7 +887,31 @@ namespace core
 	}
 
 
+	// transform (x,y,z,1)
+	inline void matrix4::transformVect(f32 *out,const vector3df &in) const
+	{
+		out[0] = in.X*M[0] + in.Y*M[4] + in.Z*M[8] + M[12];
+		out[1] = in.X*M[1] + in.Y*M[5] + in.Z*M[9] + M[13];
+		out[2] = in.X*M[2] + in.Y*M[6] + in.Z*M[10] + M[14];
+		out[3] = in.X*M[3] + in.Y*M[7] + in.Z*M[11] + M[15];
+	}
 
+	// used to scale <-1,-1><1,1> to viewport
+	inline void matrix4::buildNDCToDCMatrix( const core::rect<s32>& viewport, f32 zScale)
+	{
+		f32 scaleX = (viewport.getWidth() - 0.75f ) / 2.f;
+		f32 scaleY = -(viewport.getHeight() - 0.75f ) / 2.f;
+
+		f32 dx = -0.5f + ( (viewport.UpperLeftCorner.X + viewport.LowerRightCorner.X ) / 2.f );
+		f32 dy = -0.5f + ( (viewport.UpperLeftCorner.Y + viewport.LowerRightCorner.Y ) / 2.f );
+
+		makeIdentity();
+		M[0] = scaleX;
+		M[5] = scaleY;
+		M[10] = zScale;
+		M[12] = dx;
+		M[13] = dy;
+	}
 } // end namespace core
 } // end namespace irr
 

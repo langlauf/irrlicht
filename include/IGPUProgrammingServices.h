@@ -76,7 +76,7 @@ class IGPUProgrammingServices
 public:
 
 	//! Adds a new material renderer to the VideoDriver, based on a high level shading 
-	//! language. Currently only HLSL/D3D9 is supported. 
+	//! language. Currently only HLSL/D3D9 and GLSL/OpenGL is supported. 
 	//! \param vertexShaderProgram: String containing the source of the vertex shader program.
 	//! This can be 0 if no vertex program should be used. 
 	//! \param Entry name of the function of the vertexShaderProgram
@@ -89,6 +89,9 @@ public:
 	//! can set the needed vertex and pixel shader program constants. Set this to 0 if you don't need this.
 	//! \param baseMaterial: Base material which renderstates will be used to shade the
 	//! material.
+	//! \param userData: a user data int. This int can be set to any value and will be set as parameter
+	//! in the callback method when calling OnSetConstants(). In this way it is easily possible to 
+	//! use the same callback method for multiple materials and distinguish  between them during the call.
 	//! \return Returns the number of the
 	//! material type which can be set in SMaterial::MaterialType to use the renderer.
 	//! -1 is returned if an error occured. -1 is returned for example if a vertex or pixel shader
@@ -103,7 +106,8 @@ public:
 		const c8* pixelShaderEntryPointName = "main",
 		E_PIXEL_SHADER_TYPE psCompileTarget = EPST_PS_1_1,
 		IShaderConstantSetCallBack* callback = 0,
-		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0;    
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID,
+		s32 userData = 0 ) = 0;    
 
 	//! Like IGPUProgrammingServices::addShaderMaterial() (look there for a detailed description),
 	//! but tries to load the programs from files. 
@@ -119,7 +123,8 @@ public:
 		const c8* pixelShaderEntryPointName = "main",
 		E_PIXEL_SHADER_TYPE psCompileTarget = EPST_PS_1_1,
 		IShaderConstantSetCallBack* callback = 0,
-		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0; 
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID,
+		s32 userData = 0) = 0; 
 
 
 	//! Like IGPUProgrammingServices::addShaderMaterial() (look there for a detailed description),
@@ -136,7 +141,8 @@ public:
 		const c8* pixelShaderEntryPointName = "main",
 		E_PIXEL_SHADER_TYPE psCompileTarget = EPST_PS_1_1,
 		IShaderConstantSetCallBack* callback = 0,
-		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0; 
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID,
+		s32 userData = 0) = 0; 
 
 	//! Adds a new material renderer to the VideoDriver, using pixel and/or 
 	//! vertex shaders to render geometry.
@@ -156,6 +162,9 @@ public:
 	//! can set the needed vertex and pixel shader program constants. Set this to 0 if you don't need this.
 	//! \param baseMaterial: Base material which renderstates will be used to shade the
 	//! material.
+	//! \param userData: a user data int. This int can be set to any value and will be set as parameter
+	//! in the callback method when calling OnSetConstants(). In this way it is easily possible to 
+	//! use the same callback method for multiple materials and distinguish  between them during the call.
 	//! \return Returns the number of the
 	//! material type which can be set in SMaterial::MaterialType to use the renderer.
 	//! -1 is returned if an error occured. -1 is returned for example if a vertex or pixel shader
@@ -164,7 +173,8 @@ public:
 	virtual s32 addShaderMaterial(const c8* vertexShaderProgram = 0,
 		const c8* pixelShaderProgram = 0, 
 		IShaderConstantSetCallBack* callback = 0,
-		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0;
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID,
+		s32 userData = 0) = 0;
 
 	//! Like IGPUProgrammingServices::addShaderMaterial(), but tries to load the 
 	//! programs from files.
@@ -175,7 +185,8 @@ public:
 	virtual s32 addShaderMaterialFromFiles(io::IReadFile* vertexShaderProgram,
 		io::IReadFile* pixelShaderProgram,
 		IShaderConstantSetCallBack* callback = 0,
-		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID) = 0;
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID,
+		s32 userData = 0) = 0;
 
 	//! Like IGPUProgrammingServices::addShaderMaterial(), but tries to load the 
 	//! programs from files.
@@ -187,7 +198,8 @@ public:
 	virtual s32 addShaderMaterialFromFiles(const c8* vertexShaderProgramFileName,
 		const c8* pixelShaderProgramFileName,
 		IShaderConstantSetCallBack* callback = 0,
-		E_MATERIAL_TYPE baseMaterial =	 video::EMT_SOLID) = 0;
+		E_MATERIAL_TYPE baseMaterial = video::EMT_SOLID,
+		s32 userData = 0) = 0;
 };
 
 

@@ -101,12 +101,12 @@ public:
 		bool resetAllRenderstates) = 0;
 
 	//! Sets a constant for the vertex shader based on a name. This can be used if you used
-	//! a high level shader language like CG or HLSL to create a shader. Example: If you
+	//! a high level shader language like GLSL or HLSL to create a shader. Example: If you
 	//! created a shader which has variables named 'mWorldViewProj' (containing the 
 	//! WorldViewProjection matrix) and another one named 'fTime' containing one float, 
 	//! you can set them in your IShaderConstantSetCallBack derived class like this:
 	//! \code
-	//! virtual void OnSetConstants(video::IMaterialRendererServices* services)
+	//! virtual void OnSetConstants(video::IMaterialRendererServices* services, s32 userData)
 	//! {
 	//! 	video::IVideoDriver* driver = services->getVideoDriver();
 	//! 
@@ -134,7 +134,7 @@ public:
 	virtual void setVertexShaderConstant(f32* data, s32 startRegister, s32 constantAmount=1) = 0;
 
 	//! Sets a constant for the pixel shader based on a name. This can be used if you used
-	//! a high level shader language like CG or HLSL to create a shader. See 
+	//! a high level shader language like GLSL or HLSL to create a shader. See 
 	//! setVertexShaderConstant() for an example on how to use this.
 	//! \param name: Name of the variable
 	//! \param floats: Pointer to array of floats

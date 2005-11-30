@@ -36,8 +36,7 @@ public:
 	public:
 
 		Iterator() : current(0) {};
-		Iterator(SKListNode* begin) : current(begin) {};
-
+	
 		Iterator& operator ++() { current = current->next; return *this; };
 		Iterator& operator --() { current = current->prev; return *this; };
 		Iterator operator ++(s32) { Iterator tmp = *this; current = current->next; return tmp; };
@@ -74,6 +73,8 @@ public:
 		T& operator *() { return current->element; };
 
 	private:
+
+		Iterator(SKListNode* begin) : current(begin) {};
 
 		friend class list<T>;
 

@@ -1,4 +1,138 @@
 -------------------------------------------------------------------------------------
+Changes in version 0.14.0 (30 November 2005)
+
+- Irrlicht now includes another video driver type. Together with D3D8, D3D9, OpenGL, the NULL
+  driver and the Software Renderer, an Irrlicht user now has the decision between 6 renderers:
+  The new included renderer is The Apfelbaum Software Renderer, an alternative software renderer 
+  for Irrlicht. Basically it can be described as the Irrlicht Software renderer on steroids. 
+  It rasterizes 3D geometry perfectly: It is able to perform correct 3d clipping, perspective 
+  correct texture mapping, perspective correct color mapping, and renders sub pixel correct, 
+  sub texel correct primitives. In addition, it does bilinear texel filtering and supports more 
+  materials than the EDT_SOFTWARE driver. In short: It looks a lot like the already available hardware 
+  accelerated drivers, but without hardware. :) This renderer has been written entirely by 
+  Thomas Alten, thanks a lot for this huge contribution.
+
+- Irrlicht now supports anisotropic filtering. Use the SMaterial::AnisotropicFilter member or 
+  EMF_ANISOTROPIC_FILTER flag to enable it. I implemented this for all 3 hardware accelerated 
+  drivers: D3D8, D3D9 and OpenGL.
+  
+- Irrlicht now supports the recently released new microsoft compiler. Irrlicht versions compiled
+  with older verions of this compiler can now also be used with the new one, which wasn't possible
+  previously because of a name mangeling issue.
+  
+- All 2D drawing functions can now be used to draw into textures (render targets). This also
+  means for example that the whole GUI environment can be rendered into textures.
+  
+- Irrlicht.NET now supports shaders.
+
+- Irrlicht now loads all textures in 32 bit mode by default. (Previously this was 16bit). To
+  change this behaviour back again, use 
+  device->getVideoDriver()->setTextureCreationFlag(ETCF_ALWAYS_16_BIT, true);
+  
+- Irrlicht.NET now supports Particlesystems and Shaders. Thanks to a code contribution 
+  by Delight.
+  
+- Fixed a bug in the mipmap generation. Now mipmaps are not that blurry anymore and the rendering
+  quality has been improved a lot.
+  
+- It is now possible to assign a userData int to callback functions of shaders. In this way it 
+  it easily possible to use the same callback method for multiple materials and distinguish 
+  between them during the call.
+  
+- Directional lights are now supported in the OpenGL and D3D drivers. To switch on directional
+  lighting, set the light type to ELT_DIRECTIONAL in the SLight structure.
+  
+- Fixed several bugs in the GLSL implementation. Thanks to Michael Zoech for sending in his
+  improvements.
+  
+- For the windows version of Irrlicht, the engine now displays an icon in the program window, if
+  there is one available in the start path with the name "irr.ico".
+  
+- It is now possible to use images with alpha channels on buttons. Use the new 
+  IGUIButton::setUseAlphaChannel() method to enable this feature.
+  
+- The scene manager has a new method getSceneNodeFromName() which finds a scene node by its name.
+
+- It is now also possible to attach scene nodes to joints/bones of sceletal animated .x files.
+  (Using IAnimatedMesh->getXJointNode() ). This was previously only possible with milkshape models.
+  
+- Billboards now draw their bounding box when debugdata is set to visible for them.
+
+- Lights now draw their bounding box and raduis when debugdata is set to visible for them.
+
+- Upgraded to irrXML 1.2. Thanks to some hints by Patrik Müller, irrXML, the XML parser used
+  by the Irrlicht Engine now has CDATA support and some other useful new features.
+
+- Support for VisualC++ (Express) 2005. Added a project file and a IrrlichtPropsVC2005.vsprops
+  file which sets the no deprecate define and adds needed libraries.
+  
+- Fixed size of the bounding box of billboards.
+
+- Billboards are now culled too by default, increasing rendering speed a bit.
+  
+- Fixed a bug which caused the .ms3d loader to crash when loading .ms3d files without materials.
+  Thanks to sdi2000 for posting this.
+  
+- Fixed a bug causing the possibility to crash when destructing the scene graph or a 
+  scene node with children.
+  
+- Fixed some bugs which caused invalid RTT operations, when for example the render target
+  texture was smaller than the screen.
+  
+- Fixed a heavy bug in Irrlicht.NET causing lots of memory leaks when drawing text.
+
+- Fixed a bug in the attachement of scene nodes to animated X files.
+
+- Fixed a bug in the .NET Vector3D addition operator.
+
+- Updated to Salvatore Russo's DMF loader version 1.3. Notes by him:
+   This version just adds some new functionalities. First of all Alpha Blended Textures are now
+   supported by DeleD as well as loader. Because of some trouble with Irrlicht 0.12.0 TGA loading,
+   TGA textures are always flipped so I've added a parameter so that you can choose to
+   flip or not all TGA textures coords, this way: 
+   SceneManager->getParameters()->setParameter(scene::DMF_FLIP_ALPHA_TEXTURES, true); 
+   you can also set material transparent reference value by setting:
+   SceneManager->getParameters()->setParameter(scene::DMF_ALPHA_CHANNEL_REF, 0.01); 
+   you can use every value beetween 0 and 1, but to respect DeleD rapresentation
+   0.01 is OK, just a note, if you set 0, it's just like you set 0.5, this means
+   that each pixel found corresponding to a position in alpha map that has a value<127
+   won't be drawn.
+
+- Fixed a small bug in the line breaking algorithm.
+
+- Fixed a bug which caused the engine to display strange artifact pixels when drawing 2D images
+  like text in screens which odd resolutions.
+  
+- Slightly changed the interface of createDevice and createDeviceEx(): the version parameter
+  now is a char* instead of wchar_t*. Also, IrrlichtDevice::getVersion() now returns char*
+  instead of wchar_t*.
+  
+- Fixed some parts in the source to make Irrlicht compile in Linux 64.
+  
+- Renamed the EDT_DIRECTX8, EDT_DIRECTX9, _IRR_COMPILE_WITH_DIRECTX_8_ and 
+  _IRR_COMPILE_WITH_DIRECTX_8_ enumeration literals to EDT_DIRECT3D8, EDT_DIRECT3D9,
+  _IRR_COMPILE_WITH_DIRECT3D_8_ and _IRR_COMPILE_WITH_DIRECT3D_9_. You might need to
+  update your code and compilation settings with these new names.
+  
+- Added the remaining '..' directory in the linux version of the file list
+
+- Updated to a faster version of the TerrainSceneNode by Spintz. Much thanks again!
+
+- Fixed a bug causing billboards to be displayed upside down.
+
+- The D3D drivers now won't crash anymore when they get feeded with nullpointers as shader constants.
+
+- Irrlicht now identifies the Linux platform it runs on and returns a more detailed string
+  when calling getOperationSystemVersion().
+  
+- Fixed some bugs in several collision test methods thanks to Spintz.
+
+- Updated font tool
+
+- Made the list::iterator constructor which took a sklistnode as parameter private, 
+  to make Irrlicht compatible with the Errlicht interface.
+
+-------------------------------------------------------------------------------------
 Changes in version 0.12.0 (24 August 2005)
   
 - It is now possible to have multiple scene managers. Use ISceneManager::createNewSceneManager()
@@ -127,7 +261,7 @@ Changes in version 0.12.0 (24 August 2005)
   could not be initialized under special circumstances. Thanks to Sascha Plumhoff for
   the bug report.
   
-- Fixed a bug with the FileList in Linux, reported and fixed by William Finlayson.
+- Fixed a bug with the FileList in Linux, reported by DrAnonymous and fixed by William Finlayson.
   
 - Fixed some bad documentation bugs.
 

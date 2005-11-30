@@ -189,24 +189,12 @@ private:
 {
 	// let user select driver type
 
-	video::E_DRIVER_TYPE driverType = video::EDT_DIRECTX9;
-
-	printf("Please select the driver you want for this example:\n"\
-		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.2\n"\
-		" (d) Software Renderer\n (e) NullDevice\n (otherKey) exit\n\n");
-
+	video::E_DRIVER_TYPE driverType = video::EDT_DIRECT3D9;
+<br>	printf(&quot;Please select the driver you want for this example:\n&quot;\<br>		&quot; (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.5\n&quot;\<br>		&quot; (d) Software Renderer\n (e) Apfelbaum Software Renderer\n&quot;\<br>		&quot; (f) NullDevice\n (otherKey) exit\n\n&quot;);<br>
 	char i;
 	std::cin >> i;
 
-	switch(i)
-	{
-		case 'a': driverType = video::EDT_DIRECTX9;	break;
-		case 'b': driverType = video::EDT_DIRECTX8;	break;
-		case 'c': driverType = video::EDT_OPENGL;   break;
-		case 'd': driverType = video::EDT_SOFTWARE; break;
-		case 'e': driverType = video::EDT_NULL;     break;
-		default: return 0;
-	}	
+	switch(i)<br>	{<br>		case 'a': driverType = video::EDT_DIRECT3D9;break;<br>		case 'b': driverType = video::EDT_DIRECT3D8;break;<br>		case 'c': driverType = video::EDT_OPENGL;   break;<br>		case 'd': driverType = video::EDT_SOFTWARE; break;<br>		case 'e': driverType = video::EDT_SOFTWARE2;break;<br>		case 'f': driverType = video::EDT_NULL;     break;<br>		default: return 0;<br>	}	
 
 	// create device
 

@@ -16,6 +16,9 @@ namespace scene
 //! Scene node which is a dynamic light. 
 /** You can switch the light on and off by 
 making it visible or not, and let it be animated by ordinary scene node animators.
+If you set the light type to be directional, you will need to set the direction of the
+light source manually in the SLight structure, the position of the scene node will have no
+effect on this direction.
 */
 class ILightSceneNode : public ISceneNode
 {

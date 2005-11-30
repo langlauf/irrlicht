@@ -17,14 +17,15 @@ namespace video
 //! Enumeration for all vertex types there are.
 enum E_VERTEX_TYPE
 {
-	//! Standard vertex type used by the Irrlicht engine.
+	//! Standard vertex type used by the Irrlicht engine, video::S3DVertex.
 	EVT_STANDARD = 0, 
 
-	//! Vertex with two texture coordinates. Usually used for geometry with lightmaps
-	//! or other special materials.
+	//! Vertex with two texture coordinates, video::S3DVertex2TCoords. Usually used 
+	//! for geometry with lightmaps or other special materials.
 	EVT_2TCOORDS,
 
-	//! Vertex with a tangent and binormal vector. Usually used for tangent space normal mapping.
+	//! Vertex with a tangent and binormal vector, video::S3DVertexTangents. Usually 
+	//! used for tangent space normal mapping.
 	EVT_TANGENTS,
 };
 

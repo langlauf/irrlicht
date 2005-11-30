@@ -13,6 +13,7 @@
 #include "SMaterial.h"
 #include "IEventReceiver.h"
 #include "ITerrainSceneNode.h"
+#include "SceneParameters.h"
 
 namespace irr
 {
@@ -39,72 +40,6 @@ namespace video
 
 namespace scene
 {
-	//! Name of the parameter for changing the texture path of the built-in csm loader.
-	/** Use it like this:
-	 \code
-	 SceneManager->getParameters()->setParameter(
-	    scene::CSM_TEXTURE_PATH, "path/to/your/textures");
-	\endcode
-	**/ 
-	const char* const CSM_TEXTURE_PATH = "CSM_TexturePath";
-
-	//! Name of the parameter for changing the texture path of the built-in lmts loader.
-	/** Use it like this:
-	 \code
-	 SceneManager->getParameters()->setParameter(
-	   scene::LMTS_TEXTURE_PATH, "path/to/your/textures");
-	\endcode
-	**/ 
-	const char* const LMTS_TEXTURE_PATH = "LMTS_TexturePath";
-
-	//! Name of the parameter for changing the texture path of the built-in my3d loader.
-	/** Use it like this:
-	 \code
-	 SceneManager->getParameters()->setParameter(
-	   scene::MY3D_TEXTURE_PATH, "path/to/your/textures");
-	\endcode
-	**/ 
-	const char* const MY3D_TEXTURE_PATH = "MY3D_TexturePath";
-
-	//! Name of the parameter specifying the COLLADA mesh loading mode
-	/**
-	Specifies if the COLLADA loader should create instances of the models, lights and
-	cameras when loading COLLADA meshes. By default, this is set to false. If this is
-	set to true, the ISceneManager::getMesh() method will only return a pointer to a
-	dummy mesh and create instances of all meshes and lights and cameras in the collada
-	file by itself. Example:
-	\code
-	 SceneManager->getParameters()->setParameter(
-	   scene::COLLADA_CREATE_SCENE_INSTANCES, true);
-	\endcode
-	*/
-	const char* const COLLADA_CREATE_SCENE_INSTANCES = "COLLADA_CreateSceneInstances";
-
-	//! Name of the parameter for changing the texture path of the built-in DMF loader.
-	/** Use it like this:
-	 \code
-	 SceneManager->getStringParameters()->setParameter(
-	   scene::DMF_TEXTURE_PATH, "path/to/your/textures");
-	\endcode
-	**/ 
-	const char* const DMF_TEXTURE_PATH = "DMF_TexturePath";
-	
-	//! Name of the parameter for preserving DMF textures dir structure with built-in DMF loader.
-	/** Use it like this:
-	 \code
-	 //this way you won't use this setting
-	 SceneManager->getParameters()->setParameter(
-	   scene::DMF_USE_MATERIALS_DIRS, false); 
-	 \endcode
-	 \code
-     //this way you'll use this setting
-     SceneManager->getParameters()->setParameter(
-	   scene::DMF_USE_MATERIALS_DIRS, true); 
-	\endcode
-	**/ 
-	const char* const DMF_USE_MATERIALS_DIRS = "DMF_MaterialsDir";
-
-
 	//! Enumeration for render passes.
 	/** A parameter passed to the registerNodeForRendering() method of the ISceneManager, 
 	specifying when the mode wants to be drawed in relation to the other nodes. */
@@ -234,7 +169,10 @@ namespace scene
 		 *    <TD>DeleD (delgine.com) is a 3D editor and level-editor combined into one and is specifically 
 		 *        designed for 3D game-development. With this loader, it is possible to directly load
 		 *        all geometry is as well as textures and lightmaps from .dmf files. To set texture and 
-		 *        material paths, see scene::DMF_USE_MATERIALS_DIRS and scene::DMF_TEXTURE_PATH. The loader is 
+		 *        material paths, see scene::DMF_USE_MATERIALS_DIRS and scene::DMF_TEXTURE_PATH. It is also
+		 *        possible to flip the alpha texture by setting scene::DMF_FLIP_ALPHA_TEXTURES to true and
+		 *        to set the material transparent reference value by setting scene::DMF_ALPHA_CHANNEL_REF to
+		 *        a float between 0 and 1. The loader is 
 		 *        based on Salvatore Russo's .dmf loader, I just changed some parts of it. Thanks to
 		 *        Salvatore for his work and for allowing me to use his code in Irrlicht and put it under Irrlicht's 
 		 *        license. For newer and more enchanced versions of the loader, take a look at delgine.com.
@@ -521,7 +459,8 @@ namespace scene
 		 This pointer should not be dropped. See IUnknown::drop() for more information. */
 		virtual ILightSceneNode* addLightSceneNode(ISceneNode* parent = 0,
 			const core::vector3df& position = core::vector3df(0,0,0),
-			video::SColorf color = video::SColorf(1.0f, 1.0f, 1.0f),	f32 radius=100.0f, s32 id=-1) = 0;
+			video::SColorf color = video::SColorf(1.0f, 1.0f, 1.0f),
+			f32 radius=100.0f, s32 id=-1) = 0;
 
 		//! Adds a billboard scene node to the scene graph.
 		/** A billboard is like a 3d sprite: A 2d element,
@@ -738,6 +677,14 @@ namespace scene
 		 \return Returns pointer to the first scene node with this id,
 		 and null if no scene node could be found. */
 		virtual ISceneNode* getSceneNodeFromId(s32 id, ISceneNode* start=0) = 0;
+
+		//! Returns the first scene node with the specified name.
+		/**\param start: Scene node to start from. All children of this scene
+		 node are searched. If null is specified, the root scene node is
+		 taken.
+		 \return Returns pointer to the first scene node with this id,
+		 and null if no scene node could be found. */
+		virtual ISceneNode* getSceneNodeFromName(const wchar_t* name, ISceneNode* start=0) = 0;
 
 		//! Returns the current active camera.
 		/** \return The active camera is returned. Note that this can be NULL, if there

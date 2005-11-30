@@ -109,7 +109,7 @@ bool CDemo::OnEvent(SEvent event)
 		core::vector3df pos = device->getSceneManager()->getActiveCamera()->getAbsolutePosition();
 		sprintf(tmp, "points.push_back(core::vector3df(%ff, %ff, %ff)); // %d\n", pos.X, pos.Y, pos.Z,
 			sceneStartTime - device->getTimer()->getTime());
-		OutputDebugString(tmp);
+		//OutputDebugString(tmp);
 		return true;
 	}
 	else
@@ -428,15 +428,15 @@ void CDemo::loadSceneData()
 
 	// create camp fire
 
-	campFire = sm->addParticleSystemSceneNode(false, 0, -1, 
-		core::vector3df(100,120,600), core::vector3df(0,0,0),
-		core::vector3df(2,2,2));
+	campFire = sm->addParticleSystemSceneNode(false);
+	campFire->setPosition(core::vector3df(100,120,600));
+	campFire->setScale(core::vector3df(2,2,2));
 
 	campFire->setParticleSize(core::dimension2d<f32>(20.0f, 10.0f));
 
 	scene::IParticleEmitter* em = campFire->createBoxEmitter(
 		core::aabbox3d<f32>(-7,0,-7,7,1,7), 
-		core::vector3df(0.0f,0.03f,0.0f),
+		core::vector3df(0.0f,0.06f,0.0f),
 		80,100, video::SColor(0,255,255,255),video::SColor(0,255,255,255), 800,2000);
 
 	campFire->setEmitter(em);
@@ -489,7 +489,7 @@ void CDemo::createLoadingScreen()
 
 	// loading text
 
-	const int lwidth = 120;
+	const int lwidth = 220;
 	const int lheight = 15;
 
 	core::rect<int> pos(10, size.Height-lheight-10, 10+lwidth, size.Height-10);

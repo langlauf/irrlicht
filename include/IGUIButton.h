@@ -66,6 +66,12 @@ namespace gui
 
 		//! Returns if the button is currently pressed
 		virtual bool isPressed() = 0;
+
+		//! Sets if the alpha channel should be used for drawing images on the button (default is false)
+		virtual void setUseAlphaChannel(bool useAlphaChannel) = 0;
+
+		//! Returns if the alpha channel should be used for drawing images on the button
+		virtual bool getUseAlphaChannel() = 0;
 	};
 
 

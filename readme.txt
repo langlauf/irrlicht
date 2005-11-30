@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.12.0
+The Irrlicht Engine SDK version 0.14.0
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -86,7 +86,7 @@ The Irrlicht Engine SDK version 0.12.0
   * Visual Studio 6.0
   * Visual Studio.NET (7.0)
   * Visual Studio.NET 2003 (7.1)
-  * Visual Studio.NET 2005 Beta (8.0)
+  * Visual Studio 2005 (8.0)
   * DevC++ 4.9 & gcc (project files included)
      
   If you ever want to (re)compile the engine yourself (which means you don't
@@ -111,6 +111,9 @@ The Irrlicht Engine SDK version 0.12.0
 
   Informations about changes in this new version of the engine can be 
   found in changes.txt.
+
+  Please also note that the textures, 3D models and levels are copyright
+  by their authors and not included in the Irrlicht engine license. 
 
 ==========================================================================
 5. License

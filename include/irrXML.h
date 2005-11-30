@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 
-/** \mainpage irrXML 1.1 API documentation
+/** \mainpage irrXML 1.2 API documentation
  <div align="center"><img src="logobig.png" ></div>
 
  \section intro Introduction
@@ -48,7 +48,6 @@
 	 Although irrXML has some strenghts, it currently also has the following limitations:
 
 	 - The input xml file is not validated and assumed to be correct. 
-	 - Currently, CData-Sections are only supported as text elements.
 
     \section irrxmlexample Example
 
@@ -195,6 +194,9 @@ namespace io
 		//! An xml comment like &lt;!-- I am a comment --&gt; or a DTD definition.
 		EXN_COMMENT,
 
+		//! An xml cdata section like &lt;![CDATA[ this is some CDATA ]]&gt;
+		EXN_CDATA,
+
 		//! Unknown element.
 		EXN_UNKNOWN
 	};
@@ -316,11 +318,23 @@ namespace io
 		the value could not be interpreted as integer. */
 		virtual int getAttributeValueAsInt(const char_type* name) const = 0;
 
+		//! Returns the value of an attribute as integer. 
+		/** \param idx: Zero based index, should be something between 0 and getAttributeCount()-1.
+		\return Value of the attribute as integer, and 0 if an attribute with this index does not exist or
+		the value could not be interpreted as integer. */
+		virtual int getAttributeValueAsInt(int idx) const = 0;
+
 		//! Returns the value of an attribute as float. 
 		/** \param name: Name of the attribute.
 		\return Value of the attribute as float, and 0 if an attribute with this name does not exist or
 		the value could not be interpreted as float. */
 		virtual float getAttributeValueAsFloat(const char_type* name) const = 0;
+
+		//! Returns the value of an attribute as float. 
+		/** \param idx: Zero based index, should be something between 0 and getAttributeCount()-1.
+		\return Value of the attribute as float, and 0 if an attribute with this index does not exist or
+		the value could not be interpreted as float. */
+		virtual float getAttributeValueAsFloat(int idx) const = 0;
 
 		//! Returns the name of the current node. 
 		/** Only non null, if the node type is EXN_ELEMENT.

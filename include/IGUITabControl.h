@@ -19,7 +19,7 @@ namespace gui
 
 		//! constructor
 		IGUITab(IGUIEnvironment* environment, IGUIElement* parent, s32 id, core::rect<s32> rectangle)
-			: IGUIElement(EGUIET_TAB_CONTROL, environment, parent, id, rectangle) {}
+			: IGUIElement(EGUIET_TAB, environment, parent, id, rectangle) {}
 
 		//! destructor
 		virtual ~IGUITab() {};

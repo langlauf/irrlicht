@@ -133,8 +133,8 @@ class aabbox3d
 								const vector3d<T>& linevect,
 								T halflength) const
 		{
-			const vector3d<T> e = (MaxEdge - MinEdge) * (T)0.5;
-			const vector3d<T> t = (MinEdge + e) - linemiddle;
+			const vector3d<T> e = getExtent();
+			const vector3d<T> t = getCenter() - linemiddle;
 			float r;
 
 			if ((fabs(t.X) > e.X + halflength * fabs(linevect.X)) || 
@@ -201,7 +201,7 @@ class aabbox3d
 			return (MinEdge + MaxEdge) / 2;
 		}
 
-		//! returns extend of the box
+		//! returns extent of the box
 		vector3d<T> getExtent() const
 		{
 			return MaxEdge - MinEdge;

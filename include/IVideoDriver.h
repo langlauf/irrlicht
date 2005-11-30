@@ -85,11 +85,8 @@ namespace video
 		//! Are ARB fragment programs v1.0 supported?
 		EVDF_ARB_FRAGMENT_PROGRAM_1,
 
-		//! Is GLSL v100 supported?  (GL_ARB_shading_language_100)
-		EVDF_ARB_GLSL_100,
-
-		//! Is GLSL v110 supported?  (GL_ARB_shading_language_110)
-		EVDF_ARB_GLSL_110,
+		//! Is GLSL supported? 
+		EVDF_ARB_GLSL,
 
 		//! Is HLSL supported?
 		EVDF_HLSL
@@ -293,7 +290,11 @@ namespace video
 		// .. draw stuff here
 		driver->setRenderTarget(0);     // set previous render target
 		Please note that you cannot render 3D or 2D geometry with a render target as texture
-		on it when you are rendering the scene into this render target at the same time.
+		on it when you are rendering the scene into this render target at the same time. It is 
+		usually only possible to render into a texture between the IVideoDriver::beginScene() and endScene()
+		method calls. And please also note that the scene will be rendered upside down into the texture 
+		in some devices (e.g. OpenGL vs. D3D). A simple workaround for this is to flip the
+		texture coordinates of the geometry where the render target texture is displayed on.
 		\endcode
 		\param texture: New render target. Must be a texture created with 
 		IVideoDriver::createRenderTargetTexture(). If set to 0, it sets the previous render
@@ -381,12 +382,15 @@ namespace video
 			s32 vertexCount, const u16* indexList, s32 triangleCount) = 0;
 
 		//! Draws a 3d line.
-		/** This method usually simply calls drawIndexedTriangles with some 
+		/** For some implementations, this method simply calls drawIndexedTriangles with some 
 		triangles. Note that the line is drawed using the current transformation
-		matrix and material.
-		This method was created for making culling debugging easier. It works with
-		all drivers because it does simply a call to drawIndexedTriangleList and
-		hence is not very fast but it might be useful for further development. 
+		matrix and material. So if you need to draw the 3D line independent of the
+		current transformation, use 
+		\code
+		driver->setTransform(video::ETS_WORLD, core::matrix4());
+		\endcode
+		before drawing the line.
+		This method was created for making culling debugging easier. 
 		\param start: Start of the 3d line.
 		\param end: End of the 3d line.
 		\param color: Color of the line.  */
@@ -590,7 +594,7 @@ namespace video
 		virtual const SLight& getDynamicLight(s32 idx) = 0;
         
 		//! Gets name of this video driver.
-		/** \return Returns the name of the video driver. Example: In case of the DirectX8
+		/** \return Returns the name of the video driver. Example: In case of the Direct3D8
 		driver, it would return "Direct3D 8.1". */
 		virtual const wchar_t* getName() = 0;
 

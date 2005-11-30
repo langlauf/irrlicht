@@ -14,7 +14,7 @@ CMainMenu::CMainMenu()
 bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 					bool& outAdditive, bool &outVSync, video::E_DRIVER_TYPE& outDriver)
 {
-	device = createDevice(video::EDT_SOFTWARE,
+	device = createDevice(video::EDT_SOFTWARE2,
 		core::dimension2d<s32>(512, 384), 16, false, false, false, this);
 
 	device->getFileSystem()->addZipFileArchive("irrlicht.dat");
@@ -24,9 +24,9 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 	scene::ISceneManager* smgr = device->getSceneManager();
 	gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
 
-	wchar_t tmp[255];
-	swprintf(tmp, 255, L"Irrlicht Engine Demo v%s", device->getVersion());
-	device->setWindowCaption(tmp);
+	core::stringw str = "Irrlicht Engine Demo v";
+	str += device->getVersion();
+	device->setWindowCaption(str.c_str());
 
 	// load font
 
@@ -49,10 +49,11 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 
 	// add list box
 
-	gui::IGUIListBox* box = guienv->addListBox(core::rect<int>(10,10,220,75), optTab, 1);
+	gui::IGUIListBox* box = guienv->addListBox(core::rect<int>(10,10,220,105), optTab, 1);
 	box->addItem(L"OpenGL 1.5");
 	box->addItem(L"Direct3D 8.1");
 	box->addItem(L"Direct3D 9.0c");	
+	box->addItem(L"Apfelbaum Software Renderer 1.0");
 	box->addItem(L"Irrlicht Software Renderer 1.0");
 	box->setSelected(selected);
 
@@ -62,25 +63,27 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 
 	// add checkbox
 
-	guienv->addCheckBox(fullscreen, core::rect<int>(20,85,130,110), 
+	const s32 d = 50;
+
+	guienv->addCheckBox(fullscreen, core::rect<int>(20,85+d,130,110+d), 
 		optTab, 3, L"Fullscreen");
-	guienv->addCheckBox(music, core::rect<int>(20,110,130,135), 
+	guienv->addCheckBox(music, core::rect<int>(20,110+d,130,135+d), 
 		optTab, 4, L"Music & Sfx");
-	guienv->addCheckBox(shadows, core::rect<int>(20,135,230,160), 
+	guienv->addCheckBox(shadows, core::rect<int>(20,135+d,230,160+d), 
 		optTab, 5, L"Realtime shadows");
-	guienv->addCheckBox(additive, core::rect<int>(20,160,230,185),
+	guienv->addCheckBox(additive, core::rect<int>(20,160+d,230,185+d),
 		optTab, 6, L"Old HW compatible blending");
-	guienv->addCheckBox(vsync, core::rect<int>(20,185,230,210),
+	guienv->addCheckBox(vsync, core::rect<int>(20,185+d,230,210+d),
 		optTab, 7, L"Vertical synchronisation");
 
 	// add text
 
-	wchar_t* text = L"Welcome to the Irrlicht Engine. Please select "\
+	/*wchar_t* text = L"Welcome to the Irrlicht Engine. Please select "\
 		L"the settings you prefer and press 'Start Demo'. "\
 		L"Right click for changing menu style.";
 
 	guienv->addStaticText(text, core::rect<int>(10, 220, 220, 280),
-		true, true, optTab);
+		true, true, optTab);*/
 
 	// add about text
 
@@ -142,9 +145,10 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 	switch(selected)
 	{
 	case 0:	outDriver = video::EDT_OPENGL; break;
-	case 1:	outDriver = video::EDT_DIRECTX8; break;
-	case 2:	outDriver = video::EDT_DIRECTX9; break;	
-	case 3:	outDriver = video::EDT_SOFTWARE; break;
+	case 1:	outDriver = video::EDT_DIRECT3D8; break;
+	case 2:	outDriver = video::EDT_DIRECT3D9; break;	
+	case 3:	outDriver = video::EDT_SOFTWARE2; break;
+	case 4:	outDriver = video::EDT_SOFTWARE; break;
 	}
 
 	return start;
@@ -182,10 +186,11 @@ bool CMainMenu::OnEvent(SEvent event)
 			}
 			break;
 		case 1:
-			if (event.GUIEvent.EventType == gui::EGET_LISTBOX_CHANGED)
+			if (event.GUIEvent.EventType == gui::EGET_LISTBOX_CHANGED ||
+				event.GUIEvent.EventType == gui::EGET_LISTBOX_SELECTED_AGAIN)
 			{
 				selected = ((gui::IGUIListBox*)event.GUIEvent.Caller)->getSelected();
-				startButton->setEnabled(selected != 3);
+				startButton->setEnabled(selected != 4);
 			}
 			break;
 		case 2:

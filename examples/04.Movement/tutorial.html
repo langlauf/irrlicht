@@ -72,7 +72,7 @@
           the node moves up, and if you press 'S' it moves down.</p>
         <table width="95%" border="0" cellspacing="2" cellpadding="0" bgcolor="#CCCCCC" align="center">
           <tr> 
-            <td> <pre>if (node != 0 &amp;&amp; event.EventType == irr::EET_KEY_INPUT_EVENT&amp;&amp;<br>			!event.KeyInput.PressedDown)<br>{<br>		switch(event.KeyInput.Key)<br>		{<br>		case KEY_KEY_W:<br>		case KEY_KEY_S:<br>			{<br>				core::vector3df v = node-&gt;getPosition();<br>				v.Y += event.KeyInput.Key == KEY_KEY_W ? 2.0f : -2.0f;<br>				node-&gt;setPosition(v);<br>			}<br>			return true;<br>		}<br>}</pre></td>
+            <td> <pre>if (node != 0 &amp;&amp; event.EventType == irr::EET_KEY_INPUT_EVENT&amp;&amp;<br>			!event.KeyInput.PressedDown)<br>{<br>		switch(event.KeyInput.Key)<br>		{<br>		case KEY_KEY_W:<br>		case KEY_KEY_S:<br>			{<br>				core::vector3df v = node-&gt;getPosition();<br>				v.Y += event.KeyInput.Key == KEY_KEY_W ? 2.0f : -2.0f;<br>				node-&gt;setPosition(v);<br>			}<br>			return true;<br>		}<br>} return false; <br> } <br> };</pre></td>
           </tr>
         </table>
         

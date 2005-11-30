@@ -45,7 +45,7 @@ class MyShaderCallBack : public video::IShaderConstantSetCallBack
 {
 public:
 
-	virtual void OnSetConstants(video::IMaterialRendererServices* services)
+	virtual void OnSetConstants(video::IMaterialRendererServices* services, s32 userData)
 	{
 		video::IVideoDriver* driver = services->getVideoDriver();
 
@@ -113,27 +113,30 @@ int main()
 {
 	// let user select driver type
 
-	video::E_DRIVER_TYPE driverType = video::EDT_DIRECTX9;
+	video::E_DRIVER_TYPE driverType = video::EDT_DIRECT3D9;
 
 	printf("Please select the driver you want for this example:\n"\
-		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.2\n"\
-		" (d) Software Renderer\n (e) NullDevice\n (otherKey) exit\n\n");
+		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.5\n"\
+		" (d) Software Renderer\n (e) Apfelbaum Software Renderer\n"\
+		" (f) NullDevice\n (otherKey) exit\n\n");
 
 	char i;
 	std::cin >> i;
 
 	switch(i)
 	{
-		case 'a': driverType = video::EDT_DIRECTX9;	break;
-		case 'b': driverType = video::EDT_DIRECTX8;	break;
+		case 'a': driverType = video::EDT_DIRECT3D9;break;
+		case 'b': driverType = video::EDT_DIRECT3D8;break;
 		case 'c': driverType = video::EDT_OPENGL;   break;
 		case 'd': driverType = video::EDT_SOFTWARE; break;
-		case 'e': driverType = video::EDT_NULL;     break;
-		default: return 0;
+		case 'e': driverType = video::EDT_SOFTWARE2;break;
+		case 'f': driverType = video::EDT_NULL;     break;
+		default: return 1;
 	}	
 
 	// ask the user if we should use high level shaders for this example
-	if (driverType == video::EDT_DIRECTX9)
+	if (driverType == video::EDT_DIRECT3D9 || 
+		 driverType == video::EDT_OPENGL)
 	{
 		printf("Please press 'y' if you want to use high level shaders.\n");
 		std::cin >> i;
@@ -170,11 +173,11 @@ int main()
 
 	switch(driverType)
 	{
-	case video::EDT_DIRECTX8:
+	case video::EDT_DIRECT3D8:
 		psFileName = "../../media/d3d8.psh";
 		vsFileName = "../../media/d3d8.vsh";
 		break;
-	case video::EDT_DIRECTX9:
+	case video::EDT_DIRECT3D9:
 		if (UseHighLevelShaders)
 		{
 			psFileName = "../../media/d3d9.hlsl";
@@ -188,8 +191,16 @@ int main()
 		break;
 
 	case video::EDT_OPENGL:
-		psFileName = "../../media/opengl.psh";
-		vsFileName = "../../media/opengl.vsh";
+		if (UseHighLevelShaders)
+		{
+			psFileName = "../../media/opengl.frag";
+			vsFileName = "../../media/opengl.vert";
+		}
+		else
+		{
+			psFileName = "../../media/opengl.psh";
+			vsFileName = "../../media/opengl.vsh";
+		}
 		break;
 	}
 

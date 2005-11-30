@@ -177,6 +177,12 @@ public:
 						   other.Y*inv + Y*d);
 	}
 
+	//! sets this vector to the interpolated vector between a and b. 
+	inline void interpolate(const vector2d<T>& a, const vector2d<T>& b, const f32 t)
+	{
+		X = b.X + ( ( a.X - b.X ) * t );
+		Y = b.Y + ( ( a.Y - b.Y ) * t );
+	}
 	// member variables
 	T X, Y;
 };

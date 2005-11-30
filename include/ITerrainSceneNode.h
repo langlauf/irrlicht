@@ -108,6 +108,12 @@ namespace scene
 		 \return: Returns the number of elements in the array */
 		virtual s32 getCurrentLODOfPatches(core::array<s32>& LODs) = 0;
 
+		//! Manually sets the LOD of a patch
+		/** \param patchX: Patch x coordinate.
+		\param patchZ: Patch z coordinate.
+		\param LOD: The level of detail to set the patch to. */
+		virtual void setLODOfPatch( s32 patchX, s32 patchZ, s32 LOD ) = 0;
+
 		//! Returns center of terrain.
 		virtual core::vector3df getTerrainCenter() = 0;
 

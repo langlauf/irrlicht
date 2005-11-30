@@ -28,7 +28,7 @@ namespace irr
 
 		//! Type of the device. 
 		/** This can currently be video::EDT_NULL, 
-		video::EDT_SOFTWARE, video::EDT_DIRECTX8, video::EDT_DIRECTX9 and video::EDT_OPENGL. 
+		video::EDT_SOFTWARE, video::EDT_DIRECT3D8, video::EDT_DIRECT3D9 and video::EDT_OPENGL. 
 		Default: Software. */
 		video::E_DRIVER_TYPE DriverType;
 
@@ -121,7 +121,7 @@ namespace irr
 		//! Don't use or change this parameter. 
 		/** Always set it to IRRLICHT_SDK_VERSION, which is done by default.
 		This is needed for sdk version checks. */
-		const wchar_t* SDK_version_do_not_use;
+		const char* SDK_version_do_not_use;
 	};
 
 

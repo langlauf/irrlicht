@@ -22,8 +22,8 @@
 #define LINUX
 #endif
 
-//! Define _IRR_COMPILE_WITH_DIRECTX_8_ and _IRR_COMPILE_WITH_DIRECTX_9_ to compile 
-//! the Irrlicht engine with DirectX8 and/or DirectX9.
+//! Define _IRR_COMPILE_WITH_DIRECT3D_8_ and _IRR_COMPILE_WITH_DIRECT3D_9_ to compile 
+//! the Irrlicht engine with Direct3D8 and/or DIRECT3D9.
 /** If you only want to use the software device or opengl this can be useful.
 This switch is mostly disabled because people do not get the g++ compiler compile
 directX header files, and directX is only available on windows platforms. If you
@@ -34,8 +34,8 @@ and this to the linker settings: -ld3dx9 -ld3dx8 **/
 #if (defined(_IRR_WINDOWS_) || defined(_XBOX)) && \
  (!defined(__GNUC__) || defined(IRR_COMPILE_WITH_DX9_DEV_PACK))
 
-#define _IRR_COMPILE_WITH_DIRECTX_8_
-#define _IRR_COMPILE_WITH_DIRECTX_9_
+#define _IRR_COMPILE_WITH_DIRECT3D_8_
+#define _IRR_COMPILE_WITH_DIRECT3D_9_
 
 #endif
 
@@ -103,12 +103,12 @@ Note that the engine will run in D3D REF for this, which is a lot slower than HA
 #define _IRR_D3D_NO_SHADER_DEBUGGING 
 
 
-// We need to disable DirectX9 support for Visual Studio 6.0 because 
+// We need to disable DIRECT3D9 support for Visual Studio 6.0 because 
 // those $%&$!! disabled support for it since Dec. 2004 and users are complaining
 // about linker errors. Comment this out only if you are knowing what you are 
 // doing. (Which means you have an old DX9 SDK and VisualStudio6).
 #if (_MSC_VER < 1300 && !defined(__GNUC__)) 
-#undef _IRR_COMPILE_WITH_DIRECTX_9_
+#undef _IRR_COMPILE_WITH_DIRECT3D_9_
 #pragma message("Compiling Irrlicht with Visual Studio 6.0, support for DX9 is disabled.")
 #endif
 

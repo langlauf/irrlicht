@@ -122,9 +122,9 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION L"0.12.0"
+#define IRRLICHT_SDK_VERSION "0.14.0"
 
-/*! \mainpage Irrlicht Engine 0.12.0 API documentation
+/*! \mainpage Irrlicht Engine 0.14.0 API documentation
  *
  * <div align="center"><img src="logobig.png" ></div>
  *
@@ -132,10 +132,10 @@
  *
  * Welcome to the Irrlicht Engine API documentation.
  * Here you'll find any information you'll need to develop applications with
- * the Irrlicht Engine. If you look for a tutorial on how to start, take a look
- * at the homepage of the Irrlicht Engine at 
+ * the Irrlicht Engine. If you are looking for a tutorial on how to start, you'll
+ * find some on the homepage of the Irrlicht Engine at 
  * <A HREF="http://irrlicht.sourceforge.net" >irrlicht.sourceforge.net</A> 
- * or into the SDK in the directory \examples.
+ * or inside the SDK in the directory \examples.
  *
  * The Irrlicht Engine is intended to be an easy-to-use 3d engine, so
  * this documentation is an important part of it. If you have any questions or
@@ -165,7 +165,7 @@
  * int main()
  * {
  *	// start up the engine
- *	IrrlichtDevice *device = createDevice(video::EDT_DIRECTX8,
+ *	IrrlichtDevice *device = createDevice(video::EDT_DIRECT3D8,
  *		core::dimension2d<s32>(640,480));
  *
  *	video::IVideoDriver* driver = device->getVideoDriver();
@@ -220,7 +220,7 @@
  * You can find a list of all namespaces with descriptions at the 
  * <A HREF="namespaces.html"> namespaces page</A>. 
  * This is also a good place to start reading the documentation. If you
- * don't want always write the namespace names, just use all namespaces like 
+ * don't want to write the namespace names all the time, just use all namespaces like 
  * this:
  * \code
  * using namespace core;
@@ -268,7 +268,7 @@ namespace irr
 	/** If you need more parameters to be passed to the creation of the Irrlicht Engine device,
 	use the createDeviceEx() function.
 	\param deviceType: Type of the device. This can currently be video::EDT_NULL, 
-	video::EDT_SOFTWARE, video::EDT_DIRECTX8, video::EDT_DIRECTX9 and video::EDT_OPENGL.
+	video::EDT_SOFTWARE, video::EDT_DIRECT3D8, video::EDT_DIRECT3D9 and video::EDT_OPENGL.
 	\param windowSize: Size of the window or the video mode in fullscreen mode.
 	\param bits: Bits per pixel in fullscreen mode. Ignored if windowed mode.
 	\param fullscreen: Should be set to true if the device should run in fullscreen. Otherwise
@@ -292,7 +292,7 @@ namespace irr
 		bool stencilbuffer=false,
 		bool vsync=false,
 		IEventReceiver* receiver = 0,
-		const wchar_t* sdk_version_do_not_use = IRRLICHT_SDK_VERSION);
+		const char* sdk_version_do_not_use = IRRLICHT_SDK_VERSION);
 
 	//! Creates an Irrlicht device with the option to specify advanced parameters. 
 	/** Usually you should used createDevice() for creating an Irrlicht Engine device.
