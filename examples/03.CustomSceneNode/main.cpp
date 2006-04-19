@@ -19,6 +19,7 @@ To start, I include the header files, use the irr namespace,
 and tell the linker to link with the .lib file. 
 */
 #include <irrlicht.h>
+#include <iostream>
 
 using namespace irr;
 
@@ -153,10 +154,38 @@ the engine, create the scene node and a camera, and look at the result.
 */
 int main()
 {
-	// create engine and camera
+	// let user select driver type
+
+	video::E_DRIVER_TYPE driverType;
+
+	printf("Please select the driver you want for this example:\n"\
+		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.5\n"\
+		" (d) Software Renderer\n (e) Apfelbaum Software Renderer\n"\
+		" (f) NullDevice\n (otherKey) exit\n\n");
+
+	char i;
+	std::cin >> i;
+
+	switch(i)
+	{
+		case 'a': driverType = video::EDT_DIRECT3D9;break;
+		case 'b': driverType = video::EDT_DIRECT3D8;break;
+		case 'c': driverType = video::EDT_OPENGL;   break;
+		case 'd': driverType = video::EDT_SOFTWARE; break;
+		case 'e': driverType = video::EDT_SOFTWARE2;break;
+		case 'f': driverType = video::EDT_NULL;     break;
+		default: return 0;
+	}
+
+	// create device
 
 	IrrlichtDevice *device =
-		createDevice(video::EDT_OPENGL, core::dimension2d<s32>(640, 480), 16, false);
+		createDevice(driverType, core::dimension2d<s32>(640, 480), 16, false);
+		
+	if (device == 0)
+		return 1; // could not create selected driver.
+
+	// create engine and camera
 
 	device->setWindowCaption(L"Custom Scene Node - Irrlicht Engine Demo");
 

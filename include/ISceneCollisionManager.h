@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -104,10 +104,12 @@ namespace scene
 		//! scene node will be.
 		//! \param idBitMask: Only scene nodes with an id with bits set like in this mask
 		//! will be tested. If the BitMask is 0, this feature is disabled.
+		//! \param bNoDebugObjects: Doesn't take debug objects into account when true. These
+		//  are scene nodes with IsDebugObject() = true.
 		//! \return Returns the visible scene node under screen coordinates with matching
 		//! bits in its id. If there is no scene node under this position, 0 is returned.
 		virtual ISceneNode* getSceneNodeFromScreenCoordinatesBB(core::position2d<s32> pos,
-			s32 idBitMask=0) = 0;
+			s32 idBitMask=0, bool bNoDebugObjects = false) = 0;
 
 		//! Returns the nearest scene node which collides with a 3d ray and 
 		//! which id matches a bitmask. The collision tests are done using a bounding
@@ -115,11 +117,13 @@ namespace scene
 		//! \param ray: Line with witch collisions are tested.
 		//! \param idBitMask: Only scene nodes with an id with bits set like in this mask
 		//! will be tested. If the BitMask is 0, this feature is disabled.
+		//! \param bNoDebugObjects: Doesn't take debug objects into account when true. These
+		//  are scene nodes with IsDebugObject() = true.
 		//! \return Returns the scene node nearest to ray.start, which collides with the
 		//! ray and matches the idBitMask, if the mask is not null. If no scene
 		//! node is found, 0 is returned.
 		virtual ISceneNode* getSceneNodeFromRayBB(core::line3d<f32> ray, 
-			s32 idBitMask=0) = 0;
+			s32 idBitMask=0, bool bNoDebugObjects = false) = 0;
 
 		//! Returns the scene node, at which the overgiven camera is looking at and
 		//! which id matches the bitmask. A ray is simply casted from the position
@@ -129,11 +133,13 @@ namespace scene
 		//! \param camera: Camera from which the ray is casted.
 		//! \param idBitMaks: Only scene nodes with an id with bits set like in this mask
 		//! will be tested. If the BitMask is 0, this feature is disabled.
+		//! \param bNoDebugObjects: Doesn't take debug objects into account when true. These
+		//  are scene nodes with IsDebugObject() = true.
 		//! \return Returns the scene node nearest to the camera, which collides with the
 		//! ray and matches the idBitMask, if the mask is not null. If no scene
 		//! node is found, 0 is returned.
 		virtual ISceneNode* getSceneNodeFromCameraBB(ICameraSceneNode* camera,
-			s32 idBitMask=0) = 0;
+			s32 idBitMask=0, bool bNoDebugObjects = false) = 0;
 	};
 
 

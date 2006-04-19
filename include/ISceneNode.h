@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -6,6 +6,7 @@
 #define __I_SCENE_NODE_H_INCLUDED__
 
 #include "IUnknown.h"
+#include "ESceneNodeTypes.h"
 #include "ISceneNodeAnimator.h"
 #include "ITriangleSelector.h"
 #include "SMaterial.h"
@@ -39,8 +40,7 @@ namespace scene
 			: IsVisible(true), ID(id), Parent(parent), SceneManager(mgr),
 				AutomaticCullingEnabled(true), DebugDataVisible(false),
 				TriangleSelector(0), RelativeTranslation(position),
-				RelativeRotation(rotation), RelativeScale(scale)
-
+				RelativeRotation(rotation), RelativeScale(scale), IsDebugObject(false)
 		{
 			if (Parent)
 				Parent->addChild(this);
@@ -356,7 +356,7 @@ namespace scene
 
 
 		//! Gets the scale of the scene node. 
-		//! \return Returns the scale of the scene node.
+		/** \return Returns the scale of the scene node. */
 		virtual core::vector3df getScale() const
 		{
 			return RelativeScale;
@@ -364,64 +364,65 @@ namespace scene
 
 
 		//! Sets the scale of the scene node. 
-		//! \param scale: New scale of the node
+		/** \param scale: New scale of the node */
 		virtual void setScale(const core::vector3df& scale)
 		{
 			RelativeScale = scale;
 		}
 
 
-		//! Sets the rotation of the node. Note that this is
-		//! the relative rotation of the node.
-		//! \return Current relative rotation of the scene node.
+		//! Sets the rotation of the node.
+		/** Note that this is the relative rotation of the node.
+		\return Current relative rotation of the scene node. */
 		virtual const core::vector3df getRotation() const
 		{
 			return RelativeRotation;
 		}
 
 
-		//! Sets the rotation of the node. This only modifies
-		//! the relative rotation of the node.
-		//! \param roation: New rotation of the node in degrees.
+		//! Sets the rotation of the node.
+		/** This only modifies the relative rotation of the node.
+		\param roation: New rotation of the node in degrees. */
 		virtual void setRotation(const core::vector3df& rotation)
 		{
 			RelativeRotation = rotation;
 		}
 
 
-		//! Gets the position of the node. Note that the position is
-		//! relative to the parent.
-		//! \return Returns the current position of the node relative to the parent.
+		//! Gets the position of the node. 
+		/** Note that the position is relative to the parent.
+		\return Returns the current position of the node relative to the parent. */
 		virtual const core::vector3df getPosition() const
 		{
 			return RelativeTranslation;
 		}
 
 
-		//! Sets the position of the node. Note that the position is
-		//! relative to the parent.
-		//! \param newpos: New relative postition of the scene node.
+		//! Sets the position of the node. 
+		/** Note that the position is relative to the parent.
+		\param newpos: New relative postition of the scene node. */
 		virtual void setPosition(const core::vector3df& newpos)
 		{
 			RelativeTranslation = newpos;
 		}
 
 
-		//! Gets the abolute position of the node. The position is absolute.
-		//! \return Returns the current absolute position of the scene node.
+		//! Gets the abolute position of the node. 
+		/** The position is absolute.
+		\return Returns the current absolute position of the scene node. */
 		virtual core::vector3df getAbsolutePosition() const
 		{
 			return AbsoluteTransformation.getTranslation();
 		}
 
 
-		//! Enables or disables automatic culling based on the bounding
-		//! box. Automatic culling is enabled by default. Note that not
-		//! all SceneNodes support culling (the billboard scene node for example)
-		//! and that some nodes always cull their geometry because it is their
-		//! only reason for existance, for example the OctreeSceneNode.
-		//! \param enabled: If true, automatic culling is enabled.
-		//! If false, it is disabled.
+		//! Enables or disables automatic culling based on the bounding box.
+		/** Automatic culling is enabled by default. Note that not
+		all SceneNodes support culling (the billboard scene node for example)
+		and that some nodes always cull their geometry because it is their
+		only reason for existance, for example the OctreeSceneNode.
+		\param enabled: If true, automatic culling is enabled.
+		If false, it is disabled. */
 		void setAutomaticCulling(bool enabled)
 		{
 			AutomaticCullingEnabled = enabled;
@@ -429,16 +430,17 @@ namespace scene
 
 
 		//! Gets the automatic culling state. 
-		//! \return The node is culled based on its bounding box if this method
-		//! returns true, otherwise no culling is performed.
+		/** \return The node is culled based on its bounding box if this method
+		 returns true, otherwise no culling is performed. */
 		bool getAutomaticCulling() const
 		{
+			_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 			return AutomaticCullingEnabled;
 		}
 
 
-		//! Sets if debug data like bounding boxes should be drawed.
-		//! Please note that not all scene nodes support this feature.
+		//! Sets if debug data like bounding boxes should be drawn.
+		/** Please note that not all scene nodes support this feature. */
 		void setDebugDataVisible(bool visible)
 		{
 			DebugDataVisible = visible;
@@ -447,7 +449,26 @@ namespace scene
 		//! Returns if debug data like bounding boxes are drawed.
 		bool isDebugDataVisible()
 		{
+			_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
 			return DebugDataVisible;
+		}
+
+
+		//! Sets if this scene node is a debug object. 
+		/** Debug objects have some special properties, for example they can be easily 
+		excluded from collision detection or from serialization, etc. */
+		void setIsDebugObject(bool debugObject)
+		{
+			IsDebugObject = debugObject;
+		}
+
+		//! Returns if this scene node is a debug object. 
+		/** Debug objects have some special properties, for example they can be easily 
+		excluded from collision detection or from serialization, etc. */
+		bool isDebugObject()
+		{
+			_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
+			return IsDebugObject;
 		}
 
 
@@ -522,6 +543,12 @@ namespace scene
 			return Parent;
 		}
 
+		//! Returns type of the scene node
+		virtual ESCENE_NODE_TYPE getType()
+		{
+			return ESNT_UNKNOWN;
+		}
+
 	protected:
 
 		//! name of the scene node.
@@ -545,7 +572,7 @@ namespace scene
 		//! List of all children of this node
 		core::list<ISceneNode*> Children;
 
-		//! List of all children of this node
+		//! List of all animatrors node
 		core::list<ISceneNodeAnimator*> Animators;
 
 		//! id of the node. 
@@ -565,6 +592,9 @@ namespace scene
 
 		//! is the node visible?
 		bool IsVisible;
+
+		//! is debug object? 
+		bool IsDebugObject;
 	};
 
 } // end namespace scene

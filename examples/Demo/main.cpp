@@ -13,7 +13,9 @@
 
 using namespace irr;
 
+
 #pragma comment(lib, "Irrlicht.lib")
+
 
 #ifdef _WIN32
 INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
@@ -27,13 +29,17 @@ int main()
 	bool additive = false;
 	bool vsync = false;
 
+#ifdef MACOSX
+	video::E_DRIVER_TYPE driverType = video::EDT_OPENGL;
+#else
 	video::E_DRIVER_TYPE driverType = video::EDT_DIRECT3D9;
+#endif
 
 	CMainMenu menu;
 
-#ifndef _DEBUG
+//#ifndef _DEBUG
 	if (menu.run(fullscreen, music, shadows, additive, vsync, driverType))
-#endif
+//#endif
 	{
 		CDemo demo(fullscreen, music, shadows, additive, vsync, driverType);
 		demo.run();		

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -18,7 +18,6 @@ namespace scene
 	class IMesh;
 	class IAnimatedMesh;
 	struct SMesh;
-
 
 	//! An interface for easily manipulate meshes.
 	/** Scale, set alpha value, flip surfaces, and so on. This exists for fixing problems 
@@ -48,11 +47,11 @@ namespace scene
 
 		//! Recalculates all normals of the mesh.
 		/** \param mesh: Mesh on which the operation is performed. */
-		virtual void recalculateNormals(IMesh* mesh) const = 0;
+		virtual void recalculateNormals(IMesh* mesh, bool smooth = false) const = 0;
 
 		//! Recalculates all normals of the mesh buffer.
 		/** \param buffer: Mesh buffer on which the operation is performed. */
-		virtual void recalculateNormals(IMeshBuffer* buffer) const = 0;
+		virtual void recalculateNormals(IMeshBuffer* buffer, bool smooth = false) const = 0;
 
 		//! Scales the whole mesh.
 		/** \param mesh: Mesh on which the operation is performed.
@@ -83,6 +82,10 @@ namespace scene
 		If you no longer need the cloned mesh, you should call IMesh::drop().
 		See IUnknown::drop() for more information. */
 		virtual IMesh* createMeshWithTangents(IMesh* mesh) const = 0;
+
+		//! Unweld vertices
+		virtual IMesh* createMeshUniquePrimitives(IMesh* mesh) const = 0;
+
 
 		//! Recalculates the bounding box for a meshbuffer
 		virtual void recalculateBoundingBox(scene::IMeshBuffer* buffer) const = 0;

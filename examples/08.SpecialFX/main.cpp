@@ -1,11 +1,11 @@
 /* This tutorials describes how to do special effects. It shows how to use stencil
 buffer shadows, the particle system, billboards, dynamic light and the water
-surface scene node. 
+surface scene node.
 
 We start like in some tutorials before. Please note that this time, the 'shadows' flag in
 createDevice() is set to true, for we want to have a dynamic shadow casted from
-an animated character. If your this example runs to slow, set it to false. 
-The Irrlicht Engine checks if your hardware doesn't support the stencil 
+an animated character. If your this example runs to slow, set it to false.
+The Irrlicht Engine checks if your hardware doesn't support the stencil
 buffer, and disables shadows by itself, but just in case the demo runs slow
 on your hardware.*/
 
@@ -46,7 +46,7 @@ int main()
 		case 'e': driverType = video::EDT_SOFTWARE2;break;
 		case 'f': driverType = video::EDT_NULL;     break;
 		default: return 1;
-	}	
+	}
 
 	// create device and exit if creation failed
 
@@ -84,11 +84,11 @@ int main()
 	node = smgr->addAnimatedMeshSceneNode(mesh);
 	node->setMaterialTexture(0,	driver->getTexture("../../media/wall.jpg"));
 	node->getMaterial(0).EmissiveColor.set(0,0,0,0);
- 
+
 	/*
 	Now, for the first special effect: Animated water. It works like this: The
 	WaterSurfaceSceneNode takes a mesh as input and makes
-	it wave like a water surface. And if we let this scene node use a nice 
+	it wave like a water surface. And if we let this scene node use a nice
 	material like the EMT_REFLECTION_2_LAYER, it looks really cool. We are
 	doing this with the next few lines of code. As input mesh, we create a hill
 	plane mesh, without hills. But any other mesh could be used for this, you could
@@ -106,21 +106,21 @@ int main()
 	node = smgr->addWaterSurfaceSceneNode(mesh->getMesh(0), 3.0f, 300.0f, 30.0f);
 	node->setPosition(core::vector3df(0,7,0));
 
-	node->setMaterialTexture(0,	driver->getTexture("../../media/water.jpg"));
-	node->setMaterialTexture(1,	driver->getTexture("../../media/stones.jpg"));
+	node->setMaterialTexture(0,	driver->getTexture("../../media/stones.jpg"));
+	node->setMaterialTexture(1,	driver->getTexture("../../media/water.jpg"));
 
 	node->setMaterialType(video::EMT_REFLECTION_2_LAYER);
 
 	/*
-	The second special effect is very basic, I bet you saw it already in some 
-	Irrlicht Engine demos: A transparent billboard combined with a dynamic light. 
+	The second special effect is very basic, I bet you saw it already in some
+	Irrlicht Engine demos: A transparent billboard combined with a dynamic light.
 	We simply create a light scene node, let it fly around, an to make it look
 	more cool, we attach a billboard scene node to it.
 	*/
 
 	// create light
 
-	node = smgr->addLightSceneNode(0, core::vector3df(0,0,0), 
+	node = smgr->addLightSceneNode(0, core::vector3df(0,0,0),
 		video::SColorf(1.0f, 0.6f, 0.7f, 1.0f), 600.0f);
 	scene::ISceneNodeAnimator* anim = 0;
 	anim = smgr->createFlyCircleAnimator (core::vector3df(0,150,0),250.0f);
@@ -157,7 +157,7 @@ int main()
 	IParticleAffector and add it with addAffector().
 
 	After we set a nice material to the particle system, we have a cool looking camp fire.
-	By adjusting material, texture, particle emitter and affector parameters, it is also 
+	By adjusting material, texture, particle emitter and affector parameters, it is also
 	easily possible to create smoke, rain, explosions, snow, and so on.
 	*/
 
@@ -171,16 +171,16 @@ int main()
 	ps->setParticleSize(core::dimension2d<f32>(20.0f, 20.0f));
 
 	scene::IParticleEmitter* em = ps->createBoxEmitter(
-		core::aabbox3d<f32>(-7,0,-7,7,1,7), 
+		core::aabbox3d<f32>(-7,0,-7,7,1,7),
 		core::vector3df(0.0f,0.06f,0.0f),
-		80,100, 
+		80,100,
 		video::SColor(0,255,255,255), video::SColor(0,255,255,255),
 		800,2000);
 
 	ps->setEmitter(em);
 	em->drop();
 
-	scene::IParticleAffector* paf = 
+	scene::IParticleAffector* paf =
 		ps->createFadeOutParticleAffector();
 
 	ps->addAffector(paf);
@@ -192,33 +192,32 @@ int main()
 
 	/*
 	As our last special effect, we want a dynamic shadow be casted from an animated
-	character. For this we load a quake 2 .md2 model and place it into our world.
+	character. For this we load a DirectX .x model and place it into our world.
 	For creating the shadow, we simply need to call addShadowVolumeSceneNode().
-	The color of shadows is only adjustable globally for all shadows, by calling 
+	The color of shadows is only adjustable globally for all shadows, by calling
 	ISceneManager::setShadowColor(). Voila, here is our dynamic shadow.
 
-	Because the character is a little bit too small for this scene, we make it bigger 
+	Because the character is a little bit too small for this scene, we make it bigger
 	using setScale(). And because the character is lighted by a dynamic light, we need
 	to normalize the normals to make the lighting on it correct. This is always necessary if
-	the scale of a dynamic lighted model is not (1,1,1). Otherwise it would get too dark or 
+	the scale of a dynamic lighted model is not (1,1,1). Otherwise it would get too dark or
 	too bright because the normals will be scaled too.
 	*/
 
 	// add animated character
 
-	mesh = smgr->getMesh("../../media/faerie.md2");
+	mesh = smgr->getMesh("../../media/dwarf.x");
 	scene::IAnimatedMeshSceneNode* anode = 0;
 
 	anode = smgr->addAnimatedMeshSceneNode(mesh);
-	anode->setPosition(core::vector3df(-50,65,-60));
-	anode->setMD2Animation(scene::EMAT_STAND);
-	anode->setMaterialTexture(0, driver->getTexture("../../media/Faerie5.BMP"));
+	anode->setPosition(core::vector3df(-50,20,-60));
+	anode->setAnimationSpeed(15);
 
 	// add shadow
-	anode->addShadowVolumeSceneNode();	
+	anode->addShadowVolumeSceneNode();
 	smgr->setShadowColor(video::SColor(150,0,0,0));
 
-	// make the model a little bit bigger and normalize its normals 
+	// make the model a little bit bigger and normalize its normals
 	// because of this for correct lighting
 	anode->setScale(core::vector3df(2,2,2));
 	anode->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, true);
@@ -260,7 +259,7 @@ int main()
 	}
 
 	device->drop();
-	
+
 	return 0;
 }
 

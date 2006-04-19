@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -104,6 +104,7 @@ namespace scene
 		{
 			return video::EVT_STANDARD;
 		}
+
 
 		video::SMaterial Material;						//! material for this meshBuffer.
 		core::array<video::S3DVertex> Vertices;		//! Array of vertices

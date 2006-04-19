@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -52,7 +52,7 @@ class quaternion
 		quaternion& operator*=(f32 s);
 
 		//! multiplication operator
-		vector3df quaternion::operator* (const vector3df& v) const;
+		vector3df operator* (const vector3df& v) const;
 
 		//! multiplication operator
 		quaternion& operator*=(const quaternion& other);

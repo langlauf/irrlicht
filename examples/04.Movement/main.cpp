@@ -122,7 +122,7 @@ int main()
 	if (n)
 	{
 		anim = smgr->createFlyStraightAnimator(core::vector3df(100,0,60), 
-			core::vector3df(-100,0,60), 10000, true);
+			core::vector3df(-100,0,60), 2500, true);
 		anms->addAnimator(anim);
 		anim->drop();
 
@@ -137,8 +137,11 @@ int main()
 		but this only works with MD2 animations, and so you know how to start other animations.
 		*/
 		anms->setMaterialFlag(video::EMF_LIGHTING, false);
-		anms->setFrameLoop(320, 360);
-		anms->setAnimationSpeed(30);
+
+		//anms->setMD2Animation(scene::EMAT_RUN);
+		anms->setFrameLoop(320, 367);
+		anms->setAnimationSpeed(80);
+
 		anms->setRotation(core::vector3df(0,180.0f,0));
 		anms->setMaterialTexture(0, driver->getTexture("../../media/sydney.bmp"));
 	}
@@ -153,6 +156,13 @@ int main()
 	device->getCursorControl()->setVisible(false);
 
 	/*
+	Add a colorful irrlicht logo
+	*/
+	device->getGUIEnvironment()->addImage(
+		driver->getTexture("../../media/irrlichtlogoalpha2.tga"),
+		core::position2d<s32>(10,10));
+
+	/*
 	We have done everything, so lets draw it. We also write the current
 	frames per second and the name of the driver to the caption of the
 	window.
@@ -162,7 +172,10 @@ int main()
 	while(device->run())
 	{
 		driver->beginScene(true, true, video::SColor(255,113,113,133));
-		smgr->drawAll();
+
+		smgr->drawAll(); // draw the 3d scene
+		device->getGUIEnvironment()->drawAll(); // draw the gui environment (the logo)
+
 		driver->endScene();
 
 		int fps = driver->getFPS();

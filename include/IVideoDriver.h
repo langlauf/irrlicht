@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -126,15 +126,21 @@ namespace video
 		means that the screen is filled with a color specified with the parameter color.
 		If this parameter is false, the back buffer will not be cleared and the color
 		parameter is ignored.
-		\param zBuffer: Speciefies if the depth or z buffer should be cleared. It is
+		\param zBuffer: Specifies if the depth or z buffer should be cleared. It is
 		not nesesarry to do so, if only 2d drawing is used.
 		\return Returns false if failed. Begin Scene can clear the back- and the z-buffer. */
 		virtual bool beginScene(bool backBuffer, bool zBuffer, SColor color) = 0;
 
 		//! Presents the rendered image on the screen.
 		/** Applications must call this method after performing any rendering. 
+		\param  windowId: Handle of another window, if you want the bitmap to be displayed
+		on another window. If this is null, everything will be displayed in the default window.
+		Note: This does not work in fullscreen mode and is not implemented for all devices (only for
+		D3D8, D3D9, Software1 and Software2, and only for Windows).
+		\param sourceRect: Pointer to a rectangle defining the source rectangle of the area 
+		to be presented. Set to null to present everything. Note: not implemented in all devices.
 		\return Returns false if failed and true if succeeded. */
-		virtual bool endScene() = 0;
+		virtual bool endScene( s32 windowId = 0, core::rect<s32>* sourceRect=0 ) = 0;
 
 		//! Queries the features of the driver.
 		/** Returns true if a feature is available

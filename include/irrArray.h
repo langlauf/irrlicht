@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine" and the "irrXML" project.
 // For conditions of distribution and use, see copyright notice in irrlicht.h and irrXML.h
 
@@ -363,7 +363,7 @@ public:
 	//! \param element: Element to search for.
 	//! \return Returns position of the searched element if it was found,
 	//! otherwise -1 is returned.
-	s32 linear_search(T& element)
+	s32 linear_search(const T& element)
 	{
 		for (u32 i=0; i<used; ++i)
 			if (!(element < data[i]) && !(data[i] < element))
@@ -378,7 +378,7 @@ public:
 	//! \param element: Element to search for.
 	//! \return Returns position of the searched element if it was found,
 	//! otherwise -1 is returned.
-	s32 linear_reverse_search(T& element)
+	s32 linear_reverse_search(const T& element)
 	{
 		for (s32 i=used-1; i>=0; --i)
 			if (data[i] == element)

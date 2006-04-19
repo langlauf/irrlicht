@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -29,7 +29,7 @@ namespace scene
 			const core::vector3df& position = core::vector3df(0,0,0),
 			const core::vector3df& rotation = core::vector3df(0,0,0),
 			const core::vector3df& scale = core::vector3df(1.0f,1.0f,1.0f))
-			: ISceneNode(parent, mgr, id, position, rotation, scale) {}
+			: ISceneNode(parent, mgr, id, position, rotation, scale), IsOrthogonal(false) {}
 
 		//! Destructor
 		virtual ~ICameraSceneNode() {};
@@ -115,8 +115,26 @@ namespace scene
 		//! Returns if the input receiver of the camera is currently enabled.
 		virtual bool isInputReceiverEnabled() = 0;
 
-		//! Returns if a camera is orthogonal
-		virtual bool isOrthogonal() { return false; } 
+		//! Returns if a camera is orthogonal.
+		/** This setting does not change anything of the view or projection matrix. However
+		it influences how collision detection and picking is done with this camera. */
+		virtual bool isOrthogonal() 
+		{
+			_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
+			return IsOrthogonal;
+		} 
+
+		//! Sets if this camera should return if it is orthogonal. 
+		/** This setting does not change anything of the view or projection matrix. However
+		it influences how collision detection and picking is done with this camera. */
+		void setIsOrthogonal( bool orthogonal )
+		{
+			IsOrthogonal = orthogonal;
+		}
+
+	private:
+
+		bool IsOrthogonal;
 	};
 
 } // end namespace scene

@@ -1,5 +1,5 @@
 ==========================================================================
-The Irrlicht Engine SDK version 0.14.0
+The Irrlicht Engine SDK version 1.0
 ==========================================================================
 
   Welcome the Irrlicht Engine SDK.
@@ -80,14 +80,14 @@ The Irrlicht Engine SDK version 0.14.0
   with Irrlicht or recompile the engine. However, other compilers/IDEs make work 
   as well, we simply didn't test them. 
   
-  * gcc 3.2
   * gcc 3.3
   * gcc 3.4
+  * gcc 4.0.3
   * Visual Studio 6.0
-  * Visual Studio.NET (7.0)
   * Visual Studio.NET 2003 (7.1)
   * Visual Studio 2005 (8.0)
-  * DevC++ 4.9 & gcc (project files included)
+  * Code::Blocks 1.0 (& gcc or visual studio toolkit)
+  * DevC++ 5.0 & gcc (project files included)
      
   If you ever want to (re)compile the engine yourself (which means you don't
   want to use the precompiled version) you need the following:
@@ -106,13 +106,10 @@ The Irrlicht Engine SDK version 0.14.0
 4. Release Notes
 ==========================================================================
 
-  This is an alpha version of the SDK. Therefore please note that there are
-  features missing in the engine and maybe also some bugs. 
-
   Informations about changes in this new version of the engine can be 
   found in changes.txt.
 
-  Please also note that the textures, 3D models and levels are copyright
+  Please note that the textures, 3D models and levels are copyright
   by their authors and not included in the Irrlicht engine license. 
 
 ==========================================================================
@@ -136,7 +133,7 @@ The Irrlicht Engine SDK version 0.14.0
   The Irrlicht Engine License
   ===========================
 
-  Copyright (C) 2002-2005 Nikolaus Gebhardt
+  Copyright (C) 2002-2006 Nikolaus Gebhardt
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -173,6 +170,58 @@ The Irrlicht Engine SDK version 0.14.0
   
   irrlicht@users.sourceforge.net
 
+  Please also not that parts of the engine have been written or contributed
+  by other people. Especially: (There are probably more people, sorry if I forgot one.
+  See http://irrlicht.sourceforge.net/author.html for more informations)
 
-  
-    
+  Thomas Alten	  wrote the apfelbaum software rasterizer
+  Etienne Petitjean wrote the MacPort of the engine
+  Greg Roelofs 	Created the zlib
+  The Independent JPEG Group	Created JPEG lib
+  Guy Eric Schalnat, Andreas Dilger, Glenn Randers-Pehrson and others	Created libPng
+  Chad Austin, Jacky Chong, Theo Reed, Ben Scott 	Made Audiere
+  Mark Jeacocke	Wrote lots of helpful comments and ideas in the forums and per email.	
+  Julio Gorgé	Created the 'Unofficial DirectX 9.0 Driver for the Irrlicht Engine' 
+  Andy Spurgeon	Wrote the Dev-Cpp tutorial.	
+  André Simon	Wrote the Codewarrior tutorial.	
+  KnightToFlight	Created the unoffical terrain renderer addon for the Irrlicht Engine. 	
+  Jon Pry	Wrote the code to load compressed TGA files.	
+  Saigumi	Wrote some tutorials for the Irrlicht Engine and doing admin stuff
+  Matthew Couch	Wrote the tokamak integration tutorial.	
+  Max Winkel	Wrote the splitscreen tutorial.	
+  Gorgon Zola	Wrote the ODE integration tutorial.	
+  Dean P. Macri	Sent in code for curved surfaces and PCX Loading.	
+  Sirshane 	Made several bug fixes, sent in code for making the mouse cursor invisible in Linux.	
+  Matthias Gall	Sent in code for a spline scene node animator and reported lots of bugs.	
+  Mario Gruber	Suggested triangle fan drawing and sent in code for this. 	
+  Ariaci	Spotted out a bug in the ATI driver.	
+  Dr Andros C Bragianos	Improved texture mapping in test scene node.	
+  Philipp Dortmann	Sent in code for stencil buffer support for OpenGL.	
+  Jerome Nichols	Created the Irrlicht/Ruby interface located at irr.rubyforge.org	
+  Vash TheStampede	Sent code for missing Draw2DLine() implementation s	
+  MattyBoy	XBOX support suggestions	
+  Oliver Klems	createImageFromData() method suggestion/implementation	
+  Jox	really, really a lot of bug fixes, and the LMTS file loader 	
+  Zola	Quaternion method additions	
+  Tomasz Nowakowski 	various bug fixes	
+  Nicholas Bray	stencil shadow bug fixes with OpenGL	
+  REAPER	mouswheel events for scrollbar	
+  Calimero	various bug fixes like vector2d operators	
+  Haddock	bugfix in the linked list	
+  G.o.D	XML parser fix	
+  Alvaro F. Celis	Lots of work in the community, for example video tutorials about Irrlicht, forum admin	
+  Erik Zilli	Translated some of the tutorials from my stuttering english into real english. :)	
+  Martin Piskernig	Linux bugfixing and testing	
+  Soconne	Wrote the original terrain renderer were Irrlichts terrain renderer of Irrlicht is based on it.	
+  Spintz	GeoMipMap scene node, terrain renderer of Irrlicht is based on it.	
+  Murphy McCauley	OCT file loader, MIM tools	
+  Saurav Mohapatra	IrrCSM, and lots of addons, suggestions and bug reports	
+  Zhuck Dimitry	My3D Tools	
+  Terry Welsh	Allowed me to use the textures of his 'Parallax Mapping with Offset Limiting' paper for the parallax demo of Irrlicht	
+  rt	Wrote the original .png loader for Irrlicht	
+  Salvatore Russo	Wrote the original .dmf loader for Irrlicht	
+  Vox	Various bug reports and fixes	
+  atomice	Contributed code for a ms3d loader enhancement	
+  William Finlayson	OpenGL RTT, GLSL support and the reflection 2 layer material for OpenGL.	
+  Delight	Various code contributions for Irrlicht.NET (particle system, basic shader support and more)	
+  Michael Zoech	Improved GLSL support

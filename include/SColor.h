@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -14,7 +14,10 @@ namespace video
 	//! Creates a 16 bit A1R5G5B5 color 
 	inline s16 RGB16(s32 r, s32 g, s32 b)
 	{
-		return (((r>>3) & 0x1F)<<10) | (((g>>3) & 0x1F)<<5) | ((b>>3) & 0x1F);
+		//return (((r>>3) & 0x1F)<<10) | (((g>>3) & 0x1F)<<5) | ((b>>3) & 0x1F);
+		return	( r & 0xF8) << 7 |
+				( g & 0xF8) << 2 |
+				( b & 0xF8) >> 3;
 	}
 
 	//! Creates a 16 bit A1R5G5B5 color 
@@ -29,7 +32,34 @@ namespace video
 	//! Converts a 32 bit (X8R8G8B8) color to a 16 A1R5G5B5 color
 	inline s16 X8R8G8B8toA1R5G5B5(s32 color)
 	{
-		return RGB16(color>>16, color>>8, color);
+//		return RGB16(color>>16, color>>8, color);
+		return	( color & 0x00F80000) >> 9 |
+				( color & 0x0000F800) >> 6 |
+				( color & 0x000000F8) >> 3;
+	}
+
+	//! Converts a 32 bit (A8R8G8B8) color to a 16 A1R5G5B5 color
+	inline u16 A8R8G8B8toA1R5G5B5(u32 color)
+	{
+		return	( color & 0x80000000) >> 16 |
+				( color & 0x00F80000) >> 9  |
+				( color & 0x0000F800) >> 6  |
+				( color & 0x000000F8) >> 3;
+	}
+
+
+	//! Returns A8R8G8B8 Color from A1R5G5B5 color
+	inline u32 A1R5G5B5toA8R8G8B8(u16 color)
+	{
+		return	( color & 0x8000 ) << 16 |
+				( color & 0x7C00 ) << 9 |
+				( color & 0x03E0 ) << 6 |
+				( color & 0x001F ) << 3;
+
+/*
+		return	(((color >> 15)&0x1)<<31) |	(((color >> 10)&0x1F)<<19) |
+				(((color >> 5)&0x1F)<<11) |	(color&0x1F)<<3;
+*/
 	}
 
 	//! Returns the red component from A1R5G5B5 color
@@ -68,12 +98,6 @@ namespace video
 	}
 
 
-	//! Returns A8R8G8B8 Color from A1R5G5B5 color
-	inline s32 A1R5G5B5toA8R8G8B8(s16 color)
-	{
-		return	(((color >> 15)&0x1)<<31) |	(((color >> 10)&0x1F)<<19) |
-				(((color >> 5)&0x1F)<<11) |	(color&0x1F)<<3;
-	}
 
 	//! Returns A8R8G8B8 Color from R5G6B5 color
 	inline s32 R5G6B5toA8R8G8B8(s16 color)

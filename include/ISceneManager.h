@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -320,7 +320,7 @@ namespace scene
 		 is used.
 		 \param waveHeight: Height of the water waves.
 		 \param waveSpeed: Speed of the water waves.
-		 \param waveLenght: Lenght of a water wave.
+		 \param waveLength: Lenght of a water wave.
 		 \param mesh: Pointer to the loaded static mesh to be displayed with water waves on it.
 		 \param parent: Parent of the scene node. Can be NULL if no parent.
 		 \param id: Id of the node. This id can be used to identify the scene node.
@@ -331,11 +331,12 @@ namespace scene
 		 \return Returns pointer to the created scene node.
 		 This pointer should not be dropped. See IUnknown::drop() for more information. */
 		virtual ISceneNode* addWaterSurfaceSceneNode(IMesh* mesh,
-			f32 waveHeight=2.0f, f32 waveSpeed=300.0f, f32 waveLenght=10.0f, 
+			f32 waveHeight=2.0f, f32 waveSpeed=300.0f, f32 waveLength=10.0f, 
 			ISceneNode* parent=0, s32 id=-1,
 			const core::vector3df& position = core::vector3df(0,0,0),
 			const core::vector3df& rotation = core::vector3df(0,0,0),
 			const core::vector3df& scale = core::vector3df(1.0f, 1.0f, 1.0f)) = 0;
+
 
 		 //! Adds a scene node for rendering using a octtree to the scene graph. 
 		 /** This a good method for rendering 

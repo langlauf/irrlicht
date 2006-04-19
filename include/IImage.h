@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -82,6 +82,22 @@ public:
 
 	//! returns the color format
 	virtual ECOLOR_FORMAT getColorFormat() = 0;
+
+	//! returns mask for red value of a pixel
+	virtual u32 getRedMask() = 0;
+
+	//! returns mask for green value of a pixel
+	virtual u32 getGreenMask() = 0;
+
+	//! returns mask for blue value of a pixel
+	virtual u32 getBlueMask() = 0;
+
+	//! returns mask for alpha value of a pixel
+	virtual u32 getAlphaMask() = 0;
+
+	//! returns pitch of image
+	virtual u32 getPitch() = 0;
+
 };
 
 } // end namespace video

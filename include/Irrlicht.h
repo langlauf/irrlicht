@@ -1,6 +1,6 @@
 /* irrlicht.h -- interface of the 'Irrlicht Engine'
 
-  Copyright (C) 2002-2005 Nikolaus Gebhardt
+  Copyright (C) 2002-2006 Nikolaus Gebhardt
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -122,9 +122,9 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION "0.14.0"
+#define IRRLICHT_SDK_VERSION "1.0"
 
-/*! \mainpage Irrlicht Engine 0.14.0 API documentation
+/*! \mainpage Irrlicht Engine 1.0 API documentation
  *
  * <div align="center"><img src="logobig.png" ></div>
  *
@@ -268,7 +268,7 @@ namespace irr
 	/** If you need more parameters to be passed to the creation of the Irrlicht Engine device,
 	use the createDeviceEx() function.
 	\param deviceType: Type of the device. This can currently be video::EDT_NULL, 
-	video::EDT_SOFTWARE, video::EDT_DIRECT3D8, video::EDT_DIRECT3D9 and video::EDT_OPENGL.
+	video::EDT_SOFTWARE, video::EDT_SOFTWARE2, video::EDT_DIRECT3D8, video::EDT_DIRECT3D9 and video::EDT_OPENGL.
 	\param windowSize: Size of the window or the video mode in fullscreen mode.
 	\param bits: Bits per pixel in fullscreen mode. Ignored if windowed mode.
 	\param fullscreen: Should be set to true if the device should run in fullscreen. Otherwise

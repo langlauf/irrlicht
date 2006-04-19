@@ -1,3 +1,59 @@
+Changes in version 1.0 (19 Apr 2006)
+
+- Irrlicht now will load d3d 9 dlls (like d3dx9_27.dll) manually if needed. If you compile irrlicht
+  with an SDK which needs one of these dlls, irrlicht will now also start up on a pc without
+  these Dlls installed. Note that now these dlls will also only be loaded if your application
+  uses shaders. If the dlls are missing, shader support will be disabled.
+  
+- The Apfelbaum Software Software Renderer now works in 32 bit and is capable of rendering dynamic
+  lighting as well as doing alpha channel blending.
+
+- Added support for the Code::Blocks IDE (http://www.codeblocks.org)
+  
+- It is now possible to draw temporarily to foreign windows, by specifying a window handle when
+  calling IVideoDriver::endScene(). Note: This does not work in fullscreen mode and is not 
+  implemented for all devices (only for	D3D8, D3D9, Software1 and Software2, and only for Windows).
+  In addition, you can also specify the source rectangle to present.
+  
+- Picking is now more accurate and also works with view ports and better with orthogonal cameras.
+
+- Scene Nodes now have an additional flag, IsDebugObject. This sets if this scene node is a debug 
+  object, debug objects have some special properties, for example they can be easily excluded 
+  from collision detection, picking or from serialization, etc.
+  
+- Scene Nodes now have the possibility to return their type using
+	virtual ESCENE_NODE_TYPE getType(). 
+	
+- Improved support for orthogonal rendering: Skyboxes and billboards can be used with orthogonal cameras
+  too now.
+  
+- Fixed a bug in collision
+
+- Fixed some marshalling bugs in Irrlicht.NET
+
+- Some fixes to make gcc 4 happy.
+
+- Fixed a bug which caused the engine to crash when trying to use the apfelbaum software rasterizer
+  with linux 
+  
+- Several improvements to Irrlicht.NET, for example string output for vectors, viewfrustrum access
+  for cameras, drawing of bounding boxes, support for orthogonal cameras.
+  
+- Updated DMF importer to support new DeleD functionalities, solid materials will now be 
+  shown correctly again in Irrlicht.  Thanks to Salvatore "Il Buzzo".
+  
+- Added a method to change the return value of ICameraSceneNode::isOrthogonal
+
+- Improved md2 animation playback
+
+- Fixed the REFLECTION_2_LAYER materials. Now also works for OpenGL. Had to change the parameters
+  of this material (for all drivers), the reflection is now at texture 2 and the diffuse map at 
+  texture 1. This was the other way round before.
+
+- Added examples for csharp, visualbasic, delphi.net and boo.
+
+- Several other small bug fixes.
+
 -------------------------------------------------------------------------------------
 Changes in version 0.14.0 (30 November 2005)
 

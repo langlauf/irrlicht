@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -133,8 +133,8 @@ class aabbox3d
 								const vector3d<T>& linevect,
 								T halflength) const
 		{
-			const vector3d<T> e = getExtent();
-			const vector3d<T> t = getCenter() - linemiddle;
+			const vector3d<T> e = (MaxEdge - MinEdge) * (T)0.5;
+			const vector3d<T> t = (MinEdge + e) - linemiddle;
 			float r;
 
 			if ((fabs(t.X) > e.X + halflength * fabs(linevect.X)) || 
@@ -201,7 +201,7 @@ class aabbox3d
 			return (MinEdge + MaxEdge) / 2;
 		}
 
-		//! returns extent of the box
+		//! returns extend of the box
 		vector3d<T> getExtent() const
 		{
 			return MaxEdge - MinEdge;

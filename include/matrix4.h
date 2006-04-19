@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -59,7 +59,7 @@ namespace core
 			void setTranslation( const vector3df& translation );			
 
 			//! Gets the current translation
-			vector3df matrix4::getTranslation() const;
+			vector3df getTranslation() const;
 
 			//! Set the inverse translation of the current matrix. Will erase any previous values.
 			void setInverseTranslation( const vector3df& translation );	

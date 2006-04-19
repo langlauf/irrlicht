@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2005 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -23,18 +23,25 @@ namespace core
 	//! Constant for converting bettween degrees and radiants.
 	const f64 GRAD_PI2		= 3.1415926535897932384626433832795 / 180.0;
 
-	//! returns minimum of two values. Own implementation to get rid of the STL.
+	//! returns minimum of two values. Own implementation to get rid of the STL (VS6 problems)
 	template<class T>
 	inline const T min_(const T a, const T b)
 	{
 		return a < b ? a : b;
 	}
 	
-	//! returns minimum of two values. Own implementation to get rid of the STL
+	//! returns minimum of two values. Own implementation to get rid of the STL (VS6 problems)
 	template<class T>
 	inline T max_(const T a, const T b)
 	{
 		return a < b ? b : a;
+	}
+
+	//! returns abs of two values. Own implementation to get rid of STL (VS6 problems)
+	template<class T>
+	inline T abs_(const T a)
+	{
+		return a < 0 ? -a : a;
 	}
 
 	//! returns if a float equals the other one, taking floating 

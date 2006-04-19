@@ -2,7 +2,7 @@
 <config>
 <!--This is a config file for the Irrlicht Engine Mesh Viewer.-->
 <startUpModel file="../../media/dwarf.x" />
-<messageText caption="Irrlicht Engine Mesh Viewer">Welcome to the Mesh Viewer of the &quot;Irrlicht Engine&quot;. This program is able to load and display all 3D geometry and models the Irrlicht Engine can. 
+<messageText caption="Irrlicht Engine Mesh Viewer">Welcome to the Mesh Viewer of the &quot;Irrlicht Engine&quot;. This program is able to load and display all 3D geometry and models the Irrlicht Engine can
 Controls: Left mouse to rotate, right mouse to move, both buttons to zoom.
 
 Supported formats are:
@@ -10,10 +10,10 @@ Supported formats are:
 - COLLADA (.dae, .xml)
 - Cartography shop 4 (.csm)
 - DirectX (.x)
-- DeleD (.dmf) 
+- DeleD (.dmf)
 - Maya (.obj)
 - Milkshape (.ms3d)
-- My3D (.my3D) 
+- My3D (.my3D)
 - OCT (.oct)
 - Pulsar LMTools (.lmts)
 - Quake 3 levels (.bsp)

@@ -20,6 +20,7 @@ using namespace gui;
 
 #pragma comment(lib, "Irrlicht.lib")
 
+
 IrrlichtDevice *Device = 0;
 core::stringc StartUpModelFile;
 core::stringw MessageText;
@@ -88,7 +89,7 @@ void loadModel(const c8* fn)
 		Model->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
 	Model->setMaterialFlag(video::EMF_LIGHTING, false);
 	Model->setDebugDataVisible(true);
-	Model->setAnimationSpeed(1000);
+	Model->setAnimationSpeed(30);
 }
 
 

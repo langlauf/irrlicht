@@ -36,8 +36,8 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 
 	// add images
 
-	gui::IGUIImage* img = guienv->addImage(core::rect<int>(0,0,512,384));
-	img->setImage(driver->getTexture("../../media/demoback.bmp"));
+	//gui::IGUIImage* img = guienv->addImage(core::rect<int>(0,0,512,384));
+	//img->setImage(driver->getTexture("../../media/demoback.bmp"));
 
     const s32 leftX = 260;
 
@@ -98,6 +98,7 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 	guienv->addStaticText(text2, core::rect<int>(20, 40, 220, 300),
 		true, true, aboutTab);
 	
+
 	// add md2 model
 
 	scene::IAnimatedMesh* mesh = smgr->getMesh("../../media/faerie.md2");
@@ -105,14 +106,61 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 	if (node)
 	{
 		node->setMaterialTexture(0, driver->getTexture("../../media/faerie2.bmp"));
-		node->setMaterialFlag(video::EMF_LIGHTING, false);
-		node->setFrameLoop(0, 310);
+		node->setMaterialFlag(video::EMF_LIGHTING, true);
+		node->setMD2Animation ( scene::EMAT_STAND );
 	}
 
-	smgr->addCameraSceneNode(0, core::vector3df(45,0,0), core::vector3df(0,0,20));
+	// set ambient light
+	driver->setAmbientLight ( video::SColorf ( 0x005F6613 ) );
+
+	// add light 1 (nearly red)
+	scene::ILightSceneNode* light1 = 
+		smgr->addLightSceneNode(0, core::vector3df(0,0,0), 
+		video::SColorf(0.8f, 0.0f, 0.f, 0.0f), 200.0f);
+
+	light1->getLightData().Type = video::ELT_DIRECTIONAL;
+
+	// add fly circle animator to light 1
+	scene::ISceneNodeAnimator* anim = 
+		smgr->createFlyCircleAnimator (core::vector3df(0,18,0),14.0f, -0.003f);
+	light1->addAnimator(anim);
+	anim->drop();
+
+	// attach billboard to the light
+	scene::ISceneNode* bill = 
+		smgr->addBillboardSceneNode(light1, core::dimension2d<f32>(10, 10));
+
+	bill->setMaterialFlag(video::EMF_LIGHTING, false);
+	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
+	bill->setMaterialTexture(0, driver->getTexture("../../media/particlered.bmp"));
+
+	// add light 2 (nearly green)
+	scene::ILightSceneNode* light2 = 
+		smgr->addLightSceneNode(0, core::vector3df(0,0,0), 
+		video::SColorf(0.f, 0.f, 0.8f, 0.0f), 200.0f);
+
+	light2->getLightData().Type = video::ELT_DIRECTIONAL;
+
+	// add fly circle animator to light 2
+	anim = smgr->createFlyCircleAnimator (core::vector3df(0,-10.f,0),10.0f, 0.003f);
+	light2->addAnimator(anim);
+	anim->drop();
+
+	// attach billboard to the light
+	bill = smgr->addBillboardSceneNode(light2, core::dimension2d<f32>(10, 10));
+
+	bill->setMaterialFlag(video::EMF_LIGHTING, false);
+	bill->setMaterialType(video::EMT_TRANSPARENT_ADD_COLOR);
+	bill->setMaterialTexture(0, driver->getTexture("../../media/portal1.bmp"));
+
+	smgr->addCameraSceneNode(0, core::vector3df(45,0,0), core::vector3df(0,0,10));
 
 	// irrlicht logo
-	video::ITexture* irrlichtLogo = driver->getTexture("../../media/irrlichtlogo.bmp");
+	// add irrlicht logo
+	guienv->addImage(driver->getTexture("../../media/irrlichtlogoalpha2.tga"),
+		core::position2d<s32>(5,5));
+
+	video::ITexture* irrlichtBack = driver->getTexture("../../media/demoback.bmp");
 
 	// set transparency
 	setTransparency();
@@ -124,12 +172,14 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 		if (device->isWindowActive())
 		{
 			driver->beginScene(false, true, video::SColor(0,0,0,0));
+
+			if ( irrlichtBack )
+				driver->draw2DImage(irrlichtBack,
+									core::position2d<int>(0,0)
+									);
+
+			smgr->drawAll();
 			guienv->drawAll();
-			smgr->drawAll();	
-
-			if (irrlichtLogo)
-				driver->draw2DImage(irrlichtLogo, core::position2d<int>(10,10));
-
 			driver->endScene();
 		}
 	}

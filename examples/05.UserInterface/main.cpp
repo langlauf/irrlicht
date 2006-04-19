@@ -22,6 +22,7 @@ using namespace gui;
 
 #pragma comment(lib, "Irrlicht.lib")
 
+
 IrrlichtDevice *device = 0;
 s32 cnt = 0;
 IGUIListBox* listbox = 0;
@@ -187,6 +188,21 @@ int main()
 	env->addButton(rect<s32>(10,300,100,340), 0, 103, L"File Open");
 
 	/*
+	To make the font a little bit nicer, we load an external font
+	and set it as new font in the skin. An at last, we create a 
+	nice Irrlicht Engine logo in the top left corner.
+	*/
+
+	IGUISkin* skin = env->getSkin();
+	IGUIFont* font = env->getFont("../../media/fonthaettenschweiler.bmp");
+	if (font)
+		skin->setFont(font);
+
+	IGUIImage* img = env->addImage(
+		driver->getTexture("../../media/irrlichtlogoalpha2.tga"),
+		position2d<int>(10,10));
+
+	/*
 	Now, we add a static text and a scrollbar, which modifies the
 	transparency of all gui elements. We set the maximum value of
 	the scrollbar to 255, because that's the maximal value for 
@@ -200,21 +216,6 @@ int main()
 
 	env->addStaticText(L"Logging ListBox:", rect<s32>(50,80,250,100), true);
 	listbox = env->addListBox(rect<s32>(50, 110, 250, 180));
-
-	/*
-	To make the font a little bit nicer, we load an external font
-	and set it as new font in the skin. An at last, we create a 
-	nice Irrlicht Engine logo in the top left corner.
-	*/
-
-	IGUISkin* skin = env->getSkin();
-	IGUIFont* font = env->getFont("../../media/fonthaettenschweiler.bmp");
-	if (font)
-		skin->setFont(font);
-
-	IGUIImage* img = env->addImage(
-		driver->getTexture("../../media/irrlichtlogoalpha.tga"),
-		position2d<int>(10,10));
 
 	/*
 	That's all, we only have to draw everything.

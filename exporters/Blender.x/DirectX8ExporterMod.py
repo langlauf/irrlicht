@@ -1,17 +1,17 @@
 #!BPY
 
 """ Registration info for Blender menus:
-Name: 'DirectX8 mod1.3.1 (.x)...'
+Name: 'DirectX8 mod1.3.2 (.x)...'
 Blender: 234
 Group: 'Export'
 Tip: 'Export to DirectX8 text file format format.'
 """
 
 
-# DirectX8ExporterMod.py version 1.3.1
+# DirectX8ExporterMod.py version 1.3.2
 # Modification (c) 2004 by Jonas Petersen (jonas at mindfloaters dot de)
 # http://development.mindfloaters.de/
-MOD_VERSION = '1.3.1'
+MOD_VERSION = '1.3.2'
 #
 # DirectX8Exporter.py version 1.0
 # Copyright (C) 2003  Arben OMARI -- omariarben@everyday.com
@@ -39,11 +39,16 @@ MOD_VERSION = '1.3.1'
 # It is based on the original version by Arben Omari from Jun-20-2004 for Blender 2.34.
 #
 # Btw. this is my local CVS, not the Blender CVS.
-# $Id: DirectX8ExporterMod.py,v 1.21 2005/05/20 15:20:03 Jonas Exp $
+# $Id: DirectX8ExporterMod.py,v 1.23 2005/07/20 11:25:17 Jonas Exp $
 #
 # --
 #
 # Version history (of the modification):
+#
+# Version 1.3.2 - July 20th 2005
+#   - Removed import of mod_meshtools to make it work with Blender 2.37.
+#     ('mod_mehtools' is now named 'meshtools' but it's not used by this
+#     script anymore, so I removed it).
 #
 # Version 1.3.1 - May 20th 2005
 #   - Added check for SubSurf meshes. SubSurf meshes must be converted to
@@ -218,7 +223,7 @@ import Blender
 from Blender import Types, Object, NMesh, Material,Armature
 from Blender.Mathutils import *
 
-import time, os, sys, mod_meshtools
+import time, os, sys
 
 import string
 from string import replace

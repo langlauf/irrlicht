@@ -74,6 +74,7 @@ to make it easy, we use a pragma comment lib:
 */
 #pragma comment(lib, "Irrlicht.lib")
 
+
 /*
 This is the main method. We can use void main() on every platform.
 On Windows platforms, we could also use the WinMain method
@@ -89,9 +90,9 @@ int main()
 	root object for doing everything with the engine.
 	createDevice() has 7 paramters:
 	deviceType: Type of the device. This can currently be the Null-device,
-	   the Software device, DirectX8, DirectX9, or OpenGL. In this example we use
-	   EDT_SOFTWARE, but to try out, you might want to change it to
-	   EDT_NULL, EDT_DIRECT3D8 , EDT_DIRECT3D9, or EDT_OPENGL. 
+	   the Software device, the second software renderer, D3D8, D3D9, or OpenGL. 
+	   In this example we use EDT_SOFTWARE2, but to try out, you might want to change it to
+	   EDT_SOFTWARE, EDT_NULL, EDT_DIRECT3D8 , EDT_DIRECT3D9, or EDT_OPENGL. 
 	windowSize: Size of the Window or FullscreenMode to be created. In this 
 	   example we use 640x480.
 	bits: Amount of bits per pixel when in fullscreen mode. This should 
@@ -106,7 +107,7 @@ int main()
 	*/
 
 	IrrlichtDevice *device =
-		createDevice(EDT_SOFTWARE, dimension2d<s32>(640, 480), 16,
+		createDevice( video::EDT_SOFTWARE2, dimension2d<s32>(640, 480), 16,
 			false, false, false, 0);
 
 	/*
@@ -129,8 +130,8 @@ int main()
 	/*
 	We add a hello world label to the window, using the GUI environment.
 	*/
-	guienv->addStaticText(L"Hello World! This is the Irrlicht Software renderer!",
-		rect<int>(10,10,200,22), true);
+	guienv->addStaticText(L"Hello World! This is the Irrlicht Apfelbaum Software renderer!",
+		rect<int>(10,10,260,22), true);
 
 	/*
 	To display something interesting, we load a Quake 2 model 
@@ -156,7 +157,7 @@ int main()
 	if (node)
 	{
 		node->setMaterialFlag(EMF_LIGHTING, false);
-		node->setFrameLoop(0, 310);
+		node->setMD2Animation ( scene::EMAT_STAND );
 		node->setMaterialTexture( 0, driver->getTexture("../../media/sydney.bmp") );
 	}
 

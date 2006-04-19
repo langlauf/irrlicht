@@ -1,4 +1,4 @@
-// this example only runs in windows and demonstrates that Irrlicht 
+// this example only runs in windows and demonstrates that Irrlicht
 // can run inside a win32 window.
 
 #include <irrlicht.h>
@@ -13,7 +13,7 @@ HWND hWnd;
 
 static LRESULT CALLBACK CustomWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	switch (message) 
+	switch (message)
 	{
 	case WM_COMMAND:
 		{
@@ -25,7 +25,7 @@ static LRESULT CALLBACK CustomWndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 				DestroyWindow(hWnd);
 				PostQuitMessage(0);
 				return 0;
-			}		
+			}
 		}
 		break;
 	case WM_DESTROY:
@@ -38,7 +38,7 @@ static LRESULT CALLBACK CustomWndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 }
 
 
-	
+
 
 
 int main()
@@ -50,11 +50,11 @@ int main()
 	const char* Win32ClassName = "CIrrlichtWindowsTestDialog";
 
 	WNDCLASSEX wcex;
-	wcex.cbSize			= sizeof(WNDCLASSEX); 
+	wcex.cbSize			= sizeof(WNDCLASSEX);
 	wcex.style			= CS_HREDRAW | CS_VREDRAW;
 	wcex.lpfnWndProc	= (WNDPROC)CustomWndProc;
 	wcex.cbClsExtra		= 0;
-	wcex.cbWndExtra		= DLGWINDOWEXTRA; 
+	wcex.cbWndExtra		= DLGWINDOWEXTRA;
 	wcex.hInstance		= hInstance;
 	wcex.hIcon			= NULL;
 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
@@ -65,7 +65,7 @@ int main()
 
 	RegisterClassEx(&wcex);
 
-	DWORD style = WS_SYSMENU | WS_BORDER | WS_CAPTION | 
+	DWORD style = WS_SYSMENU | WS_BORDER | WS_CAPTION |
 		WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_MAXIMIZEBOX | WS_MINIMIZEBOX | WS_SIZEBOX;
 
 	int windowWidth = 440;
@@ -82,18 +82,18 @@ int main()
 
 	// create ok button
 
-	hOKButton = CreateWindow("BUTTON", "OK - Close", WS_CHILD | WS_VISIBLE | BS_TEXT, 
+	hOKButton = CreateWindow("BUTTON", "OK - Close", WS_CHILD | WS_VISIBLE | BS_TEXT,
 		windowWidth - 160, windowHeight - 40, 150, 30, hWnd, NULL, hInstance, NULL);
 
 	// create some text
-	
+
 	CreateWindow("STATIC", "This is Irrlicht running inside a standard Win32 window.\n"\
 		"Also mixing with MFC and .NET Windows.Forms is possible.",
 		WS_CHILD | WS_VISIBLE, 20, 20, 400, 40, hWnd, NULL, hInstance, NULL);
 
 	// create window to put irrlicht in
 
-	HWND hIrrlichtWindow = CreateWindow("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_OWNERDRAW, 
+	HWND hIrrlichtWindow = CreateWindow("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_OWNERDRAW,
 			50, 80, 320, 220, hWnd, NULL, hInstance, NULL);
 
 	// create irrlicht device in the button window
@@ -103,7 +103,7 @@ int main()
 	param.DriverType = video::EDT_OPENGL;
 
 	irr::IrrlichtDevice* device = irr::createDeviceEx(param);
-	
+
 	// setup a simple 3d scene
 
 	irr::scene::ISceneManager* smgr = device->getSceneManager();
@@ -112,13 +112,15 @@ int main()
 	scene::ICameraSceneNode* cam = smgr->addCameraSceneNode();
 	cam->setTarget(core::vector3df(0,0,0));
 
-	scene::ISceneNodeAnimator* anim = smgr->createFlyCircleAnimator(core::vector3df(0,10,0), 30.0f);
+	scene::ISceneNodeAnimator* anim = smgr->createFlyCircleAnimator(core::vector3df(0,15,0), 30.0f);
 	cam->addAnimator(anim);
 	anim->drop();
 
-	scene::ISceneNode* cube = smgr->addTestSceneNode(25);
-	
-	cube->setMaterialTexture(0, driver->getTexture("../../media/rockwall.bmp"));
+	scene::ISceneNode* cube = smgr->addTestSceneNode(20);
+
+	cube->setMaterialTexture(0, driver->getTexture("../../media/wall.bmp"));
+	cube->setMaterialTexture(1, driver->getTexture("../../media/water.jpg"));
+	cube->setMaterialType( video::EMT_REFLECTION_2_LAYER );
 
 	smgr->addSkyBoxSceneNode(
 	driver->getTexture("../../media/irrlicht2_up.jpg"),
@@ -137,8 +139,8 @@ int main()
 
 	// Instead of this, you can also simply use your own message loop
 	// using GetMessage, DispatchMessage and whatever. Calling
-	// Device->run() will cause Irrlicht to dispatch messages internally too. 
-	// You need not call Device->run() if you want to do your own message 
+	// Device->run() will cause Irrlicht to dispatch messages internally too.
+	// You need not call Device->run() if you want to do your own message
 	// dispatching loop, but Irrlicht will not be able to fetch
 	// user input then and you have to do it on your own using the window
 	// messages, DirectInput, or whatever.
@@ -164,7 +166,7 @@ int main()
 			if (msg.message == WM_QUIT)
 				break;
 		}
-		
+
 		// advance virtual time
 		device->getTimer()->tick();
 

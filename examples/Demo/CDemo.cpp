@@ -27,7 +27,7 @@ CDemo::~CDemo()
 void CDemo::run()
 {
 	device = createDevice(driverType,
-		core::dimension2d<s32>(640, 480), 16, fullscreen, shadows, vsync, this);;
+		core::dimension2d<s32>(640, 480), 32, fullscreen, shadows, vsync, this);;
 
 	device->getFileSystem()->addZipFileArchive("irrlicht.dat");
 	device->getFileSystem()->addZipFileArchive("../../media/irrlicht.dat");
@@ -325,7 +325,7 @@ void CDemo::loadSceneData()
 			model1->setMaterialTexture(0, driver->getTexture("../../media/spheremap.jpg"));
 			model1->setPosition(core::vector3df(100,40,-80));
 			model1->setScale(core::vector3df(2,2,2));
-			model1->setMD2Animation(scene::EMAT_SALUTE);
+			model1->setMD2Animation(scene::EMAT_STAND);
 			model1->setMaterialFlag(video::EMF_LIGHTING, false);
 			model1->setMaterialType(video::EMT_SPHERE_MAP);
 			model1->addShadowVolumeSceneNode();
@@ -337,7 +337,7 @@ void CDemo::loadSceneData()
 			model2->setPosition(core::vector3df(180,15,-60));
 			model2->setScale(core::vector3df(2,2,2));
 			model2->setMD2Animation(scene::EMAT_RUN);
-			model2->setAnimationSpeed(20);
+			//model2->setAnimationSpeed(1);
 			model2->setMaterialTexture(0, device->getVideoDriver()->getTexture("../../media/sydney.bmp"));
 			model2->setMaterialFlag(video::EMF_LIGHTING, true);
 			model2->addShadowVolumeSceneNode();
@@ -369,7 +369,7 @@ void CDemo::loadSceneData()
 	if (model2)
 	{
 		anim = device->getSceneManager()->createFlyStraightAnimator(waypoint[0], 
-			waypoint[1], 10000, true);
+			waypoint[1], 2000, true);
 		model2->addAnimator(anim);
 		anim->drop();
 	}
@@ -480,12 +480,14 @@ void CDemo::createLoadingScreen()
 	inOutFader->setColor(backColor);
 
 	// irrlicht logo
-
+/*
 	gui::IGUIImage* img = device->getGUIEnvironment()->addImage(
 		core::rect<int>(10,10,98,41));
-
 	img->setImage(
 		device->getVideoDriver()->getTexture("../../media/irrlichtlogoaligned.jpg"));
+*/
+	device->getGUIEnvironment()->addImage(device->getVideoDriver()->getTexture("../../media/irrlichtlogoalpha2.tga"),
+		core::position2d<s32>(5,5));
 
 	// loading text
 
