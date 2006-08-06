@@ -5,6 +5,7 @@
 #ifndef __IRR_TYPES_H_INCLUDED__
 #define __IRR_TYPES_H_INCLUDED__
 
+
 namespace irr
 {
 
@@ -14,11 +15,11 @@ typedef unsigned char		u8;
 
 //! 8 bit signed variable.
 /** This is a typedef for signed char, it ensures portability of the engine. */
-typedef signed char			s8; 
+typedef signed char		s8; 
 
 //! 8 bit character variable.
 /** This is a typedef for char, it ensures portability of the engine. */
-typedef char				c8; 
+typedef char			c8; 
 
 
 
@@ -38,7 +39,7 @@ typedef unsigned int		u32;
 
 //! 32 bit signed variable.
 /** This is a typedef for signed int, it ensures portability of the engine. */
-typedef signed int			s32; 
+typedef signed int		s32; 
 
 
 
@@ -79,8 +80,13 @@ typedef unsigned short wchar_t;
 #endif // microsoft compiler
 
 //! define a break macro for debugging only in Win32 mode.
-#if defined(WIN32) && defined(_MSC_VER) && defined(_DEBUG)
+#if defined(_DEBUG)
+#if defined(WIN32) && defined(_MSC_VER)
 #define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) if (_CONDITION_) {_asm int 3}
+#else 
+#include "assert.h"
+#define _IRR_DEBUG_BREAK_IF( _CONDITION_ ) assert( !(_CONDITION_) );
+#endif
 #else 
 #define _IRR_DEBUG_BREAK_IF( _CONDITION_ )
 #endif
@@ -96,6 +102,23 @@ Compiler version defines: VC6.0 : 1200, VC7.0 : 1300, VC7.1 : 1310, VC8.0 : 1400
 #else
 #define _IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX
 #endif // _IRR_MANAGED_MARSHALLING_BUGFIX
+
+
+#if defined(_DEBUG) && defined(IRRLICHT_EXPORTS) && defined(_MSC_VER) && \
+	(_MSC_VER > 1299) && !defined(_IRR_DONT_DO_MEMORY_DEBUGGING_HERE)
+	
+	#define CRTDBG_MAP_ALLOC
+	#define _CRTDBG_MAP_ALLOC
+	#define DEBUG_CLIENTBLOCK   new( _CLIENT_BLOCK, __FILE__, __LINE__)
+	#include <stdlib.h>
+	#include <crtdbg.h>
+	#define new DEBUG_CLIENTBLOCK
+#endif 
+
+// disable truncated debug information warning in visual studio 6 by default
+#if defined(_MSC_VER) && (_MSC_VER < 1300 )
+#pragma warning( disable: 4786)
+#endif // _MSC
 
 #endif // __IRR_TYPES_H_INCLUDED__
 

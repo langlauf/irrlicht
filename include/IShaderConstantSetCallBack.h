@@ -14,10 +14,10 @@ namespace video
 	class IMaterialRendererServices;
 
 //! Interface making it possible to set constants for gpu programs every frame. 
-/* Implement this interface in an own class and pass a pointer to it to one of the methods in
+/** Implement this interface in an own class and pass a pointer to it to one of the methods in
  IGPUProgrammingServices when creating a shader. The OnSetConstants method will be called
  every frame now. */
-class IShaderConstantSetCallBack : public IUnknown
+class IShaderConstantSetCallBack : public virtual IUnknown
 {
 public:
 
@@ -38,8 +38,7 @@ public:
 	   video::IVideoDriver* driver = services->getVideoDriver();
 	
 	   // set clip matrix at register 4
-	   core::matrix4 worldViewProj;
-	   worldViewProj = driver->getTransform(video::ETS_PROJECTION);			
+	   core::matrix4 worldViewProj(driver->getTransform(video::ETS_PROJECTION));
 	   worldViewProj *= driver->getTransform(video::ETS_VIEW);
 	   worldViewProj *= driver->getTransform(video::ETS_WORLD);
 	   services->setVertexShaderConstant(&worldViewProj.M[0], 4, 4);
@@ -48,7 +47,7 @@ public:
 	   
 	   // set some light color at register 9
 	   video::SColorf col(0.0f,1.0f,1.0f,0.0f);
-	   services->setVertexShaderConstant(reinterpret_cast<f32*>(&col), 9, 1);
+	   services->setVertexShaderConstant(reinterpret_cast<const f32*>(&col), 9, 1);
 	   // for high level shading languages, this would be another solution:
 	   //services->setVertexShaderConstant("myColor", reinterpret_cast<f32*>(&col), 4);
 	 }

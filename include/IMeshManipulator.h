@@ -24,7 +24,7 @@ namespace scene
 	with wrong imported or exported meshes quickly after loading. It is not intended for doing mesh
 	modifications and/or animations during runtime.
 	*/
-	class IMeshManipulator : public IUnknown
+	class IMeshManipulator : public virtual IUnknown
 	{
 	public:
 

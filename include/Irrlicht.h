@@ -37,10 +37,13 @@
 #include "dimension2d.h"
 #include "EDriverTypes.h"
 #include "heapsort.h"
+#include "IAttributes.h"
+#include "IAttributeExchangingObject.h"
 #include "IAnimatedMesh.h"
 #include "IAnimatedMeshMD2.h"
 #include "IAnimatedMeshMS3D.h"
 #include "IAnimatedMeshX.h"
+#include "IAnimatedMeshB3d.h"
 #include "IAnimatedMeshSceneNode.h"
 #include "ICameraSceneNode.h"
 #include "IDummyTransformationSceneNode.h"
@@ -66,10 +69,13 @@
 #include "IGUITabControl.h"
 #include "IGUIWindow.h"
 #include "IGUIToolbar.h"
+#include "IImage.h"
 #include "ILightSceneNode.h"
 #include "ILogger.h"
 #include "IMesh.h"
 #include "IMeshBuffer.h"
+#include "IMeshCache.h"
+#include "IMeshSceneNode.h"
 #include "IMeshManipulator.h"
 #include "IMetaTriangleSelector.h"
 #include "IReadFile.h"
@@ -78,11 +84,14 @@
 #include "irrString.h"
 #include "ISceneManager.h"
 #include "ISceneNode.h"
-#include "IStringParameters.h"
+#include "IAttributes.h"
 #include "ITriangleSelector.h"
 #include "ISceneNodeAnimator.h"
 #include "ISceneCollisionManager.h"
 #include "IMaterialRenderer.h"
+#include "IMaterialRendererServices.h"
+#include "ISceneNodeFactory.h"
+#include "ISceneNodeAnimatorFactory.h"
 #include "ISceneNodeAnimatorCollisionResponse.h"
 #include "IShaderConstantSetCallBack.h"
 #include "IParticleSystemSceneNode.h"
@@ -104,7 +113,6 @@
 #include "irrList.h"
 #include "matrix4.h"
 #include "plane3d.h"
-#include "plane3d.h"
 #include "vector2d.h"
 #include "vector3d.h"
 #include "triangle3d.h"
@@ -122,9 +130,9 @@
 #include "irrTypes.h"
 
 //! Irrlicht SDK Version
-#define IRRLICHT_SDK_VERSION "1.0"
+#define IRRLICHT_SDK_VERSION "1.1"
 
-/*! \mainpage Irrlicht Engine 1.0 API documentation
+/*! \mainpage Irrlicht Engine 1.1 API documentation
  *
  * <div align="center"><img src="logobig.png" ></div>
  *

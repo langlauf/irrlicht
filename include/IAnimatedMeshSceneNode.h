@@ -20,7 +20,7 @@ namespace scene
 	 IAnimatedMeshSceneNode::setAnimationEndCallback to be able to
 	 be notified if an animation playback has ended.
 	**/
-	class IAnimationEndCallBack : public IUnknown
+	class IAnimationEndCallBack : public virtual IUnknown
 	{
 	public:
 
@@ -76,7 +76,7 @@ namespace scene
 		//! the node later.
 		//! \param zfailmethod: If set to true, the shadow will use the zfail method,
 		//! if not, zpass is used. 
-		//! \param intinity: Value used by the shadow volume algorithm to scale the 
+		//! \param infinity: Value used by the shadow volume algorithm to scale the 
 		//! shadow volume. 
 		//! \return Returns pointer to the created shadow scene node.
 		//! This pointer should not be dropped. See IUnknown::drop() for more information.
@@ -156,6 +156,17 @@ namespace scene
 		//! Please note that this will only be called when in non looped mode,
 		//! see IAnimatedMeshSceneNode::setLoopMode().
 		virtual void setAnimationEndCallback(IAnimationEndCallBack* callback=0) = 0;
+
+		//! Sets if the scene node should not copy the materials of the mesh but use them in a read only style.
+		/* In this way it is possible to change the materials a mesh causing all mesh scene nodes 
+		referencing this mesh to change too. */
+		virtual void setReadOnlyMaterials(bool readonly) = 0;
+
+		//! Returns if the scene node should not copy the materials of the mesh but use them in a read only style
+		virtual bool isReadOnlyMaterials() = 0;
+
+		//! Sets a new mesh
+		virtual void setMesh(IAnimatedMesh* mesh) = 0;
 	};
 
 } // end namespace scene

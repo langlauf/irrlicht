@@ -9,6 +9,7 @@
 #include "IImage.h"
 #include "dimension2d.h"
 #include "EDriverTypes.h"
+#include "irrString.h"
 
 namespace irr
 {
@@ -59,7 +60,7 @@ enum E_TEXTURE_CREATION_FLAG
 
 	//! This flag is never used, it only forces the compiler to 
     //! compile these enumeration values to 32 bit.
-	ETCF_FORCE_32_BIT_DO_NOT_USE = 0x7fffffff,
+	ETCF_FORCE_32_BIT_DO_NOT_USE = 0x7fffffff
 };
 
 
@@ -90,9 +91,12 @@ inline E_TEXTURE_CREATION_FLAG getTextureFormatFromFlags(u32 flags)
 	If you try to use a texture created by one device with an other device, the device
 	will refuse to do that and write a warning or an error message to the output buffer.
 */
-class ITexture : public IUnknown
+class ITexture : public virtual IUnknown
 {
 public:
+
+	//! constructor
+	ITexture(const char* name) : Name(name) { Name.make_lower(); }
 
 	//! destructor
 	virtual ~ITexture() {};
@@ -144,9 +148,20 @@ public:
 	\return Returns pitch of texture in bytes. */
 	virtual s32 getPitch() = 0;
 
+	//! Returns whether the texture has MipMaps
+	/** \return Returns true if texture has MipMaps, else false. */
+	virtual bool hasMipMaps() { return false; }
+
 	//! Regenerates the mip map levels of the texture.
 	/** Useful after locking and modifying the texture */
 	virtual void regenerateMipMapLevels() = 0;
+
+	//! Returns name of texture (in most cases this is the filename)
+	const core::stringc& getName() { return Name; }
+
+protected:
+
+	core::stringc Name;
 };
 
 

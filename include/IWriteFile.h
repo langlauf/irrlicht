@@ -13,7 +13,7 @@ namespace io
 {
 
 	//! Interface providing write acess to a file.
-	class IWriteFile : public IUnknown
+	class IWriteFile : public virtual IUnknown
 	{
 	public:
 

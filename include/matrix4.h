@@ -10,6 +10,7 @@
 #include "plane3d.h"
 #include "aabbox3d.h"
 #include "rect.h"
+#include <cstring>
 
 namespace irr
 {
@@ -35,7 +36,7 @@ namespace core
 			const f32& operator()(s32 row, s32 col) const {  return M[col * 4 + row]; }
 
 			//! Sets this matrix equal to the other matrix.
-			matrix4& operator=(const matrix4 &other);
+			inline matrix4& operator=(const matrix4 &other);
 
 			//! Returns true if other matrix is equal to this matrix.
 			bool operator==(const matrix4 &other) const;
@@ -50,13 +51,13 @@ namespace core
 			matrix4 operator*(const matrix4& other) const;
 
 			//! Set matrix to identity. 
-			void makeIdentity();
+			inline void makeIdentity();
 
 			//! Returns true if the matrix is the identity matrix
-			bool isIdentity();
+			bool isIdentity() const;
 
 			//! Set the translation of the current matrix. Will erase any previous values.
-			void setTranslation( const vector3df& translation );			
+			void setTranslation( const vector3df& translation );
 
 			//! Gets the current translation
 			vector3df getTranslation() const;
@@ -65,7 +66,7 @@ namespace core
 			void setInverseTranslation( const vector3df& translation );	
 
 			//! Make a rotation matrix from Euler angles. The 4th row and column are unmodified.
-			void setRotationRadians( const vector3df& rotation );			
+			inline void setRotationRadians( const vector3df& rotation );			
 
 			//! Make a rotation matrix from Euler angles. The 4th row and column are unmodified.
 			void setRotationDegrees( const vector3df& rotation );			
@@ -74,7 +75,7 @@ namespace core
 			core::vector3df getRotationDegrees() const;			
 
 			//! Make an inverted rotation matrix from Euler angles. The 4th row and column are unmodified.
-			void setInverseRotationRadians( const vector3df& rotation );	
+			inline void setInverseRotationRadians( const vector3df& rotation );	
 
 			//! Make an inverted rotation matrix from Euler angles. The 4th row and column are unmodified.
 			void setInverseRotationDegrees( const vector3df& rotation );	
@@ -82,6 +83,9 @@ namespace core
 			//! Set Scale
 			void setScale( const vector3df& scale );
 			
+			//! Get Scale
+			core::vector3df getScale() const;
+
 			//! Translate a vector by the inverse of the translation part of this matrix.
 			void inverseTranslateVect( vector3df& vect ) const;			
 
@@ -127,9 +131,9 @@ namespace core
 			bool makeInverse();
 
 			//! returns the inversed matrix of this one
-			//! \param Target, where result matrix is written to.
+			//! \param out: where result matrix is written to.
 			//! \return Returns false if there is no inverse matrix.
-			bool getInverse(matrix4& out);
+			bool getInverse(matrix4& out) const;
 
 			//! Builds a right-handed perspective projection matrix based on a field of view
 			void buildProjectionMatrixPerspectiveFovRH(f32 fieldOfViewRadians, f32 aspectRatio, f32 zNear, f32 zFar);
@@ -160,7 +164,7 @@ namespace core
 			//! \param plane: plane into which the geometry if flattened into
 			//! \param point: value between 0 and 1, describing the light source. 
 			//! If this is 1, it is a point light, if it is 0, it is a directional light.
-			void buildShadowMatrix(core::vector3df light, core::plane3df plane, f32 point=1.0f);
+			void buildShadowMatrix(const core::vector3df& light, core::plane3df plane, f32 point=1.0f);
 
 			//! Builds a matrix which transforms a normalized Device Corrdinate to Device Coordinates. 
 			/** Used to scale <-1,-1><1,1> to viewport, for example from von <-1,-1> <1,1> to the viewport <0,0><0,640> */
@@ -169,10 +173,10 @@ namespace core
 			//! creates a new matrix as interpolated matrix from to other ones.
 			//! \param b: other matrix to interpolate with
 			//! \param time: Must be a value between 0 and 1.
-			matrix4 interpolate(core::matrix4& b, f32 time);
+			matrix4 interpolate(const core::matrix4& b, f32 time) const;
 
 			//! returns transposed matrix
-			matrix4 getTransposed();
+			matrix4 getTransposed() const;
 
 			//! Matrix data, stored in column-major order
 			f32 M[16];
@@ -211,8 +215,7 @@ namespace core
 		newMatrix[14] = m1[2]*m2[12] + m1[6]*m2[13] + m1[10]*m2[14] + m1[14]*m2[15];
 		newMatrix[15] = m1[3]*m2[12] + m1[7]*m2[13] + m1[11]*m2[14] + m1[15]*m2[15];
 		
-		for (s32 i=0; i<16; ++i)
-			M[i] = newMatrix[i];
+		memcpy(M, newMatrix, 16*sizeof(f32));
 
 		return *this;
 	}
@@ -278,14 +281,19 @@ namespace core
 		M[10] = scale.Z;
 	}
 
+	inline vector3df matrix4::getScale() const
+	{
+		return vector3df(M[0],M[5],M[10]);
+	}
+
 	inline void matrix4::setRotationDegrees( const vector3df& rotation )
 	{
-		setRotationRadians( rotation * (f32)3.1415926535897932384626433832795 / 180.0 );
+		setRotationRadians( rotation * core::DEGTORAD );
 	}
 
 	inline void matrix4::setInverseRotationDegrees( const vector3df& rotation )
 	{
-		setInverseRotationRadians( rotation * (f32)3.1415926535897932384626433832795 / 180.0 );
+		setInverseRotationRadians( rotation * core::DEGTORAD );
 	}
 
 	inline void matrix4::setRotationRadians( const vector3df& rotation )
@@ -320,7 +328,6 @@ namespace core
 		const matrix4 &mat = *this; 
 
 		f64 Y = -asin(mat(2,0)); 
-		f64 D = Y; 
 		f64 C = cos(Y); 
 		Y *= GRAD_PI; 
 
@@ -346,9 +353,9 @@ namespace core
 		// fix values that get below zero 
 		// before it would set (!) values to 360 
 		// that where above 360: 
-		if (X < 0.00) X += 360.00; 
-		if (Y < 0.00) Y += 360.00; 
-		if (Z < 0.00) Z += 360.00; 
+		if (X < 0.0) X += 360.0; 
+		if (Y < 0.0) Y += 360.0; 
+		if (Z < 0.0) Z += 360.0; 
 
 		return vector3df((f32)X,(f32)Y,(f32)Z);
 	}
@@ -381,13 +388,12 @@ namespace core
 
 	inline void matrix4::makeIdentity()
 	{
-		for (s32 i=0; i<16; ++i)
-			M[i] = 0.0f;
-		M[0] = M[5] = M[10] = M[15] = 1;
+		memset(M, 0, 16*sizeof(f32));
+		M[0] = M[5] = M[10] = M[15] = 1.0f;
 	}
 
 
-	inline bool matrix4::isIdentity()
+	inline bool matrix4::isIdentity() const
 	{
 		for (s32 i=0; i<4; ++i)
 			for (s32 j=0; j<4; ++j)
@@ -526,7 +532,7 @@ namespace core
 	}
 
 
-	inline bool matrix4::getInverse(matrix4& out)
+	inline bool matrix4::getInverse(matrix4& out) const
 	{
 		/// Calculates the inverse of this Matrix 
 		/// The inverse is calculated using Cramers rule.
@@ -581,8 +587,7 @@ namespace core
 
 	inline matrix4& matrix4::operator=(const matrix4 &other)
 	{
-		for (s32 i = 0; i < 16; ++i)
-			M[i] = other.M[i];
+		memcpy(M, other.M, 16*sizeof(f32));
 
 		return *this;
 	}
@@ -610,28 +615,28 @@ namespace core
 	//! Builds a right-handed perspective projection matrix based on a field of view
 	inline void matrix4::buildProjectionMatrixPerspectiveFovRH(f32 fieldOfViewRadians, f32 aspectRatio, f32 zNear, f32 zFar)
 	{
-	    f32 h = (f32)(cos(fieldOfViewRadians/2) / sin(fieldOfViewRadians/2));
-		f32 w = h / aspectRatio;
+		f32 h = (f32)(cos(fieldOfViewRadians/2.0) / sin(fieldOfViewRadians/2.0));
+		f32 w = h * aspectRatio;
 
-		(*this)(0,0) = 2*zNear/w;
-		(*this)(1,0) = 0;
-		(*this)(2,0) = 0;
-		(*this)(3,0) = 0;
+		(*this)(0,0) = 2.0f*zNear/w;
+		(*this)(1,0) = 0.0f;
+		(*this)(2,0) = 0.0f;
+		(*this)(3,0) = 0.0f;
 
-		(*this)(0,1) = 0;
-		(*this)(1,1) = 2*zNear/h;
-		(*this)(2,1) = 0;
-		(*this)(3,1) = 0;
+		(*this)(0,1) = 0.0f;
+		(*this)(1,1) = 2.0f*zNear/h;
+		(*this)(2,1) = 0.0f;
+		(*this)(3,1) = 0.0f;
 
-		(*this)(0,2) = 0;
-		(*this)(1,2) = 0;
+		(*this)(0,2) = 0.0f;
+		(*this)(1,2) = 0.0f;
 		(*this)(2,2) = zFar/(zFar-zNear);
-		(*this)(3,2) = -1;
+		(*this)(3,2) = -1.0f;
 
-		(*this)(0,3) = 0;
-		(*this)(1,3) = 0;
+		(*this)(0,3) = 0.0f;
+		(*this)(1,3) = 0.0f;
 		(*this)(2,3) = zNear*zFar/(zNear-zFar);
-		(*this)(3,3) = 0;
+		(*this)(3,3) = 0.0f;
 	}
 
 
@@ -639,28 +644,28 @@ namespace core
 	//! Builds a left-handed perspective projection matrix based on a field of view
 	inline void matrix4::buildProjectionMatrixPerspectiveFovLH(f32 fieldOfViewRadians, f32 aspectRatio, f32 zNear, f32 zFar)
 	{
-		f32 h = (f32)(cos(fieldOfViewRadians/2) / sin(fieldOfViewRadians/2));
-		f32 w = h / aspectRatio;
+		f32 h = (f32)(cos(fieldOfViewRadians/2.0) / sin(fieldOfViewRadians/2.0));
+		f32 w = h * aspectRatio;
 
-		(*this)(0,0) = 2*zNear/w;
-		(*this)(1,0) = 0;
-		(*this)(2,0) = 0;
-		(*this)(3,0) = 0;
+		(*this)(0,0) = 2.0f*zNear/w;
+		(*this)(1,0) = 0.0f;
+		(*this)(2,0) = 0.0f;
+		(*this)(3,0) = 0.0f;
 
-		(*this)(0,1) = 0;
-		(*this)(1,1) = 2*zNear/h;
-		(*this)(2,1) = 0;
-		(*this)(3,1) = 0;
+		(*this)(0,1) = 0.0f;
+		(*this)(1,1) = 2.0f*zNear/h;
+		(*this)(2,1) = 0.0f;
+		(*this)(3,1) = 0.0f;
 
-		(*this)(0,2) = 0;
-		(*this)(1,2) = 0;
+		(*this)(0,2) = 0.0f;
+		(*this)(1,2) = 0.0f;
 		(*this)(2,2) = zFar/(zFar-zNear);
-		(*this)(3,2) = 1;
+		(*this)(3,2) = 1.0f;
 
-		(*this)(0,3) = 0;
-		(*this)(1,3) = 0;
+		(*this)(0,3) = 0.0f;
+		(*this)(1,3) = 0.0f;
 		(*this)(2,3) = zNear*zFar/(zNear-zFar);
-		(*this)(3,3) = 0;
+		(*this)(3,3) = 0.0f;
 	}
 
 
@@ -767,7 +772,7 @@ namespace core
 
 
 	//! Builds a matrix that flattens geometry into a plane.
-	inline void matrix4::buildShadowMatrix(core::vector3df light, core::plane3df plane, f32 point)
+	inline void matrix4::buildShadowMatrix(const core::vector3df& light, core::plane3df plane, f32 point)
 	{
 		plane.Normal.normalize();
 		f32 d = plane.Normal.dotProduct(light);
@@ -866,7 +871,7 @@ namespace core
 
 	//! creates a new matrix as interpolated matrix from to other ones.
 	//! \param time: Must be a value between 0 and 1.
-	inline matrix4 matrix4::interpolate(core::matrix4& b, f32 time)
+	inline matrix4 matrix4::interpolate(const core::matrix4& b, f32 time) const
 	{
 		f32 ntime = 1.0f - time;
 		matrix4 mat;
@@ -877,11 +882,11 @@ namespace core
 	}
 
 	//! returns transposed matrix
-	inline matrix4 matrix4::getTransposed()
+	inline matrix4 matrix4::getTransposed() const
 	{
 		matrix4 t;
-		for (s32 r=0; r<4; ++r)
-			for (s32 c=0; c<4; ++c)
+		for (s32 c=0; c<4; ++c)
+			for (s32 r=0; r<4; ++r)
 				t(r,c) = (*this)(c,r);
 		return t;
 	}

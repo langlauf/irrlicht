@@ -7,9 +7,15 @@
 
 #include "IUnknown.h"
 #include "vector3d.h"
+#include "ESceneNodeAnimatorTypes.h"
+#include "IAttributeExchangingObject.h"
 
 namespace irr
 {
+namespace io
+{
+	class IAttributes;
+}
 namespace scene
 {
 	class ISceneNode;
@@ -19,7 +25,7 @@ namespace scene
 	change its position, rotation, scale and/or material. There are lots of animators
 	to choose from. You can create scene node animators with the ISceneManager interface.
 	*/
-	class ISceneNodeAnimator : public IUnknown
+	class ISceneNodeAnimator : public io::IAttributeExchangingObject
 	{
 	public:
 
@@ -32,6 +38,12 @@ namespace scene
 		/// \param node: Node to animate.
 		/// \param timeMs: Current time in milli seconds.
 		virtual void animateNode(ISceneNode* node, u32 timeMs) = 0;
+
+		//! Returns type of the scene node animator
+		virtual ESCENE_NODE_ANIMATOR_TYPE getType()
+		{
+			return ESNAT_UNKNOWN;
+		}
 	};
 } // end namespace scene
 } // end namespace irr

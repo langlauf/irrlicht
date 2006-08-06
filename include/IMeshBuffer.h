@@ -17,7 +17,7 @@ namespace scene
 {
 	//! Struct for holding a mesh with a single material
 	/** SMeshBuffer is a simple implementation of a MeshBuffer. */
-	class IMeshBuffer : public IUnknown
+	class IMeshBuffer : public virtual IUnknown
 	{
 	public:
 

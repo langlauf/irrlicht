@@ -13,7 +13,7 @@ namespace io
 {
 
 	//! Interface providing read acess to a file.
-	class IReadFile : public IUnknown
+	class IReadFile : public virtual IUnknown
 	{
 	public:
 

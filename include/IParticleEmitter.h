@@ -5,7 +5,7 @@
 #ifndef __I_PARTICLE_EMITTER_H_INCLUDED__
 #define __I_PARTICLE_EMITTER_H_INCLUDED__
 
-#include "IUnknown.h"
+#include "IAttributeExchangingObject.h"
 #include "SParticle.h"
 
 namespace irr
@@ -13,10 +13,26 @@ namespace irr
 namespace scene
 {
 
+//! Types of built in particle emitters
+enum E_PARTICLE_EMITTER_TYPE
+{
+	EPET_POINT = 0,
+	EPET_BOX,
+	EPET_COUNT
+};
+
+//! Names for built in particle emitters
+const char* const ParticleEmitterTypeNames[] = 
+{
+	"Point",
+	"Box",
+	0
+};
+
 //! A particle emitter for using with particle systems.
 /** A Particle emitter emitts new particles into a particle system.
 */
-class IParticleEmitter : public IUnknown
+class IParticleEmitter : public virtual IUnknown
 {
 public:
 
@@ -31,6 +47,21 @@ public:
 	//! particles to add into the system.
 	//! \return Returns amount of new particles in the array. Can be 0.
 	virtual s32 emitt(u32 now, u32 timeSinceLastCall, SParticle*& outArray) = 0;
+
+	//! Writes attributes of the object.
+	//! Implement this to expose the attributes of your scene node animator for 
+	//! scripting languages, editors, debuggers or xml serialization purposes.
+	virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0) {}
+
+	//! Reads attributes of the object.
+	//! Implement this to set the attributes of your scene node animator for 
+	//! scripting languages, editors, debuggers or xml deserialization purposes.
+	//! \param startIndex: start index where to start reading attributes.
+	//! \return: returns last index of an attribute read by this affector
+	virtual s32 deserializeAttributes(s32 startIndex, io::IAttributes* in, io::SAttributeReadWriteOptions* options=0) { return 0; }
+
+	//! Get emitter type
+	virtual E_PARTICLE_EMITTER_TYPE getType() = 0;
 };
 
 } // end namespace scene

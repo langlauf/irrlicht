@@ -6,6 +6,9 @@
 #define __IRR_STRING_H_INCLUDED__
 
 #include "irrTypes.h"
+#include "irrAllocator.h"
+#include <stdio.h>
+#include <string.h>
 
 namespace irr
 {
@@ -14,24 +17,24 @@ namespace core
 
 //!	Very simple string class with some useful features.
 /**	string<c8> and string<wchar_t> work both with unicode AND ascii,
-so you can assign unicode to string<c8> and ascii to string<wchar_t> 
-(and the other way round) if your ever would want to. 
+so you can assign unicode to string<c8> and ascii to string<wchar_t>
+(and the other way round) if your ever would want to.
 Note that the conversation between both is not done using an encoding.
 
 Known bugs:
 Special characters like 'Ä', 'Ü' and 'Ö' are ignored in the
 methods make_upper, make_lower and equals_ignore_case.
 */
-template <class T>
+template <typename T, typename TAlloc = irrAllocator<T> >
 class string
 {
 public:
 
 	//! Default constructor
 	string()
-	: allocated(1), used(1), array(0)
+	: array(0), allocated(1), used(1)
 	{
-		array = new T[1];
+		array = allocator.allocate(1); // new T[1];
 		array[0] = 0x0;
 	}
 
@@ -39,15 +42,24 @@ public:
 
 	//! Constructor
 	string(const string<T>& other)
-	: allocated(0), used(0), array(0)
+	: array(0), allocated(0), used(0)
 	{
 		*this = other;
 	}
 
 
+	//! Constructs a string from a float
+	string(double number)
+	: array(0), allocated(0), used(0)
+	{
+		c8 tmpbuf[255];
+		sprintf(tmpbuf,"%0.6f",number);
+		*this = tmpbuf;
+	}
+
 	//! Constructs a string from an int
 	string(int number)
-	: allocated(0), used(0), array(0)
+	: array(0), allocated(0), used(0)
 	{
 		// store if negative and make positive
 
@@ -62,11 +74,11 @@ public:
 
 		c8 tmpbuf[16];
 		tmpbuf[15] = 0;
-		s32 idx = 15;	
+		s32 idx = 15;
 
 		// special case '0'
 
-		if (!number) 
+		if (!number)
 		{
 			tmpbuf[14] = '0';
 			*this = &tmpbuf[14];
@@ -77,9 +89,9 @@ public:
 
 		while(number && idx)
 		{
-			idx--;	
+			idx--;
 			tmpbuf[idx] = (c8)('0' + (number % 10));
-			number = number / 10;					
+			number = number / 10;
 		}
 
 		// add sign
@@ -87,7 +99,7 @@ public:
 		if (negative)
 		{
 			idx--;
-			tmpbuf[idx] = '-';			
+			tmpbuf[idx] = '-';
 		}
 
 		*this = &tmpbuf[idx];
@@ -95,21 +107,21 @@ public:
 
 
 
-	//! Constructor for copying a string from a pointer with a given lenght
+	//! Constructor for copying a string from a pointer with a given length
 	template <class B>
-	string(const B* c, s32 lenght)
-	: allocated(0), used(0), array(0)
+	string(const B* c, s32 length)
+	: array(0), allocated(0), used(0)
 	{
 		if (!c)
 			return;
 
-        allocated = used = lenght+1;
-		array = new T[used];
+		allocated = used = length+1;
+		array = allocator.allocate(used); // new T[used];
 
-		for (s32 l = 0; l<lenght; ++l)
+		for (s32 l = 0; l<length; ++l)
 			array[l] = (T)c[l];
 
-		array[lenght] = 0;
+		array[length] = 0;
 	}
 
 
@@ -117,7 +129,7 @@ public:
 	//! Constructor for unicode and ascii strings
 	template <class B>
 	string(const B* c)
-	: allocated(0), used(0), array(0)
+	: array(0), allocated(0), used(0)
 	{
 		*this = c;
 	}
@@ -127,20 +139,20 @@ public:
 	//! destructor
 	~string()
 	{
-		delete [] array;
+		allocator.deallocate(array); // (delete [] array;
 	}
 
 
 
 	//! Assignment operator
-	string<T>& operator=(const string<T>& other) 
+	string<T>& operator=(const string<T>& other)
 	{
 		if (this == &other)
 			return *this;
 
-		delete [] array;
+		allocator.deallocate(array); // delete [] array;
 		allocated = used = other.size()+1;
-		array = new T[used];
+		array = allocator.allocate(used); //new T[used];
 
 		const T* p = other.c_str();
 		for (s32 i=0; i<used; ++i, ++p)
@@ -153,13 +165,13 @@ public:
 
 	//! Assignment operator for strings, ascii and unicode
 	template <class B>
-	string<T>& operator=(const B* c) 
+	string<T>& operator=(const B* c)
 	{
 		if (!c)
 		{
 			if (!array)
 			{
-				array = new T[1];
+				array = allocator.allocate((T)1); //new T[1];
 				allocated = 1;
 				used = 1;
 			}
@@ -182,39 +194,39 @@ public:
 		// a part of the current string.
 		T* oldArray = array;
 
-        allocated = used = len+1;
-		array = new T[used];
+		allocated = used = len+1;
+		array = allocator.allocate(used); //new T[used];
 
 		for (s32 l = 0; l<len+1; ++l)
 			array[l] = (T)c[l];
 
-		delete [] oldArray;
+		allocator.deallocate(oldArray); // delete [] oldArray;
 		return *this;
 	}
 
 	//! Add operator for other strings
-	string<T> operator+(const string<T>& other) 
-	{ 
-		string<T> str(*this); 
-		str.append(other); 
+	string<T> operator+(const string<T>& other) const
+	{
+		string<T> str(*this);
+		str.append(other);
 
-		return str; 
-	} 
+		return str;
+	}
 
-	//! Add operator for strings, ascii and unicode 
-	template <class B> 
-	string<T> operator+(const B* c) 
-	{ 
-		string<T> str(*this); 
-		str.append(c); 
+	//! Add operator for strings, ascii and unicode
+	template <class B>
+	string<T> operator+(const B* c) const
+	{
+		string<T> str(*this);
+		str.append(c);
 
-		return str; 
+		return str;
 	}
 
 
 
 	//! Direct access operator
-	T& operator [](const s32 index)  const
+	T& operator [](const s32 index) const
 	{
 		_IRR_DEBUG_BREAK_IF(index>=used) // bad index
 
@@ -225,7 +237,7 @@ public:
 	//! Comparison operator
 	bool operator ==(const T* str) const
 	{
-		int i;
+		s32 i;
 		for(i=0; array[i] && str[i]; ++i)
 			if (array[i] != str[i])
 				return false;
@@ -260,13 +272,21 @@ public:
 
 
 	//! Equals not operator
+	bool operator !=(const T* str) const
+	{
+		return !(*this == str);
+	}
+
+
+
+	//! Equals not operator
 	bool operator !=(const string<T>& other) const
 	{
 		return !(*this == other);
 	}
 
 
-    
+
 	//! Returns length of string
 	/** \return Returns length of the string in characters. */
 	s32 size() const
@@ -331,7 +351,7 @@ public:
 
 
 	//! compares the first n characters of the strings
-	bool equalsn(const string<T>& other, int len)
+	bool equalsn(const string<T>& other, int len) const
 	{
 		int i;
 		for(i=0; array[i] && other[i] && i < len; ++i)
@@ -339,21 +359,21 @@ public:
 				return false;
 
 		// if one (or both) of the strings was smaller then they
-		// are only equal if they have the same lenght
+		// are only equal if they have the same length
 		return (i == len) || (used == other.used);
 	}
 
 
 	//! compares the first n characters of the strings
-	bool equalsn(const T* str, int len)
+	bool equalsn(const T* str, int len) const
 	{
-		int i;	
+		int i;
 		for(i=0; array[i] && str[i] && i < len; ++i)
 			if (array[i] != str[i])
 				return false;
 
 		// if one (or both) of the strings was smaller then they
-		// are only equal if they have the same lenght
+		// are only equal if they have the same length
 		return (i == len) || (array[i] == 0 && str[i] == 0);
 	}
 
@@ -371,6 +391,30 @@ public:
 		array[used-1] = 0;
 	}
 
+	//! Appends a char string to this string
+	/** \param other: Char string to append. */
+	void append(const T* other)
+	{
+		--used;
+
+		s32 len = 0;
+		const T* p = other;
+		while(*p)
+		{
+			++len;
+			++p;
+		}
+
+		if (used + len + 1 > allocated)
+			reallocate((s32)used + (s32)len + 1);
+
+		for (s32 l=0; l<len+1; ++l)
+			array[l+used] = *(other+l);
+
+		used = used + len + 1;
+	}
+
+
 	//! Appends a string to this string
 	/** \param other: String to append. */
 	void append(const string<T>& other)
@@ -378,7 +422,7 @@ public:
 		--used;
 
 		s32 len = other.size();
-		
+
 		if (used + len + 1 > allocated)
 			reallocate((s32)used + (s32)len + 1);
 
@@ -404,7 +448,7 @@ public:
 
 		len = length;
 		--used;
-		
+
 		if (used + len > allocated)
 			reallocate((s32)used + (s32)len);
 
@@ -442,7 +486,7 @@ public:
 	//! finds first occurrence of a character of a list in string
 	/** \param c: List of strings to find. For example if the method
 	should find the first occurance of 'a' or 'b', this parameter should be "ab".
-	\param count: Amount of characters in the list. Ususally, 
+	\param count: Amount of characters in the list. Ususally,
 	this should be strlen(ofParameter1)
 	\return Returns position where one of the character has been found,
 	or -1 if not found. */
@@ -460,11 +504,11 @@ public:
 	//! Finds first position of a character not in a given list.
 	/** \param c: List of characters not to find. For example if the method
 	 should find the first occurance of a character not 'a' or 'b', this parameter should be "ab".
-	\param count: Amount of characters in the list. Ususally, 
+	\param count: Amount of characters in the list. Ususally,
 	this should be strlen(ofParameter1)
 	\return Returns position where the character has been found,
 	or -1 if not found. */
-	template <class B> 
+	template <class B>
 	s32 findFirstCharNotInList(B* c, int count) const
 	{
 		for (int i=0; i<used; ++i)
@@ -484,11 +528,11 @@ public:
 	//! Finds last position of a character not in a given list.
 	/** \param c: List of characters not to find. For example if the method
 	 should find the first occurance of a character not 'a' or 'b', this parameter should be "ab".
-	\param count: Amount of characters in the list. Ususally, 
+	\param count: Amount of characters in the list. Ususally,
 	this should be strlen(ofParameter1)
 	\return Returns position where the character has been found,
 	or -1 if not found. */
-	template <class B> 
+	template <class B>
 	s32 findLastCharNotInList(B* c, int count) const
 	{
 		for (int i=used-2; i>=0; --i)
@@ -507,7 +551,7 @@ public:
 
 	//! finds next occurrence of character in string
 	/** \param c: Character to search for.
-	\param startPos: Position in string to start searching. 
+	\param startPos: Position in string to start searching.
 	\return Returns position where the character has been found,
 	or -1 if not found. */
 	s32 findNext(T c, s32 startPos) const
@@ -537,7 +581,7 @@ public:
 	//! Returns a substring
 	//! \param begin: Start of substring.
 	//! \param length: Length of substring.
-	string<T> subString(s32 begin, s32 length)
+	string<T> subString(s32 begin, s32 length) const
 	{
 		if (length <= 0)
 			return string<T>("");
@@ -560,6 +604,11 @@ public:
 		append(c);
 	}
 
+	void operator += (const T* c)
+	{
+		append(c);
+	}
+
 	void operator += (const string<T>& other)
 	{
 		append(other);
@@ -570,6 +619,11 @@ public:
 		append(string<T>(i));
 	}
 
+	void operator += (double i)
+	{
+		append(string<T>(i));
+	}
+    	
 	//! replaces all characters of a special type with another one
 	void replace(T toReplace, T replaceWith)
 	{
@@ -598,7 +652,7 @@ public:
 	}
 
 
-	//! Erases a character from the string. May be slow, because all elements 
+	//! Erases a character from the string. May be slow, because all elements
 	//! following after the erased element have to be copied.
 	//! \param index: Index of element to be erased.
 	void erase(int index)
@@ -611,7 +665,7 @@ public:
 		--used;
 	}
 
-    	
+
 
 private:
 
@@ -624,22 +678,22 @@ private:
 			return t;
 	}
 
-	//! Reallocate the array, make it bigger or smaler
+	//! Reallocate the array, make it bigger or smaller
 	void reallocate(s32 new_size)
 	{
 		T* old_array = array;
 
-		array = new T[new_size];
+		array = allocator.allocate(new_size); //new T[new_size];
 		allocated = new_size;
-		
+
 		s32 amount = used < new_size ? used : new_size;
 		for (s32 i=0; i<amount; ++i)
 			array[i] = old_array[i];
 
 		if (allocated < used)
 			used = allocated;
-		
-		delete [] old_array;
+
+		allocator.deallocate(old_array); // delete [] old_array;
 	}
 
 
@@ -648,6 +702,7 @@ private:
 	T* array;
 	s32 allocated;
 	s32 used;
+	TAlloc allocator;
 };
 
 

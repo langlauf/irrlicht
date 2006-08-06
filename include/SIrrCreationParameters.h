@@ -14,13 +14,14 @@ namespace irr
 		//! Constructs a SIrrlichtCreationParameters structure with default values.
 		SIrrlichtCreationParameters()
 		{
-			DriverType = video::EDT_SOFTWARE;
+			DriverType = video::EDT_SOFTWARE2;
 			WindowSize = core::dimension2d<s32>(800, 600);
 			Bits = 16;
 			Fullscreen = false;
 			Stencilbuffer = false;
 			Vsync = false;
 			AntiAlias = false;
+			HighPrecisionFPU = false;
 			EventReceiver = 0;
 			WindowId = 0;
 			SDK_version_do_not_use = IRRLICHT_SDK_VERSION;
@@ -55,8 +56,8 @@ namespace irr
 		bool Vsync;
 
 		//! Specifies if the device should use fullscreen anti aliasing
-		/** Makes sharp/pixellated edges softer, but requires more performance. Also, 2D 
-		elements might look blurier with this switched on. The resulting rendering quality 
+		/** Makes sharp/pixelated edges softer, but requires more performance. Also, 2D 
+		elements might look blurred with this switched on. The resulting rendering quality 
 		also depends on the hardware and driver you are using, your program might look
 		different on different hardware with this. So if you are writing a 
 		game/application with antiAlias switched on, it would be a good idea to make it
@@ -64,6 +65,14 @@ namespace irr
 		This is only supported in D3D9 and D3D8. In D3D9, both sample types are supported,
 		D3DMULTISAMPLE_X_SAMPLES and D3DMULTISAMPLE_NONMASKABLE. Default value: false */
 		bool AntiAlias;
+
+		//! Specifies if the device should use high precision FPU setting
+		/** This is only relevant for DirectX Devices, which switch to low FPU precision
+		by default for performance reasons. However, this may lead to problems with the
+		other computations of the application. In this case setting this flag to true
+		should help - on the expense of performance loss, though.
+		Default value: false */
+		bool HighPrecisionFPU;
 
 		//! A user created event receiver.
 		IEventReceiver* EventReceiver;

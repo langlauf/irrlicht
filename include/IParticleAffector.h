@@ -7,14 +7,33 @@
 
 #include "IUnknown.h"
 #include "SParticle.h"
+#include "IAttributeExchangingObject.h"
 
 namespace irr
 {
 namespace scene
 {
 
+//! Types of built in particle affectors
+enum E_PARTICLE_AFFECTOR_TYPE
+{
+	EPAT_NONE = 0,
+	EPAT_FADE_OUT,
+	EPAT_GRAVITY,
+	EPAT_COUNT
+};
+
+//! Names for built in particle affectors
+const char* const ParticleAffectorTypeNames[] = 
+{
+	"None",
+	"FadeOut",
+	"Gravity",	
+	0
+};
+
 //! A particle affector modifies particles.
-class IParticleAffector : public IUnknown
+class IParticleAffector : public virtual IUnknown
 {
 public:
 
@@ -24,6 +43,20 @@ public:
 	//! \param count: Amount of particles in array.
 	virtual void affect(u32 now, SParticle* particlearray, u32 count) = 0;
 
+	//! Writes attributes of the object.
+	//! Implement this to expose the attributes of your scene node animator for 
+	//! scripting languages, editors, debuggers or xml serialization purposes.
+	virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0) {}
+
+	//! Reads attributes of the object.
+	//! Implement this to set the attributes of your scene node animator for 
+	//! scripting languages, editors, debuggers or xml deserialization purposes.
+	//! \param startIndex: start index where to start reading attributes.
+	//! \return: returns last index of an attribute read by this affector
+	virtual s32 deserializeAttributes(s32 startIndex, io::IAttributes* in, io::SAttributeReadWriteOptions* options=0) { return 0; }
+
+	//! Get emitter type
+	virtual E_PARTICLE_AFFECTOR_TYPE getType() = 0;
 };
 
 } // end namespace scene

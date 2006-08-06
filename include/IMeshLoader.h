@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2003 Nikolaus Gebhardt
+// Copyright (C) 2002-2006 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -19,7 +19,7 @@ namespace scene
 currently unsupported file formats (e.g .cob), then implement
 this and add your new Surface loader with 
 ISceneManager::addExternalMeshLoader() to the engine. */
-class IMeshLoader : public IUnknown
+class IMeshLoader : public virtual IUnknown
 {
 public:
 

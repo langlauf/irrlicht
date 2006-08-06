@@ -1,5 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UserInterface", "UserInterface.vcproj", "{9994A903-C6DB-4516-9D54-B238B05FE001}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UserInterface", "UserInterface.vcproj", "{7FD46B60-53A7-4634-A07C-95AA83BBE9F6}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
@@ -9,10 +9,10 @@ Global
 		Release = Release
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
-		{9994A903-C6DB-4516-9D54-B238B05FE001}.Debug.ActiveCfg = Debug|Win32
-		{9994A903-C6DB-4516-9D54-B238B05FE001}.Debug.Build.0 = Debug|Win32
-		{9994A903-C6DB-4516-9D54-B238B05FE001}.Release.ActiveCfg = Release|Win32
-		{9994A903-C6DB-4516-9D54-B238B05FE001}.Release.Build.0 = Release|Win32
+		{7FD46B60-53A7-4634-A07C-95AA83BBE9F6}.Debug.ActiveCfg = Debug|Win32
+		{7FD46B60-53A7-4634-A07C-95AA83BBE9F6}.Debug.Build.0 = Debug|Win32
+		{7FD46B60-53A7-4634-A07C-95AA83BBE9F6}.Release.ActiveCfg = Release|Win32
+		{7FD46B60-53A7-4634-A07C-95AA83BBE9F6}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

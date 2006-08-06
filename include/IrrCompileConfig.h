@@ -11,14 +11,14 @@
 //! WIN64 for Windows64
 //! _IRR_WINDOWS_ for all irrlicht supported windows versions
 //! OS2 for OS/2
-//! MACOS for MacOs
+//! MACOSX for Mac OS X
 //! LINUX for linux and unix (it is defined here if no other os is defined)
 
 #if defined(WIN32) || defined(WIN64)
 #define _IRR_WINDOWS_
 #endif
 
-#if !defined(_IRR_WINDOWS_) && !defined(_XBOX) && !defined(OS2) && !defined(MACOS)
+#if !defined(_IRR_WINDOWS_) && !defined(_XBOX) && !defined(OS2) && !defined(MACOSX)
 #define LINUX
 #endif
 
@@ -53,7 +53,10 @@ define. */
 /** For being able to do things like multi texturing. It is useful
  to comment out this define to disable opengl extensions in linux because
  on some linux versions, these extensions does not exist. */
+#if !defined(_IRR_WINDOWS_) && !defined(_XBOX) && !defined(OS2) && !defined(MACOSX)
 #define _IRR_LINUX_OPENGL_USE_EXTENSIONS_
+#define _IRR_LINUX_X11_VIDMODE_
+#endif
 
 
 //! Define _IRR_COMPILE_WITH_ZLIB_ to enable compiling the engine using zlib.
@@ -107,9 +110,11 @@ Note that the engine will run in D3D REF for this, which is a lot slower than HA
 // those $%&$!! disabled support for it since Dec. 2004 and users are complaining
 // about linker errors. Comment this out only if you are knowing what you are 
 // doing. (Which means you have an old DX9 SDK and VisualStudio6).
+#ifdef _MSC_VER
 #if (_MSC_VER < 1300 && !defined(__GNUC__)) 
 #undef _IRR_COMPILE_WITH_DIRECT3D_9_
 #pragma message("Compiling Irrlicht with Visual Studio 6.0, support for DX9 is disabled.")
+#endif
 #endif
 
 #endif

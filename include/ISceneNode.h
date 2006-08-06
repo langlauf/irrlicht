@@ -14,6 +14,8 @@
 #include "aabbox3d.h"
 #include "matrix4.h"
 #include "irrList.h"
+#include "IAttributes.h"
+#include "IAttributeExchangingObject.h"
 
 namespace irr
 {
@@ -28,7 +30,7 @@ namespace scene
 	visible, its children won't be visible too. In this way, it is for example easily possible
 	to attach a light to a moving car, or to place a walking character on a moving platform
 	on a moving ship. */
-	class ISceneNode : public IUnknown
+	class ISceneNode : public io::IAttributeExchangingObject
 	{
 	public:
 
@@ -37,15 +39,15 @@ namespace scene
 					const core::vector3df& position = core::vector3df(0,0,0),
 					const core::vector3df& rotation = core::vector3df(0,0,0),
 					const core::vector3df& scale = core::vector3df(1.0f, 1.0f, 1.0f))
-			: IsVisible(true), ID(id), Parent(parent), SceneManager(mgr),
-				AutomaticCullingEnabled(true), DebugDataVisible(false),
-				TriangleSelector(0), RelativeTranslation(position),
-				RelativeRotation(rotation), RelativeScale(scale), IsDebugObject(false)
+			: RelativeTranslation(position), RelativeRotation(rotation), RelativeScale(scale),
+				Parent(parent), ID(id), SceneManager(mgr), TriangleSelector(0),
+				AutomaticCullingEnabled(true), IsVisible(true),
+				DebugDataVisible(false), IsDebugObject(false)
 		{
 			if (Parent)
 				Parent->addChild(this);
 
-			updateAbsolutePosition();			
+			updateAbsolutePosition();
 		}
 
 
@@ -71,7 +73,7 @@ namespace scene
 		//! precalculate the geometry which should be renderered, and prevent their
 		//! children from being able to register them selfes if they are clipped by simply
 		//! not calling their OnPreRender-Method.
-		virtual void OnPreRender() 
+		virtual void OnPreRender()
 		{
 			if (IsVisible)
 			{
@@ -100,7 +102,7 @@ namespace scene
 				updateAbsolutePosition();
 
 				// perform the post render process on all children
-				
+
 				core::list<ISceneNode*>::Iterator it = Children.begin();
 				for (; it != Children.end(); ++it)
 					(*it)->OnPostRender(timeMs);
@@ -114,7 +116,7 @@ namespace scene
 
 		//! Returns the name of the node.
 		//! \return Returns name as wide character string.
-		virtual const wchar_t* getName() const
+		virtual const char* getName() const
 		{
 			return Name.c_str();
 		}
@@ -122,7 +124,7 @@ namespace scene
 
 		//! Sets the name of the node.
 		//! \param name: New name of the scene node.
-		virtual void setName(const wchar_t* name)
+		virtual void setName(const char* name)
 		{
 			Name = name;
 		}
@@ -143,9 +145,9 @@ namespace scene
 		{
 			core::aabbox3d<f32> box = getBoundingBox();
 			AbsoluteTransformation.transformBox(box);
-            return box;
+			return box;
 		}
-		
+
 
 		//! returns the absolute transformation of the node. Is recalculated every OnPostRender()-call.
 		core::matrix4& getAbsoluteTransformation()
@@ -215,7 +217,7 @@ namespace scene
 				child->grab();
 				child->remove(); // remove from old parent
 				Children.push_back(child);
-				child->Parent = this;				
+				child->Parent = this;
 			}
 		}
 
@@ -272,6 +274,12 @@ namespace scene
 		}
 
 
+		//! Returns a const reference to the list of all scene node animators.
+		const core::list<ISceneNodeAnimator*>& getAnimators() const
+		{
+			return Animators;
+		}
+
 
 		//! Removes an animator from this scene node.
 		virtual void removeAnimator(ISceneNodeAnimator* animator)
@@ -294,7 +302,7 @@ namespace scene
 			for (; it != Animators.end(); ++it)
 				(*it)->drop();
 
-			Animators.clear();	
+			Animators.clear();
 		}
 
 
@@ -320,7 +328,7 @@ namespace scene
 
 
 		//! Sets all material flags at once to a new value. Helpful for
-		//! example, if you want to be the the whole mesh to be lighted by 
+		//! example, if you want to be the the whole mesh to be lighted by
 		//! \param flag: Which flag of all materials to be set.
 		//! \param newvalue: New value of the flag.
 		void setMaterialFlag(video::E_MATERIAL_FLAG flag, bool newvalue)
@@ -344,7 +352,7 @@ namespace scene
 				getMaterial(i).Textures[textureLayer] = texture;
 		}
 
-			
+
 		//! Sets the material type of all materials s32 this scene node
 		//! to a new material type.
 		//! \param newType: New type of material to be set.
@@ -352,10 +360,10 @@ namespace scene
 		{
 			for (s32 i=0; i<getMaterialCount(); ++i)
 				getMaterial(i).MaterialType = newType;
-		}	
+		}
 
 
-		//! Gets the scale of the scene node. 
+		//! Gets the scale of the scene node.
 		/** \return Returns the scale of the scene node. */
 		virtual core::vector3df getScale() const
 		{
@@ -363,7 +371,7 @@ namespace scene
 		}
 
 
-		//! Sets the scale of the scene node. 
+		//! Sets the scale of the scene node.
 		/** \param scale: New scale of the node */
 		virtual void setScale(const core::vector3df& scale)
 		{
@@ -382,14 +390,14 @@ namespace scene
 
 		//! Sets the rotation of the node.
 		/** This only modifies the relative rotation of the node.
-		\param roation: New rotation of the node in degrees. */
+		\param rotation: New rotation of the node in degrees. */
 		virtual void setRotation(const core::vector3df& rotation)
 		{
 			RelativeRotation = rotation;
 		}
 
 
-		//! Gets the position of the node. 
+		//! Gets the position of the node.
 		/** Note that the position is relative to the parent.
 		\return Returns the current position of the node relative to the parent. */
 		virtual const core::vector3df getPosition() const
@@ -398,7 +406,7 @@ namespace scene
 		}
 
 
-		//! Sets the position of the node. 
+		//! Sets the position of the node.
 		/** Note that the position is relative to the parent.
 		\param newpos: New relative postition of the scene node. */
 		virtual void setPosition(const core::vector3df& newpos)
@@ -407,7 +415,7 @@ namespace scene
 		}
 
 
-		//! Gets the abolute position of the node. 
+		//! Gets the abolute position of the node.
 		/** The position is absolute.
 		\return Returns the current absolute position of the scene node. */
 		virtual core::vector3df getAbsolutePosition() const
@@ -429,7 +437,7 @@ namespace scene
 		}
 
 
-		//! Gets the automatic culling state. 
+		//! Gets the automatic culling state.
 		/** \return The node is culled based on its bounding box if this method
 		 returns true, otherwise no culling is performed. */
 		bool getAutomaticCulling() const
@@ -454,16 +462,16 @@ namespace scene
 		}
 
 
-		//! Sets if this scene node is a debug object. 
-		/** Debug objects have some special properties, for example they can be easily 
+		//! Sets if this scene node is a debug object.
+		/** Debug objects have some special properties, for example they can be easily
 		excluded from collision detection or from serialization, etc. */
 		void setIsDebugObject(bool debugObject)
 		{
 			IsDebugObject = debugObject;
 		}
 
-		//! Returns if this scene node is a debug object. 
-		/** Debug objects have some special properties, for example they can be easily 
+		//! Returns if this scene node is a debug object.
+		/** Debug objects have some special properties, for example they can be easily
 		excluded from collision detection or from serialization, etc. */
 		bool isDebugObject()
 		{
@@ -496,8 +504,8 @@ namespace scene
 
 		//! Returns the triangle selector attached to this scene node.
 		//! The Selector can be used by the engine for doing collision
-		//! detection. You can create a TriangleSelector with 
-		//! ISceneManager::createTriangleSelector() or 
+		//! detection. You can create a TriangleSelector with
+		//! ISceneManager::createTriangleSelector() or
 		//! ISceneManager::createOctTreeTriangleSelector and set it with
 		//! ISceneNode::setTriangleSelector(). If a scene node got no triangle
 		//! selector, but collision tests should be done with it, a triangle
@@ -512,13 +520,13 @@ namespace scene
 
 		//! Sets the triangle selector of the scene node. The Selector can be
 		//! used by the engine for doing collision detection. You can create a
-		//! TriangleSelector with ISceneManager::createTriangleSelector() or 
+		//! TriangleSelector with ISceneManager::createTriangleSelector() or
 		//! ISceneManager::createOctTreeTriangleSelector(). Some nodes may
 		//! create their own selector by default, so it would be good to
 		//! check if there is already a selector in this node by calling
-		//! ISceneNode::getTriangleSelector(). 
+		//! ISceneNode::getTriangleSelector().
 		//! \param selector: New triangle selector for this scene node.
-		virtual void setTriangleSelector(ITriangleSelector* selector) 
+		virtual void setTriangleSelector(ITriangleSelector* selector)
 		{
 			if (TriangleSelector)
 				TriangleSelector->drop();
@@ -531,12 +539,12 @@ namespace scene
 		virtual void updateAbsolutePosition()
 		{
 			if (Parent)
-				AbsoluteTransformation = 
+				AbsoluteTransformation =
 					Parent->getAbsoluteTransformation() * getRelativeTransformation();
 			else
 				AbsoluteTransformation = getRelativeTransformation();
 		}
-		
+
 		//! Returns the parent of this scene node
 		scene::ISceneNode* getParent()
 		{
@@ -549,13 +557,47 @@ namespace scene
 			return ESNT_UNKNOWN;
 		}
 
+		//! Writes attributes of the scene node.
+		//! Implement this to expose the attributes of your scene node for
+		//! scripting languages, editors, debuggers or xml serialization purposes.
+		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0)
+		{
+			out->addString	("Name", Name.c_str());
+			out->addInt		("Id", ID );
+			out->addVector3d("Position", RelativeTranslation );
+			out->addVector3d("Rotation", RelativeRotation );
+			out->addVector3d("Scale", RelativeScale );
+			out->addBool	("Visible", IsVisible );
+			out->addBool	("AutomaticCulling", AutomaticCullingEnabled);
+			out->addBool	("DebugDataVisible", DebugDataVisible );
+			out->addBool	("IsDebugObject", IsDebugObject );
+		}
+
+		//! Reads attributes of the scene node.
+		//! Implement this to set the attributes of your scene node for
+		//! scripting languages, editors, debuggers or xml deserialization purposes.
+		virtual void deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options=0)
+		{
+			Name = in->getAttributeAsString("Name");
+			ID = in->getAttributeAsInt("Id");
+			RelativeTranslation = in->getAttributeAsVector3d("Position");
+			RelativeRotation = in->getAttributeAsVector3d("Rotation");
+			RelativeScale = in->getAttributeAsVector3d("Scale");
+			IsVisible = in->getAttributeAsBool("Visible");
+			AutomaticCullingEnabled = in->getAttributeAsBool("AutomaticCulling");
+			DebugDataVisible = in->getAttributeAsBool("DebugDataVisible");
+			IsDebugObject = in->getAttributeAsBool("IsDebugObject");
+
+			updateAbsolutePosition();
+		}
+
 	protected:
 
 		//! name of the scene node.
-		core::stringw Name;	
+		core::stringc Name;
 
 		//! absolute transformation of the node.
-		core::matrix4 AbsoluteTransformation; 
+		core::matrix4 AbsoluteTransformation;
 
 		//! relative translation of the scene node.
 		core::vector3df RelativeTranslation;
@@ -572,28 +614,28 @@ namespace scene
 		//! List of all children of this node
 		core::list<ISceneNode*> Children;
 
-		//! List of all animatrors node
+		//! List of all animator nodes
 		core::list<ISceneNodeAnimator*> Animators;
 
-		//! id of the node. 
+		//! id of the node.
 		s32 ID;
 
 		//! pointer to the scene manager
 		ISceneManager* SceneManager;
 
-		//! pointer to the triangleselector
+		//! pointer to the triangle selector
 		ITriangleSelector* TriangleSelector;
 
 		//! automatic culling
 		bool AutomaticCullingEnabled;
 
-		//! flag if debug data should be drawed, like Bounding Boxes.
-		bool DebugDataVisible;		
-
 		//! is the node visible?
 		bool IsVisible;
 
-		//! is debug object? 
+		//! flag if debug data should be drawn, such as Bounding Boxes.
+		bool DebugDataVisible;
+
+		//! is debug object?
 		bool IsDebugObject;
 	};
 

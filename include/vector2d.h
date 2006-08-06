@@ -20,9 +20,9 @@ class vector2d
 {
 public:
 
-	vector2d(): X(0), Y(0) {};
+	vector2d() : X(0), Y(0) {};
 	vector2d(T nx, T ny) : X(nx), Y(ny) {};
-	vector2d(const vector2d<T>& other)	:X(other.X), Y(other.Y) {};
+	vector2d(const vector2d<T>& other) : X(other.X), Y(other.Y) {};
 
 	// operators
 
@@ -51,7 +51,7 @@ public:
 
 	// functions
 
-	void set(const T& nx, const T& ny) {X=nx; Y=ny; }
+	void set(T nx, T ny) {X=nx; Y=ny; }
 	void set(const vector2d<T>& p) { X=p.X; Y=p.Y;}
 
 	//! Returns the length of the vector
@@ -68,8 +68,7 @@ public:
 	//! point in 2 dimensional space.
 	f64 getDistanceFrom(const vector2d<T>& other) const
 	{
-		f64 vx = X - other.X; f64 vy = Y - other.Y;
-		return sqrt(vx*vx + vy*vy);
+		return vector2d<T>(X - other.X, Y - other.Y).getLength();
 	}
 
 	//! rotates the point around a center by an amount of degrees.
@@ -104,7 +103,7 @@ public:
 	//! Calculates the angle of this vector in grad in the trigonometric sense.
 	//! This method has been suggested by Pr3t3nd3r.
 	//! \return Returns a value between 0 and 360.
-	inline f64 getAngleTrig() const
+	f64 getAngleTrig() const
 	{
 		if (X == 0.0)
 			return Y < 0.0 ? 270.0 : 90.0;
@@ -133,7 +132,7 @@ public:
 		else if (X == 0.0) 
 			return Y < 0.0 ? 90.0 : 270.0;
 
-		f64 tmp = Y / sqrt(X*X + Y*Y);
+		f64 tmp = Y / getLength();
 		tmp = atan(sqrt(1 - tmp*tmp) / tmp) * GRAD_PI;
 
 		if (X>0.0 && Y>0.0)
@@ -173,16 +172,16 @@ public:
 	vector2d<T> getInterpolated(const vector2d<T>& other, f32 d) const
 	{
 		f32 inv = 1.0f - d;
-		return vector2d<T>(other.X*inv + X*d,
-						   other.Y*inv + Y*d);
+		return vector2d<T>(other.X*inv + X*d, other.Y*inv + Y*d);
 	}
 
 	//! sets this vector to the interpolated vector between a and b. 
-	inline void interpolate(const vector2d<T>& a, const vector2d<T>& b, const f32 t)
+	void interpolate(const vector2d<T>& a, const vector2d<T>& b, const f32 t)
 	{
 		X = b.X + ( ( a.X - b.X ) * t );
 		Y = b.Y + ( ( a.Y - b.Y ) * t );
 	}
+
 	// member variables
 	T X, Y;
 };
@@ -191,6 +190,8 @@ public:
 	typedef vector2d<f32> vector2df;
 	//! Typedef for integer 2d vector.
 	typedef vector2d<s32> vector2di;
+
+	template<class S, class T> vector2d<T> operator*(const S scalar, const vector2d<T>& vector) { return vector*scalar; }
 
 } // end namespace core
 } // end namespace irr

@@ -28,7 +28,7 @@ enum ELOG_LEVEL
 
 
 //! Interface for logging messages, warnings and errors
-class ILogger : public IUnknown
+class ILogger : public virtual IUnknown
 {
 public:
 

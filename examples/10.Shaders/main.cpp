@@ -295,15 +295,16 @@ int main()
 	/*
 	Now time for testing out the materials. We create a test cube
 	and set the material we created. In addition, we add a text scene node to
-	the cube and a rotatation animator, to make it look more interesting and 
+	the cube and a rotation animator to make it look more interesting and 
 	important. 
 	*/
 
 	// create test scene node 1, with the new created material type 1
 
-	scene::ISceneNode* node = smgr->addTestSceneNode(50);
+	scene::ISceneNode* node = smgr->addCubeSceneNode(50);
 	node->setPosition(core::vector3df(0,0,0));
 	node->setMaterialTexture(0, driver->getTexture("../../media/wall.bmp"));
+	node->setMaterialFlag(video::EMF_LIGHTING, false);
 	node->setMaterialType((video::E_MATERIAL_TYPE)newMaterialType1);
 
 	smgr->addTextSceneNode(gui->getBuiltInFont(), 
@@ -321,9 +322,10 @@ int main()
 
 	// create test scene node 2, with the new created material type 2
 
-	node = smgr->addTestSceneNode(50);
+	node = smgr->addCubeSceneNode(50);
 	node->setPosition(core::vector3df(0,-10,50));
 	node->setMaterialTexture(0, driver->getTexture("../../media/wall.bmp"));
+	node->setMaterialFlag(video::EMF_LIGHTING, false);
 	node->setMaterialType((video::E_MATERIAL_TYPE)newMaterialType2);
 
 	smgr->addTextSceneNode(gui->getBuiltInFont(), 
@@ -341,9 +343,10 @@ int main()
 
 	// add a scene node with no shader 
 
-	node = smgr->addTestSceneNode(50);
+	node = smgr->addCubeSceneNode(50);
 	node->setPosition(core::vector3df(0,50,25));
 	node->setMaterialTexture(0, driver->getTexture("../../media/wall.bmp"));
+	node->setMaterialFlag(video::EMF_LIGHTING, false);
 	smgr->addTextSceneNode(gui->getBuiltInFont(), L"NO SHADER",
 		video::SColor(255,255,255,255), node);
 

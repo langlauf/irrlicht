@@ -10,6 +10,10 @@
 
 namespace irr
 {
+namespace video
+{
+	class IVideoDriver;
+}
 namespace io
 {
 
@@ -17,6 +21,7 @@ class IReadFile;
 class IWriteFile;
 class IFileList;
 class IXMLWriter;
+class IAttributes;
 
 //! The FileSystem manages files and archives and provides access to them.
 /**
@@ -25,7 +30,7 @@ class IXMLWriter;
 	could be in a .zip-Archive or as file on disk, using the IFileSystem
 	makes no difference to this.
 */
-class IFileSystem : public IUnknown
+class IFileSystem : public virtual IUnknown
 {
 public:
 
@@ -61,6 +66,18 @@ public:
 	\return Returns true if the archive was added successful, false if not. */
 	virtual bool addZipFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true) = 0;
 	
+	//! Adds an pak archive to the file system.
+	/** After calling this, the Irrlicht Engine will search and open files directly from this archive too. 
+	 This is useful for hiding data from the end user, speeding up file access and making it possible to
+	 access for example Quake2/KingPin/Hexen2 .pak files
+	\param filename: Filename of the pak archive to add to the file system.
+	\param ignoreCase: If set to true, files in the archive can be accessed without
+	writing all letters in the right case.
+	\param ignorePaths: If set to true, files in the added archive can be accessed
+	without its complete path.(should not use with Quake2 paks
+	\return Returns true if the archive was added successful, false if not. */
+	virtual bool addPakFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true) = 0;
+
 	//! Returns the string of the current working directory.
 	virtual const c8* getWorkingDirectory() = 0;
 
@@ -131,6 +148,14 @@ public:
 	has to be deleted using its IXMLWriter::drop() method.
 	See IUnknown::drop() for more information. */
 	virtual IXMLWriter* createXMLWriter(IWriteFile* file) = 0;
+
+	//! Creates a new empty collection of attributes, usable for serialization and more.
+	/** \param: driver: Video driver to be used to load textures when specified as attribute values.
+	Can be null to prevent automatic texture loading by attributes.
+	\return Returns a pointer to the created object.
+	If you no longer need the object, you should call IAttributes::drop().
+	See IUnknown::drop() for more information. */
+	virtual IAttributes* createEmptyAttributes(video::IVideoDriver* driver=0) = 0;
 };
 
 } // end namespace io

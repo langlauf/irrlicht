@@ -16,7 +16,7 @@ namespace gui
 {
 
 //! Font interface.
-class IGUIFont : public IUnknown
+class IGUIFont : public virtual IUnknown
 {
 public:
 

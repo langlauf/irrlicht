@@ -42,7 +42,7 @@ class IGUIComboBox;
 class IGUIToolBar;
 
 //! GUI Environment. Used as factory and manager of all other GUI elements.
-class IGUIEnvironment : public IUnknown
+class IGUIEnvironment : public virtual IUnknown
 {
 public:
 

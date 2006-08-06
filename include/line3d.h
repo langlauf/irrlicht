@@ -21,10 +21,10 @@ class line3d
 
 		// Constructors
 
-		line3d(): start(0,0,0), end(1,1,1) {};
+		line3d() : start(0,0,0), end(1,1,1) {};
 		line3d(T xa, T ya, T za, T xb, T yb, T zb) : start(xa, ya, za), end(xb, yb, zb) {};
 		line3d(const vector3d<T>& start, const vector3d<T>& end) : start(start), end(end) {};
-		line3d(const line3d<T>& other) :start(other.start), end(other.end) {};
+		line3d(const line3d<T>& other) : start(other.start), end(other.end) {};
 
 		// operators
 
@@ -49,7 +49,7 @@ class line3d
 
 		//! Returns sqared length of line
 		//! \return Returns sqared length of line.
-		f64 getLengthSQ() const { return start.getDistanceFromSQ(end); };
+		T getLengthSQ() const { return start.getDistanceFromSQ(end); };
 
 		//! Returns middle of line
 		vector3d<T> getMiddle() const
@@ -89,17 +89,18 @@ class line3d
 		//! Returns if the line intersects with a shpere
 		//! \param sorigin: Origin of the shpere.
 		//! \param sradius: Radius if the sphere.
+		//! \param outdistance: The distance to the firest intersection point.
 		//! \return Returns true if there is an intersection.
 		//! If there is one, the distance to the first intersection point
 		//! is stored in outdistance.
-		bool getIntersectionWithSphere(vector3d<T> sorigin, T sradius, f64& outdistance)
+		bool getIntersectionWithSphere(vector3d<T> sorigin, T sradius, f64& outdistance) const
 		{
 			vector3d<T> q = sorigin - start;
 			f64 c = q.getLength();
 			f64 v = q.dotProduct(getVector().normalize());
 			f64 d = sradius * sradius - (c*c - v*v);
 
-            if (d < 0.0) 
+			if (d < 0.0) 
 				return false;
 
 			outdistance = v - sqrt(d);
@@ -112,6 +113,10 @@ class line3d
 		vector3d<T> end;
 };
 
+	//! Typedef for a f32 line.
+	typedef line3d<f32> line3df;
+	//! Typedef for an integer line.
+	typedef line3d<s32> line3di;
 
 } // end namespace core
 } // end namespace irr

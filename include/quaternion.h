@@ -13,7 +13,7 @@ namespace irr
 namespace core
 {
 
-//! Quaternion class. 
+//! Quaternion class.
 class quaternion
 {
 	public:
@@ -34,10 +34,10 @@ class quaternion
 		bool operator==(const quaternion& other) const;
 
 		//! assignment operator
-		quaternion& operator=(const quaternion& other);
+		inline quaternion& operator=(const quaternion& other);
 
 		//! matrix assignment operator
-		quaternion& operator=(const matrix4& other);
+		inline quaternion& operator=(const matrix4& other);
 
 		//! add operator
 		quaternion operator+(const quaternion& other) const;
@@ -58,32 +58,32 @@ class quaternion
 		quaternion& operator*=(const quaternion& other);
 
 		//! calculates the dot product
-		f32 getDotProduct(const quaternion& other) const;
+		inline f32 getDotProduct(const quaternion& other) const;
 
-		//! sets new quaternion 
-		void set(f32 x, f32 y, f32 z, f32 w);
+		//! sets new quaternion
+		inline void set(f32 x, f32 y, f32 z, f32 w);
 
 		//! sets new quaternion based on euler angles
-		void set(f32 x, f32 y, f32 z);
+		inline void set(f32 x, f32 y, f32 z);
 
 		//! normalizes the quaternion
-		quaternion& normalize();
+		inline quaternion& normalize();
 
 		//! Creates a matrix from this quaternion
 		matrix4 getMatrix() const;
 
 		//! Inverts this quaternion
-        void makeInverse();
+		void makeInverse();
 
 		//! Interpolates the quaternion between to quaternions based on time
 		quaternion slerp(quaternion q1, quaternion q2, f32 time);
 
-		//! axis must be unit length 
-		//! The quaternion representing the rotation is 
-		//!  q = cos(A/2)+sin(A/2)*(x*i+y*j+z*k) 
+		//! axis must be unit length
+		//! The quaternion representing the rotation is
+		//!  q = cos(A/2)+sin(A/2)*(x*i+y*j+z*k)
 		void fromAngleAxis (f32 angle, const vector3df& axis);
 
-		void toEuler(vector3df& euler);
+		void toEuler(vector3df& euler) const;
 
 		f32 X, Y, Z, W;
 };
@@ -160,8 +160,8 @@ inline quaternion& quaternion::operator=(const matrix4& m)
 	}
 	else
 	{
-		if ( m(0,0) > m(1,1) && m(0,0) > m(2,2))  
-		{	
+		if ( m(0,0) > m(1,1) && m(0,0) > m(2,2))
+		{
 			// 1st element of diag is greatest value
 			// find scale according to 1st element, and double it
 			scale = sqrtf( 1.0f + m(0,0) - m(1,1) - m(2,2)) * 2.0f;
@@ -170,22 +170,22 @@ inline quaternion& quaternion::operator=(const matrix4& m)
 			X = 0.25f * scale;
 			Y = (m(0,1) + m(1,0)) / scale;
 			Z = (m(2,0) + m(0,2)) / scale;
-			W = (m(1,2) - m(2,1)) / scale;	
-		} 
-		else if ( m(1,1) > m(2,2)) 
+			W = (m(1,2) - m(2,1)) / scale;
+		}
+		else if ( m(1,1) > m(2,2))
 		{
 			// 2nd element of diag is greatest value
 			// find scale according to 2nd element, and double it
 			scale = sqrtf( 1.0f + m(1,1) - m(0,0) - m(2,2)) * 2.0f;
-			
+
 			// TODO: speed this up
 			X = (m(0,1) + m(1,0) ) / scale;
 			Y = 0.25f * scale;
 			Z = (m(1,2) + m(2,1) ) / scale;
 			W = (m(2,0) - m(0,2) ) / scale;
-		} 
-		else 
-		{	
+		}
+		else
+		{
 			// 3rd element of diag is greatest value
 			// find scale according to 3rd element, and double it
 			scale  = sqrtf( 1.0f + m(2,2) - m(0,0) - m(1,1)) * 2.0f;
@@ -249,24 +249,24 @@ inline matrix4 quaternion::getMatrix() const
 {
 	core::matrix4 m;
 
-	m(0,0) = 1.0f - 2.0f*Y*Y - 2.0f*Z*Z; 
-	m(0,1) = 2.0f*X*Y + 2.0f*Z*W; 
-	m(0,2) = 2.0f*X*Z - 2.0f*Y*W; 
+	m(0,0) = 1.0f - 2.0f*Y*Y - 2.0f*Z*Z;
+	m(0,1) = 2.0f*X*Y + 2.0f*Z*W;
+	m(0,2) = 2.0f*X*Z - 2.0f*Y*W;
 	m(0,3) = 0.0f;
 
-	m(1,0) = 2.0f*X*Y - 2.0f*Z*W; 
-	m(1,1) = 1.0f - 2.0f*X*X - 2.0f*Z*Z; 
-	m(1,2) = 2.0f*Z*Y + 2.0f*X*W; 
+	m(1,0) = 2.0f*X*Y - 2.0f*Z*W;
+	m(1,1) = 1.0f - 2.0f*X*X - 2.0f*Z*Z;
+	m(1,2) = 2.0f*Z*Y + 2.0f*X*W;
 	m(1,3) = 0.0f;
 
-	m(2,0) = 2.0f*X*Z + 2.0f*Y*W; 
-	m(2,1) = 2.0f*Z*Y - 2.0f*X*W; 
-	m(2,2) = 1.0f - 2.0f*X*X - 2.0f*Y*Y; 
+	m(2,0) = 2.0f*X*Z + 2.0f*Y*W;
+	m(2,1) = 2.0f*Z*Y - 2.0f*X*W;
+	m(2,2) = 1.0f - 2.0f*X*X - 2.0f*Y*Y;
 	m(2,3) = 0.0f;
 
-	m(3,0) = 0.0f; 
-	m(3,1) = 0.0f; 
-	m(3,2) = 0.0f; 
+	m(3,0) = 0.0f;
+	m(3,1) = 0.0f;
+	m(3,2) = 0.0f;
 	m(3,3) = 1.0f;
 
 	return m;
@@ -279,7 +279,7 @@ inline void quaternion::makeInverse()
 	X = -X; Y = -Y; Z = -Z;
 }
 
-//! sets new quaternion 
+//! sets new quaternion
 inline void quaternion::set(f32 x, f32 y, f32 z, f32 w)
 {
 	X = x;
@@ -291,29 +291,29 @@ inline void quaternion::set(f32 x, f32 y, f32 z, f32 w)
 //! sets new quaternion based on euler angles
 inline void quaternion::set(f32 x, f32 y, f32 z)
 {
-	f32 angle;
+	f64 angle;
 
-	angle = x * 0.5f;
-	f32 sr = (f32)sin(angle);
-	f32 cr = (f32)cos(angle);
+	angle = x * 0.5;
+	f64 sr = (f32)sin(angle);
+	f64 cr = (f32)cos(angle);
 
-	angle = y * 0.5f;
-    f32 sp = (f32)sin(angle);
-	f32 cp = (f32)cos(angle);
+	angle = y * 0.5;
+	f64 sp = (f32)sin(angle);
+	f64 cp = (f32)cos(angle);
 
-	angle = z * 0.5f;
-	f32 sy = (f32)sin(angle);
-	f32 cy = (f32)cos(angle);
+	angle = z * 0.5;
+	f64 sy = (f32)sin(angle);
+	f64 cy = (f32)cos(angle);
 
-	f32 cpcy = cp * cy;
-	f32 spcy = sp * cy;
-	f32 cpsy = cp * sy;
-	f32 spsy = sp * sy; 
+	f64 cpcy = cp * cy;
+	f64 spcy = sp * cy;
+	f64 cpsy = cp * sy;
+	f64 spsy = sp * sy;
 
-	X = sr * cpcy - cr * spsy;
-	Y = cr * spcy + sr * cpsy;
-	Z = cr * cpsy - sr * spcy;
-	W = cr * cpcy + sr * spsy;
+	X = (f32)(sr * cpcy - cr * spsy);
+	Y = (f32)(cr * spcy + sr * cpsy);
+	Z = (f32)(cr * cpsy - sr * spcy);
+	W = (f32)(cr * cpcy + sr * spsy);
 
 	normalize();
 }
@@ -324,7 +324,7 @@ inline quaternion& quaternion::normalize()
 	f32 n = X*X + Y*Y + Z*Z + W*W;
 
 	if (n == 1)
-		return *this; 
+		return *this;
 
 	n = 1.0f / sqrtf(n);
 	X *= n;
@@ -339,19 +339,19 @@ inline quaternion& quaternion::normalize()
 // Interpolates the quaternion between to quaternions based on time
 inline quaternion quaternion::slerp(quaternion q1, quaternion q2, f32 time)
 {
-    f32 angle = q1.getDotProduct(q2);
+	f32 angle = q1.getDotProduct(q2);
 
-    if (angle < 0.0f) 
-    {
+	if (angle < 0.0f)
+	{
 		q1 *= -1.0f;
 		angle *= -1.0f;
-    }
+	}
 
 	f32 scale;
 	f32 invscale;
 
-    if ((angle + 1.0f) > 0.05f) 
-    {
+	if ((angle + 1.0f) > 0.05f)
+	{
 		if ((1.0f - angle) >= 0.05f)  // spherical interpolation
 		{
 			f32 theta = (f32)acos(angle);
@@ -364,13 +364,13 @@ inline quaternion quaternion::slerp(quaternion q1, quaternion q2, f32 time)
 			scale = 1.0f - time;
 			invscale = time;
 		}
-    }
-    else 
-    {
-        q2 = quaternion(-q1.Y, q1.X, -q1.W, q1.Z);
-        scale = (f32)sin(PI * (0.5f - time));
-        invscale = (f32)sin(PI * time);
-    }
+	}
+	else
+	{
+		q2 = quaternion(-q1.Y, q1.X, -q1.W, q1.Z);
+		scale = (f32)sin(PI * (0.5f - time));
+		invscale = (f32)sin(PI * time);
+	}
 
 	*this = (q1*scale) + (q2*invscale);
 	return *this;
@@ -384,49 +384,49 @@ inline f32 quaternion::getDotProduct(const quaternion& q2) const
 }
 
 
-inline void quaternion::fromAngleAxis(f32 angle, const vector3df& axis) 
-{ 
-	f32 fHalfAngle = 0.5f*angle; 
-	f32 fSin = (f32)sin(fHalfAngle); 
-	W = (f32)cos(fHalfAngle); 
-	X = fSin*axis.X; 
-	Y = fSin*axis.Y; 
-	Z = fSin*axis.Z; 
-} 
+inline void quaternion::fromAngleAxis(f32 angle, const vector3df& axis)
+{
+	f32 fHalfAngle = 0.5f*angle;
+	f32 fSin = (f32)sin(fHalfAngle);
+	W = (f32)cos(fHalfAngle);
+	X = fSin*axis.X;
+	Y = fSin*axis.Y;
+	Z = fSin*axis.Z;
+}
 
-inline void quaternion::toEuler(vector3df& euler)
-{ 
-	double sqw = W*W;    
-	double sqx = X*X;    
-	double sqy = Y*Y;    
-	double sqz = Z*Z; 
+inline void quaternion::toEuler(vector3df& euler) const
+{
+	double sqw = W*W;
+	double sqx = X*X;
+	double sqy = Y*Y;
+	double sqz = Z*Z;
 
-	// heading = rotaton about z-axis 
-	euler.Z = (f32) (atan2(2.0 * (X*Y +Z*W),(sqx - sqy - sqz + sqw))); 
+	// heading = rotation about z-axis
+	euler.Z = (f32) (atan2(2.0 * (X*Y +Z*W),(sqx - sqy - sqz + sqw)));
 
-	// bank = rotation about x-axis 
-	euler.X = (f32) (atan2(2.0 * (Y*Z +X*W),(-sqx - sqy + sqz + sqw))); 
+	// bank = rotation about x-axis
+	euler.X = (f32) (atan2(2.0 * (Y*Z +X*W),(-sqx - sqy + sqz + sqw)));
 
-	// attitude = rotation about y-axis 
-	euler.Y = (f32) (asin(-2.0 * (X*Z - Y*W))); 
-} 
+	// attitude = rotation about y-axis
+	euler.Y = (f32) (asin(-2.0 * (X*Z - Y*W)));
+}
 
-inline vector3df quaternion::operator* (const vector3df& v) const 
-{ 
-	// nVidia SDK implementation 
+inline vector3df quaternion::operator* (const vector3df& v) const
+{
+	// nVidia SDK implementation
 
-	vector3df uv, uuv; 
-	vector3df qvec(X, Y, Z); 
-	uv = qvec.crossProduct(v); 
-	uuv = qvec.crossProduct(uv); 
-	uv *= (2.0f * W); 
-	uuv *= 2.0f; 
+	vector3df uv, uuv;
+	vector3df qvec(X, Y, Z);
+	uv = qvec.crossProduct(v);
+	uuv = qvec.crossProduct(uv);
+	uv *= (2.0f * W);
+	uuv *= 2.0f;
 
-	return v + uv + uuv; 
+	return v + uv + uuv;
 }
 
 } // end namespace core
 } // end namespace irr
 
-#endif 
+#endif
 

@@ -26,7 +26,7 @@ namespace irr
 	/** This is the most important class of the Irrlicht Engine. You can access everything
 	in the engine if you have a pointer to an instance of this class. 
 	*/
-	class IrrlichtDevice : public IUnknown
+	class IrrlichtDevice : public virtual IUnknown
 	{
 	public:
 

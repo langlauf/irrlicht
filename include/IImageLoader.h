@@ -19,7 +19,7 @@ namespace video
 currently unsupported file formats (e.g .gif), then implement
 this and add your new Surface loader with 
 IVideoDriver::addExternalImageLoader() to the engine. */
-class IImageLoader : public IUnknown
+class IImageLoader : public virtual IUnknown
 {
 public:
 

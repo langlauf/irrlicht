@@ -24,7 +24,7 @@ namespace scene
 	this interface, it is possible to manually add new loaded meshes (if
 	ISceneManager::getMesh() is not sufficient), to remove them and to iterate through
 	already loaded meshes.  */
-	class IMeshCache : public IUnknown
+	class IMeshCache : public virtual IUnknown
 	{
 	public:
 

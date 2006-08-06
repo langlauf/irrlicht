@@ -13,7 +13,7 @@ namespace irr
 //! The Operating system operator provides operation system specific methods and informations.
 /** Currently only 3 methods are supported. But it will be extended with more functionality
 soon. */
-class IOSOperator : public IUnknown
+class IOSOperator : public virtual IUnknown
 {
 public:
 

@@ -99,14 +99,14 @@ int main()
 	device->getCursorControl()->setVisible(false);
 
 	// create test cube
-	scene::ISceneNode* test = smgr->addTestSceneNode(60);
+	scene::ISceneNode* test = smgr->addCubeSceneNode(60);
 
 	// let the cube rotate and set some light settings
 	scene::ISceneNodeAnimator* anim = smgr->createRotationAnimator(
 		core::vector3df(0.3f, 0.3f,0));
 
 	test->setPosition(core::vector3df(-100,0,-100));
-	test->setMaterialFlag(video::EMF_LIGHTING, false); // enable dynamic lighting
+	test->setMaterialFlag(video::EMF_LIGHTING, false); // disable dynamic lighting
 	test->addAnimator(anim);
 	anim->drop();
 

@@ -13,7 +13,7 @@ namespace io
 {
 
 //! The Filelist lists all files in a directory.
-class IFileList : public IUnknown
+class IFileList : public virtual IUnknown
 {
 public:
 

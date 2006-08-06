@@ -16,7 +16,7 @@ namespace scene
 	/** An IMesh is nothing more than a collection of some mesh buffers (IMeshBuffer).
 	SMesh is a simple implementation of an IMesh.
 	*/
-	class IMesh : public IUnknown
+	class IMesh : public virtual IUnknown
 	{
 	public:
 
@@ -28,7 +28,7 @@ namespace scene
 		virtual s32 getMeshBufferCount() = 0;
 
 		//! Returns pointer to a mesh buffer.
-		/** \param Zero based index of the mesh buffer. The maximum value is
+ 		/** \param nr: Zero based index of the mesh buffer. The maximum value is
 		getMeshBufferCount() - 1;
 		\return Returns the pointer to the mesh buffer or 
 		NULL if there is no such mesh buffer. */

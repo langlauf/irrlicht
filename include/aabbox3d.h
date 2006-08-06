@@ -94,9 +94,9 @@ class aabbox3d
 		//! \return Returns true if the point is withing the box, and false if it is not.
 		bool isPointInside(const vector3d<T>& p) const
 		{
-			return (	p.X >= MinEdge.X && p.X <= MaxEdge.X &&
-						p.Y >= MinEdge.Y && p.Y <= MaxEdge.Y &&
-						p.Z >= MinEdge.Z && p.Z <= MaxEdge.Z);
+			return (p.X >= MinEdge.X && p.X <= MaxEdge.X &&
+				p.Y >= MinEdge.Y && p.Y <= MaxEdge.Y &&
+				p.Z >= MinEdge.Z && p.Z <= MaxEdge.Z);
 		};
 
 		//! Determinates if a point is within this box and its borders.
@@ -104,9 +104,9 @@ class aabbox3d
 		//! \return Returns true if the point is withing the box, and false if it is not.
 		bool isPointTotalInside(const vector3d<T>& p) const
 		{
-			return (	p.X > MinEdge.X && p.X < MaxEdge.X &&
-						p.Y > MinEdge.Y && p.Y < MaxEdge.Y &&
-						p.Z > MinEdge.Z && p.Z < MaxEdge.Z);
+			return (p.X > MinEdge.X && p.X < MaxEdge.X &&
+				p.Y > MinEdge.Y && p.Y < MaxEdge.Y &&
+				p.Z > MinEdge.Z && p.Z < MaxEdge.Z);
 		};
 
 		//! Determinates if the box intersects with an other box.
@@ -130,11 +130,11 @@ class aabbox3d
 		//! Tests if the box intersects with a line
 		//! \return Returns true if there is an intersection and false if not.
 		bool intersectsWithLine(const vector3d<T>& linemiddle, 
-								const vector3d<T>& linevect,
-								T halflength) const
+					const vector3d<T>& linevect,
+					T halflength) const
 		{
-			const vector3d<T> e = (MaxEdge - MinEdge) * (T)0.5;
-			const vector3d<T> t = (MinEdge + e) - linemiddle;
+			const vector3d<T> e = getExtent() * (T)0.5;
+			const vector3d<T> t = getCenter() - linemiddle;
 			float r;
 
 			if ((fabs(t.X) > e.X + halflength * fabs(linevect.X)) || 
@@ -210,22 +210,22 @@ class aabbox3d
 
 		//! stores all 8 edges of the box into a array
 		//! \param edges: Pointer to array of 8 edges
-        void getEdges(vector3d<T> *edges) const
+		void getEdges(vector3d<T> *edges) const
 		{
-			core::vector3df middle = (MinEdge + MaxEdge) / 2;
-			core::vector3df diag = middle - MaxEdge;
+			core::vector3d<T> middle = getCenter();
+			core::vector3d<T> diag = middle - MaxEdge;
 
 			/*
 			Edges are stored in this way:
 			Hey, am I an ascii artist, or what? :) niko.
-                  /1--------/3
+                  /4--------/0
                  /  |      / |
                 /   |     /  |
-                5---------7  |
-                |   0- - -| -2
+                6---------2  |
+                |   5- - -| -1
                 |  /      |  /
                 |/        | /
-                4---------6/ 
+                7---------3/ 
 			*/
 
 			edges[0].set(middle.X + diag.X, middle.Y + diag.Y, middle.Z + diag.Z);
@@ -243,14 +243,14 @@ class aabbox3d
 		//! no space within the min and the max edge.
 		bool isEmpty() const
 		{
-			core::vector3df d = MinEdge - MaxEdge;
+			core::vector3d<T> d = MinEdge - MaxEdge;
 			if (d.X < 0) d.X = -d.X;
 			if (d.Y < 0) d.Y = -d.Y;
 			if (d.Z < 0) d.Z = -d.Z;
 
 			return (d.X < ROUNDING_ERROR && 
-					d.Y < ROUNDING_ERROR && 
-					d.Z < ROUNDING_ERROR);
+				d.Y < ROUNDING_ERROR && 
+				d.Z < ROUNDING_ERROR);
 		}
 
 		//! repairs the box, if for example MinEdge and MaxEdge are swapped.

@@ -7,6 +7,7 @@
 
 #include "irrTypes.h"
 #include "heapsort.h"
+#include "irrAllocator.h"
 
 namespace irr
 {
@@ -16,14 +17,14 @@ namespace core
 //!	Self reallocating template array (like stl vector) with additional features.
 /** Some features are: Heap sorting, binary search methods, easier debugging.
 */
-template <class T>
+template <class T, typename TAlloc = irrAllocator<T> >
 class array
 {
 
 public:
 
 	array()
-		: data(0), used(0), allocated(0),
+		: data(0), allocated(0), used(0),
 			free_when_destroyed(true), is_sorted(true)
 	{
 	}
@@ -31,8 +32,8 @@ public:
 	//! Constructs a array and allocates an initial chunk of memory.
 	//! \param start_count: Amount of elements to allocate.
 	array(u32 start_count)
-		: data(0), used(0), allocated(0),
-			free_when_destroyed(true),	is_sorted(true)
+		: data(0), allocated(0), used(0),
+			free_when_destroyed(true), is_sorted(true)
 	{
 		reallocate(start_count);
 	}
@@ -52,7 +53,12 @@ public:
 	~array()
 	{
 		if (free_when_destroyed)
-			delete [] data;
+		{
+			for (u32 i=0; i<used; ++i)
+				allocator.destruct(&data[i]);
+
+			allocator.deallocate(data);
+		}
 	}
 
 
@@ -63,20 +69,29 @@ public:
 	{
 		T* old_data = data;
 
-		data = new T[new_size];
+		data = allocator.allocate(new_size); //new T[new_size];
 		allocated = new_size;
-		
+
+        // copy old data
 		s32 end = used < new_size ? used : new_size;
+		
 		for (s32 i=0; i<end; ++i)
-			data[i] = old_data[i];
+		{
+			// data[i] = old_data[i];
+			allocator.construct(&data[i], old_data[i]);
+		}
+		
+        // destruct old data
+		for (u32 j=0; j<used; ++j)
+			allocator.destruct(&old_data[j]);
 
 		if (allocated < used)
 			used = allocated;
-		
-		delete [] old_data;
+
+		allocator.deallocate(old_data); //delete [] old_data;
 	}
 
-	//! Adds an element at back of array. If the array is to small to 
+	//! Adds an element at back of array. If the array is to small to
 	//! add this new element, the array is made bigger.
 	//! \param element: Element to add at the back of the array.
 	void push_back(const T& element)
@@ -88,20 +103,24 @@ public:
 			// we'll copy the element first to be sure we'll get no data
 			// corruption
 
-			T e;
-			e = element;           // copy element
+			T e(element);
 			reallocate(used * 2 +1); // increase data block
-			data[used++] = e;        // push_back
-			is_sorted = false; 
+
+			allocator.construct(&data[used++], e); // data[used++] = e;  // push_back
+
+			is_sorted = false;
 			return;
 		}
 
-		data[used++] = element;
+		//data[used++] = element;
+		// instead of using this here, we copy it the safe way:
+		allocator.construct(&data[used++], element);
+
 		is_sorted = false;
 	}
 
 
-	//! Adds an element at the front of the array. If the array is to small to 
+	//! Adds an element at the front of the array. If the array is to small to
 	//! add this new element, the array is made bigger. Please note that this
 	//! is slow, because the whole array needs to be copied for this.
 	//! \param element: Element to add at the back of the array.
@@ -111,30 +130,35 @@ public:
 			reallocate(used * 2 +1);
 
 		for (int i=(int)used; i>0; --i)
-			data[i] = data[i-1];
+		{
+			//data[i] = data[i-1];
+			allocator.construct(&data[i], data[i-1]);
+		}
 
-		data[0] = element;
+		// data[0] = element;
+		allocator.construct(&data[0], element);
+
 		is_sorted = false;
 		++used;
 	}
 
-	
+
 	//! Insert item into array at specified position. Please use this
-	//! only if you know what you are doing (possible performance loss). 
+	//! only if you know what you are doing (possible performance loss).
 	//! The preferred method of adding elements should be push_back().
 	//! \param element: Element to be inserted
 	//! \param index: Where position to insert the new element.
-	void insert(const T& element, u32 index=0) 
+	void insert(const T& element, u32 index=0)
 	{
 		_IRR_DEBUG_BREAK_IF(index>used) // access violation
 
 		if (used + 1 > allocated)
 			reallocate(used * 2 +1);
 
-		for (u32 i=used++; i>index; i--) 
-			data[i] = data[i-1];
+		for (u32 i=used++; i>index; i--)
+			allocator.construct(&data[i], data[i-1]); // data[i] = data[i-1];
 
-		data[index] = element;
+		allocator.construct(&data[index], element); // data[index] = element;
 		is_sorted = false;
 	}
 
@@ -144,7 +168,10 @@ public:
 	//! Clears the array and deletes all allocated memory.
 	void clear()
 	{
-		delete [] data;
+		for (u32 i=0; i<used; ++i)
+			allocator.destruct(&data[i]);
+
+		allocator.deallocate(data); // delete [] data;
 		data = 0;
 		used = 0;
 		allocated = 0;
@@ -158,7 +185,10 @@ public:
 	//! \param size: Size of the new array.
 	void set_pointer(T* newPointer, u32 size)
 	{
-		delete [] data;
+		for (u32 i=0; i<used; ++i)
+			allocator.destruct(&data[i]);
+
+		allocator.deallocate(data); // delete [] data;
 		data = newPointer;
 		allocated = size;
 		used = size;
@@ -177,8 +207,10 @@ public:
 
 
 
-	//! Sets the size of the array.
-	//! \param usedNow: Amount of elements now used.
+	//! Sets the size of the array and adds some new elements if necessary.
+	/** Please note: This is only secure when using it with simple types, because
+	no default constructor will be called for the added new elements.
+	\param usedNow: Amount of elements now used. */
 	void set_used(u32 usedNow)
 	{
 		if (allocated < usedNow)
@@ -189,17 +221,22 @@ public:
 
 
 
-	//! Assignement operator
+	//! Assignment operator
 	void operator=(const array<T>& other)
 	{
 		if (data)
-			delete [] data;
+		{
+			for (u32 i=0; i<used; ++i)
+				allocator.destruct(&data[i]);
+
+			allocator.deallocate(data); // delete [] data;
+		}
 
 		//if (allocated < other.allocated)
 		if (other.allocated == 0)
 			data = 0;
 		else
-			data = new T[other.allocated];
+			data = allocator.allocate(other.allocated); // new T[other.allocated];
 
 		used = other.used;
 		free_when_destroyed = other.free_when_destroyed;
@@ -207,7 +244,7 @@ public:
 		allocated = other.allocated;
 
 		for (u32 i=0; i<other.used; ++i)
-			data[i] = other.data[i];
+			allocator.construct(&data[i], other.data[i]); // data[i] = other.data[i];
 	}
 
 
@@ -229,22 +266,22 @@ public:
 		return data[index];
 	}
 
-    //! Gets last frame
-	const T& getLast() const
-	{
-		_IRR_DEBUG_BREAK_IF(!used) // access violation
-
-		return data[used-1];
-	}
-
-    //! Gets last frame
+	//! Gets last frame
 	T& getLast()
 	{
 		_IRR_DEBUG_BREAK_IF(!used) // access violation
 
 		return data[used-1];
 	}
-    
+
+
+	//! Gets last frame
+	const T& getLast() const
+	{
+		_IRR_DEBUG_BREAK_IF(!used) // access violation
+
+		return data[used-1];
+	}
 
 	//! Returns a pointer to the array.
 	//! \return Pointer to the array.
@@ -293,7 +330,7 @@ public:
 
 
 	//! Sorts the array using heapsort. There is no additional memory waste and
-	//! the algorithm performs (O) n log n in worst case.
+	//! the algorithm performs O(n*log n) in worst case.
 	void sort()
 	{
 		if (is_sorted || used<2)
@@ -363,7 +400,7 @@ public:
 	//! \param element: Element to search for.
 	//! \return Returns position of the searched element if it was found,
 	//! otherwise -1 is returned.
-	s32 linear_search(const T& element)
+	s32 linear_search(const T& element) const
 	{
 		for (u32 i=0; i<used; ++i)
 			if (!(element < data[i]) && !(data[i] < element))
@@ -378,7 +415,7 @@ public:
 	//! \param element: Element to search for.
 	//! \return Returns position of the searched element if it was found,
 	//! otherwise -1 is returned.
-	s32 linear_reverse_search(const T& element)
+	s32 linear_reverse_search(const T& element) const
 	{
 		for (s32 i=used-1; i>=0; --i)
 			if (data[i] == element)
@@ -389,30 +426,47 @@ public:
 
 
 
-	//! Erases an element from the array. May be slow, because all elements 
+	//! Erases an element from the array. May be slow, because all elements
 	//! following after the erased element have to be copied.
 	//! \param index: Index of element to be erased.
 	void erase(u32 index)
 	{
-		_IRR_DEBUG_BREAK_IF(index>=used || index<0) // access violation
+		_IRR_DEBUG_BREAK_IF(index>=used) // access violation
 
 		for (u32 i=index+1; i<used; ++i)
-			data[i-1] = data[i];
+		{
+			allocator.destruct(&data[i-1]);
+			allocator.construct(&data[i-1], data[i]); // data[i-1] = data[i];
+		}
+
+		allocator.destruct(&data[used-1]);
 
 		--used;
 	}
 
 
-	//! Erases some elements from the array. may be slow, because all elements 
+	//! Erases some elements from the array. may be slow, because all elements
 	//! following after the erased element have to be copied.
 	//! \param index: Index of the first element to be erased.
 	//! \param count: Amount of elements to be erased.
 	void erase(u32 index, s32 count)
 	{
-		_IRR_DEBUG_BREAK_IF(index>=used || index<0 || count<1 || index+count>used) // access violation
+		_IRR_DEBUG_BREAK_IF(index>=used || count<1 || index+count>used) // access violation
 
-		for (u32 i=index+count; i<used; ++i)
-			data[i-count] = data[i];
+		u32 i;
+		for (i=index; i<index+count; ++i)
+			allocator.destruct(&data[i]);
+
+		for (i=index+count; i<used; ++i)
+		{
+			if (i > index+count)
+				allocator.destruct(&data[i-count]);
+
+			allocator.construct(&data[i-count], data[i]); // data[i-count] = data[i];
+
+			if (i >= used-count)
+				allocator.destruct(&data[i]);
+		}
 
 		used-= count;
 	}
@@ -424,7 +478,7 @@ public:
 		is_sorted = _is_sorted;
 	}
 
-			
+
 	private:
 
 		T* data;
@@ -432,12 +486,12 @@ public:
 		u32 used;
 		bool free_when_destroyed;
 		bool is_sorted;
+		TAlloc allocator;
 };
 
 
 } // end namespace core
 } // end namespace irr
-
 
 
 #endif
