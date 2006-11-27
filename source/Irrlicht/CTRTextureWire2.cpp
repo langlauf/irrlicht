@@ -5,7 +5,6 @@
 #include "ITriangleRenderer2.h"
 
 // compile flag for this file
-
 #undef USE_Z
 #undef IPOL_Z
 #undef CMP_Z
@@ -16,36 +15,51 @@
 #undef WRITE_W
 
 #undef SUBTEXEL
+#undef INVERSE_W
 
 #undef IPOL_C
 #undef IPOL_T0
 #undef IPOL_T1
 
 // define render case
+#define SUBTEXEL
+#define INVERSE_W
 
 #define USE_Z
-#define IPOL_Z
-#define CMP_Z
-#define WRITE_Z
+#define IPOL_W
+#define CMP_W
+#define WRITE_W
 
-//#define SUBTEXEL
-
-//#define IPOL_W
-//#define CMP_W
-//#define WRITE_W
 
 //#define IPOL_C
 #define IPOL_T0
 //#define IPOL_T1
 
 // apply global override
-
 #ifndef SOFTWARE_DRIVER_2_PERSPECTIVE_CORRECT
-	#undef IPOL_W
+	#undef INVERSE_W
 #endif
 
 #ifndef SOFTWARE_DRIVER_2_SUBTEXEL
 	#undef SUBTEXEL
+#endif
+
+#if !defined ( SOFTWARE_DRIVER_2_USE_WBUFFER ) && defined ( USE_Z )
+	#ifndef SOFTWARE_DRIVER_2_PERSPECTIVE_CORRECT
+		#undef IPOL_W
+	#endif
+	#define IPOL_Z
+
+	#ifdef CMP_W
+		#undef CMP_W
+		#define CMP_Z
+	#endif
+
+	#ifdef WRITE_W
+		#undef WRITE_W
+		#define WRITE_Z
+	#endif
+
 #endif
 
 
@@ -107,7 +121,7 @@ void CTRTextureWire2::renderLine ( const s4DVertex *a,const s4DVertex *b ) const
 	int run;
 
 	tVideoSample *dst;
-#ifdef IPOL_Z
+#ifdef USE_Z
 	TZBufferType2 *z;
 #endif
 
@@ -140,7 +154,7 @@ void CTRTextureWire2::renderLine ( const s4DVertex *a,const s4DVertex *b ) const
 	}
 
 	dst = (tVideoSample*) ( (u8*) lockedSurface + ( aposy * pitch0 ) + (aposx << VIDEO_SAMPLE_GRANULARITY ) );
-#ifdef IPOL_Z
+#ifdef USE_Z
 	z = (TZBufferType2*) ( (u8*) lockedZBuffer + ( aposy * pitch1 ) + (aposx << 2 ) );
 #endif
 
@@ -154,11 +168,21 @@ void CTRTextureWire2::renderLine ( const s4DVertex *a,const s4DVertex *b ) const
 	f32 dataZ = a->Pos.z;
 #endif
 
+#ifdef IPOL_W
+	f32 slopeW = (b->Pos.w - a->Pos.w);
+	if (dx )
+		slopeW /= (f32) dx;
+	f32 dataW = a->Pos.w;
+#endif
+
 	run = dx;
 	while ( run )
 	{
 #ifdef CMP_Z
 		if ( *z >= dataZ )
+#endif
+#ifdef CMP_W
+		if ( dataW > *z )
 #endif
 		{
 			*dst = color;
@@ -166,10 +190,17 @@ void CTRTextureWire2::renderLine ( const s4DVertex *a,const s4DVertex *b ) const
 #ifdef WRITE_Z
 			*z = dataZ;
 #endif
+#ifdef WRITE_W
+			*z = dataW;
+#endif
+
 		}
 
 		dst = (tVideoSample*) ( (u8*) dst + xInc0 );	// x += xInc
 #ifdef IPOL_Z
+		z = (TZBufferType2*) ( (u8*) z + xInc1 );
+#endif
+#ifdef IPOL_W
 		z = (TZBufferType2*) ( (u8*) z + xInc1 );
 #endif
 
@@ -180,12 +211,20 @@ void CTRTextureWire2::renderLine ( const s4DVertex *a,const s4DVertex *b ) const
 #ifdef IPOL_Z
 			z = (TZBufferType2*) ( (u8*) z + yInc1 );
 #endif
+#ifdef IPOL_W
+			z = (TZBufferType2*) ( (u8*) z + yInc1 );
+#endif
+
 			d -= c;
 		}
 		run -= 1;
 #ifdef IPOL_Z
 		dataZ += slopeZ;
 #endif
+#ifdef IPOL_W
+		dataW += slopeW;
+#endif
+
 	}
 
 }

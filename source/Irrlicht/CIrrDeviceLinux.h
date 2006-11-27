@@ -15,16 +15,30 @@
 #include "IGUIEnvironment.h"
 #include "ICursorControl.h"
 
+#ifdef _IRR_COMPILE_WITH_X11_
+
 #ifdef _IRR_COMPILE_WITH_OPENGL_
 #include <GL/gl.h>
+#define GLX_GLXEXT_LEGACY 1
 #include <GL/glx.h>
-#include <GL/glxext.h>
+#ifndef __sun__
+#include "glxext.h"
 #endif
+#endif
+
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 #ifdef _IRR_LINUX_X11_VIDMODE_
 #include <X11/extensions/xf86vmode.h>
 #endif
+#ifdef _IRR_LINUX_X11_RANDR_
+#include <X11/extensions/Xrandr.h>
+#endif
 #include <X11/keysym.h>
+
+#else
+#define KeySym s32
+#endif
 
 namespace irr
 {
@@ -60,9 +74,8 @@ namespace irr
 	private:
 
 		//! create the driver
-		void createDriver(video::E_DRIVER_TYPE driverType,
-			const core::dimension2d<s32>& windowSize, u32 bits,
-			bool vsync, bool antiAlias);
+		void createDriver(const core::dimension2d<s32>& windowSize,
+					u32 bits, bool vsync);
 
 		bool createWindow(const core::dimension2d<s32>& windowSize, u32 bits);
 
@@ -76,6 +89,7 @@ namespace irr
 			CCursorControl(CIrrDeviceLinux* dev, bool null)
 				: Device(dev), IsVisible(true), Null(null)
 			{
+#ifdef _IRR_COMPILE_WITH_X11_
 				if (!null)
 				{
 					GC gc;
@@ -105,12 +119,14 @@ namespace irr
 
 					invisCursor = XCreatePixmapCursor( Device->display, invisBitmap, maskBitmap, &fg, &bg, 1, 1 );
 				}
+#endif
 			}
 
 			//! Changes the visible state of the mouse cursor.
 			virtual void setVisible(bool visible)
 			{
 				IsVisible = visible;
+#ifdef _IRR_COMPILE_WITH_X11_
 				if (!Null)
 				{
 					if ( !IsVisible )
@@ -118,6 +134,7 @@ namespace irr
 					else
 						XUndefineCursor( Device->display, Device->window );
 				}
+#endif
 			}
 
 			//! Returns if the cursor is currently visible.
@@ -147,6 +164,7 @@ namespace irr
 			//! Sets the new position of the cursor.
 			virtual void setPosition(s32 x, s32 y)
 			{
+#ifdef _IRR_COMPILE_WITH_X11_
 				if (!Null)
 				{
 					XWarpPointer(Device->display,
@@ -156,6 +174,7 @@ namespace irr
 				 		Device->Height, x, y);
 					XFlush(Device->display);
 				}
+#endif
 			}
 
 			//! Returns the current position of the mouse cursor.
@@ -177,6 +196,7 @@ namespace irr
 
 			void updateCursorPos()
 			{
+#ifdef _IRR_COMPILE_WITH_X11_
 				if (Null)
 					return;
 					
@@ -196,19 +216,23 @@ namespace irr
 					CursorPos.Y = 0;
 				if (CursorPos.Y > Device->Height)
 					CursorPos.Y = Device->Height;
+#endif
 			}
 
 			core::position2d<s32> CursorPos;
 			bool IsVisible;
 			CIrrDeviceLinux* Device;
+#ifdef _IRR_COMPILE_WITH_X11_
 			Cursor invisCursor;
 			Pixmap invisBitmap;
 			Pixmap maskBitmap;
+#endif
 			bool Null;
 		};
 
 		friend class CCursorControl;
 
+#ifdef _IRR_COMPILE_WITH_X11_
 		Display *display;
 		int screennr;
 		Window window;
@@ -217,18 +241,30 @@ namespace irr
 		GLXContext Context;
 		#endif
 		XSetWindowAttributes attributes;
+		XEvent event;
+		XImage* SoftwareImage;
+#endif
 		bool Fullscreen;
 		bool StencilBuffer;
+		bool AntiAlias;
+		video::E_DRIVER_TYPE DriverType;
+
+		s32 x,y;
+		u32 Width, Height, Depth;
+		bool Close;
+		bool WindowActive;
+		bool UseXVidMode;
+		bool UseXRandR;
+		bool UseGLXWindow;
+#ifdef _IRR_COMPILE_WITH_X11_
 		#ifdef _IRR_LINUX_X11_VIDMODE_
 		XF86VidModeModeInfo oldVideoMode;
 		#endif
-		XEvent event;
-		XImage* SoftwareImage;
-		video::E_DRIVER_TYPE DriverType;
-
-		int x,y;
-		unsigned int Width, Height, Depth;
-		bool close;
+		#ifdef _IRR_LINUX_X11_RANDR_
+		SizeID oldRandrMode;
+		Rotation oldRandrRotation;
+		#endif
+#endif
 
 		struct SKeyMap
 		{

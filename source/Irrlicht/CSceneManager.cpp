@@ -12,7 +12,6 @@
 #include "ISceneUserDataSerializer.h"
 
 #include "os.h"
-#include <wchar.h>
 #include <string.h>
 
 #include "CGeometryCreator.h"
@@ -71,9 +70,9 @@ namespace irr
 namespace scene
 {
 
-const wchar_t* IRR_XML_FORMAT_SCENE				= L"irr_scene";
-const wchar_t* IRR_XML_FORMAT_NODE				= L"node";
-const wchar_t* IRR_XML_FORMAT_NODE_ATTR_TYPE	= L"type";
+const core::stringw IRR_XML_FORMAT_SCENE		(L"irr_scene");
+const core::stringw IRR_XML_FORMAT_NODE			(L"node");
+const core::stringw IRR_XML_FORMAT_NODE_ATTR_TYPE	(L"type");
 
 //! constructor
 CSceneManager::CSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs,
@@ -81,7 +80,7 @@ CSceneManager::CSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs,
 : ISceneNode(0, 0), Driver(driver), FileSystem(fs), ActiveCamera(0),
 	CursorControl(cursorControl), CollisionManager(0),
 	ShadowColor(150,0,0,0), MeshManipulator(0), CurrentRendertime(ESNRP_COUNT),
-	MeshCache(cache)
+	MeshCache(cache), AmbientLight(0,0,0,0)
 {
 	#ifdef _DEBUG
 	ISceneManager::setDebugName("CSceneManager ISceneManager");
@@ -111,7 +110,7 @@ CSceneManager::CSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs,
 
 	// add default format loader
 
-	MeshLoaderList.push_back(new CDefaultMeshFormatLoader(FileSystem, Driver));
+	MeshLoaderList.push_back(new CDefaultMeshFormatLoader(FileSystem, Driver, this));
 	MeshLoaderList.push_back(new C3DSMeshFileLoader(MeshManipulator,FileSystem, Driver));
 	MeshLoaderList.push_back(new CXMeshFileLoader(MeshManipulator, Driver));
 	MeshLoaderList.push_back(new COCTLoader(Driver));
@@ -122,7 +121,6 @@ CSceneManager::CSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs,
 	MeshLoaderList.push_back(new CDMFLoader(Driver, this));
 	MeshLoaderList.push_back(new COgreMeshFileLoader(MeshManipulator, FileSystem, Driver));
 	MeshLoaderList.push_back(new COBJMeshFileLoader(FileSystem, Driver));
-
 	// factories
 
 	ISceneNodeFactory* factory = new CDefaultSceneNodeFactory(this);
@@ -473,7 +471,7 @@ IBillboardSceneNode* CSceneManager::addBillboardSceneNode(ISceneNode* parent,
 
 
 //! Adds a skybox scene node. A skybox is a big cube with 6 textures on it and
-//! is drawed around the camera position.
+//! is drawn around the camera position.
 ISceneNode* CSceneManager::addSkyBoxSceneNode(video::ITexture* top, video::ITexture* bottom,
 	video::ITexture* left, video::ITexture* right, video::ITexture* front,
 	video::ITexture* back, ISceneNode* parent, s32 id)
@@ -737,8 +735,19 @@ void CSceneManager::registerNodeForRendering(ISceneNode* node, E_SCENE_NODE_REND
 {
 	switch(time)
 	{
+	// hack to support ESNRP_LIGHT_AND_CAMERA
 	case ESNRP_LIGHT_AND_CAMERA:
-		LightAndCameraList.push_back(node);
+		if ( node->getType() == ESNT_LIGHT )
+			LightList.push_back(node);
+		else
+			CameraList.push_back(node);
+		break;
+
+	case ESNRP_CAMERA:
+		CameraList.push_back(node);
+		break;
+	case ESNRP_LIGHT:
+		LightList.push_back(node);
 		break;
 	case ESNRP_SKY_BOX:
 		SkyBoxList.push_back(node);
@@ -790,6 +799,8 @@ void CSceneManager::drawAll()
 	if (!Driver)
 		return;
 
+	Driver->setAmbientLight(AmbientLight);
+
 	// calculate camera pos.
 	camTransPos.set(0,0,0);
 	if (ActiveCamera)
@@ -798,18 +809,27 @@ void CSceneManager::drawAll()
 	// let all nodes register themselfes
 	OnPreRender();
 
-	//render lights and cameras
+	// render cameras
 
-	CurrentRendertime = ESNRP_LIGHT_AND_CAMERA;
+	CurrentRendertime = ESNRP_CAMERA;
+	
+	u32 i; // new ISO for scoping problem in some compilers
+
+	for (i=0; i<CameraList.size(); ++i)
+		CameraList[i]->render();
+
+	CameraList.clear();
+
+	// render lights
+
+	CurrentRendertime = ESNRP_LIGHT;
 
 	Driver->deleteAllDynamicLights();
 
-	u32 i; // new ISO for scoping problem in some compilers
+	for (i=0; i<LightList.size(); ++i)
+		LightList[i]->render();
 
-	for (i=0; i<LightAndCameraList.size(); ++i)
-		LightAndCameraList[i]->render();
-
-	LightAndCameraList.clear();
+	LightList.clear();
 
 	// render skyboxes
 
@@ -865,7 +885,7 @@ void CSceneManager::drawAll()
 }
 
 
-//! Sets the color of stencil buffers shadows drawed by the scene manager.
+//! Sets the color of stencil buffers shadows drawn by the scene manager.
 void CSceneManager::setShadowColor(video::SColor color)
 {
 	ShadowColor = color;
@@ -893,10 +913,12 @@ ISceneNodeAnimator* CSceneManager::createRotationAnimator(const core::vector3df&
 
 //! creates a fly circle animator, which lets the attached scene node fly around a center.
 ISceneNodeAnimator* CSceneManager::createFlyCircleAnimator(const core::vector3df& normal,
-														   f32 radius, f32 speed)
+														   f32 radius, f32 speed,
+														   const core::vector3df& direction
+														   )
 {
 	ISceneNodeAnimator* anim = new CSceneNodeAnimatorFlyCircle(os::Timer::getTime(), normal,
-			radius, speed);
+			radius, speed, direction);
 	return anim;
 }
 
@@ -1306,13 +1328,24 @@ bool CSceneManager::loadScene(io::IReadFile* file, ISceneUserDataSerializer* use
         os::Printer::log("Scene is not a valid XML file", file->getFileName(), ELL_ERROR);
 		return false;
 	}
+	
+	// for mesh loading, set collada loading attributes
+
+	bool bOldColladaSingleMesh = getParameters()->getAttributeAsBool(COLLADA_CREATE_SCENE_INSTANCES);
+	getParameters()->setAttribute(COLLADA_CREATE_SCENE_INSTANCES, false);
+
+	// read file
 
 	while(reader->read())
 	{
 		readSceneNode(reader, 0, userDataSerializer);
 	}
 
-	os::Printer::log("Finished loading scene", file->getFileName(), ELL_INFORMATION);
+	// restore old collada parameters
+
+	getParameters()->setAttribute(COLLADA_CREATE_SCENE_INSTANCES, bOldColladaSingleMesh);
+
+	// finish up
 
 	reader->drop();
 	return true;
@@ -1328,13 +1361,13 @@ void CSceneManager::readSceneNode(io::IXMLReader* reader, ISceneNode* parent, IS
 
 	scene::ISceneNode* node = 0;
 
-	if ((!parent && !wcscmp(IRR_XML_FORMAT_SCENE, reader->getNodeName())) ||
-		( parent && !wcscmp(IRR_XML_FORMAT_NODE, reader->getNodeName())))
+	if ((!parent && IRR_XML_FORMAT_SCENE==reader->getNodeName()) ||
+		( parent && IRR_XML_FORMAT_NODE==reader->getNodeName()))
 	{
 		if (parent)
 		{
 			// find node type and create it
-			core::stringc attrName = reader->getAttributeValue(IRR_XML_FORMAT_NODE_ATTR_TYPE);
+			core::stringc attrName = reader->getAttributeValue(IRR_XML_FORMAT_NODE_ATTR_TYPE.c_str());
 
 			for (int i=0; i<(int)SceneNodeFactoryList.size() && !node; ++i)
 				node = SceneNodeFactoryList[i]->addSceneNode(attrName.c_str(), parent);
@@ -1355,14 +1388,14 @@ void CSceneManager::readSceneNode(io::IXMLReader* reader, ISceneNode* parent, IS
 		switch (reader->getNodeType())
 		{
 		case io::EXN_ELEMENT_END:
-			if (!wcscmp(IRR_XML_FORMAT_NODE,  reader->getNodeName()) ||
-				!wcscmp(IRR_XML_FORMAT_SCENE, reader->getNodeName()))
+			if ((IRR_XML_FORMAT_NODE==reader->getNodeName()) ||
+				(IRR_XML_FORMAT_SCENE==reader->getNodeName()))
 			{
 				endreached = true;
 			}
 			break;
 		case io::EXN_ELEMENT:
-			if (!wcscmp(L"attributes", reader->getNodeName()))
+			if (core::stringw(L"attributes")==reader->getNodeName())
 			{
 				// read attributes
 				io::IAttributes* attr = FileSystem->createEmptyAttributes(Driver);
@@ -1374,17 +1407,17 @@ void CSceneManager::readSceneNode(io::IXMLReader* reader, ISceneNode* parent, IS
 				attr->drop();
 			}
 			else
-			if (!wcscmp(L"materials", reader->getNodeName()))
+			if (core::stringw(L"materials")==reader->getNodeName())
 				readMaterials(reader, node);
 			else
-			if (!wcscmp(L"animators", reader->getNodeName()))
+			if (core::stringw(L"animators")==reader->getNodeName())
 				readAnimators(reader, node);
 			else
-			if (!wcscmp(L"userData", reader->getNodeName()))
+			if (core::stringw(L"userData")==reader->getNodeName())
 				readUserData(reader, node, userDataSerializer);
 			else
-			if (!wcscmp(IRR_XML_FORMAT_NODE, reader->getNodeName()) ||
-				!wcscmp(IRR_XML_FORMAT_SCENE, reader->getNodeName()))
+			if ((IRR_XML_FORMAT_NODE==reader->getNodeName()) ||
+				(IRR_XML_FORMAT_SCENE==reader->getNodeName()))
 			{
 				readSceneNode(reader, node, userDataSerializer);
 			}
@@ -1415,11 +1448,11 @@ void CSceneManager::readMaterials(io::IXMLReader* reader, ISceneNode* node)
 		switch(reader->getNodeType())
 		{
 		case io::EXN_ELEMENT_END:
-			if (!wcscmp(L"materials", name))
+			if (core::stringw(L"materials")==name)
 				return;
 			break;
 		case io::EXN_ELEMENT:
-			if (!wcscmp(L"attributes", name))
+			if (core::stringw(L"attributes")==name)
 			{
 				// read materials from attribute list
 				io::IAttributes* attr = FileSystem->createEmptyAttributes(Driver);
@@ -1452,11 +1485,11 @@ void CSceneManager::readAnimators(io::IXMLReader* reader, ISceneNode* node)
 		switch(reader->getNodeType())
 		{
 		case io::EXN_ELEMENT_END:
-			if (!wcscmp(L"animators", name))
+			if (core::stringw(L"animators")==name)
 				return;
 			break;
 		case io::EXN_ELEMENT:
-			if (!wcscmp(L"attributes", name))
+			if (core::stringw(L"attributes")==name)
 			{
 				// read animator data from attribute list
 				io::IAttributes* attr = FileSystem->createEmptyAttributes(Driver);
@@ -1496,11 +1529,11 @@ void CSceneManager::readUserData(io::IXMLReader* reader, ISceneNode* node, IScen
 		switch(reader->getNodeType())
 		{
 		case io::EXN_ELEMENT_END:
-			if (!wcscmp(L"userData", name))
+			if (core::stringw(L"userData")==name)
 				return;
 			break;
 		case io::EXN_ELEMENT:
-			if (!wcscmp(L"attributes", name))
+			if (core::stringw(L"attributes")==name)
 			{
 				// read user data from attribute list
 				io::IAttributes* attr = FileSystem->createEmptyAttributes(Driver);
@@ -1529,13 +1562,13 @@ void CSceneManager::writeSceneNode(io::IXMLWriter* writer, ISceneNode* node, ISc
 
 	if (node == this)
 	{
-		name = IRR_XML_FORMAT_SCENE;
+		name = IRR_XML_FORMAT_SCENE.c_str();
 		writer->writeElement(name, false);
 	}
 	else
 	{
-		name = IRR_XML_FORMAT_NODE;
-		writer->writeElement(name, false, IRR_XML_FORMAT_NODE_ATTR_TYPE,
+		name = IRR_XML_FORMAT_NODE.c_str();
+		writer->writeElement(name, false, IRR_XML_FORMAT_NODE_ATTR_TYPE.c_str(),
 			core::stringw(getSceneNodeTypeName(node->getType())).c_str());
 	}
 
@@ -1654,6 +1687,45 @@ const c8* CSceneManager::getAnimatorTypeName(ESCENE_NODE_ANIMATOR_TYPE type)
 		name = SceneNodeAnimatorFactoryList[i]->getCreateableSceneNodeAnimatorTypeName(type);
 
 	return name;
+}
+//! Writes attributes of the scene node.
+void CSceneManager::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options)
+{
+	out->addString	("Name", Name.c_str());
+	out->addInt		("Id", ID );
+	out->addColorf	("AmbientLight", AmbientLight);
+}
+
+//! Reads attributes of the scene node.
+void CSceneManager::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options)
+{
+	Name =			in->getAttributeAsString("Name");
+	ID =			in->getAttributeAsInt("Id");
+	AmbientLight =	in->getAttributeAsColorf("AmbientLight");
+
+	RelativeTranslation.set(0,0,0);
+	RelativeRotation.set(0,0,0);
+	RelativeScale.set(1,1,1);
+	IsVisible = true;
+	AutomaticCullingEnabled = true;
+	DebugDataVisible = false;
+	IsDebugObject = false;
+
+	updateAbsolutePosition();
+}
+
+
+//! Sets ambient color of the scene
+void CSceneManager::setAmbientLight(video::SColorf ambientColor)
+{
+	AmbientLight = ambientColor;
+}
+
+
+//! Returns ambient color of the scene
+video::SColorf CSceneManager::getAmbientLight()
+{
+	return AmbientLight;
 }
 
 

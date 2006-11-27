@@ -62,13 +62,11 @@ void CGUIMenu::draw()
 			rect = getRect(Items[i], AbsoluteRect);
 
 			// draw highlighted
-
 			if (i == HighLighted && Items[i].Enabled)
 			{
 				skin->draw3DSunkenPane(this, skin->getColor(EGDC_3D_DARK_SHADOW),
 					true, true, rect, &AbsoluteClippingRect);
 			}
-
 			// draw text
 
 			EGUI_DEFAULT_COLOR c = EGDC_BUTTON_TEXT;
@@ -201,7 +199,7 @@ void CGUIMenu::recalculateSize()
 
 
 //! returns the item highlight-area
-core::rect<s32> CGUIMenu::getHRect(SItem& i, core::rect<s32>& absolute)
+core::rect<s32> CGUIMenu::getHRect(const SItem& i, const core::rect<s32>& absolute)
 {
 	core::rect<s32> r = absolute;
 	r.UpperLeftCorner.X += i.PosY;
@@ -210,7 +208,7 @@ core::rect<s32> CGUIMenu::getHRect(SItem& i, core::rect<s32>& absolute)
 }
 
 //! Gets drawing rect of Item
-core::rect<s32> CGUIMenu::getRect(SItem& i, core::rect<s32>& absolute)
+core::rect<s32> CGUIMenu::getRect(const SItem& i, const core::rect<s32>& absolute)
 {
 	return getHRect(i, absolute);
 }

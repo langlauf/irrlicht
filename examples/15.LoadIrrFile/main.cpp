@@ -1,8 +1,8 @@
 /*
 Since version 1.1, Irrlicht is able to save and load
 the full scene graph into an .irr file, an xml based
-format. There is also an editor available to edit
-those files, named irrEdit on http://irredit.irrlicht3d.org,
+format. There is an editor available to edit
+those files, named irrEdit on http://www.ambiera.com/irredit,
 which can also be used as world and particle editor.
 This tutorial shows how to use .irr files.
 
@@ -23,7 +23,7 @@ int main()
 
 	printf("Please select the driver you want for this example:\n"\
 		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.5\n"\
-		" (d) Software Renderer\n (e) Apfelbaum Software Renderer\n"\
+		" (d) Software Renderer\n (e) Burning's Software Renderer\n"\
 		" (f) NullDevice\n (otherKey) exit\n\n");
 
 	char i;

@@ -27,39 +27,10 @@ CGUIScrollBar::CGUIScrollBar(bool horizontal, IGUIEnvironment* environment,
 	setDebugName("CGUIScrollBar");
 	#endif
 
-	if (horizontal)
-	{
-		s32 h = RelativeRect.getHeight();
+	if (noclip)
+		AbsoluteClippingRect = AbsoluteRect;
 
-		UpButton = new CGUIButton(Environment, this, -1, core::rect<s32>(0,0, h, h), NoClip);
-		UpButton->setText(GUI_ICON_CURSOR_LEFT);
-		UpButton->drop();
-		DownButton = new CGUIButton(Environment, this, -1, core::rect<s32>(RelativeRect.getWidth()-h, 0, RelativeRect.getWidth(), h), NoClip);
-		DownButton->setText(GUI_ICON_CURSOR_RIGHT);
-		DownButton->drop();
-	}
-	else
-	{
-		s32 w = RelativeRect.getWidth();
-		UpButton = new CGUIButton(Environment, this, -1, core::rect<s32>(0,0, w, w), NoClip);
-		UpButton->setText(GUI_ICON_CURSOR_UP);
-		UpButton->drop();
-		DownButton = new CGUIButton(Environment, this, -1, core::rect<s32>(0,RelativeRect.getHeight()-w, w, RelativeRect.getHeight()), NoClip);
-		DownButton->setText(GUI_ICON_CURSOR_DOWN);
-		DownButton->drop();
-	}
-
-	if (UpButton)
-	{
-		UpButton->setOverrideFont(Environment->getBuiltInFont());
-		UpButton->grab();
-	}
-
-	if (DownButton)
-	{
-		DownButton->setOverrideFont(Environment->getBuiltInFont());
-		DownButton->grab();
-	}
+	refreshControls();
 
 	setPos(0);
 }
@@ -110,7 +81,7 @@ bool CGUIScrollBar::OnEvent(SEvent event)
 		{
 		case EMIE_MOUSE_WHEEL:
 			{ // thanks to a bug report by REAPER
-				setPos(getPos() + (s32)event.MouseInput.Wheel*-10); 
+				setPos(getPos() + (s32)event.MouseInput.Wheel* -SmallStep); 
 				SEvent newEvent; 
 				newEvent.EventType = EET_GUI_EVENT; 
 				newEvent.GUIEvent.Caller = this; 
@@ -190,7 +161,13 @@ void CGUIScrollBar::draw()
 	IGUIElement::draw();
 }
 
-
+void CGUIScrollBar::updateAbsolutePosition()
+{
+	IGUIElement::updateAbsolutePosition();
+	if (NoClip)
+		AbsoluteClippingRect = AbsoluteRect;
+	refreshControls();
+}
 
 void CGUIScrollBar::setPosFromMousePos(s32 x, s32 y)
 {
@@ -235,6 +212,16 @@ void CGUIScrollBar::setPos(s32 pos)
 }
 
 
+//! sets the small step value
+void CGUIScrollBar::setSmallStep(s32 step)
+{
+	if (step > 0)
+		SmallStep = step;
+	else
+		SmallStep = 10;
+
+}
+
 
 //! sets the maximum value of the scrollbar. must be > 0
 void CGUIScrollBar::setMax(s32 max)
@@ -256,6 +243,47 @@ void CGUIScrollBar::setMax(s32 max)
 s32 CGUIScrollBar::getPos()
 {
 	return Pos;
+}
+
+//! refreshes the position and text on child buttons
+void CGUIScrollBar::refreshControls()
+{
+	if (Horizontal)
+	{
+		s32 h = RelativeRect.getHeight();
+		if (!UpButton)
+		{
+			UpButton = new CGUIButton(Environment, this, -1, core::rect<s32>(0,0, h, h), NoClip);
+			UpButton->setOverrideFont(Environment->getBuiltInFont());
+		}
+		UpButton->setText(GUI_ICON_CURSOR_LEFT);
+		UpButton->setRelativePosition(core::rect<s32>(0,0, h, h));
+		if (!DownButton)
+		{
+			DownButton = new CGUIButton(Environment, this, -1, core::rect<s32>(RelativeRect.getWidth()-h, 0, RelativeRect.getWidth(), h), NoClip);
+			DownButton->setOverrideFont(Environment->getBuiltInFont());
+		}
+		DownButton->setRelativePosition(core::rect<s32>(RelativeRect.getWidth()-h, 0, RelativeRect.getWidth(), h));
+		DownButton->setText(GUI_ICON_CURSOR_RIGHT);
+	}
+	else
+	{
+		s32 w = RelativeRect.getWidth();
+		if (!UpButton)
+		{
+			UpButton = new CGUIButton(Environment, this, -1, core::rect<s32>(0,0, w, w), NoClip);
+			UpButton->setOverrideFont(Environment->getBuiltInFont());
+		}
+		UpButton->setText(GUI_ICON_CURSOR_UP);
+		UpButton->setRelativePosition(core::rect<s32>(0,0, w, w));
+		if (!DownButton)
+		{
+			DownButton = new CGUIButton(Environment, this, -1, core::rect<s32>(0,RelativeRect.getHeight()-w, w, RelativeRect.getHeight()), NoClip);
+			DownButton->setOverrideFont(Environment->getBuiltInFont());
+		}
+		DownButton->setText(GUI_ICON_CURSOR_DOWN);
+		DownButton->setRelativePosition(core::rect<s32>(0,RelativeRect.getHeight()-w, w, RelativeRect.getHeight()));
+	}
 }
 
 

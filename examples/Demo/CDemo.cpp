@@ -4,6 +4,8 @@
 #include "CDemo.h"
 #include <stdio.h>
 
+
+
 CDemo::CDemo(bool f, bool m, bool s, bool a, bool v, video::E_DRIVER_TYPE d)
 : fullscreen(f), driverType(d), currentScene(-2),
  model1(0), model2(0), music(m), 
@@ -21,18 +23,35 @@ CDemo::~CDemo()
 
 	if (metaSelector)
 		metaSelector->drop();
+
+#ifdef USE_IRRKLANG
+	if (irrKlang)
+		irrKlang->drop();
+#endif
 }
 
 
 void CDemo::run()
 {
-	device = createDevice(driverType,
-		core::dimension2d<s32>(640, 480), 32, fullscreen, shadows, vsync, this);;
+	if ( driverType == video::EDT_SOFTWARE2 )
+	{
+		// any resultion possible for burning video, but use a smaller one
+		device = createDevice(driverType,
+			core::dimension2d<s32>(640, 480), 32, fullscreen, shadows, vsync, this);
+	}
+	else
+	{
+		device = createDevice(driverType,
+			core::dimension2d<s32>(800, 600), 32, fullscreen, shadows, vsync, this);
+	}
 
 	device->getFileSystem()->addZipFileArchive("irrlicht.dat");
 	device->getFileSystem()->addZipFileArchive("../../media/irrlicht.dat");
 	device->getFileSystem()->addZipFileArchive("map-20kdm2.pk3");
 	device->getFileSystem()->addZipFileArchive("../../media/map-20kdm2.pk3");
+
+//	device->getFileSystem()->addUnZipFileArchive ( "/baseq3" );
+
 
 	video::IVideoDriver* driver = device->getVideoDriver();
 	scene::ISceneManager* smgr = device->getSceneManager();
@@ -40,12 +59,27 @@ void CDemo::run()
 
 	device->setWindowCaption(L"Irrlicht Engine Demo");
 
+	// clear backbuffer
+	if ( driver )
+	{
+		driver->beginScene(true, true, 0);
+		driver->endScene();
+	}
+
 	wchar_t tmp[255];
 
+	u32 now = 0;
 	while(device->run() && driver)
 	{
 		if (device->isWindowActive())
 		{
+			#ifdef USE_IRRKLANG
+			// update 3D position for sound engine
+			scene::ICameraSceneNode* cam = smgr->getActiveCamera();
+			if (cam && irrKlang)
+				irrKlang->setListenerPosition(cam->getAbsolutePosition(), cam->getTarget()); 
+			#endif
+
 			// load next scene if necessary
 			u32 now = device->getTimer()->getTime();
 			if (now - sceneStartTime > timeForThisScene && timeForThisScene!=-1)
@@ -55,7 +89,7 @@ void CDemo::run()
 
 			// draw everything
 
-			driver->beginScene(true, true, backColor);
+			driver->beginScene(false, true, backColor);
 
 			smgr->drawAll();
 			guienv->drawAll();
@@ -107,7 +141,12 @@ bool CDemo::OnEvent(SEvent event)
 	{
 		video::IImage* image = device->getVideoDriver()->createScreenShot();
 		if (image)
+		{
 			device->getVideoDriver()->writeImageToFile(image, "screenshot.bmp");
+			device->getVideoDriver()->writeImageToFile(image, "screenshot.png");
+			device->getVideoDriver()->writeImageToFile(image, "screenshot.tga");
+			device->getVideoDriver()->writeImageToFile(image, "screenshot.ppm");
+		}
 		image->drop();
 	}
 	else
@@ -258,7 +297,7 @@ void CDemo::switchToNextScene()
 			keyMap[7].Action = EKA_STRAFE_RIGHT;
 			keyMap[7].KeyCode = KEY_KEY_D;
 
-			camera = sm->addCameraSceneNodeFPS(0, 100.0f, 300.0f, -1, keyMap, 8);
+			camera = sm->addCameraSceneNodeFPS(0, 100.0f, 700.0f, -1, keyMap, 8);
 			camera->setPosition(core::vector3df(108,140,-140));
 			
 			scene::ISceneNodeAnimatorCollisionResponse* collider = 
@@ -344,9 +383,7 @@ void CDemo::loadSceneData()
 	scene::ISceneNodeAnimator* anim = 0;
 
 	// create sky box
-
-	//driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
-
+	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, false);
 	skyboxNode = sm->addSkyBoxSceneNode(
 		driver->getTexture("../../media/irrlicht2_up.jpg"),
 		driver->getTexture("../../media/irrlicht2_dn.jpg"),
@@ -354,6 +391,7 @@ void CDemo::loadSceneData()
 		driver->getTexture("../../media/irrlicht2_rt.jpg"),
 		driver->getTexture("../../media/irrlicht2_ft.jpg"),
 		driver->getTexture("../../media/irrlicht2_bk.jpg"));
+	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
 	//driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, true);
 
@@ -449,9 +487,9 @@ void CDemo::loadSceneData()
 
 	// load music
 
-	#ifdef USE_AUDIERE
+	#ifdef USE_IRRKLANG
 	if (music)
-		startAudiere();
+		startIrrKlang();
 	#endif
 	#ifdef USE_SDL_MIXER
 	if (music)
@@ -592,9 +630,9 @@ void CDemo::shoot()
 	}
 
 	// play sound
-	#ifdef USE_AUDIERE
+	#ifdef USE_IRRKLANG
 	if (ballSound)
-		ballSound->play();
+		irrKlang->play2D(ballSound);
 	#endif
 	#ifdef USE_SDL_MIXER
 	if (ballSound)
@@ -644,10 +682,11 @@ void CDemo::createParticleImpacts()
 			i--;			
 
 			// play impact sound
-			#ifdef USE_AUDIERE
-			if (impactSound)
-				impactSound->play();
+			#ifdef USE_IRRKLANG
+			if (irrKlang)
+				irrKlang->play3D(impactSound, Impacts[i].pos);
 			#endif
+
 			#ifdef USE_SDL_MIXER
 			if (impactSound)
 				playSound(impactSound);
@@ -658,38 +697,33 @@ void CDemo::createParticleImpacts()
 
 
 
-#ifdef USE_AUDIERE
-void CDemo::startAudiere()
+#ifdef USE_IRRKLANG
+void CDemo::startIrrKlang()
 {
-	audiereDevice = OpenDevice();
-	if (!audiereDevice) 
+	irrKlang = audio::createIrrKlangDevice();
+
+	if (!irrKlang)
 		return;
 
-	stream = OpenSound(audiereDevice.get(), "IrrlichtTheme.mp3", true);
-	if (!stream) 
+	// play music 
+
+	audio::ISound* snd = irrKlang->play2D("IrrlichtTheme.ogg", true, false, true);
+	if ( !snd )
+		snd = irrKlang->play2D("../../media/IrrlichtTheme.ogg", true, false, true);
+
+	if (snd)
 	{
-		stream = OpenSound(audiereDevice.get(), "../../media/IrrlichtTheme.mp3", true);
-		if (!stream)
-			return;
+		snd->setVolume(0.5f); // 50% volume
+		snd->drop();
 	}
 
-	ballSound = OpenSound(audiereDevice.get(), "ball.wav", false);
-	if (!ballSound) 
-	{
-		ballSound = OpenSound(audiereDevice.get(), "../../media/ball.wav", false);
-	}
+	// preload both sound effects
 
-	impactSound = OpenSound(audiereDevice.get(), "impact.wav", false);
-	if (!impactSound) 
-	{
-		impactSound = OpenSound(audiereDevice.get(), "../../media/impact.wav", false);
-	}
-		
-	stream->setRepeat(true);
-	//stream->setVolume(0.5f); // 50% volume
-	stream->play();
+    ballSound = irrKlang->getSoundSource("../../media/ball.wav");
+	impactSound = irrKlang->getSoundSource("../../media/impact.wav");
 }
 #endif
+
 
 #ifdef USE_SDL_MIXER
 void CDemo::startSound()
@@ -703,7 +737,7 @@ void CDemo::startSound()
 	if (Mix_OpenAudio(22050, AUDIO_S16, 2, 128))
 		return;
 
-	stream = Mix_LoadMUS("../../media/IrrlichtTheme.mp3");
+	stream = Mix_LoadMUS("../../media/IrrlichtTheme.ogg");
 	if (stream)
 		Mix_PlayMusic(stream, -1);
 

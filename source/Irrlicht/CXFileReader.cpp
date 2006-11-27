@@ -8,7 +8,8 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <cstring>
+#include <string.h>
+
 
 namespace irr
 {
@@ -16,7 +17,7 @@ namespace scene
 {
 
 CXFileReader::CXFileReader(io::IReadFile* file)
-: ErrorHappened(false), Buffer(0), Size(0), P(0), End(0), binary(false)
+: ErrorHappened(false), Buffer(0), Size(0), P(0), End(0), binary(false), m_pgCurFrame(0)
 {
 	if (!file)
 	{
@@ -37,10 +38,14 @@ CXFileReader::CXFileReader(io::IReadFile* file)
 	}
 
 #ifdef _XREADER_DEBUG
-	validateMesh(&RootFrame);
+	for( unsigned int i = 0; i < RootFrames.size(); i++ )
+		validateMesh(&RootFrames[i]);
 #endif
 
-	computeGlobalFrameMatrices(RootFrame, 0);
+	for( unsigned int i = 0; i < RootFrames.size(); i++ )
+	{
+		computeGlobalFrameMatrices(RootFrames[i], 0 );
+	}
 }
 
 
@@ -145,6 +150,7 @@ bool CXFileReader::readFileIntoMemory(io::IReadFile* file)
 	Buffer = new c8[Size];
 
 	//! read all into memory
+	file->seek(0); // apparently sometimes files have been read already, so reset it
 	if (file->read(Buffer, Size) != Size)
 	{
 		os::Printer::log("Could not read from x file.", ELL_WARNING);
@@ -165,11 +171,11 @@ bool CXFileReader::readFileIntoMemory(io::IReadFile* file)
 	tmp[2] = 0x0;
 	tmp[0] = Buffer[4];
 	tmp[1] = Buffer[5];
-	MajorVersion = strtol(tmp, &P, 10);
+	MajorVersion = strtol(tmp, (char**) &P, 10);
 
 	tmp[0] = Buffer[6];
 	tmp[1] = Buffer[7];
-	MinorVersion = strtol(tmp, &P, 10);
+	MinorVersion = strtol(tmp, (char**) &P, 10);
 
 	//! read format
 	if (strncmp(&Buffer[8], "txt ", 4) ==0)
@@ -204,12 +210,83 @@ bool CXFileReader::readFileIntoMemory(io::IReadFile* file)
 //! Parses the file
 bool CXFileReader::parseFile()
 {
+	u32 u32Idx;
 	while(parseDataObject())
 	{
 		// loop
 	}
-
+	// loop through hiearchy and combine frames that have no mesh
+	// and no name into its parent
+	
+	m_bFrameRemoved = false;
+	for( u32Idx = 0; u32Idx < RootFrames.size(); u32Idx++ )
+	{
+		optimizeFrames( &RootFrames[ u32Idx ], 0 );
+	}
+	while( m_bFrameRemoved )
+	{
+		m_bFrameRemoved = false;
+		for( u32Idx = 0; u32Idx < RootFrames.size(); u32Idx++ )
+		{
+			optimizeFrames( &RootFrames[ u32Idx ], 0 );
+		}
+	}
 	return true;
+}
+
+//! loop through hiearchy and combine frames that have no mesh or name into parent frame
+void CXFileReader::optimizeFrames( SXFrame * pgFrame,  SXFrame * pgParent )
+{
+	if( pgParent )
+	{
+		if( (0 == pgParent->Meshes.size()) &&
+			(0 == strlen( pgFrame->Name.c_str() )) &&
+			strlen( pgParent->Name.c_str() ) )
+		{
+			// combine this frame with parent
+			// add child frames to parent
+			pgParent->LocalMatrix = pgParent->LocalMatrix * pgFrame->LocalMatrix;
+
+			u32 c;
+
+			for( c=0; c<pgFrame->ChildFrames.size(); ++c )
+			{
+				// add child frames to parent
+				for (u32 c=0; c<pgFrame->ChildFrames.size(); ++c)
+				{
+					pgParent->ChildFrames.push_back(pgFrame->ChildFrames[c]);
+				}
+			}
+
+			// add meshes to parent
+
+			for( c=0; c<pgFrame->Meshes.size(); ++c )
+			{
+				// add meshes frames to parent
+				pgParent->Meshes.push_back( pgFrame->Meshes[c] );
+			}
+
+			// remove child fames in our list
+			pgFrame->ChildFrames.clear();
+
+			// remove meshes
+			pgFrame->Meshes.clear();
+
+			// find ourselve and remove from parent frame
+			for( c=0; c< pgParent->ChildFrames.size(); ++c )
+			{
+				if( &pgParent->ChildFrames[c] == pgFrame )
+				{
+					//found ourself
+					pgParent->ChildFrames.erase( c, 1 );
+					m_bFrameRemoved = true;
+					return;
+				}
+			}
+		}
+	}
+	for (u32 c=0; c<pgFrame->ChildFrames.size(); ++c)
+		optimizeFrames( &pgFrame->ChildFrames[c], pgFrame );
 }
 
 
@@ -227,12 +304,22 @@ bool CXFileReader::parseDataObject()
 		return parseDataObjectTemplate();
 	else
 	if (objectName == "Frame")
-		return parseDataObjectFrame(RootFrame);
+	{
+		RootFrames.push_back(SXFrame());
+		m_pgCurFrame = &RootFrames[ RootFrames.size() - 1 ];
+		return parseDataObjectFrame( * m_pgCurFrame );
+	}
 	else
 	if (objectName == "Mesh")
 	{
-		RootFrame.Meshes.push_back(SXMesh());
-		return parseDataObjectMesh(RootFrame.Meshes[RootFrame.Meshes.size()-1]);
+		// some meshes have no frames at all
+		if (!m_pgCurFrame)
+		{
+			RootFrames.push_back(SXFrame());
+			m_pgCurFrame = &RootFrames[ RootFrames.size() - 1 ];
+		}
+		m_pgCurFrame->Meshes.push_back(SXMesh());
+		return parseDataObjectMesh(m_pgCurFrame->Meshes[m_pgCurFrame->Meshes.size()-1]);
 	}
 	else
 	if (objectName == "AnimationSet")
@@ -353,7 +440,7 @@ bool CXFileReader::parseDataObjectTransformationMatrix(core::matrix4 &mat)
 
 	for (s32 i=0; i<4; ++i)
 		for (s32 j=0; j<4; ++j)
-			mat(j,i)=readFloat();
+			mat(i,j)=readFloat();
 
 	if (!checkForTwoFollowingSemicolons())
 	{
@@ -540,11 +627,17 @@ bool CXFileReader::parseDataObjectMesh(SXMesh &mesh)
 				return false;
 		}
 		else
+		if (objectName == "MeshVertexColors")
+		{
+			if (!parseDataObjectMeshVertexColors(mesh.VertexColors))
+				return false;
+		}
+		else
 		if (objectName == "MeshMaterialList")
 		{
 			if (!parseDataObjectMeshMaterialList(mesh.MaterialList,
 				mesh.Indices.size(), mesh.IndexCountPerFace))
-                return false;
+					return false;
 		}
 		else
 		if (objectName == "VertexDuplicationIndices")
@@ -639,7 +732,7 @@ bool CXFileReader::parseDataObjectSkinWeights(SXSkinWeight& weights)
 
 	for (i=0; i<4; ++i)
 		for (u32 j=0; j<4; ++j)
-			weights.MatrixOffset(j,i) = readFloat();
+			weights.MatrixOffset(i,j) = readFloat();
 
 	if (!checkForTwoFollowingSemicolons())
 	{
@@ -729,7 +822,8 @@ bool CXFileReader::parseDataObjectMeshMaterialList(SXMeshMaterialList& mlist,
 			mlist.FaceIndices[triangulatedindex++] = nonTriFaceIndices[tfi];
 
 	// in version 03.02, the face indices end with two semicolons.
-	if (!binary && MajorVersion == 3 && MinorVersion <= 2)
+	// commented out version check, as version 03.03 exported from blender also has 2 semicolons
+	if (!binary) // && MajorVersion == 3 && MinorVersion <= 2)
 	{
 		if (P[0] == ';')
 			++P;
@@ -1157,8 +1251,8 @@ bool CXFileReader::parseDataObjectAnimationKey(SXAnimationKey& animkey)
 						return false;
 					}
 				}
-				for (s32 n=0; n<4; ++n)
-					for (s32 m=0; m<4; ++m)
+				for (s32 m=0; m<4; ++m)
+					for (s32 n=0; n<4; ++n)
 						animkey.getMatrix(i)(m,n) = readFloat();
 
 				if (!checkForTwoFollowingSemicolons())
@@ -1328,6 +1422,7 @@ bool CXFileReader::parseDataObjectMeshTextureCoords(
 	}
 
 	s32 nCoords;
+	u32 count;
 	nCoords = readInt();
 	if (binary)
 	{
@@ -1336,7 +1431,7 @@ bool CXFileReader::parseDataObjectMeshTextureCoords(
 			os::Printer::log("Binary X: MeshTextureCoords: Expecting float list", ELL_WARNING);
 			return false;
 		}
-		readBinDWord();
+		count = readBinDWord();
 	}
 	textureCoords.set_used(nCoords);
 
@@ -1346,6 +1441,56 @@ bool CXFileReader::parseDataObjectMeshTextureCoords(
 	if (!checkForTwoFollowingSemicolons())
 	{
 		os::Printer::log("No finishing semicolon in Mesh Texture Coordinates Array found in x file", ELL_WARNING);
+		return false;
+	}
+
+	if (getNextToken() != "}")
+	{
+		os::Printer::log("No closing brace in Mesh Texture Coordinates Array found in x file", ELL_WARNING);
+		return false;
+	}
+
+	return true;
+}
+
+
+
+bool CXFileReader::parseDataObjectMeshVertexColors(
+	core::array<SXIndexedColor>& vertexColors)
+{
+#ifdef _XREADER_DEBUG
+	os::Printer::log("CXFileReader: reading mesh vertex colors");
+#endif
+
+	if (!readHeadOfDataObject())
+	{
+		os::Printer::log("No opening brace for Mesh Vertex Colors found in x file", ELL_WARNING);
+		return false;
+	}
+
+	s32 nColors;
+	u32 count;
+	nColors = readInt();
+	if (binary)
+	{
+		if (readBinWord() != 7)
+		{
+			os::Printer::log("Binary X: MeshVertexColors: Expecting float list", ELL_WARNING);
+			return false;
+		}
+		count = readBinDWord();
+	}
+	vertexColors.set_used(nColors);
+
+	for (s32 i=0; i<nColors; ++i)
+	{
+		vertexColors[i].Index=readInt();
+		readRGBA(vertexColors[i].Color);
+	}
+
+	if (getNextToken() != ";")
+	{
+		os::Printer::log("No finishing semicolon in Mesh Vertex Colors Array found in x file", ELL_WARNING);
 		return false;
 	}
 
@@ -1640,9 +1785,9 @@ CXFileReader::SXAnimationSet& CXFileReader::getAnimationSet(s32 i)
 }
 
 //! returns the root frame of the mesh
-CXFileReader::SXFrame& CXFileReader::getRootFrame()
+core::array<CXFileReader::SXFrame> & CXFileReader::getRootFrames()
 {
-	return RootFrame;
+	return RootFrames;
 }
 
 
@@ -1755,20 +1900,20 @@ inline bool CXFileReader::readVector3(core::vector3df& vec)
 // read color without alpha value. Stops after second semicolon after blue value
 inline bool CXFileReader::readRGB(video::SColorf& color)
 {
-	color.a = 1.0f;
 	color.r = readFloat();
 	color.g = readFloat();
 	color.b = readFloat();
+	color.a = 1.0f;
 	return checkForTwoFollowingSemicolons();
 }
 
 // read color with alpha value. Stops after second semicolon after blue value
 inline bool CXFileReader::readRGBA(video::SColorf& color)
 {
-	color.a = readFloat();
 	color.r = readFloat();
 	color.g = readFloat();
 	color.b = readFloat();
+	color.a = readFloat();
 	return checkForTwoFollowingSemicolons();
 }
 

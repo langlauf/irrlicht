@@ -57,28 +57,8 @@ namespace video
 		//! gets the area of the current viewport
 		virtual const core::rect<s32>& getViewPort() const;
 
-		//! draws an indexed triangle list
-		virtual void drawIndexedTriangleList(const S3DVertex* vertices, s32 vertexCount,
-			const u16* indexList, s32 triangleCount);
-
-		//! draws an indexed triangle list
-		virtual void drawIndexedTriangleList(const S3DVertex2TCoords* vertices, s32 vertexCount,
-			const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle list.
-		virtual void drawIndexedTriangleList(const S3DVertexTangents* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle fan.
-		virtual void drawIndexedTriangleFan(const S3DVertex* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle fan.
-		virtual void drawIndexedTriangleFan(const S3DVertex2TCoords* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! draws an 2d image
-		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos);
+		//! draws a vertex primitive list
+		virtual void drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType);
 
 		//! draws an 2d image, using a color (if color is other then Color(255,255,255,255)) and the alpha channel of the texture if wanted.
 		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos,
@@ -91,14 +71,14 @@ namespace video
 			video::SColor* colors=0, bool useAlphaChannelOfTexture=false);
 
 		//!Draws an 2d rectangle with a gradient.
-		void draw2DRectangle(const core::rect<s32>& pos,
+		virtual void draw2DRectangle(const core::rect<s32>& pos,
 			SColor colorLeftUp, SColor colorRightUp, SColor colorLeftDown, SColor colorRightDown,
 			const core::rect<s32>* clip);
 
 		//! Draws a 2d line.
 		virtual void draw2DLine(const core::position2d<s32>& start,
-								const core::position2d<s32>& end,
-								SColor color=SColor(255,255,255,255));
+					const core::position2d<s32>& end,
+					SColor color=SColor(255,255,255,255));
 
 		//! Draws a 3d line.
 		virtual void draw3DLine(const core::vector3df& start,
@@ -187,7 +167,7 @@ namespace video
 		virtual IVideoDriver* getVideoDriver();
 
 		//! Creates a render target texture.
-		virtual ITexture* createRenderTargetTexture(core::dimension2d<s32> size);
+		virtual ITexture* createRenderTargetTexture(const core::dimension2d<s32>& size);
 
 		//! Clears the ZBuffer.
 		virtual void clearZBuffer();
@@ -224,7 +204,7 @@ namespace video
 		void setRenderStatesStencilShadowMode(bool zfail);
 
 		//! sets the current Texture
-		void setTexture(s32 stage, video::ITexture* texture);
+		bool setTexture(s32 stage, video::ITexture* texture);
 
 		//! resets the device
 		bool reset();
@@ -278,8 +258,8 @@ namespace video
 		bool ResetRenderStates; // bool to make all renderstates be reseted if set.
 		bool Transformation3DChanged;
 		bool StencilBuffer;
-		bool LastTextureMipMapsAvailable[4];
-		ITexture* CurrentTexture[4];
+		bool LastTextureMipMapsAvailable[MATERIAL_MAX_TEXTURES];
+		ITexture* CurrentTexture[MATERIAL_MAX_TEXTURES];
 
 		HINSTANCE D3DLibrary;
 		IDirect3D9* pID3D;

@@ -74,8 +74,11 @@ public:
 	//! returns a pixel
 	virtual SColor getPixel(s32 x, s32 y);
 
+	//! sets a pixel
+	virtual void setPixel(s32 x, s32 y, const SColor &color );
+
 	//! returns the color format
-	virtual ECOLOR_FORMAT getColorFormat();
+	virtual ECOLOR_FORMAT getColorFormat() const;
 
 	//! draws a rectangle
 	void drawRectangle(const core::rect<s32>& rect, const SColor &color);
@@ -91,6 +94,9 @@ public:
 
 	//! copies this surface into another, scaling it to fit it.
 	void copyToScaling(CImage* target);
+
+	//! copies this surface into another, scaling it to fit it, appyling a box filter
+	void copyToScalingBoxFilter(CImage* target, s32 bias = 0);
 
 	//! draws a line from to
 	void drawLine(const core::position2d<s32>& from, const core::position2d<s32>& to, const SColor &color);
@@ -121,6 +127,9 @@ private:
 	u32 GreenMask;
 	u32 BlueMask;
 	u32 AlphaMask;
+
+	inline SColor getPixelBox ( s32 x, s32 y, s32 fx, s32 fy, s32 bias );
+
 };
 
 } // end namespace video

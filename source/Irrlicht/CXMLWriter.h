@@ -28,12 +28,16 @@ namespace io
 		virtual void writeXMLHeader();
 
 		//! Writes an xml element with maximal 5 attributes
-        virtual void writeElement(const wchar_t* name, bool empty=false,
+		virtual void writeElement(const wchar_t* name, bool empty=false,
 			const wchar_t* attr1Name = 0, const wchar_t* attr1Value = 0,
 			const wchar_t* attr2Name = 0, const wchar_t* attr2Value = 0,
 			const wchar_t* attr3Name = 0, const wchar_t* attr3Value = 0,
 			const wchar_t* attr4Name = 0, const wchar_t* attr4Value = 0,
 			const wchar_t* attr5Name = 0, const wchar_t* attr5Value = 0);
+
+		//! Writes an xml element with any number of attributes
+		virtual void writeElement(const wchar_t* name, bool empty,
+				core::array<core::stringw> &names, core::array<core::stringw> &values);
 
 		//! Writes a comment into the xml file
 		virtual void writeComment(const wchar_t* comment);

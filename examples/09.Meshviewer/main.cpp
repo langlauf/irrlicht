@@ -323,7 +323,7 @@ int main()
 
 	printf("Please select the driver you want for this example:\n"\
 		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.5\n"\
-		" (d) Software Renderer\n (e) Apfelbaum Software Renderer\n"\
+		" (d) Software Renderer\n (e) Burning's Software Renderer\n"\
 		" (f) NullDevice\n (otherKey) exit\n\n");
 
 	char key;
@@ -423,7 +423,6 @@ int main()
 		skin->setFont(font);
 
 	// create menu
-
 	gui::IGUIContextMenu* menu = env->addMenu();
 	menu->addItem(L"File", -1, true, true);
 	menu->addItem(L"View", -1, true, true);

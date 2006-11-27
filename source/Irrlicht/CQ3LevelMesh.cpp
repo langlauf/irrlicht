@@ -8,6 +8,9 @@
 #include "SMeshBufferLightMap.h"
 #include "irrString.h"
 #include "CColorConverter.h"
+#include "ILightSceneNode.h"
+#include "fast_atof.h"
+
 #include <stdio.h>
 
 namespace irr
@@ -17,10 +20,10 @@ namespace scene
 
 
 //! constructor
-CQ3LevelMesh::CQ3LevelMesh(io::IFileSystem* fs, video::IVideoDriver* driver)
+CQ3LevelMesh::CQ3LevelMesh(io::IFileSystem* fs, video::IVideoDriver* driver, scene::ISceneManager* smgr)
 : Textures(0), LightMaps(0),
  Vertices(0), Faces(0),	Planes(0), Nodes(0), Leafs(0), LeafFaces(0),
-	MeshVerts(0), Brushes(0), Driver(driver), FileSystem(fs)
+	MeshVerts(0), Brushes(0), Driver(driver), FileSystem(fs), SceneManager ( smgr )
 {
 	#ifdef _DEBUG
 	IUnknown::setDebugName("CQ3LevelMesh");
@@ -33,6 +36,7 @@ CQ3LevelMesh::CQ3LevelMesh(io::IFileSystem* fs, video::IVideoDriver* driver)
 
 	if (FileSystem)
 		FileSystem->grab();
+
 }
 
 
@@ -93,8 +97,8 @@ bool CQ3LevelMesh::loadFile(io::IReadFile* file)
 	file->read(&header, sizeof(tBSPHeader));
 
 	#ifdef __BIG_ENDIAN__
-		header.strID = OSReadSwapInt32(&header.strID,0);
-		header.version = OSReadSwapInt32(&header.version,0);
+		header.strID = os::Byteswap::byteswap(header.strID);
+		header.version = os::Byteswap::byteswap(header.version);
 	#endif
 
 	if (header.strID != 0x50534249 || header.version != 0x2e)
@@ -108,30 +112,30 @@ bool CQ3LevelMesh::loadFile(io::IReadFile* file)
 	file->read(&Lumps[0], sizeof(tBSPLump)*kMaxLumps);
 
 	#ifdef __BIG_ENDIAN__
-	for (int i=0;i<kMaxLumps;i++)
+	for (int i=0;i<kMaxLumps;++i)
 	{
-		Lumps[i].offset = OSReadSwapInt32(&Lumps[i].offset,0);
-		Lumps[i].length = OSReadSwapInt32(&Lumps[i].length,0);
+		Lumps[i].offset = os::Byteswap::byteswap(Lumps[i].offset);
+		Lumps[i].length = os::Byteswap::byteswap(Lumps[i].length);
 	}
 	#endif
 
 	// load everything
 
 	loadTextures(&Lumps[kTextures], file);		// Load the textures
-	loadLightmaps(&Lumps[kLightmaps], file);      // Load the lightmaps
+	loadLightmaps(&Lumps[kLightmaps], file);	// Load the lightmaps
 	loadVerts(&Lumps[kVertices], file);		// Load the vertices
 	loadFaces(&Lumps[kFaces], file);		// Load the faces
 	loadPlanes(&Lumps[kPlanes], file);		// Load the Planes of the BSP
 	loadNodes(&Lumps[kNodes], file);		// load the Nodes of the BSP
 	loadLeafs(&Lumps[kLeafs], file);		// load the Leafs of the BSP
-	loadLeafFaces(&Lumps[kLeafFaces], file);		// load the Faces of the Leafs of the BSP
+	loadLeafFaces(&Lumps[kLeafFaces], file);	// load the Faces of the Leafs of the BSP
 	loadVisData(&Lumps[kVisData], file);		// load the visibility data of the clusters
 	loadEntities(&Lumps[kEntities], file);		// load the entities
 	loadModels(&Lumps[kModels], file);		// load the models
-	loadMeshVerts(&Lumps[kMeshVerts], file);		// load the mesh vertices
+	loadMeshVerts(&Lumps[kMeshVerts], file);	// load the mesh vertices
 	loadBrushes(&Lumps[kBrushes], file);		// load the brushes of the BSP
-	loadBrushSides(&Lumps[kBrushSides], file);		// load the brushsides of the BSP
-	loadLeafBrushes(&Lumps[kLeafBrushes], file);		// load the brushes of the leaf*/
+	loadBrushSides(&Lumps[kBrushSides], file);	// load the brushsides of the BSP
+	loadLeafBrushes(&Lumps[kLeafBrushes], file);	// load the brushes of the leaf*/
 
 	constructMesh();
 
@@ -153,6 +157,10 @@ s32 CQ3LevelMesh::getFrameCount()
 //! returns the animated mesh based on a detail level. 0 is the lowest, 255 the highest detail. Note, that some Meshes will ignore the detail level.
 IMesh* CQ3LevelMesh::getMesh(s32 frameInMs, s32 detailLevel, s32 startFrameLoop, s32 endFrameLoop)
 {
+	// Dirty Hack
+	if ( frameInMs == 1 )
+		return (IMesh*) ((void*)&LightData);
+
 	return Mesh;
 }
 
@@ -168,8 +176,8 @@ void CQ3LevelMesh::loadTextures(tBSPLump* l, io::IReadFile* file)
 	#ifdef __BIG_ENDIAN__
 	for (int i=0;i<NumTextures;i++)
 	{
-		Textures[i].flags = OSReadSwapInt32(&Textures[i].flags,0);
-		Textures[i].contents = OSReadSwapInt32(&Textures[i].contents,0);
+		Textures[i].flags = os::Byteswap::byteswap(Textures[i].flags);
+		Textures[i].contents = os::Byteswap::byteswap(Textures[i].contents);
 	}
 	#endif
 }
@@ -196,16 +204,16 @@ void CQ3LevelMesh::loadVerts(tBSPLump* l, io::IReadFile* file)
 	#ifdef __BIG_ENDIAN__
 	for (int i=0;i<NumVertices;i++)
 	{
-		*((long*)&Vertices[i].vPosition[0]) = OSReadSwapInt32(&Vertices[i].vPosition[0],0);
-		*((long*)&Vertices[i].vPosition[1]) = OSReadSwapInt32(&Vertices[i].vPosition[1],0);
-		*((long*)&Vertices[i].vPosition[2]) = OSReadSwapInt32(&Vertices[i].vPosition[2],0);
-		*((long*)&Vertices[i].vTextureCoord[0]) = OSReadSwapInt32(&Vertices[i].vTextureCoord[0],0);
-		*((long*)&Vertices[i].vTextureCoord[1]) = OSReadSwapInt32(&Vertices[i].vTextureCoord[1],0);
-		*((long*)&Vertices[i].vLightmapCoord[0]) = OSReadSwapInt32(&Vertices[i].vLightmapCoord[0],0);
-		*((long*)&Vertices[i].vLightmapCoord[1]) = OSReadSwapInt32(&Vertices[i].vLightmapCoord[1],0);
-		*((long*)&Vertices[i].vNormal[0]) = OSReadSwapInt32(&Vertices[i].vNormal[0],0);
-		*((long*)&Vertices[i].vNormal[1]) = OSReadSwapInt32(&Vertices[i].vNormal[1],0);
-		*((long*)&Vertices[i].vNormal[2]) = OSReadSwapInt32(&Vertices[i].vNormal[2],0);
+		Vertices[i].vPosition[0] = os::Byteswap::byteswap(Vertices[i].vPosition[0]);
+		Vertices[i].vPosition[1] = os::Byteswap::byteswap(Vertices[i].vPosition[1]);
+		Vertices[i].vPosition[2] = os::Byteswap::byteswap(Vertices[i].vPosition[2]);
+		Vertices[i].vTextureCoord[0] = os::Byteswap::byteswap(Vertices[i].vTextureCoord[0]);
+		Vertices[i].vTextureCoord[1] = os::Byteswap::byteswap(Vertices[i].vTextureCoord[1]);
+		Vertices[i].vLightmapCoord[0] = os::Byteswap::byteswap(Vertices[i].vLightmapCoord[0]);
+		Vertices[i].vLightmapCoord[1] = os::Byteswap::byteswap(Vertices[i].vLightmapCoord[1]);
+		Vertices[i].vNormal[0] = os::Byteswap::byteswap(Vertices[i].vNormal[0]);
+		Vertices[i].vNormal[1] = os::Byteswap::byteswap(Vertices[i].vNormal[1]);
+		Vertices[i].vNormal[2] = os::Byteswap::byteswap(Vertices[i].vNormal[2]);
 	}
 	#endif
 }
@@ -222,32 +230,32 @@ void CQ3LevelMesh::loadFaces(tBSPLump* l, io::IReadFile* file)
 	#ifdef __BIG_ENDIAN__
 	for (int i=0;i<NumFaces;i++)
 	{
-		Faces[i].textureID = OSReadSwapInt32(&Faces[i].textureID,0);
-		Faces[i].effect = OSReadSwapInt32(&Faces[i].effect,0);
-		Faces[i].type = OSReadSwapInt32(&Faces[i].type,0);
-		Faces[i].vertexIndex = OSReadSwapInt32(&Faces[i].vertexIndex,0);
-		Faces[i].numOfVerts = OSReadSwapInt32(&Faces[i].numOfVerts,0);
-		Faces[i].meshVertIndex = OSReadSwapInt32(&Faces[i].meshVertIndex,0);
-		Faces[i].numMeshVerts = OSReadSwapInt32(&Faces[i].numMeshVerts,0);
-		Faces[i].lightmapID = OSReadSwapInt32(&Faces[i].lightmapID,0);
-		Faces[i].lMapCorner[0] = OSReadSwapInt32(&Faces[i].lMapCorner[0],0);
-		Faces[i].lMapCorner[1] = OSReadSwapInt32(&Faces[i].lMapCorner[1],0);
-		Faces[i].lMapSize[0] = OSReadSwapInt32(&Faces[i].lMapSize[0],0);
-		Faces[i].lMapSize[1] = OSReadSwapInt32(&Faces[i].lMapSize[1],0);
-		*((long*)&Faces[i].lMapPos[0]) = OSReadSwapInt32(&Faces[i].lMapPos[0],0);
-		*((long*)&Faces[i].lMapPos[1]) = OSReadSwapInt32(&Faces[i].lMapPos[1],0);
-		*((long*)&Faces[i].lMapPos[2]) = OSReadSwapInt32(&Faces[i].lMapPos[2],0);
-		*((long*)&Faces[i].lMapBitsets[0][0]) = OSReadSwapInt32(&Faces[i].lMapBitsets[0][0],0);
-		*((long*)&Faces[i].lMapBitsets[0][1]) = OSReadSwapInt32(&Faces[i].lMapBitsets[0][1],0);
-		*((long*)&Faces[i].lMapBitsets[0][2]) = OSReadSwapInt32(&Faces[i].lMapBitsets[0][2],0);
-		*((long*)&Faces[i].lMapBitsets[1][0]) = OSReadSwapInt32(&Faces[i].lMapBitsets[1][0],0);
-		*((long*)&Faces[i].lMapBitsets[1][1]) = OSReadSwapInt32(&Faces[i].lMapBitsets[1][1],0);
-		*((long*)&Faces[i].lMapBitsets[1][2]) = OSReadSwapInt32(&Faces[i].lMapBitsets[1][2],0);
-		*((long*)&Faces[i].vNormal[0]) = OSReadSwapInt32(&Faces[i].vNormal[0],0);
-		*((long*)&Faces[i].vNormal[1]) = OSReadSwapInt32(&Faces[i].vNormal[1],0);
-		*((long*)&Faces[i].vNormal[2]) = OSReadSwapInt32(&Faces[i].vNormal[2],0);
-		Faces[i].size[0] = OSReadSwapInt32(&Faces[i].size[0],0);
-		Faces[i].size[1] = OSReadSwapInt32(&Faces[i].size[1],0);
+		Faces[i].textureID = os::Byteswap::byteswap(Faces[i].textureID);
+		Faces[i].effect = os::Byteswap::byteswap(Faces[i].effect);
+		Faces[i].type = os::Byteswap::byteswap(Faces[i].type);
+		Faces[i].vertexIndex = os::Byteswap::byteswap(Faces[i].vertexIndex);
+		Faces[i].numOfVerts = os::Byteswap::byteswap(Faces[i].numOfVerts);
+		Faces[i].meshVertIndex = os::Byteswap::byteswap(Faces[i].meshVertIndex);
+		Faces[i].numMeshVerts = os::Byteswap::byteswap(Faces[i].numMeshVerts);
+		Faces[i].lightmapID = os::Byteswap::byteswap(Faces[i].lightmapID);
+		Faces[i].lMapCorner[0] = os::Byteswap::byteswap(Faces[i].lMapCorner[0]);
+		Faces[i].lMapCorner[1] = os::Byteswap::byteswap(Faces[i].lMapCorner[1]);
+		Faces[i].lMapSize[0] = os::Byteswap::byteswap(Faces[i].lMapSize[0]);
+		Faces[i].lMapSize[1] = os::Byteswap::byteswap(Faces[i].lMapSize[1]);
+		Faces[i].lMapPos[0] = os::Byteswap::byteswap(Faces[i].lMapPos[0]);
+		Faces[i].lMapPos[1] = os::Byteswap::byteswap(Faces[i].lMapPos[1]);
+		Faces[i].lMapPos[2] = os::Byteswap::byteswap(Faces[i].lMapPos[2]);
+		Faces[i].lMapBitsets[0][0] = os::Byteswap::byteswap(Faces[i].lMapBitsets[0][0]);
+		Faces[i].lMapBitsets[0][1] = os::Byteswap::byteswap(Faces[i].lMapBitsets[0][1]);
+		Faces[i].lMapBitsets[0][2] = os::Byteswap::byteswap(Faces[i].lMapBitsets[0][2]);
+		Faces[i].lMapBitsets[1][0] = os::Byteswap::byteswap(Faces[i].lMapBitsets[1][0]);
+		Faces[i].lMapBitsets[1][1] = os::Byteswap::byteswap(Faces[i].lMapBitsets[1][1]);
+		Faces[i].lMapBitsets[1][2] = os::Byteswap::byteswap(Faces[i].lMapBitsets[1][2]);
+		Faces[i].vNormal[0] = os::Byteswap::byteswap(Faces[i].vNormal[0]);
+		Faces[i].vNormal[1] = os::Byteswap::byteswap(Faces[i].vNormal[1]);
+		Faces[i].vNormal[2] = os::Byteswap::byteswap(Faces[i].vNormal[2]);
+		Faces[i].size[0] = os::Byteswap::byteswap(Faces[i].size[0]);
+		Faces[i].size[1] = os::Byteswap::byteswap(Faces[i].size[1]);
 	}
 	#endif
 }
@@ -285,7 +293,151 @@ void CQ3LevelMesh::loadVisData(tBSPLump* l, io::IReadFile* file)
 
 void CQ3LevelMesh::loadEntities(tBSPLump* l, io::IReadFile* file)
 {
+	core::array<u8> entity;
+	entity.set_used ( l->length + 2 );
+	entity[l->length + 1 ] = 0;
+
+	file->seek(l->offset);
+	file->read ( entity.pointer(), l->length);
+
+	parser_parse ( entity.pointer(), l->length );
 	// ignore
+}
+
+
+void CQ3LevelMesh::parser_nextToken ()
+{
+	c8 symbol;
+
+	Parser.token = "";
+
+	// skip white space
+	do
+	{
+		if ( Parser.index >= Parser.sourcesize )
+		{
+			Parser.tokenresult = Q3_TOKEN_EOF;
+			return;
+		}
+
+		symbol = Parser.source [ Parser.index ];
+		Parser.index += 1;
+	} while ( symbol == ' ' || symbol == '\t' || symbol == '\n' );
+
+	// one byte 
+	switch ( symbol )
+	{
+		case '{':
+			Parser.tokenresult = Q3_TOKEN_START_LIST;
+			break;
+		case '}':
+			Parser.tokenresult = Q3_TOKEN_END_LIST;
+			break;
+		case '"':
+		{
+			do
+			{
+				if ( Parser.index >= Parser.sourcesize )
+				{
+					Parser.tokenresult = Q3_TOKEN_EOF;
+					return;
+				}
+				symbol = Parser.source [ Parser.index ];
+				Parser.index += 1;
+				if ( symbol != '"' )
+					Parser.token.append ( symbol );
+			} while ( symbol != '"' );
+			Parser.tokenresult = Q3_TOKEN_IDENTITY;
+		} break;
+	}
+
+}
+
+
+void CQ3LevelMesh::parser_parse ( const void * data, const u32 size )
+{
+	Parser.source = (const c8*) data;
+	Parser.sourcesize = size;
+	Parser.index = 0;
+
+	SQ3VarGroup group;
+	SQ3Variable entity;
+
+	do
+	{
+		parser_nextToken ();
+		switch ( Parser.tokenresult )
+		{
+			case Q3_TOKEN_START_LIST:
+			{
+				group.clear ();
+			}  break;
+
+			case Q3_TOKEN_IDENTITY:
+			{
+				strcpy ( entity.name, Parser.token.c_str () );
+				parser_nextToken ();
+				strcpy ( entity.content, Parser.token.c_str () );
+				group.Variable.push_back ( entity );
+			}  break;
+
+			case Q3_TOKEN_END_LIST:
+			{
+				const c8 *classname = group.get ( "classname" );
+
+				if ( 0 == strcmp ( classname, "light" ) )
+				{
+					addLightData ( group );
+				}
+
+			} break;
+
+		}
+	} while ( Parser.tokenresult != Q3_TOKEN_EOF );
+}
+
+// simple assozitave array
+const c8 * CQ3LevelMesh::SQ3VarGroup::get( const char * name ) const
+{
+	SQ3Variable search;
+	strcpy ( search.name, name );
+
+	s32 index = Variable.linear_search ( search );
+	if ( index < 0 )
+		return 0;
+
+	return Variable [index].content;
+}
+
+
+
+const c8 * CQ3LevelMesh::parser_get_float ( f32 &out, const c8* in ) const
+{
+	if ( 0 == in )
+		return 0;
+	return core::fast_atof_move ( in, out );
+}
+
+void CQ3LevelMesh::parser_get_vector ( core::vector3df &vector, const c8* string ) const
+{
+	const c8 * in = string;
+
+	in = parser_get_float ( vector.X, in );
+	in = parser_get_float ( vector.Y, in );
+	in = parser_get_float ( vector.Z, in );
+}
+
+
+// extract light info
+void CQ3LevelMesh::addLightData ( const SQ3VarGroup &group )
+{
+	video::SLight light;
+	light.Type = video::ELT_POINT;
+	light.Radius = 200;
+
+	parser_get_vector ( light.Position, group.get ( "origin" ) );
+	parser_get_float ( light.Radius, group.get ( "light" ) );
+	LightData.push_back ( light );
 }
 
 
@@ -304,7 +456,8 @@ void CQ3LevelMesh::loadMeshVerts(tBSPLump* l, io::IReadFile* file)
 	file->read(MeshVerts, l->length);
 
 	#ifdef __BIG_ENDIAN__
-	for (int i=0;i<NumMeshVerts;i++) MeshVerts[i] = OSReadSwapInt32(&MeshVerts[i],0);
+	for (int i=0;i<NumMeshVerts;i++)
+		MeshVerts[i] = os::Byteswap::byteswap(MeshVerts[i]);
 	#endif
 }
 
@@ -385,12 +538,12 @@ void CQ3LevelMesh::constructMesh()
 							video::S3DVertex2TCoords currentVertex;
 							tBSPVertex *v = &Vertices[vidxes[vu]];
 
-							//currentVertex.Color = video::SColor(v->color[3], v->color[0], v->color[1], v->color[2]);
-							currentVertex.Color.set(255,255,255,255);
-
-							currentVertex.Pos.X = v->vPosition[0];
-							currentVertex.Pos.Y = v->vPosition[2];
-							currentVertex.Pos.Z =  v->vPosition[1];
+							currentVertex.Color = video::SColor(v->color[3], v->color[0], v->color[1], v->color[2]);
+							
+							// round the position values or the mesh has small gaps
+							currentVertex.Pos.X = floorf(v->vPosition[0]+0.5f);
+							currentVertex.Pos.Y = floorf(v->vPosition[2]+0.5f);
+							currentVertex.Pos.Z =  floorf(v->vPosition[1]+0.5f);
 							currentVertex.Normal.X = v->vNormal[0];
 							currentVertex.Normal.Y = v->vNormal[2];
 							currentVertex.Normal.Z = v->vNormal[1];
@@ -507,9 +660,9 @@ void CQ3LevelMesh::createCurvedSurface(SMeshBufferLightMap* meshBuffer, s32 i)
 
 					// Vert 1
 					currentVertex[0].Color.set(255,255,255,255);
-					currentVertex[0].Pos.X = Blend( cs, ct, v, (char*)&v[0]->vPosition[0] - (char*)v[0]);
-					currentVertex[0].Pos.Y = Blend( cs, ct, v, (char*)&v[0]->vPosition[2] - (char*)v[0]);
-					currentVertex[0].Pos.Z = Blend( cs, ct, v, (char*)&v[0]->vPosition[1] - (char*)v[0]);
+					currentVertex[0].Pos.X = floorf( Blend( cs, ct, v, (char*)&v[0]->vPosition[0] - (char*)v[0])+ 0.5f);
+					currentVertex[0].Pos.Y = floorf( Blend( cs, ct, v, (char*)&v[0]->vPosition[2] - (char*)v[0])+ 0.5f);
+					currentVertex[0].Pos.Z = floorf( Blend( cs, ct, v, (char*)&v[0]->vPosition[1] - (char*)v[0])+ 0.5f);
 					currentVertex[0].Normal.X = Blend( cs, ct, v, (char*)&v[0]->vNormal[0] - (char*)v[0]);
 					currentVertex[0].Normal.Y = Blend( cs, ct, v, (char*)&v[0]->vNormal[2] - (char*)v[0]);
 					currentVertex[0].Normal.Z = Blend( cs, ct, v, (char*)&v[0]->vNormal[1] - (char*)v[0]);
@@ -519,9 +672,9 @@ void CQ3LevelMesh::createCurvedSurface(SMeshBufferLightMap* meshBuffer, s32 i)
 					currentVertex[0].TCoords2.Y = Blend( cs, ct, v, (char*)&v[0]->vLightmapCoord[1] - (char*)v[0]);
 					// Vert 2
 					currentVertex[1].Color.set(255,255,255,255);
-					currentVertex[1].Pos.X = Blend( cs, nxt, v, (char*)&v[0]->vPosition[0] - (char*)v[0]);
-					currentVertex[1].Pos.Y = Blend( cs, nxt, v, (char*)&v[0]->vPosition[2] - (char*)v[0]);
-					currentVertex[1].Pos.Z = Blend( cs, nxt, v, (char*)&v[0]->vPosition[1] - (char*)v[0]);
+					currentVertex[1].Pos.X = floorf( Blend( cs, nxt, v, (char*)&v[0]->vPosition[0] - (char*)v[0])+ 0.5f);
+					currentVertex[1].Pos.Y = floorf( Blend( cs, nxt, v, (char*)&v[0]->vPosition[2] - (char*)v[0])+ 0.5f);
+					currentVertex[1].Pos.Z = floorf( Blend( cs, nxt, v, (char*)&v[0]->vPosition[1] - (char*)v[0])+ 0.5f);
 					currentVertex[1].Normal.X = Blend( cs, nxt, v, (char*)&v[0]->vNormal[0] - (char*)v[0]);
 					currentVertex[1].Normal.Y = Blend( cs, nxt, v, (char*)&v[0]->vNormal[2] - (char*)v[0]);
 					currentVertex[1].Normal.Z = Blend( cs, nxt, v, (char*)&v[0]->vNormal[1] - (char*)v[0]);
@@ -531,9 +684,9 @@ void CQ3LevelMesh::createCurvedSurface(SMeshBufferLightMap* meshBuffer, s32 i)
 					currentVertex[1].TCoords2.Y = Blend( cs, nxt, v, (char*)&v[0]->vLightmapCoord[1] - (char*)v[0]);
 					// Vert 3
 					currentVertex[2].Color.set(255,255,255,255);
-					currentVertex[2].Pos.X = Blend( nxs, ct, v, (char*)&v[0]->vPosition[0] - (char*)v[0]);
-					currentVertex[2].Pos.Y = Blend( nxs, ct, v, (char*)&v[0]->vPosition[2] - (char*)v[0]);
-					currentVertex[2].Pos.Z = Blend( nxs, ct, v, (char*)&v[0]->vPosition[1] - (char*)v[0]);
+					currentVertex[2].Pos.X = floorf( Blend( nxs, ct, v, (char*)&v[0]->vPosition[0] - (char*)v[0])+ 0.5f);
+					currentVertex[2].Pos.Y = floorf( Blend( nxs, ct, v, (char*)&v[0]->vPosition[2] - (char*)v[0])+ 0.5f);
+					currentVertex[2].Pos.Z = floorf( Blend( nxs, ct, v, (char*)&v[0]->vPosition[1] - (char*)v[0])+ 0.5f);
 					currentVertex[2].Normal.X = Blend( nxs, ct, v, (char*)&v[0]->vNormal[0] - (char*)v[0]);
 					currentVertex[2].Normal.Y = Blend( nxs, ct, v, (char*)&v[0]->vNormal[2] - (char*)v[0]);
 					currentVertex[2].Normal.Z = Blend( nxs, ct, v, (char*)&v[0]->vNormal[1] - (char*)v[0]);
@@ -543,9 +696,9 @@ void CQ3LevelMesh::createCurvedSurface(SMeshBufferLightMap* meshBuffer, s32 i)
 					currentVertex[2].TCoords2.Y = Blend( nxs, ct, v, (char*)&v[0]->vLightmapCoord[1] - (char*)v[0]);
 					// Vert 4
 					currentVertex[3].Color.set(255,255,255,255);
-					currentVertex[3].Pos.X = Blend( nxs, nxt, v, (char*)&v[0]->vPosition[0] - (char*)v[0]);
-					currentVertex[3].Pos.Y = Blend( nxs, nxt, v, (char*)&v[0]->vPosition[2] - (char*)v[0]);
-					currentVertex[3].Pos.Z = Blend( nxs, nxt, v, (char*)&v[0]->vPosition[1] - (char*)v[0]);
+					currentVertex[3].Pos.X = floorf(Blend( nxs, nxt, v, (char*)&v[0]->vPosition[0] - (char*)v[0])+ 0.5f);
+					currentVertex[3].Pos.Y = floorf(Blend( nxs, nxt, v, (char*)&v[0]->vPosition[2] - (char*)v[0])+ 0.5f);
+					currentVertex[3].Pos.Z = floorf(Blend( nxs, nxt, v, (char*)&v[0]->vPosition[1] - (char*)v[0])+ 0.5f);
 					currentVertex[3].Normal.X = Blend( nxs, nxt, v, (char*)&v[0]->vNormal[0] - (char*)v[0]);
 					currentVertex[3].Normal.Y = Blend( nxs, nxt, v, (char*)&v[0]->vNormal[2] - (char*)v[0]);
 					currentVertex[3].Normal.Z = Blend( nxs, nxt, v, (char*)&v[0]->vNormal[1] - (char*)v[0]);
@@ -720,6 +873,7 @@ void CQ3LevelMesh::loadTextures()
 			++i;
 	}
 }
+
 
 
 //! Returns an axis aligned bounding box of the mesh.

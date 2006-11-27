@@ -91,6 +91,7 @@ public:
 
 	//! Adds a file open dialog.
 	virtual IGUIFileOpenDialog* addFileOpenDialog(const wchar_t* title = 0, bool modal=true, IGUIElement* parent=0, s32 id=-1);
+	virtual IGUIColorSelectDialog* addColorSelectDialog(const wchar_t* title = 0, bool modal=true, IGUIElement* parent=0, s32 id=-1);
 
 	//! adds a static text. The returned pointer must not be dropped.
 	virtual IGUIStaticText* addStaticText(const wchar_t* text, const core::rect<s32>& rectangle,
@@ -156,7 +157,7 @@ private:
 
 	void updateHoveredElement(core::position2d<s32> mousePos);
 
-	void loadBuidInFont();
+	void loadBuiltInFont();
 
 	core::array<SFont> Fonts;
 	video::IVideoDriver* Driver;

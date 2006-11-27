@@ -45,28 +45,12 @@ namespace video
 		//! clears the zbuffer
 		virtual bool beginScene(bool backBuffer, bool zBuffer, SColor color);
 
-		//! draws an indexed triangle list
-		virtual void drawIndexedTriangleList(const S3DVertex* vertices, s32 vertexCount,
-			const u16* indexList, s32 triangleCount);
+		//! draws a vertex primitive list
+		void drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType);
 
-		//! draws an indexed triangle list
-		virtual void drawIndexedTriangleList(const S3DVertex2TCoords* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle list.
-		virtual void drawIndexedTriangleList(const S3DVertexTangents* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle fan.
-		virtual void drawIndexedTriangleFan(const S3DVertex* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle fan.
-		virtual void drawIndexedTriangleFan(const S3DVertex2TCoords* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! draws an 2d image
-		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos);
+		//! Draws a 3d line.
+		virtual void draw3DLine(const core::vector3df& start,
+			const core::vector3df& end, SColor color = SColor(255,255,255,255));
 
 		//! draws an 2d image, using a color (if color is other then Color(255,255,255,255)) and the alpha channel of the texture if wanted.
 		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos,
@@ -98,7 +82,7 @@ namespace video
 		virtual const core::matrix4& getTransform(E_TRANSFORMATION_STATE state);
 
 		//! Creates a render target texture.
-		virtual ITexture* createRenderTargetTexture(core::dimension2d<s32> size);
+		virtual ITexture* createRenderTargetTexture(const core::dimension2d<s32>& size);
 	
 		//! Clears the ZBuffer. 
 		virtual void clearZBuffer();
@@ -118,7 +102,7 @@ namespace video
 		void setRenderTarget(video::CImage* image);
 
 		//! sets the current Texture
-		void setTexture(video::ITexture* texture);
+		bool setTexture(video::ITexture* texture);
 
 		video::CImage* BackBuffer;
 		video::IImagePresenter* Presenter;
@@ -133,7 +117,7 @@ namespace video
 		void clipTriangle(f32* transformedPos);
 
 		//! creates the clipping planes from the view matrix
-		void createPlanes(core::matrix4& mat);
+		void createPlanes(const core::matrix4& mat);
 
 		template<class VERTEXTYPE>
 		void drawClippedIndexedTriangleListT(const VERTEXTYPE* vertices,

@@ -16,7 +16,9 @@
 #include "IAttributes.h"
 #include "IMeshCache.h"
 #include "IMeshSceneNode.h"
+#include "SMeshBufferLightMap.h"
 
+//#define COLLADA_READER_DEBUG
 namespace irr
 {
 namespace scene
@@ -179,7 +181,7 @@ namespace scene
 CColladaFileLoader::CColladaFileLoader(video::IVideoDriver* driver, 
 		scene::ISceneManager* smgr, io::IFileSystem* fs)
 : Driver(driver), SceneManager(smgr), FileSystem(fs), DummyMesh(0),
-	CreateInstances(false)
+	CreateInstances(false), FirstLoadedMesh(0), LoadedMeshCount(0)
 {
 	
 }
@@ -190,6 +192,9 @@ CColladaFileLoader::~CColladaFileLoader()
 {
 	if (DummyMesh)
 		DummyMesh->drop();
+
+	if (FirstLoadedMesh)
+		FirstLoadedMesh->drop();
 }
 
 
@@ -242,6 +247,14 @@ IAnimatedMesh* CColladaFileLoader::createMesh(irr::io::IReadFile* file)
 		returnMesh = DummyMesh;
 	}
 
+	// add the first loaded mesh into the mesh cache too, if more than one
+	// meshes have been loaded from the file
+	if (LoadedMeshCount>1 && FirstLoadedMesh)
+	{
+		os::Printer::log("Added COLLADA mesh", FirstLoadedMeshName.c_str());	
+		SceneManager->getMeshCache()->addMesh(FirstLoadedMeshName.c_str(), FirstLoadedMesh);
+	}
+
 	// clean up temporary loaded data
 	clearData();
 
@@ -249,6 +262,11 @@ IAnimatedMesh* CColladaFileLoader::createMesh(irr::io::IReadFile* file)
 
 	DummyMesh->drop();
 	DummyMesh = 0;
+
+	if (FirstLoadedMesh)
+		FirstLoadedMesh->drop();
+	FirstLoadedMesh = 0;
+	LoadedMeshCount = 0;
 
 	return returnMesh;
 }
@@ -514,10 +532,10 @@ core::matrix4 CColladaFileLoader::readSkewNode(io::IXMLReaderUTF8* reader)
 	f32 floats[7];
 	readFloatsInsideElement(reader, floats, 7);
 
-	// TODO: build skew matrix from this 7 floats
+	// TODO: build skew matrix from these 7 floats
 
 	os::Printer::log("COLLADA loader warning: <skew> not implemented yet.", ELL_WARNING);
-
+    
 	return mat;
 }
 
@@ -529,7 +547,7 @@ core::matrix4 CColladaFileLoader::readMatrixNode(io::IXMLReaderUTF8* reader)
 		return mat;
 
 	readFloatsInsideElement(reader, mat.M, 16);
-
+    
 	return mat;
 }
 
@@ -625,22 +643,22 @@ void CColladaFileLoader::readCameraPrefab(io::IXMLReaderUTF8* reader)
 {
 	CCameraPrefab* prefab = new CCameraPrefab(reader->getAttributeValue("id"));
 
-	if (!reader->isEmptyElement())
+    if (!reader->isEmptyElement())
 	{
 		readColladaParameters(reader, cameraPrefabName);
 
 		SColladaParam* p;
 	
 		p = getColladaParameter(ECPN_YFOV);
-		if (p && p->Type == ECPT_FLOAT)
+        if (p && p->Type == ECPT_FLOAT)
 			prefab->YFov = p->Floats[0];
 
 		p = getColladaParameter(ECPN_ZNEAR);
-		if (p && p->Type == ECPT_FLOAT)
+        if (p && p->Type == ECPT_FLOAT)
 			prefab->ZNear = p->Floats[0];
 
 		p = getColladaParameter(ECPN_ZFAR);
-		if (p && p->Type == ECPT_FLOAT)
+        if (p && p->Type == ECPT_FLOAT)
 			prefab->ZFar = p->Floats[0];
 	}
 
@@ -699,7 +717,7 @@ void CColladaFileLoader::readGeometry(io::IXMLReaderUTF8* reader)
 				sources.getLast().Id = reader->getAttributeValue("id");
 
 				#ifdef COLLADA_READER_DEBUG
-				//os::Printer::log("Loaded source", sources.getLast().Id.c_str());
+				os::Printer::log("Loaded source", sources.getLast().Id.c_str());
 				#endif
 			}
 			else
@@ -718,7 +736,7 @@ void CColladaFileLoader::readGeometry(io::IXMLReaderUTF8* reader)
 					okToReadArray = (!strcmp("float", type) || !strcmp("int", type));
 
 					#ifdef COLLADA_READER_DEBUG
-					//os::Printer::log("Read array", sources.getLast().Array.Name.c_str());
+					os::Printer::log("Read array", sources.getLast().Array.Name.c_str());
 					#endif
 				}
 				#ifdef COLLADA_READER_DEBUG
@@ -739,7 +757,7 @@ void CColladaFileLoader::readGeometry(io::IXMLReaderUTF8* reader)
 					accessor.Stride = 1;
 
 				// the accessor contains some information on how to access (boi!) the array,
-				// the info is stored in collada style parameters, so just read them.
+                // the info is stored in collada style parameters, so just read them.
 				readColladaParameters(reader, accessorSectionName);
 				if (!sources.empty())
 				{
@@ -772,7 +790,7 @@ void CColladaFileLoader::readGeometry(io::IXMLReaderUTF8* reader)
 			{
 				core::array<f32>& a = sources.getLast().Array.Data;
 				core::stringc data = reader->getNodeData();
-				char* p = &data[0];
+				const c8* p = &data[0];
 
 				for (int i=0; i<(int)a.size(); ++i)
 				{
@@ -805,11 +823,21 @@ void CColladaFileLoader::readGeometry(io::IXMLReaderUTF8* reader)
 	filename += id;
 
 	// add to scene manager
-	SceneManager->getMeshCache()->addMesh(filename.c_str(), amesh);
-	amesh->drop();
-	mesh->drop();
+	if (LoadedMeshCount)
+	{
+		SceneManager->getMeshCache()->addMesh(filename.c_str(), amesh);
+		os::Printer::log("Added COLLADA mesh", filename.c_str());	
+	}
+	else
+	{
+		FirstLoadedMeshName = filename;
+		FirstLoadedMesh = amesh;
+		FirstLoadedMesh->grab();
+	}
 
-	os::Printer::log("Added COLLADA mesh", filename.c_str());	
+	++LoadedMeshCount;
+	mesh->drop();
+	amesh->drop();
 
 	// create geometry prefab
 	CGeometryPrefab* prefab = new CGeometryPrefab(id.c_str());
@@ -821,7 +849,7 @@ void CColladaFileLoader::readGeometry(io::IXMLReaderUTF8* reader)
 	{
 		DummyMesh = amesh;
 		DummyMesh->grab();
-	}
+	}	
 }
 
 
@@ -842,7 +870,7 @@ void CColladaFileLoader::readPolygonSection(io::IXMLReaderUTF8* reader,
 	scene::SMesh* mesh)
 {
 	core::stringc material = reader->getAttributeValue("material");
-	int polygonCount = reader->getAttributeValueAsInt("count");
+	// int polygonCount = reader->getAttributeValueAsInt("count");
 	core::array<SInputSlot> slots;
 	core::array<SPolygon> polygons;
 	bool parsePolygonOK = false;
@@ -931,7 +959,7 @@ void CColladaFileLoader::readPolygonSection(io::IXMLReaderUTF8* reader,
 			{
 				// parse this text and add it to the last polygon data
 				core::stringc data = reader->getNodeData();
-				char* p = &data[0];
+				const c8* p = &data[0];
 				SPolygon& poly = polygons.getLast();
 				while(*p)
 				{
@@ -950,81 +978,178 @@ void CColladaFileLoader::readPolygonSection(io::IXMLReaderUTF8* reader,
 	if (!polygons.size())
 		return; // cancel if there are no polygons anyway.
 
-	// based on input slots, create the mesh
-	// TODO: currently we only support simple vertices, S3DVertex, but we could
-	// support extend versions too, like S3DVertexTangents or S3DVertex2TCoords
-
-	SMeshBuffer* buffer = new SMeshBuffer();
+	// analyze content of slots to create a fitting mesh buffer
 
 	int i;
-	for (i=0; i<(int)polygons.size(); ++i)
+	int textureCoordSetCount = 0;
+	int normalSlotCount = 0;
+	int secondTexCoordSetIndex = -1;
+
+	for (i=0; i<(int)slots.size(); ++i)
 	{
-		int vertexCount = polygons[i].Indices.size() / inputSemanticCount;
-
-		// for all vertices in array
-		for (int v=0; v<(int)polygons[i].Indices.size(); v+=inputSemanticCount)
+		if (slots[i].Semantic == ECIS_TEXCOORD || slots[i].Semantic == ECIS_UV )
 		{
-			video::S3DVertex vtx;
-			vtx.Color.set(100,255,255,255);
+			++textureCoordSetCount;
 
-			// for all input semantics
-			for (int k=0; k<(int)slots.size(); ++k)
+			if (textureCoordSetCount==2)
+				secondTexCoordSetIndex = i;
+		}
+		else
+		if (slots[i].Semantic == ECIS_NORMAL)
+			++normalSlotCount;
+	}
+
+	// if there is more than one texture coordinate set, create a lightmap mesh buffer,
+	// otherwise use a standard mesh buffer
+
+	scene::IMeshBuffer* buffer = 0;
+
+	if ( textureCoordSetCount <= 1 )
+	{
+		// standard mesh buffer 
+
+		scene::SMeshBuffer* mbuffer = new SMeshBuffer();
+		buffer = mbuffer;
+
+		for (i=0; i<(int)polygons.size(); ++i)
+		{
+			int vertexCount = polygons[i].Indices.size() / inputSemanticCount;
+
+			// for all vertices in array
+			for (int v=0; v<(int)polygons[i].Indices.size(); v+=inputSemanticCount)
 			{
-				// build vertex from input semantics.
+				video::S3DVertex vtx;
+				vtx.Color.set(100,255,255,255);
 
-				int idx = polygons[i].Indices[v+k];
-
-				switch(slots[k].Semantic)
+				// for all input semantics
+				for (int k=0; k<(int)slots.size(); ++k)
 				{
-				case ECIS_POSITION:
-				case ECIS_VERTEX:
-					vtx.Pos.X = slots[k].Data[(idx*3)+0];
-					vtx.Pos.Y = slots[k].Data[(idx*3)+1];
-					vtx.Pos.Z = slots[k].Data[(idx*3)+2];
-					break;
-				case ECIS_NORMAL:
-					vtx.Normal.X = slots[k].Data[(idx*3)+0];
-					vtx.Normal.Y = slots[k].Data[(idx*3)+1];
-					vtx.Normal.Z = slots[k].Data[(idx*3)+2];
-					break;
-				case ECIS_TEXCOORD:
-				case ECIS_UV:
-					vtx.TCoords.X = slots[k].Data[(idx*2)+0];
-					vtx.TCoords.Y = slots[k].Data[(idx*2)+1];
-					break;
-				case ECIS_TANGENT:
-					break;
-				default:
-					break;
+					// build vertex from input semantics.
+
+					int idx = polygons[i].Indices[v+k];
+
+					switch(slots[k].Semantic)
+					{
+					case ECIS_POSITION:
+					case ECIS_VERTEX:
+						vtx.Pos.X = slots[k].Data[(idx*3)+0];
+						vtx.Pos.Y = slots[k].Data[(idx*3)+1];
+						vtx.Pos.Z = slots[k].Data[(idx*3)+2];
+						break;
+					case ECIS_NORMAL:
+						vtx.Normal.X = slots[k].Data[(idx*3)+0];
+						vtx.Normal.Y = slots[k].Data[(idx*3)+1];
+						vtx.Normal.Z = slots[k].Data[(idx*3)+2];
+						break;
+					case ECIS_TEXCOORD:
+					case ECIS_UV:
+						vtx.TCoords.X = slots[k].Data[(idx*2)+0];
+						vtx.TCoords.Y = slots[k].Data[(idx*2)+1];
+						break;
+					case ECIS_TANGENT:
+						break;
+					default:
+						break;
+					}
 				}
+
+				mbuffer->Vertices.push_back(vtx);
+
+			} // end for all vertices
+
+			// add vertex indices 
+			int currentVertexCount = mbuffer->Vertices.size();
+			int oldVertexCount = currentVertexCount - vertexCount;
+			for (int face=0; face<vertexCount-2; ++face)
+			{
+				mbuffer->Indices.push_back(oldVertexCount + 0);
+				mbuffer->Indices.push_back(oldVertexCount + 1 + face);
+				mbuffer->Indices.push_back(oldVertexCount + 2 + face);
 			}
 
-			buffer->Vertices.push_back(vtx);
+		} // end for all polygons
+	}
+	else
+	{
+		// lightmap mesh buffer 
 
-		} // end for all vertices
+		scene::SMeshBufferLightMap* mbuffer = new SMeshBufferLightMap();
+		buffer = mbuffer;
 
-		// add vertex indices 
-		int currentVertexCount = buffer->Vertices.size();
-		int oldVertexCount = currentVertexCount - vertexCount;
-		for (int face=0; face<vertexCount-2; ++face)
+		for (i=0; i<(int)polygons.size(); ++i)
 		{
-			buffer->Indices.push_back(oldVertexCount + 0);
-			buffer->Indices.push_back(oldVertexCount + 1 + face);
-			buffer->Indices.push_back(oldVertexCount + 2 + face);
-		}
+			int vertexCount = polygons[i].Indices.size() / inputSemanticCount;
 
-	} // end for all polygons
+			// for all vertices in array
+			for (int v=0; v<(int)polygons[i].Indices.size(); v+=inputSemanticCount)
+			{
+				video::S3DVertex2TCoords vtx;
+				vtx.Color.set(100,255,255,255);
+
+				// for all input semantics
+				for (int k=0; k<(int)slots.size(); ++k)
+				{
+					// build vertex from input semantics.
+
+					int idx = polygons[i].Indices[v+k];
+
+					switch(slots[k].Semantic)
+					{
+					case ECIS_POSITION:
+					case ECIS_VERTEX:
+						vtx.Pos.X = slots[k].Data[(idx*3)+0];
+						vtx.Pos.Y = slots[k].Data[(idx*3)+1];
+						vtx.Pos.Z = slots[k].Data[(idx*3)+2];
+						break;
+					case ECIS_NORMAL:
+						vtx.Normal.X = slots[k].Data[(idx*3)+0];
+						vtx.Normal.Y = slots[k].Data[(idx*3)+1];
+						vtx.Normal.Z = slots[k].Data[(idx*3)+2];
+						break;
+					case ECIS_TEXCOORD:
+					case ECIS_UV:
+						if (k==secondTexCoordSetIndex)
+						{
+							vtx.TCoords2.X = slots[k].Data[(idx*2)+0];
+							vtx.TCoords2.Y = slots[k].Data[(idx*2)+1];
+						}
+						else
+						{
+							vtx.TCoords.X = slots[k].Data[(idx*2)+0];
+							vtx.TCoords.Y = slots[k].Data[(idx*2)+1];
+						}
+						break;
+					case ECIS_TANGENT:
+						break;
+					default:
+						break;
+					}
+				}
+
+				mbuffer->Vertices.push_back(vtx);
+
+			} // end for all vertices
+
+			// add vertex indices 
+			int currentVertexCount = mbuffer->Vertices.size();
+			int oldVertexCount = currentVertexCount - vertexCount;
+			for (int face=0; face<vertexCount-2; ++face)
+			{
+				mbuffer->Indices.push_back(oldVertexCount + 0);
+				mbuffer->Indices.push_back(oldVertexCount + 1 + face);
+				mbuffer->Indices.push_back(oldVertexCount + 2 + face);
+			}
+
+		} // end for all polygons
+	}
 
 	// calculate normals if there is no slot for it
-	for (i=0; i<(int)slots.size(); ++i)
-		if (slots[i].Semantic == ECIS_NORMAL)
-			break;
 
-	if (i == (int)slots.size()) // no normals in input
+	if (!normalSlotCount) 
 		SceneManager->getMeshManipulator()->recalculateNormals(buffer);
 
 	// recalculate bounding box
-	buffer->recalculateBoundingBox();
+	SceneManager->getMeshManipulator()->recalculateBoundingBox(buffer);
 
 	// add mesh buffer
 	mesh->addMeshBuffer(buffer);
@@ -1038,7 +1163,7 @@ void CColladaFileLoader::readLightPrefab(io::IXMLReaderUTF8* reader)
 {
 	CLightPrefab* prefab = new CLightPrefab(reader->getAttributeValue("id"));
 
-	if (!reader->isEmptyElement())
+    if (!reader->isEmptyElement())
 	{
 		readColladaParameters(reader, lightPrefabName);
 	
@@ -1100,7 +1225,7 @@ void CColladaFileLoader::readColladaInputs(io::IXMLReaderUTF8* reader, const cor
 {
 	Inputs.clear();
 
-	while(reader->read())
+    while(reader->read())
 	{
 		if (reader->getNodeType() == io::EXN_ELEMENT &&
 			inputTagName == reader->getNodeName())
@@ -1185,7 +1310,7 @@ void CColladaFileLoader::readColladaParameters(io::IXMLReaderUTF8* reader,
 
 //! parses a float from a char pointer and moves the pointer
 //! to the end of the parsed float
-inline f32 CColladaFileLoader::readFloat(c8** p)
+inline f32 CColladaFileLoader::readFloat(const c8** p)
 {
 	f32 ftmp;
 	*p = core::fast_atof_move(*p, ftmp);
@@ -1194,15 +1319,15 @@ inline f32 CColladaFileLoader::readFloat(c8** p)
 
 //! parses an int from a char pointer and moves the pointer to
 //! the end of the parsed float
-inline s32 CColladaFileLoader::readInt(c8** p)
+inline s32 CColladaFileLoader::readInt(const c8** p)
 {
 	return (s32)readFloat(p);
 }
 
 //! places pointer to next begin of a token
-void CColladaFileLoader::findNextNoneWhiteSpace(c8** start)
+void CColladaFileLoader::findNextNoneWhiteSpace(const c8** start)
 {
-	c8* p = *start;
+	const c8* p = *start;
 
 	while(*p && (*p==' ' || *p=='\n' || *p=='\r' || *p=='\t'))
 		++p;
@@ -1228,7 +1353,7 @@ void CColladaFileLoader::readFloatsInsideElement(io::IXMLReaderUTF8* reader, f32
 		{
 			// parse float data
 			core::stringc data = reader->getNodeData();
-			char* p = &data[0];
+			const c8* p = &data[0];
 			
 			for (int i=0; i<count; ++i)
 			{

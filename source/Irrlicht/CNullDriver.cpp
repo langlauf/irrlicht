@@ -466,69 +466,60 @@ const core::rect<s32>& CNullDriver::getViewPort() const
 
 
 
-//! draws an indexed triangle list
-void CNullDriver::drawIndexedTriangleList(const S3DVertex* vertices, s32 vertexCount, const u16* indexList, s32 triangleCount)
+//! draws a vertex primitive list
+void CNullDriver::drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType)
 {
-	PrimitivesDrawn += triangleCount;
+	PrimitivesDrawn += primitiveCount;
 }
 
 
 
 //! draws an indexed triangle list
-void CNullDriver::drawIndexedTriangleList(const S3DVertex2TCoords* vertices, s32 vertexCount, const u16* indexList, s32 triangleCount)
+inline void CNullDriver::drawIndexedTriangleList(const S3DVertex* vertices, s32 vertexCount, const u16* indexList, s32 triangleCount)
 {
-	PrimitivesDrawn += triangleCount;
+	drawVertexPrimitiveList(vertices, vertexCount, indexList, triangleCount, EVT_STANDARD, scene::EPT_TRIANGLES);
+}
+
+
+
+//! draws an indexed triangle list
+inline void CNullDriver::drawIndexedTriangleList(const S3DVertex2TCoords* vertices, s32 vertexCount, const u16* indexList, s32 triangleCount)
+{
+	drawVertexPrimitiveList(vertices, vertexCount, indexList, triangleCount, EVT_2TCOORDS, scene::EPT_TRIANGLES);
 }
 
 
 //! Draws an indexed triangle list.
-void CNullDriver::drawIndexedTriangleList(const S3DVertexTangents* vertices,
+inline void CNullDriver::drawIndexedTriangleList(const S3DVertexTangents* vertices,
 	s32 vertexCount, const u16* indexList, s32 triangleCount)
 {
-	PrimitivesDrawn += triangleCount;
+	drawVertexPrimitiveList(vertices, vertexCount, indexList, triangleCount, EVT_TANGENTS, scene::EPT_TRIANGLES);
 }
 
-
-//! Draws an indexed triangle list.
-void CNullDriver::drawIndexedTriangleFan(const S3DVertex2TCoords* vertices,
-	s32 vertexCount, const u16* indexList, s32 triangleCount)
-{
-	PrimitivesDrawn += triangleCount;
-}
 
 
 //! Draws an indexed triangle fan.
-void CNullDriver::drawIndexedTriangleFan(const S3DVertex* vertices,
+inline void CNullDriver::drawIndexedTriangleFan(const S3DVertex* vertices,
 	s32 vertexCount, const u16* indexList, s32 triangleCount)
 {
-	PrimitivesDrawn += triangleCount;
+	drawVertexPrimitiveList(vertices, vertexCount, indexList, triangleCount, EVT_STANDARD, scene::EPT_TRIANGLE_FAN);
 }
+
+
+
+//! Draws an indexed triangle fan.
+inline void CNullDriver::drawIndexedTriangleFan(const S3DVertex2TCoords* vertices,
+	s32 vertexCount, const u16* indexList, s32 triangleCount)
+{
+	drawVertexPrimitiveList(vertices, vertexCount, indexList, triangleCount, EVT_2TCOORDS, scene::EPT_TRIANGLE_FAN);
+}
+
 
 
 //! Draws a 3d line.
 void CNullDriver::draw3DLine(const core::vector3df& start,
-							const core::vector3df& end, SColor color)
+				const core::vector3df& end, SColor color)
 {
-	core::vector3df vect = start.crossProduct(end);
-	vect.normalize();
-	vect *= 1.0f;
-
-	S3DVertex vtx[4];
-
-	vtx[0].Color = color;
-	vtx[1].Color = color;
-	vtx[2].Color = color;
-	vtx[3].Color = color;
-
-	vtx[0].Pos = start;
-	vtx[1].Pos = end;
-
-	vtx[2].Pos = start + vect;
-	vtx[3].Pos = end + vect;
-
-	u16 idx[12] = {0,1,2, 0,2,1,   0,1,3, 0,3,1};
-
-	drawIndexedTriangleList(vtx, 4, idx, 4);
 }
 
 
@@ -549,7 +540,7 @@ void CNullDriver::draw3DBox(const core::aabbox3d<f32> box, SColor color)
 	core::vector3df edges[8];
 	box.getEdges(edges);
 
-	// TODO: optimize into one big drawIndexePrimitive call.
+	// TODO: optimize into one big drawIndexPrimitive call.
 
 	draw3DLine(edges[5], edges[1], color);
 	draw3DLine(edges[1], edges[3], color);
@@ -570,7 +561,36 @@ void CNullDriver::draw3DBox(const core::aabbox3d<f32> box, SColor color)
 //! draws an 2d image
 void CNullDriver::draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos)
 {
+	if (!texture)
+		return;
+
+	draw2DImage(texture,destPos, core::rect<s32>(core::position2d<s32>(0,0), texture->getOriginalSize()));
 }
+
+
+
+//! draws a set of 2d images, using a color and the alpha channel of the
+//! texture if desired. The images are drawn beginning at pos and concatenated
+//! in one line. All drawings are clipped against clipRect (if != 0).
+//! The subtextures are defined by the array of sourceRects and are chosen
+//! by the indices given.
+void CNullDriver::draw2DImage(video::ITexture* texture,
+				const core::position2d<s32>& pos,
+				const core::array<core::rect<s32> >& sourceRects,
+				const core::array<s32>& indices,
+				const core::rect<s32>* clipRect, SColor color,
+				bool useAlphaChannelOfTexture)
+{
+	core::position2d<s32> target(pos);
+	
+	for (u32 i=0; i<indices.size(); ++i)
+	{
+		draw2DImage(texture, target, sourceRects[indices[i]],
+				clipRect, color, useAlphaChannelOfTexture);
+		target.X += sourceRects[indices[i]].getWidth();
+	}
+}
+
 
 
 //! Draws a part of the texture into the rectangle.
@@ -579,6 +599,7 @@ void CNullDriver::draw2DImage(video::ITexture* texture, const core::rect<s32>& d
 	video::SColor* colors, bool useAlphaChannelOfTexture)
 {
 }
+
 
 
 //! draws an 2d image, using a color (if color is other then Color(255,255,255,255)) and the alpha channel of the texture if wanted.
@@ -651,6 +672,12 @@ core::dimension2d<s32> CNullDriver::getScreenSize()
 	return ScreenSize;
 }
 
+//! returns the current render target size, 
+//! or the screen size if render targets are not implemented
+core::dimension2d<s32> CNullDriver::getCurrentRenderTargetSize()
+{
+	return ScreenSize;
+}
 
 
 // returns current frames per second value
@@ -773,15 +800,17 @@ void CNullDriver::makeColorKeyTexture(video::ITexture* texture, video::SColor co
 		core::dimension2d<s32> dim = texture->getSize();
 		s32 pitch = texture->getPitch() / 2;
 
-		s16 ref = (0x0<<15) | (~(0x1<<15) & color.toA1R5G5B5());
-		s16 blackalpha = (0x0<<15) | (~(0x1<<15) & 0);
+		// color with alpha enabled (color opaque)
+		s16 ref = (0x1<<15) | (0x7fff & color.toA1R5G5B5());
 
-		for (s32 x=0; x<pitch; ++x)
-			for (s32 y=0; y<dim.Height; ++y)
+		for (s32 y=0; y<dim.Height; ++y)
+		{
+			for (s32 x=0; x<pitch; ++x)
 			{
-				s16 c = (0x0<<15) | (~(0x1<<15) & p[y*pitch + x]);
-				p[y*pitch + x] = (c == ref) ? blackalpha : ((0x1<<15) | (~(0x1<<15) & c));
+				s16 c = (0x1<<15) | (0x7fff & p[y*pitch + x]);
+				p[y*pitch + x] = (c == ref) ? 0 : c;
 			}
+		}
 
 		texture->unlock();
 	}
@@ -798,15 +827,17 @@ void CNullDriver::makeColorKeyTexture(video::ITexture* texture, video::SColor co
 		core::dimension2d<s32> dim = texture->getSize();
 		s32 pitch = texture->getPitch() / 4;
 
-		s32 ref = (0x0<<24) | (~(0xFF<<24) & color.color);
-		s32 blackalpha = (0x0<<24) | (~(0xFF<<24) & 0);
+		// color with alpha enabled (color opaque)
+		s32 ref = (0xff<<24) | (0x00ffffff & color.color);
 
-		for (s32 x=0; x<pitch; ++x)
-			for (s32 y=0; y<dim.Height; ++y)
+		for (s32 y=0; y<dim.Height; ++y)
+		{
+			for (s32 x=0; x<pitch; ++x)
 			{
-				s32 c = (0x0<<24) | (~(0xFF<<24) & p[y*pitch + x]);
-				p[y*pitch + x] = (c == ref) ? blackalpha : ((0xFF<<24) | (~(0xFF<<24) & c));
+				s32 c = (0xff<<24) | (0x00ffffff & p[y*pitch + x]);
+				p[y*pitch + x] = (c == ref) ? 0 : c;
 			}
+		}
 
 		texture->unlock();
 	}
@@ -841,15 +872,16 @@ void CNullDriver::makeColorKeyTexture(video::ITexture* texture,
 		core::dimension2d<s32> dim = texture->getSize();
 		s32 pitch = texture->getPitch() / 2;
 
-		s16 ref = (0x0<<15) | (~(0x1<<15) & p[colorKeyPixelPos.Y*dim.Width + colorKeyPixelPos.X]);
-		s16 blackalpha = (0x0<<15) | (~(0x1<<15) & 0);
+		s16 ref = (0x1<<15) | (0x7fff & p[colorKeyPixelPos.Y*dim.Width + colorKeyPixelPos.X]);
 
-		for (s32 x=0; x<pitch; ++x)
-			for (s32 y=0; y<dim.Height; ++y)
+		for (s32 y=0; y<dim.Height; ++y)
+		{
+			for (s32 x=0; x<pitch; ++x)
 			{
-				s16 c = (0x0<<15) | (~(0x1<<15) & p[y*pitch + x]);
-				p[y*pitch + x] = (c == ref) ? blackalpha : ((0x1<<15) | (~(0x1<<15) & c));
+				s16 c = (0x1<<15) | (0x7fff & p[y*pitch + x]);
+				p[y*pitch + x] = (c == ref) ? 0 : c;
 			}
+		}
 
 		texture->unlock();
 	}
@@ -866,29 +898,21 @@ void CNullDriver::makeColorKeyTexture(video::ITexture* texture,
 		core::dimension2d<s32> dim = texture->getSize();
 		s32 pitch = texture->getPitch() / 4;
 
-#ifdef __BIG_ENDIAN__
-		s32 ref = (0x0) | (~(0xFF) & p[colorKeyPixelPos.Y*dim.Width + colorKeyPixelPos.X]);
-		s32 blackalpha = (0x0) | (~(0xFF) & 0);
-#else
-		s32 ref = (0x0<<24) | (~(0xFF<<24) & p[colorKeyPixelPos.Y*dim.Width + colorKeyPixelPos.X]);
-		s32 blackalpha = (0x0<<24) | (~(0xFF<<24) & 0);
-#endif
+		s32 ref = (0xff<<24) | (0x00ffffff & p[colorKeyPixelPos.Y*dim.Width + colorKeyPixelPos.X]);
 
-		for (s32 x=0; x<pitch; ++x)
-			for (s32 y=0; y<dim.Height; ++y)
+		for (s32 y=0; y<dim.Height; ++y)
+		{
+			for (s32 x=0; x<pitch; ++x)
 			{
-#ifdef __BIG_ENDIAN__
-				s32 c = (0x0) | (~(0xFF) & p[y*pitch + x]);
-				p[y*pitch + x] = (c == ref) ? blackalpha : ((0xFF) | (~(0xFF) & c));
-#else
-				s32 c = (0x0<<24) | (~(0xFF<<24) & p[y*pitch + x]);
-				p[y*pitch + x] = (c == ref) ? blackalpha : ((0xFF<<24) | (~(0xFF<<24) & c));
-#endif
+				s32 c = (0xff<<24) | (0x00ffffff & p[y*pitch + x]);
+				p[y*pitch + x] = (c == ref) ? 0 : c;
 			}
+		}
 
 		texture->unlock();
 	}
 }
+
 
 
 //! Creates a normal map from a height map texture.
@@ -1013,7 +1037,7 @@ void CNullDriver::makeNormalMapTexture(video::ITexture* texture, f32 amplitude)
 //! call.
 s32 CNullDriver::getMaximalPrimitiveCount()
 {
-	return 65535;
+	return (1<<30)-1;
 }
 
 
@@ -1166,23 +1190,7 @@ void CNullDriver::drawMeshBuffer(scene::IMeshBuffer* mb)
 	if (!mb)
 		return;
 
-	switch(mb->getVertexType())
-	{
-	case video::EVT_STANDARD:
-		drawIndexedTriangleList((video::S3DVertex*)mb->getVertices(),
-			mb->getVertexCount(), mb->getIndices(), mb->getIndexCount()/ 3);
-		break;
-
-	case video::EVT_2TCOORDS:
-		drawIndexedTriangleList((video::S3DVertex2TCoords*)mb->getVertices(),
-			mb->getVertexCount(), mb->getIndices(), mb->getIndexCount()/ 3);
-		break;
-
-	case video::EVT_TANGENTS:
-		drawIndexedTriangleList((video::S3DVertexTangents*)mb->getVertices(),
-			mb->getVertexCount(), mb->getIndices(), mb->getIndexCount()/ 3);
-		break;
-	}
+	drawVertexPrimitiveList(mb->getVertices(), mb->getVertexCount(), mb->getIndices(), mb->getIndexCount()/3, mb->getVertexType(), scene::EPT_TRIANGLES);
 }
 
 
@@ -1613,7 +1621,7 @@ s32 CNullDriver::addShaderMaterialFromFiles(const c8* vertexShaderProgramFileNam
 }
 
 //! Creates a render target texture.
-ITexture* CNullDriver::createRenderTargetTexture(core::dimension2d<s32> size)
+ITexture* CNullDriver::createRenderTargetTexture(const core::dimension2d<s32>& size)
 {
 	return 0;
 }

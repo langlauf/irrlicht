@@ -16,12 +16,12 @@
 
 #include "CDMFLoader.h"
 #include "ISceneManager.h"
+#include "IAttributes.h"
 #include "SAnimatedMesh.h"
 #include "SMeshBufferLightMap.h"
 #include "irrString.h"
 #include "irrMath.h"
 #include <string.h>
-#include <math.h>
 #include "dmfsupport.h"
 
 namespace irr

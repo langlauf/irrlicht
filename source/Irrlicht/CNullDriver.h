@@ -10,6 +10,7 @@
 #include "IImagePresenter.h"
 #include "irrArray.h"
 #include "irrString.h"
+#include "IAttributes.h"
 #include "IImageLoader.h"
 #include "IImageWriter.h"
 #include "IMeshBuffer.h"
@@ -56,7 +57,7 @@ namespace video
 		virtual s32 getTextureCount();
 
 		//! creates a Texture
-		virtual ITexture* addTexture(const core::dimension2d<s32>& size, const c8* name, ECOLOR_FORMAT format);
+		virtual ITexture* addTexture(const core::dimension2d<s32>& size, const c8* name, ECOLOR_FORMAT format = ECF_A8R8G8B8);
 
 		//! sets a render target
 		virtual bool setRenderTarget(video::ITexture* texture, bool clearBackBuffer, 
@@ -67,6 +68,9 @@ namespace video
 
 		//! gets the area of the current viewport
 		virtual const core::rect<s32>& getViewPort() const;
+
+		//! draws a vertex primitive list
+		virtual void drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType);
 
 		//! draws an indexed triangle list
 		virtual void drawIndexedTriangleList(const S3DVertex* vertices, s32 vertexCount, const u16* indexList, s32 triangleCount);
@@ -101,6 +105,29 @@ namespace video
 		//! draws an 2d image
 		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos);
 
+		//! draws a set of 2d images, using a color and the alpha
+		/** channel of the texture if desired. The images are drawn
+		beginning at pos and concatenated in one line. All drawings
+		are clipped against clipRect (if != 0).
+		The subtextures are defined by the array of sourceRects
+		and are chosen by the indices given.
+		\param texture: Texture to be drawn.
+		\param pos: Upper left 2d destination position where the image will be drawn.
+		\param sourceRects: Source rectangles of the image.
+		\param indices: List of indices which choose the actual rectangle used each time.
+		\param clipRect: Pointer to rectangle on the screen where the image is clipped to.
+		This pointer can be 0. Then the image is not clipped.
+		\param color: Color with which the image is colored.
+		Note that the alpha component is used: If alpha is other than 255, the image will be transparent.
+		\param useAlphaChannelOfTexture: If true, the alpha channel of the texture is
+		used to draw the image. */
+		virtual void draw2DImage(video::ITexture* texture,
+				const core::position2d<s32>& pos,
+				const core::array<core::rect<s32> >& sourceRects,
+				const core::array<s32>& indices,
+				const core::rect<s32>* clipRect, SColor color,
+				bool useAlphaChannelOfTexture);
+
 		//! draws an 2d image, using a color (if color is other then Color(255,255,255,255)) and the alpha channel of the texture if wanted.
 		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos, 
 			const core::rect<s32>& sourceRect, const core::rect<s32>* clipRect = 0,
@@ -134,6 +161,9 @@ namespace video
 
 		//! returns screen size
 		virtual core::dimension2d<s32> getScreenSize();
+
+		//! returns screen size
+		virtual core::dimension2d<s32> getCurrentRenderTargetSize();
 
 		// returns current frames per second value
 		virtual s32 getFPS();
@@ -199,7 +229,7 @@ namespace video
 		virtual void removeAllTextures();
 
 		//! Creates a render target texture.
-		virtual ITexture* createRenderTargetTexture(core::dimension2d<s32> size);
+		virtual ITexture* createRenderTargetTexture(const core::dimension2d<s32>& size);
 
 		//! Creates an 1bit alpha channel of the texture based of an color key.
 		virtual void makeColorKeyTexture(video::ITexture* texture, video::SColor color);
@@ -421,7 +451,7 @@ namespace video
 			virtual const core::dimension2d<s32>& getOriginalSize() { return size; }
 			virtual const core::dimension2d<s32>& getSize() { return size; }
 			virtual E_DRIVER_TYPE getDriverType() { return video::EDT_NULL; }
-			virtual ECOLOR_FORMAT getColorFormat() { return video::ECF_R5G6B5; };
+			virtual ECOLOR_FORMAT getColorFormat() const { return video::ECF_R5G6B5; };
 			virtual s32 getPitch() { return 0; }
 			virtual void regenerateMipMapLevels() {};
 			core::dimension2d<s32> size;

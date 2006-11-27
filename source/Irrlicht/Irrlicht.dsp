@@ -362,7 +362,7 @@ SOURCE=..\..\include\SIrrCreationParameters.h
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=.\BuildInFont.h
+SOURCE=.\BuiltInFont.h
 # End Source File
 # Begin Source File
 
@@ -379,6 +379,14 @@ SOURCE=.\CGUICheckBox.cpp
 # Begin Source File
 
 SOURCE=.\CGUICheckbox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CGUIColorSelectDialog.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\CGUIColorSelectDialog.h
 # End Source File
 # Begin Source File
 
@@ -1013,6 +1021,10 @@ SOURCE=.\CTRTextureLightMap2_M4.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CTRTextureLightMapGouraud2_M4.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\CTRTextureWire2.cpp
 # End Source File
 # Begin Source File
@@ -1022,6 +1034,10 @@ SOURCE=.\CZBuffer2.cpp
 # Begin Source File
 
 SOURCE=.\CZBuffer2.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ITriangleRenderer2.cpp
 # End Source File
 # Begin Source File
 

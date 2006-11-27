@@ -32,7 +32,7 @@ namespace irr
 			bool pureSoftware, bool highPrecisionFPU, bool vsync, bool antiAlias);
 
 		IVideoDriver* createOpenGLDriver(const core::dimension2d<s32>& screenSize, HWND window, 
-			bool fullscreen, bool stencilBuffer, io::IFileSystem* io,
+			u32 bits, bool fullscreen, bool stencilBuffer, io::IFileSystem* io,
 			bool vsync, bool antiAlias);
 	}
 
@@ -453,7 +453,7 @@ void CIrrDeviceWin32::createDriver(video::E_DRIVER_TYPE driverType,
 
 		#ifdef _IRR_COMPILE_WITH_OPENGL_
 		if (fullscreen)	switchToFullScreen(windowSize.Width, windowSize.Height, bits);
-		VideoDriver = video::createOpenGLDriver(windowSize, HWnd, fullscreen, stencilbuffer, FileSystem,
+		VideoDriver = video::createOpenGLDriver(windowSize, HWnd, bits, fullscreen, stencilbuffer, FileSystem,
 			vsync, antiAlias);
 		if (!VideoDriver)
 		{
@@ -475,7 +475,7 @@ void CIrrDeviceWin32::createDriver(video::E_DRIVER_TYPE driverType,
 		break;
 
 	default:
-		// create null driver if a bad programmer made a mistake
+		// create null driver
 		VideoDriver = video::createNullDriver(FileSystem, windowSize);
 		break;
 	}
@@ -860,18 +860,6 @@ void CIrrDeviceWin32::setResizeAble(bool resize)
 	SetWindowPos(HWnd, HWND_TOP, windowLeft, windowTop, realWidth, realHeight, 
 		SWP_FRAMECHANGED | SWP_NOMOVE | SWP_SHOWWINDOW);
 }
-
-#ifdef IRRLICHT_EXPORTS
-#define IRRLICHT_API __declspec(dllexport)
-#else
-#define IRRLICHT_API __declspec(dllimport)
-#endif // IRRLICHT_EXPORT
-
-#if defined(_STDCALL_SUPPORTED)
-#define IRRCALLCONV __stdcall  // Declare the calling convention.
-#else
-#define IRRCALLCONV
-#endif // STDCALL_SUPPORTED
 
 
 IRRLICHT_API IrrlichtDevice* IRRCALLCONV createDeviceEx(

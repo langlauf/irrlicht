@@ -7,6 +7,7 @@
 
 #define _IRR_DONT_DO_MEMORY_DEBUGGING_HERE
 #include "CD3D9Texture.h"
+#include "CD3D9Driver.h"
 #include "os.h"
 
 #include <stdio.h>
@@ -30,8 +31,8 @@ namespace video
 {
 
 //! rendertarget constructor
-CD3D9Texture::CD3D9Texture(IDirect3DDevice9* device, core::dimension2d<s32> size, const char* name)
-: ITexture(name), Image(0), Device(device), TextureSize(size),
+CD3D9Texture::CD3D9Texture(CD3D9Driver* driver, core::dimension2d<s32> size, const char* name)
+: ITexture(name), Image(0), Driver(driver), TextureSize(size),
 	Texture(0), Pitch(0), ImageSize(size), HasMipMaps(0), HardwareMipMaps(0),
 	IsRenderTarget(true), RTTSurface(0)
 {
@@ -39,6 +40,7 @@ CD3D9Texture::CD3D9Texture(IDirect3DDevice9* device, core::dimension2d<s32> size
 	setDebugName("CD3D9Texture");
 	#endif
 
+	Device=driver->getExposedVideoData().D3D9.D3DDev9;
 	if (Device)
 		Device->AddRef();
 
@@ -47,9 +49,9 @@ CD3D9Texture::CD3D9Texture(IDirect3DDevice9* device, core::dimension2d<s32> size
 
 
 //! constructor
-CD3D9Texture::CD3D9Texture(IImage* image, IDirect3DDevice9* device,
+CD3D9Texture::CD3D9Texture(IImage* image, CD3D9Driver* driver,
 					   u32 flags, const char* name)
-: ITexture(name), Image(image), Device(device), TextureSize(0,0),
+: ITexture(name), Image(image), Driver(driver), TextureSize(0,0),
 Texture(0), Pitch(0), ImageSize(0,0), HasMipMaps(false), HardwareMipMaps(false),
 IsRenderTarget(false), RTTSurface(0)
 {
@@ -59,6 +61,7 @@ IsRenderTarget(false), RTTSurface(0)
 
 	bool generateMipLevels = (flags & video::ETCF_CREATE_MIP_MAPS) != 0;
 
+	Device=driver->getExposedVideoData().D3D9.D3DDev9;
 	if (Device)
 		Device->AddRef();
 
@@ -171,6 +174,7 @@ bool CD3D9Texture::createMipMaps(s32 level)
 		Texture->GenerateMipSubLevels();
 		return true;
 	}
+	//os::Printer::log("manual mipmap");
 
 	// The D3DXFilterTexture function seems to get linked wrong when
 	// compiling with both D3D8 and 9, causing it not to work in the D3D9 device.
@@ -255,15 +259,19 @@ bool CD3D9Texture::createMipMaps(s32 level)
 }
 
 
-
 //! creates the hardware texture
 void CD3D9Texture::createTexture(u32 flags)
 {
 	core::dimension2d<s32> optSize;
 	ImageSize = Image->getDimension();
 
-	optSize.Width = getTextureSizeFromImageSize(ImageSize.Width);
-	optSize.Height = getTextureSizeFromImageSize(ImageSize.Height);
+	if (Driver->queryFeature(EVDF_TEXTURE_NPOT))
+		optSize=ImageSize;
+	else
+	{
+		optSize.Width = getTextureSizeFromImageSize(ImageSize.Width);
+		optSize.Height = getTextureSizeFromImageSize(ImageSize.Height);
+	}
 
 	HRESULT hr;
 	D3DFORMAT format = D3DFMT_A1R5G5B5;
@@ -442,8 +450,7 @@ bool CD3D9Texture::copyTo32BitTexture()
 }
 
 
-//! optimized for 16 bit to 16 copy. This is in here because before
-//! version 0.4.2, the engine only used A1R5G5B5 hardware textures,
+//! optimized for 16 bit to 16 copy.
 bool CD3D9Texture::copyTo16BitTexture()
 {
 	D3DLOCKED_RECT rect;
@@ -663,7 +670,7 @@ E_DRIVER_TYPE CD3D9Texture::getDriverType()
 
 
 //! returns color format of texture
-ECOLOR_FORMAT CD3D9Texture::getColorFormat()
+ECOLOR_FORMAT CD3D9Texture::getColorFormat() const
 {
 	return ColorFormat;
 }
@@ -735,11 +742,13 @@ void CD3D9Texture::copy32BitMipMap(char* src, char* tgt,
 	SColor c;
 
 	for (int x=0; x<width; ++x)
+	{
 		for (int y=0; y<height; ++y)
 		{
 			s32 a=0, r=0, g=0, b=0;
 
 			for (int dx=0; dx<2; ++dx)
+			{
 				for (int dy=0; dy<2; ++dy)
 				{
 					int tgx = (x*2)+dx;
@@ -752,6 +761,7 @@ void CD3D9Texture::copy32BitMipMap(char* src, char* tgt,
 					g += c.getGreen();
 					b += c.getBlue();
 				}
+			}
 
 			a >>= 2;
 			r >>= 2;
@@ -761,6 +771,7 @@ void CD3D9Texture::copy32BitMipMap(char* src, char* tgt,
 			c = ((a & 0xff)<<24) | ((r & 0xff)<<16) | ((g & 0xff)<<8) | (b & 0xff);
 			*(u32*)((void*)&tgt[(x*4)+(y*pitchtgt)]) = c.color;
 		}
+	}
 }
 
 

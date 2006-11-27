@@ -152,6 +152,9 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 		return false;
 	}
 
+#ifdef __BIG_ENDIAN__
+	pHeader->Version = os::Byteswap::byteswap(pHeader->Version);
+#endif
 	if ( pHeader->Version < 3 || pHeader->Version > 4 )
 	{
 		delete [] buffer;
@@ -163,18 +166,46 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 
 	// vertices
 	u16 numVertices = *(u16*)pPtr;
+#ifdef __BIG_ENDIAN__
+	numVertices = os::Byteswap::byteswap(numVertices);
+#endif
 	pPtr += sizeof(u16);
 	MS3DVertex *vertices = (MS3DVertex*)pPtr;
 	pPtr += sizeof(MS3DVertex) * numVertices;
+#ifdef __BIG_ENDIAN__
+	for (i=0; i<numVertices; ++i)
+		for (j=0; j<3; ++j)
+			vertices[i].Vertex[j] = os::Byteswap::byteswap(vertices[i].Vertex[j]);
+#endif
 	
 	// triangles
 	u16 numTriangles = *(u16*)pPtr;
+#ifdef __BIG_ENDIAN__
+	numTriangles = os::Byteswap::byteswap(numTriangles);
+#endif
 	pPtr += sizeof(u16);
 	MS3DTriangle *triangles = (MS3DTriangle*)pPtr;
 	pPtr += sizeof(MS3DTriangle) * numTriangles;
+#ifdef __BIG_ENDIAN__
+	for (i=0; i<numTriangles; ++i)
+	{
+		triangles[i].Flags = os::Byteswap::byteswap(triangles[i].Flags);
+		for (j=0; j<3; ++j)
+		{
+			triangles[i].VertexIndices[j] = os::Byteswap::byteswap(triangles[i].VertexIndices[j]);
+			for (u16 k=0; k<3; ++k)
+				triangles[i].VertexNormals[j][k] = os::Byteswap::byteswap(triangles[i].VertexNormals[j][k]);
+			triangles[i].S[j] = os::Byteswap::byteswap(triangles[i].S[j]);
+			triangles[i].T[j] = os::Byteswap::byteswap(triangles[i].T[j]);
+		}
+	}
+#endif
 	
 	// groups
 	u16 numGroups = *(u16*)pPtr;
+#ifdef __BIG_ENDIAN__
+	numGroups = os::Byteswap::byteswap(numGroups);
+#endif
 	pPtr += sizeof(u16);
 	
 	//skip groups
@@ -183,16 +214,24 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 		Groups.push_back(SGroup());
 		SGroup& grp = Groups.getLast();
 
-		grp.Name = (const c8*) pPtr;
+		// The byte flag is before the name, so add 1
+		grp.Name = ((const c8*) pPtr) + 1;
 
 		pPtr += 33; // name and 1 byte flags
 		u16 triangleCount = *(u16*)pPtr;
+#ifdef __BIG_ENDIAN__
+		triangleCount = os::Byteswap::byteswap(triangleCount);
+#endif
 		pPtr += sizeof(u16);
 		
 		//pPtr += sizeof(u16) * triangleCount; // triangle indices
 		for (j=0; j<triangleCount; ++j) 
 		{
-			grp.VertexIds.push_back (*(u16*)pPtr);
+#ifdef __BIG_ENDIAN__
+			grp.VertexIds.push_back(os::Byteswap::byteswap(*(u16*)pPtr));
+#else
+			grp.VertexIds.push_back(*(u16*)pPtr);
+#endif
 			pPtr += sizeof (u16);
 		}
 
@@ -203,6 +242,9 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 	
 	// skip materials
 	u16 numMaterials = *(u16*)pPtr;
+#ifdef __BIG_ENDIAN__
+	numMaterials = os::Byteswap::byteswap(numMaterials);
+#endif
 	pPtr += sizeof(u16);
 
 	// MS3DMaterial *materials = (MS3DMaterial*)pPtr;
@@ -221,6 +263,18 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 	for (i=0; i<numMaterials; ++i)
 	{
 		MS3DMaterial *material = (MS3DMaterial*)pPtr;
+#ifdef __BIG_ENDIAN__
+		for (j=0; j<4; ++j)
+			material->Ambient[j] = os::Byteswap::byteswap(material->Ambient[j]);
+		for (j=0; j<4; ++j)
+			material->Diffuse[j] = os::Byteswap::byteswap(material->Diffuse[j]);
+		for (j=0; j<4; ++j)
+			material->Specular[j] = os::Byteswap::byteswap(material->Specular[j]);
+		for (j=0; j<4; ++j)
+			material->Emissive[j] = os::Byteswap::byteswap(material->Emissive[j]);
+		material->Shininess = os::Byteswap::byteswap(material->Shininess);
+		material->Transparency = os::Byteswap::byteswap(material->Transparency);
+#endif
 		pPtr += sizeof(MS3DMaterial);
 
 		Buffers.push_back (SMS3DMeshBuffer ());
@@ -240,14 +294,23 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 
 	// animation time
 	f32 framesPerSecond = *(f32*)pPtr;
+#ifdef __BIG_ENDIAN__
+	framesPerSecond = os::Byteswap::byteswap(framesPerSecond);
+#endif
 	pPtr += sizeof(f32) * 2; // fps and current time
 	
 	s32 frameCount = *(s32*)pPtr;
+#ifdef __BIG_ENDIAN__
+	frameCount = os::Byteswap::byteswap(frameCount);
+#endif
 	pPtr += sizeof(s32);
 	
 	totalTime = (frameCount / framesPerSecond) * 1000.0f;
 	
-	s32 jointCount = *(u16*)pPtr;
+	u16 jointCount = *(u16*)pPtr;
+#ifdef __BIG_ENDIAN__
+	jointCount = os::Byteswap::byteswap(jointCount);
+#endif
 	pPtr += sizeof(u16);
 	
 	// load joints	
@@ -256,6 +319,14 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 	for (i=0; i<jointCount; ++i)
 	{
 		MS3DJoint *pJoint = (MS3DJoint*)pPtr;
+#ifdef __BIG_ENDIAN__
+		for (j=0; j<3; ++j)
+			pJoint->Rotation[j] = os::Byteswap::byteswap(pJoint->Rotation[j]);
+		for (j=0; j<3; ++j)
+			pJoint->Translation[j] = os::Byteswap::byteswap(pJoint->Translation[j]);
+		pJoint->NumRotationKeyframes= os::Byteswap::byteswap(pJoint->NumRotationKeyframes);
+		pJoint->NumTranslationKeyframes = os::Byteswap::byteswap(pJoint->NumTranslationKeyframes);
+#endif
 		pPtr += sizeof(MS3DJoint);
 		Joints.push_back(t);
 		SJoint& jnt = Joints[Joints.size()-1];
@@ -279,6 +350,11 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 		for (j=0; j<pJoint->NumRotationKeyframes; ++j)
 		{
 			MS3DKeyframe* kf = (MS3DKeyframe*)pPtr;
+#ifdef __BIG_ENDIAN__
+			kf->Time = os::Byteswap::byteswap(kf->Time);
+			for (u32 l=0; l<3; ++l)
+				kf->Parameter[l] = os::Byteswap::byteswap(kf->Parameter[l]);
+#endif
 			pPtr += sizeof(MS3DKeyframe);
 
 			SKeyframe k;
@@ -293,6 +369,11 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 		for (j=0; j<pJoint->NumTranslationKeyframes; ++j)
 		{
 			MS3DKeyframe* kf = (MS3DKeyframe*)pPtr;
+#ifdef __BIG_ENDIAN__
+			kf->Time = os::Byteswap::byteswap(kf->Time);
+			for (u32 l=0; l<3; ++l)
+				kf->Parameter[l] = os::Byteswap::byteswap(kf->Parameter[l]);
+#endif
 			pPtr += sizeof(MS3DKeyframe);
 
 			SKeyframe k;
@@ -330,12 +411,14 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 		jnt.RelativeTransformation.setTranslation(jnt.Translation);
 
 		if (jnt.Parent == -1)
-			jnt.AbsoluteTransformation = jnt.RelativeTransformation;
+			jnt.AbsoluteTransformation  = jnt.RelativeTransformation;
 		else
 		{
 			jnt.AbsoluteTransformation = Joints[jnt.Parent].AbsoluteTransformation;
 			jnt.AbsoluteTransformation *= jnt.RelativeTransformation;
 		}
+
+		jnt.AbsoluteTransformationAnimated = jnt.AbsoluteTransformation;
 	}
 
 	// create vertices and indices, attach them to the joints.
@@ -350,7 +433,8 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 			v.Normal.X = triangles[i].VertexNormals[j][0];
 			v.Normal.Y = triangles[i].VertexNormals[j][1];
 			v.Normal.Z = triangles[i].VertexNormals[j][2];
-			v.Color.set(255,255,255,255);
+			if(triangles[i].GroupIndex < Groups.size() && Groups[triangles[i].GroupIndex].MaterialIdx < Buffers.size())
+				v.Color = Buffers[Groups[triangles[i].GroupIndex].MaterialIdx].Material.DiffuseColor;
 			v.Pos.X = vertices[triangles[i].VertexIndices[j]].Vertex[0];
 			v.Pos.Y = vertices[triangles[i].VertexIndices[j]].Vertex[1];
 			v.Pos.Z = vertices[triangles[i].VertexIndices[j]].Vertex[2];
@@ -370,6 +454,7 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 				s32 boneid = vertices[triangles[i].VertexIndices[j]].BoneID;
 				if (boneid>=0 && boneid<(s32)Joints.size())
 					Joints[boneid].VertexIds.push_back(Vertices.size());
+
 				Vertices.push_back(v);
 				index = Vertices.size() - 1;
 			}
@@ -444,13 +529,28 @@ IMesh* CAnimatedMeshMS3D::getMesh(s32 frame, s32 detailLevel, s32 startFrameLoop
 
 void CAnimatedMeshMS3D::getKeyframeData(core::array<SKeyframe>& keys, f32 time, core::vector3df& outdata)
 {
-	for (s32 i=0; i<(s32)keys.size()-1; ++i)
+
+	if (keys.size())
 	{
-		if (keys[i].timeindex <= time && keys[i+1].timeindex >= time)
+		if (time < keys[0].timeindex)
 		{
-			f32 interpolate = (time - keys[i].timeindex)/(keys[i+1].timeindex - keys[i].timeindex);
-			outdata = keys[i].data + ((keys[i+1].data - keys[i].data) * interpolate);
+			outdata = keys[0].data;
 			return;
+		}
+		if (time > keys[keys.size()-1].timeindex)
+		{
+			outdata = keys[keys.size()-1].data;
+			return;
+		}
+
+		for (s32 i=0; i<(s32)keys.size()-1; ++i)
+		{
+			if (keys[i].timeindex <= time && keys[i+1].timeindex >= time)
+			{
+				f32 interpolate = (time - keys[i].timeindex)/(keys[i+1].timeindex - keys[i].timeindex);
+				outdata = keys[i].data + ((keys[i+1].data - keys[i].data) * interpolate);
+				return;
+			}
 		}
 	}
 }
@@ -460,7 +560,7 @@ void CAnimatedMeshMS3D::getKeyframeData(core::array<SKeyframe>& keys, f32 time, 
 //! mesh based on a frame time.
 core::matrix4* CAnimatedMeshMS3D::getMatrixOfJoint(s32 jointNumber, s32 frame)
 {
-	if (!HasAnimation || jointNumber < 0 || jointNumber >= (s32)Joints.size())
+	if (jointNumber < 0 || jointNumber >= (s32)Joints.size())
 		return 0;
 
 	animate(frame);
@@ -665,17 +765,13 @@ core::aabbox3d<f32>& CAnimatedMeshMS3D::SMS3DMeshBuffer::getBoundingBox()
 	return *BoundingBox; 
 } 
 
-//! returns which type of vertex data is stored. 
-video::E_VERTEX_TYPE CAnimatedMeshMS3D::SMS3DMeshBuffer::getVertexType() const 
-{ 
-	return video::EVT_STANDARD; 
-} 
-
-
-
-
-
+//! returns which type of vertex data is stored.
+video::E_VERTEX_TYPE CAnimatedMeshMS3D::SMS3DMeshBuffer::getVertexType() const
+{
+	return video::EVT_STANDARD;
+}
 
 } // end namespace scene
 } // end namespace irr
+
 

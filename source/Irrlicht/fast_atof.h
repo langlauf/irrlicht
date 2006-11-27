@@ -6,7 +6,7 @@
 #define __FAST_A_TO_F_H_INCLUDED__
 
 #include <stdlib.h>
-#include <math.h>
+#include "irrMath.h"
 
 namespace irr
 {
@@ -35,7 +35,7 @@ const float fast_atof_table[] =	{
 //! Provides a fast function for converting a string into a float,
 //! about 6 times faster than atof in win32.
 // If you find any bugs, please send them to me, niko (at) irrlicht3d.org.
-inline char* fast_atof_move(char* c, float& out)
+inline const char* fast_atof_move( const char* c, float& out)
 {
 	bool inv = false;
 	char *t;

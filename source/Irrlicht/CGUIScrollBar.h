@@ -38,11 +38,18 @@ namespace gui
 		//! sets the maximum value of the scrollbar. must be > 0
 		virtual void setMax(s32 max);
 
+		//! sets the small step value
+		virtual void setSmallStep(s32 step);
+
 		//! gets the current position of the scrollbar
 		virtual s32 getPos();
-		
+
+		//! updates the rectangle
+		virtual void updateAbsolutePosition();
+
 	private:
 
+		void refreshControls();
 		void setPosFromMousePos(s32 x, s32 y);
 
 		IGUIButton* UpButton;

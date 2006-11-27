@@ -40,12 +40,13 @@ CCameraSceneNode::CCameraSceneNode(ISceneNode* parent, ISceneManager* mgr, s32 i
 	video::IVideoDriver* d = mgr->getVideoDriver();
 	if (d)
 	{
-		screenDim.Width = (f32)d->getScreenSize().Width;
-		screenDim.Height = (f32)d->getScreenSize().Height;
+		screenDim.Width = (f32)d->getCurrentRenderTargetSize().Width;
+		screenDim.Height = (f32)d->getCurrentRenderTargetSize().Height;
 		Aspect = screenDim.Width / screenDim.Height;
 	}
 
 	recalculateProjectionMatrix();
+	recalculateViewArea();
 }
 
 
@@ -102,7 +103,7 @@ const core::matrix4& CCameraSceneNode::getViewMatrix()
 //! It is possible to send mouse and key events to the camera. Most cameras
 //! may ignore this input, but camera scene nodes which are created for 
 //! example with scene::ISceneManager::addMayaCameraSceneNode or
-//! scene::ISceneManager::addMeshViewerCameraSceneNode, may want to get this input
+//! scene::ISceneManager::addFPSCameraSceneNode, may want to get this input
 //! for changing their position, look at target or whatever. 
 bool CCameraSceneNode::OnEvent(SEvent event)
 {
@@ -206,8 +207,8 @@ void CCameraSceneNode::OnPreRender()
 
 	if (SceneManager->getActiveCamera() == this)
 	{
-		screenDim.Width = (f32)driver->getScreenSize().Width;
-		screenDim.Height = (f32)driver->getScreenSize().Height;
+		screenDim.Width = (f32)driver->getCurrentRenderTargetSize().Width;
+		screenDim.Height = (f32)driver->getCurrentRenderTargetSize().Height;
 
 		driver->setTransform(video::ETS_PROJECTION, Projection);
 
@@ -229,7 +230,7 @@ void CCameraSceneNode::OnPreRender()
 		View.buildCameraLookAtMatrixLH(pos, Target, up);
 		recalculateViewArea();
 
-		SceneManager->registerNodeForRendering(this, ESNRP_LIGHT_AND_CAMERA);
+		SceneManager->registerNodeForRendering(this, ESNRP_CAMERA);
 	}
 
 	if (IsVisible)

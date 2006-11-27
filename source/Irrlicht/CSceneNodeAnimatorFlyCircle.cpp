@@ -10,12 +10,13 @@ namespace scene
 {
 
 //! constructor
-CSceneNodeAnimatorFlyCircle::CSceneNodeAnimatorFlyCircle(u32 time, const core::vector3df& center, f32 radius, f32 speed)
-: Radius(radius), Center(center), Speed(speed), StartTime(time)
+CSceneNodeAnimatorFlyCircle::CSceneNodeAnimatorFlyCircle(u32 time, const core::vector3df& center, f32 radius, f32 speed, const core::vector3df& direction)
+: Radius(radius), Center(center), Speed(speed), StartTime(time), Direction ( direction )
 {
 	#ifdef _DEBUG
 	setDebugName("CSceneNodeAnimatorFlyCircle");
 	#endif
+	Direction.normalize();
 }
 
 
@@ -30,10 +31,16 @@ CSceneNodeAnimatorFlyCircle::~CSceneNodeAnimatorFlyCircle()
 //! animates a scene node
 void CSceneNodeAnimatorFlyCircle::animateNode(ISceneNode* node, u32 timeMs)
 {
-	f32 t = (timeMs-StartTime) * Speed;
+	if (node)
+	{
+		f32 t = (timeMs-StartTime) * Speed;
 
-	core::vector3df circle(Radius * (f32)sin(t), 0, Radius * (f32)cos(t));
-	node->setPosition(Center + circle);
+		core::vector3df circle(Radius * sinf(t), 0, Radius * cosf(t));
+
+		circle = circle.crossProduct ( Direction );
+
+		node->setPosition(Center + circle);
+	}
 }
 
 
@@ -43,7 +50,9 @@ void CSceneNodeAnimatorFlyCircle::serializeAttributes(io::IAttributes* out, io::
 	out->addVector3d("Center", Center);
 	out->addFloat("Radius", Radius);
 	out->addFloat("Speed", Speed);
+	out->addVector3d("Direction", Direction);
 }
+
 
 //! Reads attributes of the scene node animator.
 void CSceneNodeAnimatorFlyCircle::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options)
@@ -51,6 +60,12 @@ void CSceneNodeAnimatorFlyCircle::deserializeAttributes(io::IAttributes* in, io:
 	Center = in->getAttributeAsVector3d("Center");
 	Radius = in->getAttributeAsFloat("Radius");
 	Speed = in->getAttributeAsFloat("Speed");
+	Direction = in->getAttributeAsVector3d("Direction");
+	
+	if (Direction.equals(core::vector3df(0,0,0)))
+		Direction.set(0,1,0); // irrlicht 1.1 backwards compatibility
+	else
+		Direction.normalize();
 }
 
 

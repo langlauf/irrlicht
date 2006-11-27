@@ -41,11 +41,11 @@ namespace scene
 		//! returns pointer to a mesh buffer
 		virtual IMeshBuffer* getMeshBuffer(s32 nr);
 
-		 //! returns the material of this meshbuffer
-        virtual const video::SMaterial& getMaterial() const;
+		//! returns the material of this meshbuffer
+		virtual const video::SMaterial& getMaterial() const;
 
-		 //! returns the material of this meshbuffer
-        virtual video::SMaterial& getMaterial();
+		//! returns the material of this meshbuffer
+		virtual video::SMaterial& getMaterial();
 
 		//! returns pointer to vertices
 		virtual const void* getVertices() const; 

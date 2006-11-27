@@ -2,9 +2,8 @@
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
-#include <cstring>
-#include <cctype>
-#include <iostream>
+#include <string.h>
+#include <ctype.h>
 
 #include "COBJMeshFileLoader.h"
 #include "SMeshBuffer.h"
@@ -103,6 +102,7 @@ IAnimatedMesh* COBJMeshFileLoader::createMesh(io::IReadFile* file)
 
 	// Process obj information
 	c8* pBufPtr = pBuf;
+	SObjMtl *pUseMtl=0;
 	while(pBufPtr && (pBufPtr-pBuf<filesize))
 	{
 		switch(pBufPtr[0])
@@ -191,7 +191,10 @@ IAnimatedMesh* COBJMeshFileLoader::createMesh(io::IReadFile* file)
 			// get name of material
 			pBufPtr = goAndCopyNextWord(wordBuffer, pBufPtr, WORD_BUFFER_LENGTH, pBufEnd);
 			// retrieve the material
-			pCurrMtl = findMtl( wordBuffer );
+			pUseMtl = findMtl( wordBuffer );
+			// only change material if we found it
+			if (pUseMtl)
+				pCurrMtl = pUseMtl;
 			pBufPtr = goNextLine(pBufPtr, pBufEnd);
 			break;
 
@@ -271,7 +274,7 @@ IAnimatedMesh* COBJMeshFileLoader::createMesh(io::IReadFile* file)
 	// Combine all the groups (meshbuffers) into the mesh
 	for ( u32 m = 0; m < materials.size(); ++m )
 	{
-		if ( materials[m]->pMeshbuffer->getIndices() > 0 )
+		if ( materials[m]->pMeshbuffer->getIndexCount() > 0 )
 		{
 			materials[m]->pMeshbuffer->recalculateBoundingBox();
 			Mesh->addMeshBuffer( materials[m]->pMeshbuffer );
@@ -324,9 +327,9 @@ void COBJMeshFileLoader::readMTL(const c8* pFileName, core::stringc relPath)
 	SObjMtl* pCurrMaterial = 0;
 
 	c8* pBufPtr = pBuf;
-	while(pBufPtr && (pBufPtr-pBuf<=filesize))
+	while(pBufPtr && (pBufPtr-pBuf<filesize))
 	{
-		switch(pBufPtr[0])
+		switch(*pBufPtr)
 		{
 		case 'n':               // newmtl
 			{
@@ -394,6 +397,11 @@ void COBJMeshFileLoader::readMTL(const c8* pFileName, core::stringc relPath)
 				case 'a':		// Ka = ambience
 					{
 						pBufPtr=readColor(pBufPtr, pCurrMaterial->pMeshbuffer->Material.AmbientColor, pBufEnd);
+					}
+					break;
+				case 'e':		// Ke = emissive
+					{
+						pBufPtr=readColor(pBufPtr, pCurrMaterial->pMeshbuffer->Material.EmissiveColor, pBufEnd);
 					}
 					break;
 
@@ -518,11 +526,11 @@ c8* COBJMeshFileLoader::readColor(c8* pBufPtr, video::SColor& color, const c8* p
 
 	color.setAlpha(255);
 	pBufPtr = goAndCopyNextWord(colStr,   pBufPtr, COLOR_BUFFER_LENGTH, pBufEnd);
-	color.setRed((s32)(255-core::fast_atof(colStr) * 255));
+	color.setRed((s32)(core::fast_atof(colStr) * 255));
 	pBufPtr = goAndCopyNextWord(colStr,   pBufPtr, COLOR_BUFFER_LENGTH, pBufEnd);
-	color.setGreen((s32)(255-core::fast_atof(colStr) * 255));
+	color.setGreen((s32)(core::fast_atof(colStr) * 255));
 	pBufPtr = goAndCopyNextWord(colStr,   pBufPtr, COLOR_BUFFER_LENGTH, pBufEnd);
-	color.setBlue((s32)(255-core::fast_atof(colStr) * 255));
+	color.setBlue((s32)(core::fast_atof(colStr) * 255));
 
 	return goNextLine(pBufPtr, pBufEnd);
 }
@@ -614,27 +622,20 @@ c8* COBJMeshFileLoader::goNextWord(c8* buf, const c8* pBufEnd)
 
 c8* COBJMeshFileLoader::goNextLine(c8* buf, const c8* pBufEnd)
 {
-	// Have to use pointer to pointer in parameter or else string address won't be changed
-	s32 i=0;
 	// look for newline characters
-	while(buf[i])
+	while(*buf)
 	{
-		if ( &(buf[i]) == pBufEnd )
-		{
-			// end of buffer check
+		// end of buffer check
+		if ( buf == pBufEnd )
 			return 0;
-		}
-		if (buf[i]=='\n' || buf[i]=='\r')
-		{
-			// found it, so skip pass it
+		// found it, so leave
+		if (*buf=='\n' || *buf=='\r')
 			break;
-		}
-
-		++i;
+		++buf;
 	}
-	while (isspace(buf[++i])) ;
+	while (isspace((u8)*++buf)) /* skip */ ;
 
-	return &buf[i];
+	return buf;
 }
 
 

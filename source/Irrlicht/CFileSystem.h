@@ -15,6 +15,7 @@ namespace io
 
 	class CZipReader;
 	class CPakReader;
+	class CUnZipReader;
 	const s32 FILE_SYSTEM_MAX_PATH = 1024;
 
 /*!
@@ -38,7 +39,8 @@ public:
 
 	//! adds an zip archive to the filesystem
 	virtual bool addZipFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true);
-	
+	virtual bool addUnZipFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true);
+
 	//! adds an pak archive to the filesystem
 	virtual bool addPakFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true);
 
@@ -49,6 +51,9 @@ public:
 	//! The string is operating system dependent. Under Windows it will look
 	//! like this: "drive:\directory\sudirectory\"
 	virtual bool changeWorkingDirectoryTo(const c8* newDirectory);
+
+	//! Converts a relative path to an absolute (unique) path, resolving symbolic links
+	virtual irr::core::stringc getAbsolutePath(irr::core::stringc &filename);
 
 	//! Creates a list of files and directories in the current working directory 
 	//! and returns it.
@@ -82,6 +87,7 @@ private:
 
 	core::array<CZipReader*> ZipFileSystems;
 	core::array<CPakReader*> PakFileSystems;
+	core::array<CUnZipReader*> UnZipFileSystems;
 	c8 WorkingDirectory[FILE_SYSTEM_MAX_PATH];
 };
 

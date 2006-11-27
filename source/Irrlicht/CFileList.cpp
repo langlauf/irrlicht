@@ -11,13 +11,13 @@ namespace io
 {
 
 #if (defined(LINUX) || defined(MACOSX))
-#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <sys/types.h> 
-#include <sys/stat.h> 
+#include <sys/types.h>
+#include <dirent.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #endif
 
@@ -62,58 +62,67 @@ CFileList::CFileList()
 	//entry.isDirectory = true;
 	//Files.push_back(entry);
 	#endif
-	
+
 	// --------------------------------------------
 	// Linux version
 	#if (defined(LINUX) || defined(MACOSX))
 
-	struct dirent **namelist; 
-	struct stat	buf; 
+	FileEntry entry;
 
-	FileEntry entry; 
-
-	// Add default parent - even when at /, this is available 
-	entry.Name = ".."; 
-	entry.Size = 0; 
-	entry.isDirectory = true; 
+	// Add default parent - even when at /, this is available
+	entry.Name = "..";
+	entry.Size = 0;
+	entry.isDirectory = true;
 	Files.push_back(entry);
 
-	Path = getcwd(NULL,0); 
-
-	s32	n =	scandir(".", &namelist,	0, alphasort); 
-
-	if (n >= 0) 
-	{ 
-		while(n--) 
-		{ 
-			if((strcmp(namelist[n]->d_name,	".")==0) || 
-			   (strcmp(namelist[n]->d_name, "..")==0)) 
-			{ 
-				// Only	add	entries	that aren't	.. or .	since they are already handled 
-				free(namelist[n]); 
-				continue; 
-			} 
-
-			entry.Name = namelist[n]->d_name; 
-
-			if (stat(namelist[n]->d_name, &buf)==0) 
-			{ 
-				entry.Size = buf.st_size; 
-				entry.isDirectory =	S_ISDIR(buf.st_mode); 
-			} 
-            else 
-			{ 
-				entry.Size = 0;	
-				entry.isDirectory =	namelist[n]->d_type	== DT_DIR; 
-			} 
-			
-			Files.push_back(entry);	
-			free(namelist[n]); 
-		} 
-
-		free(namelist);	
+	// getting the CWD is rather complex as we do not know the size
+	// so try it until the call was successful
+	// Note that neither the first nor the second parameter may be 0 according to POSIX
+	u32 pathSize=256;
+	char *tmpPath = new char[pathSize];
+	while ((pathSize < (1<<16)) && !(getcwd(tmpPath,pathSize)))
+	{
+		delete [] tmpPath;
+		pathSize *= 2;
+		tmpPath = new char[pathSize];
 	}
+	if (!tmpPath)
+		return;
+	Path = tmpPath;
+	delete [] tmpPath;
+	// We use the POSIX compliant methods instead of scandir
+	DIR* dirHandle=opendir(Path.c_str());
+	if (!dirHandle)
+		return;
+
+	struct dirent *dirEntry;
+	while ((dirEntry=readdir(dirHandle)))
+	{
+		if((strcmp(dirEntry->d_name, ".")==0) ||
+		   (strcmp(dirEntry->d_name, "..")==0))
+			continue;
+		entry.Name = dirEntry->d_name;
+		entry.Size = 0;
+		entry.isDirectory = false;
+		struct stat buf;
+		if (stat(dirEntry->d_name, &buf)==0)
+		{
+			entry.Size = buf.st_size;
+			entry.isDirectory = S_ISDIR(buf.st_mode);
+		}
+		#if !defined(__sun__) && !defined(__CYGWIN__)
+		// only available on some systems
+		else
+		{
+			entry.isDirectory = dirEntry->d_type == DT_DIR;
+		}
+		#endif
+		Files.push_back(entry);
+	}
+	closedir(dirHandle);
 	#endif
+	// sort the list on all platforms
+	Files.sort();
 }
 
 

@@ -12,34 +12,45 @@
 #ifdef _IRR_COMPILE_WITH_OPENGL_
 
 #ifdef _IRR_WINDOWS_
+	// include windows headers for HWND
 	#define WIN32_LEAN_AND_MEAN
 	#include <windows.h>
 	#include <GL/gl.h>
 	#include <GL/glu.h>
-#else // _IRR_WINDOWS_
-	#ifdef MACOSX
-		#include <OpenGL/gl.h>
-		#include <OpenGL/glext.h>
-		#include <OpenGL/glu.h>
-	#else
-		#include <GL/gl.h>
-		#include <GL/glx.h>
-		#include <GL/glu.h>
-	#endif // MACOSX
-#endif // _IRR_WINDOWS_
+	#include "glext.h"
+	#pragma comment(lib, "OpenGL32.lib")
+	#pragma comment(lib, "GLu32.lib")
+#elif defined(MACOSX)
+	#include <OpenGL/gl.h>
+	#include <OpenGL/glu.h>
+	#include <OpenGL/glext.h>
+#else
+	#if defined(_IRR_OPENGL_USE_EXTPOINTER_)
+		#define GL_GLEXT_LEGACY 1
+	#endif
+	#include <GL/gl.h>
+	#if defined(_IRR_OPENGL_USE_EXTPOINTER_)
+		#include "glext.h"
+	#endif
+	#include <GL/glu.h>
+#endif
+
 
 namespace irr
 {
 namespace video
 {
 
+class COpenGLDriver;
 //! OpenGL texture.
 class COpenGLTexture : public ITexture
 {
 public:
 
 	//! constructor
-	COpenGLTexture(IImage* surface, bool generateMipLevels, const char* name);
+	COpenGLTexture(IImage* surface, bool generateMipLevels, const char* name, COpenGLDriver* driver=0);
+    //! FrameBufferObject constructor
+	COpenGLTexture(const core::dimension2d<s32>& size, bool extPackedDepthStencilSupported, const char* name, COpenGLDriver* driver=0);
 
 	//! destructor
 	virtual ~COpenGLTexture();
@@ -60,7 +71,7 @@ public:
 	virtual E_DRIVER_TYPE getDriverType();
 
 	//! returns color format of texture
-	virtual ECOLOR_FORMAT getColorFormat();
+	virtual ECOLOR_FORMAT getColorFormat() const;
 
 	//! returns pitch of texture (in bytes)
 	virtual s32 getPitch();
@@ -75,29 +86,44 @@ public:
 	//! locking and modifying the texture
 	virtual void regenerateMipMapLevels();
 
+	//! Is it a FrameBufferObject?
+	bool isFrameBufferObject();
+
+	//! Bind FrameBufferObject (valid only if isFrameBufferObject() returns true).
+	void bindFrameBufferObject();
+
+	//! Unbind FrameBufferObject (valid only if isFrameBufferObject() returns true).
+	void unbindFrameBufferObject();
+
 private:
 
 	void getImageData(IImage* image);
 
 	//! copies the the texture into an open gl texture.
-	void copyTexture();
+	//! \param: newTexture is true if method is called from a newly created texture for the first time. Otherwise call with false to improve memory handling.
+	void copyTexture(bool newTexture=true);
 
 	//! returns the size of a texture which would be the optimize size for rendering it
 	inline s32 getTextureSizeFromSurfaceSize(s32 size);
-
-	//! test if an error occurred, prints the problem, and returns
-	//! true if an error happened
-	inline bool testError();
 
 	core::dimension2d<s32> ImageSize;
 	core::dimension2d<s32> OriginalSize;
 	s32 Pitch;
 	bool SurfaceHasSameSize; // true if Surface has the same dimension as texture.
-	c8* ImageData;
+	u8* ImageData;
 	ECOLOR_FORMAT ColorFormat;
+	COpenGLDriver* Driver;
 
 	GLuint TextureName;
+	GLint InternalFormat;
+	GLenum PixelFormat;
+	GLenum PixelType;
 	bool HasMipMaps;
+	bool AutomaticMipmapUpdate;
+
+	GLuint ColorFrameBuffer; // for FBO path
+	GLuint DepthRenderBuffer; // for FBO path
+	GLuint StencilRenderBuffer; // for FBO path
 };
 
 
@@ -106,3 +132,4 @@ private:
 
 #endif
 #endif // _IRR_COMPILE_WITH_OPENGL_
+

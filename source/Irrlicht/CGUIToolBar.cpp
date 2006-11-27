@@ -32,8 +32,7 @@ CGUIToolBar::CGUIToolBar(IGUIEnvironment* environment, IGUIElement* parent, s32 
 		parentwidth = Parent->getAbsolutePosition().getWidth();
 
 		const core::list<IGUIElement*>& children = parent->getChildren();
-        core::list<IGUIElement*>::Iterator it = children.begin();
-
+		core::list<IGUIElement*>::Iterator it = children.begin();
 		for (; it != children.end(); ++it)
 		{
 			core::rect<s32> r = (*it)->getAbsolutePosition();
@@ -45,7 +44,7 @@ CGUIToolBar::CGUIToolBar(IGUIEnvironment* environment, IGUIElement* parent, s32 
 
 	RelativeRect.UpperLeftCorner.X = 0;
 	RelativeRect.UpperLeftCorner.Y = y;
-	s32 height = 30;
+	s32 height = Environment->getSkin()->getSize ( EGDS_MENU_HEIGHT );
 
 	/*IGUISkin* skin = Environment->getSkin();
 	IGUIFont* font = skin->getFont();

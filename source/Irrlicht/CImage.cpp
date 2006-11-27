@@ -4,7 +4,7 @@
 
 #include "CImage.h"
 #include "os.h"
-#include <memory.h>
+#include <string.h>
 #include <stdio.h>
 #include "SoftwareDriver2_helper.h"
 
@@ -17,11 +17,6 @@ namespace irr
 		s32 x1;
 		s32 y1;
 	};
-
-	inline s32 s32_clamp (s32 value, s32 low, s32 high) 
-	{
-		return s32_min (s32_max(value,low), high);
-	}
 
 	inline void intersect ( AbsRectangle &dest, const AbsRectangle& a, const AbsRectangle& b)
 	{
@@ -456,7 +451,7 @@ static void RenderLine16_Blend (	video::IImage *t,
 */
 static void executeBlit_TextureCopy_x_to_x ( const SBlitJob * job )
 {
-	void *src = (void*) job->src;
+	const void *src = (void*) job->src;
 	void *dst = (void*) job->dst;
 
 	const u32 widthPitch = job->width * job->dstPixelMul;
@@ -469,18 +464,23 @@ static void executeBlit_TextureCopy_x_to_x ( const SBlitJob * job )
 	}
 }
 
+
 /*!
 */
 static void executeBlit_TextureCopy_32_to_16 ( const SBlitJob * job )
 {
-	u32 *src = (u32*) job->src;
+	const u32 *src = (u32*) job->src;
 	u16 *dst = (u16*) job->dst;
+
+	u32 s;
 
 	for ( s32 dy = 0; dy != job->height; ++dy )
 	{
 		for ( s32 dx = 0; dx != job->width; ++dx )
 		{
-			dst[dx] = video::A8R8G8B8toA1R5G5B5 ( src[dx] );
+			//16 bit Blitter depends on pre-multiplied color
+			s = PixelLerp32 ( src[dx] | 0xFF000000, extractAlpha ( src[dx] ) );
+			dst[dx] = video::A8R8G8B8toA1R5G5B5 ( s );
 		}
 
 		src = (u32*) ( (u8*) (src) + job->srcPitch );
@@ -492,7 +492,7 @@ static void executeBlit_TextureCopy_32_to_16 ( const SBlitJob * job )
 */
 static void executeBlit_TextureCopy_24_to_16 ( const SBlitJob * job )
 {
-	void *src = (void*) job->src;
+	const void *src = (void*) job->src;
 	u16 *dst = (u16*) job->dst;
 
 	for ( s32 dy = 0; dy != job->height; ++dy )
@@ -515,7 +515,7 @@ static void executeBlit_TextureCopy_24_to_16 ( const SBlitJob * job )
 */
 static void executeBlit_TextureCopy_16_to_32 ( const SBlitJob * job )
 {
-	u16 *src = (u16*) job->src;
+	const u16 *src = (u16*) job->src;
 	u32 *dst = (u32*) job->dst;
 
 	for ( s32 dy = 0; dy != job->height; ++dy )
@@ -543,7 +543,7 @@ static void executeBlit_TextureCopy_24_to_32 ( const SBlitJob * job )
 
 		for ( s32 dx = 0; dx != job->width; ++dx )
 		{
-			dst[dx] = s[0] << 16 | s[1] << 8 | s[2];
+			dst[dx] = 0xFF000000 | s[0] << 16 | s[1] << 8 | s[2];
 			s += 3;
 		}
 
@@ -557,17 +557,22 @@ static void executeBlit_TextureCopy_24_to_32 ( const SBlitJob * job )
 */
 static void executeBlit_TextureBlend_16_to_16 ( const SBlitJob * job )
 {
+	u32 dx;
+	s32 dy;
+
 	u32 *src = (u32*) job->src;
 	u32 *dst = (u32*) job->dst;
 
-	u32 rdx = job->width >> 1;
-	u32 off = job->width & 1 ? (job->width - 1 ) : 0;
+
+	const u32 rdx = job->width >> 1;
+	const u32 off = if_c_a_else_b ( job->width & 1 ,job->width - 1, 0 );
+
 
 	if ( 0 == off )
 	{
-		for ( s32 dy = 0; dy != job->height; ++dy )
+		for ( dy = 0; dy != job->height; ++dy )
 		{
-			for ( u32 dx = 0; dx != rdx; ++dx )
+			for ( dx = 0; dx != rdx; ++dx )
 			{
 				dst[dx] = PixelBlend16_simd ( dst[dx], src[dx] );
 			}
@@ -579,9 +584,9 @@ static void executeBlit_TextureBlend_16_to_16 ( const SBlitJob * job )
 	}
 	else
 	{
-		for ( s32 dy = 0; dy != job->height; ++dy )
+		for ( dy = 0; dy != job->height; ++dy )
 		{
-			for ( u32 dx = 0; dx != rdx; ++dx )
+			for ( dx = 0; dx != rdx; ++dx )
 			{
 				dst[dx] = PixelBlend16_simd ( dst[dx], src[dx] );
 			}
@@ -625,7 +630,7 @@ static void executeBlit_TextureBlendColor_16_to_16 ( const SBlitJob * job )
 	{
 		for ( s32 dx = 0; dx != job->width; ++dx )
 		{
-			dst[dx] = PixelBlend16 ( dst[dx], PixelMul16 ( src[dx], blend ) );
+			dst[dx] = PixelBlend16 ( dst[dx], PixelMul16_2 ( src[dx], blend ) );
 		}
 		src = (u16*) ( (u8*) (src) + job->srcPitch );
 		dst = (u16*) ( (u8*) (dst) + job->dstPitch );
@@ -644,7 +649,7 @@ static void executeBlit_TextureBlendColor_32_to_32 ( const SBlitJob * job )
 	{
 		for ( s32 dx = 0; dx != job->width; ++dx )
 		{
-			dst[dx] = PixelBlend32 ( dst[dx], PixelMul32 ( src[dx], job->argb ) );
+			dst[dx] = PixelBlend32 ( dst[dx], PixelMul32_2 ( src[dx], job->argb ) );
 		}
 		src = (u32*) ( (u8*) (src) + job->srcPitch );
 		dst = (u32*) ( (u8*) (dst) + job->dstPitch );
@@ -657,7 +662,7 @@ static void executeBlit_Color_16_to_16 ( const SBlitJob * job )
 {
 	u16 *dst = (u16*) job->dst;
 
-	u32 c0 = video::A8R8G8B8toA1R5G5B5 ( job->argb );
+	u16 c0 = video::A8R8G8B8toA1R5G5B5 ( job->argb );
 	u32 c = c0 | c0 << 16;
 
 	if ( 0 == (job->srcPitch & 3 ) )
@@ -701,8 +706,8 @@ static void executeBlit_ColorAlpha_16_to_16 ( const SBlitJob * job )
 {
 	u16 *dst = (u16*) job->dst;
 
-	u32 alpha = extractAlpha ( job->argb ) >> 3;
-	u32 src = video::A8R8G8B8toA1R5G5B5 ( job->argb );
+	const u32 alpha = extractAlpha ( job->argb ) >> 3;
+	const u32 src = video::A8R8G8B8toA1R5G5B5 ( job->argb );
 
 	for ( s32 dy = 0; dy != job->height; ++dy )
 	{
@@ -720,8 +725,8 @@ static void executeBlit_ColorAlpha_32_to_32 ( const SBlitJob * job )
 {
 	u32 *dst = (u32*) job->dst;
 
-	u32 alpha = extractAlpha ( job->argb );
-	u32 src = job->argb;
+	const u32 alpha = extractAlpha ( job->argb );
+	const u32 src = job->argb;
 
 	for ( s32 dy = 0; dy != job->height; ++dy )
 	{
@@ -735,15 +740,17 @@ static void executeBlit_ColorAlpha_32_to_32 ( const SBlitJob * job )
 
 /*!
 */
-static tExecuteBlit getBlitter ( eBlitter operation,video::IImage * dest,video::IImage * source )
+static tExecuteBlit getBlitter ( eBlitter operation,const video::IImage * dest,const video::IImage * source )
 {
-	video::ECOLOR_FORMAT sourceFormat = (video::ECOLOR_FORMAT)-1;
-	video::ECOLOR_FORMAT destFormat = (video::ECOLOR_FORMAT)-1;
+	video::ECOLOR_FORMAT sourceFormat = (video::ECOLOR_FORMAT) -1;
+	video::ECOLOR_FORMAT destFormat = (video::ECOLOR_FORMAT) -1;
 
 	if ( source )
-		sourceFormat = source->getColorFormat();
+		sourceFormat = source->getColorFormat ();
+
 	if ( dest )
-		destFormat = dest->getColorFormat();
+		destFormat = dest->getColorFormat ();
+
 
 	switch ( operation )
 	{
@@ -1131,6 +1138,29 @@ s32 CImage::getBitsPerPixelFromFormat()
 	return 0;
 }
 
+//! sets a pixel
+void CImage::setPixel(s32 x, s32 y, const SColor &color )
+{
+	if (x < 0 || y < 0 || x >= Size.Width || y >= Size.Height)
+		return;
+
+	switch(Format)
+	{
+		case ECF_A1R5G5B5:
+		{
+			u16 * dest = (u16*) ((u8*) Data + ( y * Pitch ) + ( x << 1 ));
+			*dest = video::A8R8G8B8toA1R5G5B5 ( color.color );
+		} break;
+
+		case ECF_A8R8G8B8:
+		{
+			u32 * dest = (u32*) ((u8*) Data + ( y * Pitch ) + ( x << 2 ));
+			*dest = color.color;
+		} break;
+
+	}
+}
+
 
 //! returns a pixel
 SColor CImage::getPixel(s32 x, s32 y)
@@ -1141,11 +1171,11 @@ SColor CImage::getPixel(s32 x, s32 y)
 	switch(Format)
 	{
 	case ECF_A1R5G5B5:
-		return A1R5G5B5toA8R8G8B8(((s16*)Data)[y*Size.Width + x]);
+		return A1R5G5B5toA8R8G8B8(((u16*)Data)[y*Size.Width + x]);
 	case ECF_R5G6B5:
-		return R5G6B5toA8R8G8B8(((s16*)Data)[y*Size.Width + x]);
+		return R5G6B5toA8R8G8B8(((u16*)Data)[y*Size.Width + x]);
 	case ECF_A8R8G8B8:
-		return ((s32*)Data)[y*Size.Width + x];
+		return ((u32*)Data)[y*Size.Width + x];
 	case ECF_R8G8B8:
 		{
 			u8* p = &((u8*)Data)[(y*3)*Size.Width + (x*3)];
@@ -1158,7 +1188,7 @@ SColor CImage::getPixel(s32 x, s32 y)
 
 
 //! returns the color format
-ECOLOR_FORMAT CImage::getColorFormat()
+ECOLOR_FORMAT CImage::getColorFormat() const
 {
 	return Format;
 }
@@ -1189,7 +1219,8 @@ void CImage::copyTo(CImage* target, const core::position2d<s32>& pos, const core
 //! copies this surface into another, using the alpha mask, an cliprect and a color to add with
 void CImage::copyToWithAlpha(CImage* target, const core::position2d<s32>& pos, const core::rect<s32>& sourceRect, const SColor &color, const core::rect<s32>* clipRect)
 {
-	Blit (	BLITTER_TEXTURE_ALPHA_COLOR_BLEND, // color.color == 0xFFFFFFFF ? BLITTER_TEXTURE_ALPHA_BLEND: BLITTER_TEXTURE_ALPHA_COLOR_BLEND,
+	// color blend only necessary on not full spectrum aka. color.color != 0xFFFFFFFF
+	Blit (	color.color == 0xFFFFFFFF ? BLITTER_TEXTURE_ALPHA_BLEND: BLITTER_TEXTURE_ALPHA_COLOR_BLEND,
 			target, clipRect, &pos, this, &sourceRect, color.color );
 }
 
@@ -1308,6 +1339,82 @@ u32 CImage::getPitch()
 {
 	return Pitch;
 }
+
+
+//! get a filtered pixel
+inline SColor CImage::getPixelBox ( s32 x, s32 y, s32 fx, s32 fy, s32 bias )
+{
+	SColor c;
+	s32 a = 0, r = 0, g = 0, b = 0;
+
+	for ( s32 dx = 0; dx != fx; ++dx )
+	{
+		for ( s32 dy = 0; dy != fy; ++dy )
+		{
+			c = getPixel ( x + dx , y + dy );
+
+			a += c.getAlpha ();
+			r += c.getRed();
+			g += c.getGreen();
+			b += c.getBlue();
+		}
+	}
+
+	s32 sdiv = s32_log2(fx * fy);
+
+	a = s32_clamp ( ( a >> sdiv ) + bias, 0, 255 );
+	r = s32_clamp ( ( r >> sdiv ) + bias, 0, 255 );
+	g = s32_clamp ( ( g >> sdiv ) + bias, 0, 255 );
+	b = s32_clamp ( ( b >> sdiv ) + bias, 0, 255 );
+
+	c.set ( a, r, g, b );
+	return c;
+}
+
+
+//! copies this surface into another, scaling it to fit it.
+void CImage::copyToScalingBoxFilter(CImage* target, s32 bias)
+{
+	video::ECOLOR_FORMAT destFormat = target->getColorFormat();
+
+	if (Format != destFormat )
+	{
+		os::Printer::log("Format not equal", ELL_ERROR);
+		return;
+	}
+
+	core::dimension2d<s32> destSize = target->getDimension();
+
+	f32 sourceXStep = (f32) Size.Width;
+	f32 sourceYStep = (f32) Size.Height;
+
+	sourceXStep /= (f32) ( destSize.Width - 0 );
+	sourceYStep /= (f32) ( destSize.Height - 0 );
+
+	s32 fx = irr::core::ceil32 ( sourceXStep );
+	s32 fy = irr::core::ceil32 ( sourceYStep );
+	f32 sx;
+	f32 sy;
+	SColor p;
+
+	sy = 0.f;
+
+	for ( s32 y = 0; y != destSize.Height; ++y )
+	{
+		sx = 0.f;
+		for ( s32 x = 0; x != destSize.Width; ++x )
+		{
+			target->setPixel ( x, y,getPixelBox ( core::floor32 ( sx ), core::floor32 ( sy ), fx, fy, bias ) );
+
+			sx += sourceXStep;
+		}
+		sy += sourceYStep;
+	}
+
+	target->unlock ();
+
+}
+
 
 
 } // end namespace video

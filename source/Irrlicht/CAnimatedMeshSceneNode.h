@@ -63,39 +63,43 @@ namespace scene
 		//! optimal position for minimizing renderstate changes, but can also be used
 		//! to directly modify the material of a scene node.
 		virtual video::SMaterial& getMaterial(s32 i);
-		
+
 		//! returns amount of materials used by this scene node.
 		virtual s32 getMaterialCount();
 
 		//! Creates shadow volume scene node as child of this node
-		//! and returns a pointer to it. 
+		//! and returns a pointer to it.
 		virtual IShadowVolumeSceneNode* addShadowVolumeSceneNode(s32 id,
 			bool zfailmethod=true, f32 infinity=10000.0f);
 
-		//! Returns a pointer to a child node, wich has the same transformation as 
+		//! Returns a pointer to a child node, which has the same transformation as
 		//! the corrsesponding joint, if the mesh in this scene node is a ms3d mesh.
 		virtual ISceneNode* getMS3DJointNode(const c8* jointName);
 
-		//! Returns a pointer to a child node, wich has the same transformation as 
+		//! Returns a pointer to a child node, which has the same transformation as
 		//! the corrsesponding joint, if the mesh in this scene node is a x mesh.
 		virtual ISceneNode* getXJointNode(const c8* jointName);
+
+		//! Returns a pointer to a child node, which has the same transformation as
+		//! the corresponding joint, if the mesh in this scene node is a b3d mesh.
+		virtual ISceneNode* getB3DJointNode(const c8* jointName);
 
 		//! Removes a child from this scene node.
 		//! Implemented here, to be able to remove the shadow properly, if there is one,
 		//! or to remove attached childs.
 		virtual bool removeChild(ISceneNode* child);
 
-		//! Starts a MD2 animation. 
+		//! Starts a MD2 animation.
 		virtual bool setMD2Animation(EMD2_ANIMATION_TYPE anim);
 
-		//! Starts a special MD2 animation. 
+		//! Starts a special MD2 animation.
 		virtual bool setMD2Animation(const c8* animationName);
 
 		//! Returns the current displayed frame number.
 		virtual s32 getFrameNr();
 
 		//! Sets if the scene node should not copy the materials of the mesh but use them in a read only style.
-		/* In this way it is possible to change the materials a mesh causing all mesh scene nodes 
+		/* In this way it is possible to change the materials a mesh causing all mesh scene nodes
 		referencing this mesh to change too. */
 		virtual void setReadOnlyMaterials(bool readonly);
 
@@ -105,6 +109,9 @@ namespace scene
 		//! Sets a new mesh
 		virtual void setMesh(IAnimatedMesh* mesh);
 
+		//! Returns the current mesh
+		virtual IAnimatedMesh* getMesh(void) { return Mesh; }
+
 		//! Writes attributes of the scene node.
 		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0);
 
@@ -113,6 +120,7 @@ namespace scene
 
 		//! Returns type of the scene node
 		virtual ESCENE_NODE_TYPE getType() { return ESNT_ANIMATED_MESH; }
+
 
 	private:
 
@@ -134,6 +142,7 @@ namespace scene
 		IShadowVolumeSceneNode* Shadow;
 
 		core::array<IDummyTransformationSceneNode* > JointChildSceneNodes;
+
 	};
 
 } // end namespace scene

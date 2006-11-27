@@ -54,8 +54,8 @@ namespace gui
 
 	protected:
 
-		bool processKey(SEvent& event);
-		bool processMouse(SEvent& event);
+		bool processKey(const SEvent& event);
+		bool processMouse(const SEvent& event);
 		s32 getCursorPos(s32 x);
 
 		bool MouseMarking;

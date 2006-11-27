@@ -3,7 +3,7 @@
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "C3DSMeshFileLoader.h"
-#include <cstring>
+#include <string.h>
 #include "os.h"
 #include "SMeshBuffer.h"
 #include "SAnimatedMesh.h"
@@ -25,7 +25,7 @@ const u16 C3DS_MESHVERSION = 0x3D3E;
 
 // sub chunks of C3DS_EDIT3DS
 const u16 C3DS_EDIT_MATERIAL = 0xAFFF;
-const u16 C3DS_EDIT_OBJECT	= 0x4000;
+const u16 C3DS_EDIT_OBJECT   = 0x4000;
 
 // sub chunks of C3DS_EDIT_MATERIAL
 const u16 C3DS_MATNAME       = 0xA000; 
@@ -38,7 +38,7 @@ const u16 C3DS_TRANSPARENCY  = 0xA050;
 const u16 C3DS_TWO_SIDE      = 0xA081;
 const u16 C3DS_WIRE          = 0xA085;
 const u16 C3DS_SHADING       = 0xA100;
-const u16 C3DS_MATMAP        = 0xA200;
+const u16 C3DS_MATTEXMAP     = 0xA200;
 const u16 C3DS_MATSPECMAP    = 0xA204;
 const u16 C3DS_MATOPACMAP    = 0xA210;
 const u16 C3DS_MATREFLMAP    = 0xA220;
@@ -55,12 +55,20 @@ const u16 C3DS_OBJTRIMESH    = 0x4100;
 
 // subs of C3DS_OBJTRIMESH
 const u16 C3DS_TRIVERT       = 0x4110;
+const u16 C3DS_POINTFLAGARRAY= 0x4111;
 const u16 C3DS_TRIFACE       = 0x4120;
 const u16 C3DS_TRIFACEMAT    = 0x4130;
 const u16 C3DS_TRIUV         = 0x4140;
 const u16 C3DS_TRISMOOTH     = 0x4150;
 const u16 C3DS_TRIMATRIX     = 0x4160;
 const u16 C3DS_MESHCOLOR     = 0x4165;
+const u16 C3DS_DIRECT_LIGHT  = 0x4600;
+const u16 C3DS_DL_INNER_RANGE= 0x4659;
+const u16 C3DS_DL_OUTER_RANGE= 0x465A;
+const u16 C3DS_DL_MULTIPLIER = 0x465B;
+const u16 C3DS_CAMERA        = 0x4700;
+const u16 C3DS_CAM_SEE_CONE  = 0x4710;
+const u16 C3DS_CAM_RANGES    = 0x4720;
 
 // subs of C3DS_KEYF3DS
 const u16 C3DS_KF_HDR        = 0xB00A;
@@ -148,11 +156,6 @@ IAnimatedMesh* C3DSMeshFileLoader::createMesh(io::IReadFile* file)
 
 	readChunkData(file, data);
 
-#ifdef __BIG_ENDIAN__
-	data.header.id = OSReadSwapInt16(&data.header.id,0);
-	data.header.length = OSReadSwapInt32(&data.header.length,0);
-#endif
-
 	if (data.header.id != C3DS_MAIN3DS )
 		return false;
 
@@ -173,7 +176,17 @@ IAnimatedMesh* C3DSMeshFileLoader::createMesh(io::IReadFile* file)
 		am->Type = EAMT_3DS;
 
 		for (s32 i=0; i<Mesh->getMeshBufferCount(); ++i)
-			((SMeshBuffer*)Mesh->getMeshBuffer(i))->recalculateBoundingBox();
+		{
+			SMeshBuffer* mb = ((SMeshBuffer*)Mesh->getMeshBuffer(i));
+			// drop empty buffers
+			if (mb->getIndexCount() == 0 || mb->getVertexCount() == 0)
+			{
+				Mesh->MeshBuffers.erase(i--);
+				mb->drop();
+			}
+			else
+				mb->recalculateBoundingBox();
+		}
 
 		Mesh->recalculateBoundingBox();
 
@@ -205,6 +218,9 @@ bool C3DSMeshFileLoader::readPercentageChunk(io::IReadFile* file,
 	{
 		// read short
 		file->read(&intpercentage, 2);
+#ifdef __BIG_ENDIAN__
+		intpercentage = os::Byteswap::byteswap(intpercentage);
+#endif
 		percentage=intpercentage/100.0f;
 		data.read += 2;
 	}
@@ -213,6 +229,9 @@ bool C3DSMeshFileLoader::readPercentageChunk(io::IReadFile* file,
 	{
 		// read float
 		file->read(&percentage, 4);
+#ifdef __BIG_ENDIAN__
+		percentage = os::Byteswap::byteswap(percentage);
+#endif
 		data.read += 4;
 	}
 	break;
@@ -255,6 +274,11 @@ bool C3DSMeshFileLoader::readColorChunk(io::IReadFile* file, ChunkData* chunk,
 	{
 		// read float data
 		file->read(cf, sizeof(cf));
+#ifdef __BIG_ENDIAN__
+		cf[0] = os::Byteswap::byteswap(cf[0]);
+		cf[1] = os::Byteswap::byteswap(cf[1]);
+		cf[2] = os::Byteswap::byteswap(cf[2]);
+#endif
 		out.set(255, (s32)(cf[0]*255.0f), (s32)(cf[1]*255.0f), (s32)(cf[2]*255.0f)); 
 		data.read += sizeof(cf);
 	}
@@ -313,10 +337,13 @@ bool C3DSMeshFileLoader::readMaterialChunk(io::IReadFile* file, ChunkData* paren
 			{
 				float percentage;
 				readPercentageChunk(file, &data, percentage);
-				if (percentage>0.0f) {
+				if (percentage>0.0f)
+				{
 					CurrentMaterial.Material.MaterialTypeParam=percentage;
 					CurrentMaterial.Material.MaterialType=video::EMT_TRANSPARENT_VERTEX_ALPHA;
-				} else {
+				}
+				else
+				{
 					CurrentMaterial.Material.MaterialType=video::EMT_SOLID;
 				}
 			}
@@ -331,7 +358,11 @@ bool C3DSMeshFileLoader::readMaterialChunk(io::IReadFile* file, ChunkData* paren
 			{
 				s16 flags;
 				file->read(&flags, 2);
-				switch (flags) {
+#ifdef __BIG_ENDIAN__
+				flags = os::Byteswap::byteswap(flags);
+#endif
+				switch (flags)
+				{
 					case 0:
 						CurrentMaterial.Material.Wireframe=true;
 						break;
@@ -350,16 +381,18 @@ bool C3DSMeshFileLoader::readMaterialChunk(io::IReadFile* file, ChunkData* paren
 				data.read += data.header.length - data.read;
 			}
 			break;
-		case C3DS_MATMAP:
+		case C3DS_MATTEXMAP:
 		case C3DS_MATSPECMAP:
 		case C3DS_MATOPACMAP:
 		case C3DS_MATREFLMAP:
 		case C3DS_MATBUMPMAP:
 			{
-				f32 percentage=0;
 				matSection=data.header.id;
+#if 0 // Should contain a percentage chunk, but does not work with the meshes
+				f32 percentage=0;
 				if (matSection!=C3DS_MATREFLMAP)
 					readPercentageChunk(file, &data, percentage);
+#endif
 			}
 			break;
 		case C3DS_MATMAPFILE:
@@ -367,23 +400,16 @@ bool C3DSMeshFileLoader::readMaterialChunk(io::IReadFile* file, ChunkData* paren
 				// read texture file name
 				c8* c = new c8[data.header.length - data.read];
 				file->read(c, data.header.length - data.read);
-				switch (matSection) {
-					case C3DS_MATMAP:
-						CurrentMaterial.Filename[0] = c;
-						break;
-					case C3DS_MATSPECMAP:
-						CurrentMaterial.Filename[1] = c;
-						break;
-					case C3DS_MATOPACMAP:
-						CurrentMaterial.Filename[2] = c;
-						break;
-					case C3DS_MATREFLMAP:
-						CurrentMaterial.Filename[3] = c;
-						break;
-					case C3DS_MATBUMPMAP:
-						CurrentMaterial.Filename[4] = c;
-						break;
-				}
+				if (matSection == C3DS_MATTEXMAP)
+					CurrentMaterial.Filename[0] = c;
+				else if (matSection == C3DS_MATSPECMAP)
+					CurrentMaterial.Filename[1] = c;
+				else if (matSection == C3DS_MATOPACMAP)
+					CurrentMaterial.Filename[2] = c;
+				else if (matSection == C3DS_MATREFLMAP)
+					CurrentMaterial.Filename[3] = c;
+				else if (matSection == C3DS_MATBUMPMAP)
+					CurrentMaterial.Filename[4] = c;
 				data.read += data.header.length - data.read;
 				delete [] c;
 			}
@@ -392,6 +418,9 @@ bool C3DSMeshFileLoader::readMaterialChunk(io::IReadFile* file, ChunkData* paren
 			{
 				s16 flags;
 				file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+				flags = os::Byteswap::byteswap(flags);
+#endif
 				data.read += 2;
 			}
 			break;
@@ -402,6 +431,9 @@ bool C3DSMeshFileLoader::readMaterialChunk(io::IReadFile* file, ChunkData* paren
 			{
 				f32 value;
 				file->read(&value, 4);
+#ifdef __BIG_ENDIAN__
+				value = os::Byteswap::byteswap(value);
+#endif
 				data.read += 4;
 			}
 			break;
@@ -429,39 +461,70 @@ bool C3DSMeshFileLoader::readTrackChunk(io::IReadFile* file, ChunkData& data,
 	u32 flags2;
 	// Track flags
 	file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+	flags = os::Byteswap::byteswap(flags);
+#endif
 	file->read(&flags2, 4);
+#ifdef __BIG_ENDIAN__
+	flags2 = os::Byteswap::byteswap(flags2);
+#endif
 	file->read(&flags2, 4);
+#ifdef __BIG_ENDIAN__
+	flags2 = os::Byteswap::byteswap(flags2);
+#endif
 	// Num keys
 	file->read(&flags2, 4);
+#ifdef __BIG_ENDIAN__
+	flags2 = os::Byteswap::byteswap(flags2);
+#endif
 	file->read(&flags2, 4);
+#ifdef __BIG_ENDIAN__
+	flags2 = os::Byteswap::byteswap(flags2);
+#endif
 	// TCB flags
 	file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+	flags = os::Byteswap::byteswap(flags);
+#endif
 	data.read += 20;
 
 	f32 angle=0.0f;
-	if (data.header.id== C3DS_ROT_TRACK_TAG) {
+	if (data.header.id== C3DS_ROT_TRACK_TAG)
+	{
 		// Angle
 		file->read(&angle, sizeof(f32));
+#ifdef __BIG_ENDIAN__
+	angle = os::Byteswap::byteswap(angle);
+#endif
 		data.read += sizeof(f32);
 	}
 	core::vector3df vec;
 	file->read(&vec.X, sizeof(f32));
 	file->read(&vec.Y, sizeof(f32));
 	file->read(&vec.Z, sizeof(f32));
+#ifdef __BIG_ENDIAN__
+	vec.X = os::Byteswap::byteswap(vec.X);
+	vec.Y = os::Byteswap::byteswap(vec.X);
+	vec.Z = os::Byteswap::byteswap(vec.X);
+#endif
 	data.read += 12;
 	vec-=pivot;
 
 	// apply transformation to mesh buffer
-	if (mb) {
+	if (false)//mb)
+	{
 		video::S3DVertex *vertices=(video::S3DVertex*)mb->getVertices();
-		if (data.header.id==C3DS_POS_TRACK_TAG) {
+		if (data.header.id==C3DS_POS_TRACK_TAG)
+		{
 			for (s32 i=0; i<mb->getVertexCount(); ++i)
 				vertices[i].Pos+=vec;
-		} else
-		if (data.header.id==C3DS_ROT_TRACK_TAG) {
+		}
+		else if (data.header.id==C3DS_ROT_TRACK_TAG)
+		{
 			//TODO
-		} else
-		if (data.header.id==C3DS_SCL_TRACK_TAG) {
+		}
+		else if (data.header.id==C3DS_SCL_TRACK_TAG)
+		{
 			//TODO
 		}
 	}
@@ -481,12 +544,19 @@ bool C3DSMeshFileLoader::readFrameChunk(io::IReadFile* file, ChunkData* parent)
 	readChunkData(file, data);
 	if (data.header.id != C3DS_KF_HDR)
 		return false;
-	else {
+	else
+	{
 		u16 flags;
 		file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+		flags = os::Byteswap::byteswap(flags);
+#endif
 		c8* c = new c8[data.header.length - data.read-4];
 		file->read(c, data.header.length - data.read-4);
 		file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+		flags = os::Byteswap::byteswap(flags);
+#endif
 
 		data.read += data.header.length - data.read;
 		parent->read += data.read;
@@ -511,7 +581,13 @@ bool C3DSMeshFileLoader::readFrameChunk(io::IReadFile* file, ChunkData* parent)
 			{
 				u32 flags;
 				file->read(&flags, 4);
+#ifdef __BIG_ENDIAN__
+		flags = os::Byteswap::byteswap(flags);
+#endif
 				file->read(&flags, 4);
+#ifdef __BIG_ENDIAN__
+		flags = os::Byteswap::byteswap(flags);
+#endif
 				data.read += 8;
 			}
 			break;
@@ -522,16 +598,27 @@ bool C3DSMeshFileLoader::readFrameChunk(io::IReadFile* file, ChunkData* parent)
 				file->read(c, data.header.length - data.read-6);
 
 				// search mesh buffer to apply these transformations to
-				for (u32 i=0; i<MeshBufferNames.size(); ++i) {
-					if (MeshBufferNames[i]==c) {
+				for (u32 i=0; i<MeshBufferNames.size(); ++i)
+				{
+					if (MeshBufferNames[i]==c)
+					{
 						mb=Mesh->getMeshBuffer(i);
 						break;
 					}
 				}
 
 				file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+				flags = os::Byteswap::byteswap(flags);
+#endif
 				file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+				flags = os::Byteswap::byteswap(flags);
+#endif
 				file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+				flags = os::Byteswap::byteswap(flags);
+#endif
 				data.read += data.header.length - data.read;
 				delete [] c;
 			}
@@ -540,13 +627,19 @@ bool C3DSMeshFileLoader::readFrameChunk(io::IReadFile* file, ChunkData* parent)
 			{
 				u32 flags;
 				file->read(&flags, 4);
-				data.read += data.header.length - data.read;
+#ifdef __BIG_ENDIAN__
+				flags = os::Byteswap::byteswap(flags);
+#endif
+				data.read += 4;
 			}
 			break;
 		case C3DS_NODE_ID:
 			{
 				u16 flags;
 				file->read(&flags, 2);
+#ifdef __BIG_ENDIAN__
+				flags = os::Byteswap::byteswap(flags);
+#endif
 				data.read += 2;
 			}
 			break;
@@ -555,7 +648,12 @@ bool C3DSMeshFileLoader::readFrameChunk(io::IReadFile* file, ChunkData* parent)
 				file->read(&pivot.X, sizeof(f32));
 				file->read(&pivot.Y, sizeof(f32));
 				file->read(&pivot.Z, sizeof(f32));
-				data.read += data.header.length - data.read;
+#ifdef __BIG_ENDIAN__
+				pivot.X = os::Byteswap::byteswap(pivot.X);
+				pivot.Y = os::Byteswap::byteswap(pivot.Y);
+				pivot.Z = os::Byteswap::byteswap(pivot.Z);
+#endif
+				data.read += 12;
 			}
 			break;
 		case C3DS_BOUNDBOX:
@@ -565,13 +663,23 @@ bool C3DSMeshFileLoader::readFrameChunk(io::IReadFile* file, ChunkData* parent)
 				file->read(&bboxCenter.X, sizeof(f32));
 				file->read(&bboxCenter.Y, sizeof(f32));
 				file->read(&bboxCenter.Z, sizeof(f32));
+#ifdef __BIG_ENDIAN__
+				bboxCenter.X = os::Byteswap::byteswap(bboxCenter.X);
+				bboxCenter.Y = os::Byteswap::byteswap(bboxCenter.Y);
+				bboxCenter.Z = os::Byteswap::byteswap(bboxCenter.Z);
+#endif
 				bbox.reset(bboxCenter);
 				file->read(&bboxCenter.X, sizeof(f32));
 				file->read(&bboxCenter.Y, sizeof(f32));
 				file->read(&bboxCenter.Z, sizeof(f32));
+#ifdef __BIG_ENDIAN__
+				bboxCenter.X = os::Byteswap::byteswap(bboxCenter.X);
+				bboxCenter.Y = os::Byteswap::byteswap(bboxCenter.Y);
+				bboxCenter.Z = os::Byteswap::byteswap(bboxCenter.Z);
+#endif
 				bbox.addInternalPoint(bboxCenter);
 				bboxCenter=bbox.getCenter();
-				data.read += data.header.length - 24;
+				data.read += 24;
 			}
 			break;
 		case C3DS_POS_TRACK_TAG:
@@ -608,15 +716,12 @@ bool C3DSMeshFileLoader::readChunk(io::IReadFile* file, ChunkData* parent)
 				u16 version;
 				file->read(&version, sizeof(u16));
 #ifdef __BIG_ENDIAN__
-				version = OSReadSwapInt16(&version,0);
+				version = os::Byteswap::byteswap(version);
 #endif
 				file->seek(data.header.length - data.read - 2, true);
 				data.read += data.header.length - data.read;
 				if (version != 0x03)
-				{
-					os::Printer::log("Cannot load 3ds files of version other than 3.", ELL_ERROR);
-//					return false;
-				}
+					os::Printer::log("3ds file version is other than 3.", ELL_ERROR);
 			}
 			break;
 		case C3DS_EDIT_MATERIAL:
@@ -633,7 +738,7 @@ bool C3DSMeshFileLoader::readChunk(io::IReadFile* file, ChunkData* parent)
 				u32 version;
 				file->read(&version, sizeof(u32));
 #ifdef __BIG_ENDIAN__
-				version = OSReadSwapInt32(&version,0);
+				version = os::Byteswap::byteswap(version);
 #endif
 				data.read += sizeof(u32);
 			}
@@ -671,12 +776,29 @@ bool C3DSMeshFileLoader::readObjectChunk(io::IReadFile* file, ChunkData* parent)
 		switch(data.header.id)
 		{
 		case C3DS_OBJTRIMESH:
-		{
 			readObjectChunk(file, &data);
-		} break;
+			break;
 
 		case C3DS_TRIVERT: 
 			readVertices(file, data);
+			break;
+
+		case C3DS_POINTFLAGARRAY:
+			{
+				u16 numVertex, flags;
+				file->read(&numVertex, sizeof(u16));
+#ifdef __BIG_ENDIAN__
+				numVertex= os::Byteswap::byteswap(numVertex);
+#endif
+				for (u16 i=0; i<numVertex; ++i)
+				{
+					file->read(&flags, sizeof(u16));
+#ifdef __BIG_ENDIAN__
+					flags = os::Byteswap::byteswap(flags);
+#endif
+				}
+				data.read += (numVertex+1)*sizeof(u16);
+			}
 			break;
 
 		case C3DS_TRIFACE: 
@@ -696,18 +818,41 @@ bool C3DSMeshFileLoader::readObjectChunk(io::IReadFile* file, ChunkData* parent)
 			{
 				f32 mat[4][3];
 				file->read(&mat, 12*sizeof(f32));
-				for (int i=0; i<3; ++i) {
+				TransformationMatrix.makeIdentity();
+				for (int i=0; i<4; ++i)
+				{
 					for (int j=0; j<3; ++j)
+					{
+#ifdef __BIG_ENDIAN__
+						TransformationMatrix(i,j)=os::Byteswap::byteswap(mat[i][j]);
+#else
 						TransformationMatrix(i,j)=mat[i][j];
+#endif
+					}
 				}
-				for (int j=0; j<3; ++j) {
-					TransformationMatrix(j,3)=mat[3][j];
-				}
-				TransformationMatrix=TransformationMatrix.getTransposed();
 				data.read += 12*sizeof(f32);
 			}
 			break;
+		case C3DS_MESHCOLOR:
+			{
+				u8 flag;
+				file->read(&flag, sizeof(u8));
+				++data.read;
+			}
+			break;
 		case C3DS_TRISMOOTH: // TODO
+			{
+				u32 flags;
+				for (u16 i=0; i<CountFaces; ++i)
+					file->read(&flags, sizeof(u32));
+#ifdef __BIG_ENDIAN__
+				for (u16 i=0; i<CountFaces; ++i)
+					flags = os::Byteswap::byteswap(flags);
+#endif
+				data.read += CountFaces*sizeof(u32);
+			}
+			break;
+
 		default:
 			// ignore chunk
 			file->seek(data.header.length - data.read, true);
@@ -745,6 +890,9 @@ void C3DSMeshFileLoader::composeObject(io::IReadFile* file, const core::stringc&
 			Mesh->addMeshBuffer(mb);
 			mb->Material = Materials[0].Material;
 			mb->drop();
+			// add an empty mesh buffer name
+			core::stringc c = "";
+			MeshBufferNames.push_back(c);
 		}
 	}
 
@@ -771,7 +919,8 @@ void C3DSMeshFileLoader::composeObject(io::IReadFile* file, const core::stringc&
 			video::S3DVertex vtx;
 			core::vector3df vec;
 			vtx.Color=mat->DiffuseColor;
-			if (mat->MaterialType==video::EMT_TRANSPARENT_VERTEX_ALPHA) {
+			if (mat->MaterialType==video::EMT_TRANSPARENT_VERTEX_ALPHA)
+			{
 				vtx.Color.setAlpha((int)(255.0f*mat->MaterialTypeParam));
 			}
 			vtx.Normal.set(0,0,0);
@@ -862,7 +1011,8 @@ void C3DSMeshFileLoader::loadMaterials(io::IReadFile* file)
 		{
 			m->Material.Texture1 = Driver->getTexture(Materials[i].Filename[0].c_str());
 			
-			if (!m->Material.Texture1) {
+			if (!m->Material.Texture1)
+			{
 				core::stringc fname = getTextureFileName(
 					Materials[i].Filename[0], modelFilename);
 				if (fname.size())
@@ -878,17 +1028,21 @@ void C3DSMeshFileLoader::loadMaterials(io::IReadFile* file)
 		{
 			m->Material.Texture1 = Driver->getTexture(Materials[i].Filename[2].c_str());
 			
-			if (!m->Material.Texture1) {
+			if (!m->Material.Texture1)
+			{
 				core::stringc fname = getTextureFileName(
 					Materials[i].Filename[2], modelFilename);
 				if (fname.size())
 					m->Material.Texture1 = Driver->getTexture(fname.c_str());				
 			}
 
-			if (!m->Material.Texture1) {
+			if (!m->Material.Texture1)
+			{
 				os::Printer::log("Could not load a texture for entry in 3ds file",
 					Materials[i].Filename[2].c_str(), ELL_WARNING);
-			} else {
+			}
+			else
+			{
 				m->Material.MaterialType=video::EMT_TRANSPARENT_ADD_COLOR;
 			}
 		}
@@ -899,19 +1053,23 @@ void C3DSMeshFileLoader::loadMaterials(io::IReadFile* file)
 			m->Material.Texture1=0;
 			m->Material.Texture1 = Driver->getTexture(Materials[i].Filename[3].c_str());
 			
-			if (!m->Material.Texture1) {
+			if (!m->Material.Texture1)
+			{
 				core::stringc fname = getTextureFileName(
 					Materials[i].Filename[3], modelFilename);
 				if (fname.size())
 					m->Material.Texture1 = Driver->getTexture(fname.c_str());				
 			}
 
-			if (!m->Material.Texture1) {
+			if (!m->Material.Texture1)
+			{
 				os::Printer::log("Could not load a texture for entry in 3ds file",
 					Materials[i].Filename[3].c_str(), ELL_WARNING);
 				m->Material.Texture1=m->Material.Texture2;
 				m->Material.Texture2=0;
-			} else {
+			}
+			else
+			{
 				m->Material.MaterialType=video::EMT_REFLECTION_2_LAYER;
 			}
 		}
@@ -920,7 +1078,8 @@ void C3DSMeshFileLoader::loadMaterials(io::IReadFile* file)
 		{
 			m->Material.Texture2 = Driver->getTexture(Materials[i].Filename[4].c_str());
 			
-			if (!m->Material.Texture2) {
+			if (!m->Material.Texture2)
+			{
 				core::stringc fname = getTextureFileName(
 					Materials[i].Filename[4], modelFilename);
 				if (fname.size())
@@ -930,7 +1089,8 @@ void C3DSMeshFileLoader::loadMaterials(io::IReadFile* file)
 			if (!m->Material.Texture2)
 				os::Printer::log("Could not load a texture for entry in 3ds file",
 					Materials[i].Filename[4].c_str(), ELL_WARNING);
-			else {
+			else
+			{
 				Driver->makeNormalMapTexture(m->Material.Texture2, 9.0f);
 				m->Material.MaterialType=video::EMT_PARALLAX_MAP_SOLID;
 				m->Material.MaterialTypeParam=0.035f;
@@ -964,7 +1124,7 @@ void C3DSMeshFileLoader::readTextureCoords(io::IReadFile* file, ChunkData& data)
 {
 	file->read(&CountTCoords, sizeof(CountTCoords));
 #ifdef __BIG_ENDIAN__
-	CountTCoords = OSReadSwapInt16(&CountTCoords,0);
+	CountTCoords = os::Byteswap::byteswap(CountTCoords);
 #endif
 	data.read += sizeof(CountTCoords);
 
@@ -979,7 +1139,7 @@ void C3DSMeshFileLoader::readTextureCoords(io::IReadFile* file, ChunkData& data)
 	TCoords = new f32[CountTCoords * 3];
 	file->read(TCoords, tcoordsBufferByteSize);
 #ifdef __BIG_ENDIAN__
-	for (int i=0;i<CountTCoords*2;i++) *((long*)&TCoords[i]) = OSReadSwapInt32(&TCoords[i],0);
+	for (int i=0;i<CountTCoords*2;i++) TCoords[i] = os::Byteswap::byteswap(TCoords[i]);
 #endif
 	data.read += tcoordsBufferByteSize;
 }
@@ -993,7 +1153,7 @@ void C3DSMeshFileLoader::readMaterialGroup(io::IReadFile* file, ChunkData& data)
 
 	file->read(&group.faceCount, sizeof(group.faceCount));
 #ifdef __BIG_ENDIAN__
-	group.faceCount = OSReadSwapInt16(&group.faceCount,0);
+	group.faceCount = os::Byteswap::byteswap(group.faceCount);
 #endif
 	data.read += sizeof(group.faceCount);
 
@@ -1001,7 +1161,7 @@ void C3DSMeshFileLoader::readMaterialGroup(io::IReadFile* file, ChunkData& data)
 	group.faces = new s16[group.faceCount];
 	file->read(group.faces, sizeof(s16) * group.faceCount);
 #ifdef __BIG_ENDIAN__
-	for (int i=0;i<group.faceCount;i++) group.faces[i] = OSReadSwapInt16(&group.faces[i],0);
+	for (int i=0;i<group.faceCount;i++) group.faces[i] = os::Byteswap::byteswap(group.faces[i]);
 #endif
 	data.read += sizeof(s16) * group.faceCount;
 
@@ -1013,7 +1173,7 @@ void C3DSMeshFileLoader::readIndices(io::IReadFile* file, ChunkData& data)
 {
 	file->read(&CountFaces, sizeof(CountFaces));
 #ifdef __BIG_ENDIAN__
-	CountFaces = OSReadSwapInt16(&CountFaces,0);
+	CountFaces = os::Byteswap::byteswap(CountFaces);
 #endif
 	data.read += sizeof(CountFaces);
 
@@ -1024,7 +1184,7 @@ void C3DSMeshFileLoader::readIndices(io::IReadFile* file, ChunkData& data)
 	Indices = new u16[CountFaces * 4];
 	file->read(Indices, indexBufferByteSize);
 #ifdef __BIG_ENDIAN__
-	for (int i=0;i<CountFaces*4;++i) Indices[i] = OSReadSwapInt16(&Indices[i],0);
+	for (int i=0;i<CountFaces*4;++i) Indices[i] = os::Byteswap::byteswap(Indices[i]);
 #endif
 	data.read += indexBufferByteSize;
 }
@@ -1035,7 +1195,7 @@ void C3DSMeshFileLoader::readVertices(io::IReadFile* file, ChunkData& data)
 {
 	file->read(&CountVertices, sizeof(CountVertices));
 #ifdef __BIG_ENDIAN__
-	CountVertices = OSReadSwapInt16(&CountVertices,0);
+	CountVertices = os::Byteswap::byteswap(CountVertices);
 #endif
 	data.read += sizeof(CountVertices);
 
@@ -1050,7 +1210,7 @@ void C3DSMeshFileLoader::readVertices(io::IReadFile* file, ChunkData& data)
 	Vertices = new f32[CountVertices * 3];
 	file->read(Vertices, vertexBufferByteSize);
 #ifdef __BIG_ENDIAN__
-	for (int i=0;i<CountVertices*3;i++) *((long*)&Vertices[i]) = OSReadSwapInt32(&Vertices[i],0);
+	for (int i=0;i<CountVertices*3;i++) Vertices[i] = os::Byteswap::byteswap(Vertices[i]);
 #endif
 	data.read += vertexBufferByteSize;
 }
@@ -1061,8 +1221,8 @@ void C3DSMeshFileLoader::readChunkData(io::IReadFile* file, ChunkData& data)
 {
 	file->read(&data.header, sizeof(ChunkHeader));
 #ifdef __BIG_ENDIAN__
-	data.header.id = OSReadSwapInt16(&data.header.id,0);
-	data.header.length = OSReadSwapInt32(&data.header.length,0);
+	data.header.id = os::Byteswap::byteswap(data.header.id);
+	data.header.length = os::Byteswap::byteswap(data.header.length);
 #endif
 	data.read += sizeof(ChunkHeader);
 }

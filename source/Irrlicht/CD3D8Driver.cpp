@@ -42,7 +42,7 @@ CD3D8Driver::CD3D8Driver(const core::dimension2d<s32>& screenSize, HWND window,
 
 	printVersion();
 
-	for (int i=0; i<4; ++i)
+	for (s32 i=0; i<MATERIAL_MAX_TEXTURES; ++i)
 		CurrentTexture[i] = 0;
 
 	// create sphere map matrix
@@ -72,7 +72,7 @@ CD3D8Driver::~CD3D8Driver()
 {
 	deleteMaterialRenders();
 
-	for (int i=0; i<4; ++i)
+	for (s32 i=0; i<MATERIAL_MAX_TEXTURES; ++i)
 		if (CurrentTexture[i])
 			CurrentTexture[i]->drop();
 
@@ -271,8 +271,7 @@ bool CD3D8Driver::initDriver(const core::dimension2d<s32>& screenSize, HWND hwnd
 	}
 
 	if (!StencilBuffer)
-		present.AutoDepthStencilFormat = D3DFMT_D16;
-
+		present.AutoDepthStencilFormat = D3DFMT_D24X8;
 
 	// create device
 
@@ -412,10 +411,17 @@ bool CD3D8Driver::beginScene(bool backBuffer, bool zBuffer, SColor color)
 bool CD3D8Driver::reset()
 {
 	// reset
+	HRESULT hr;
 	os::Printer::log("Resetting D3D8 device.", ELL_INFORMATION);
-	if (FAILED(pID3DDevice->Reset(&present)))
+	if (FAILED(hr = pID3DDevice->Reset(&present)))
 	{
-		os::Printer::log("Resetting failed.", ELL_WARNING);
+		if (hr == D3DERR_DEVICELOST)
+		{
+			DeviceLost = true;
+			os::Printer::log("Resetting failed due to device lost.", ELL_WARNING);
+		}
+		else
+			os::Printer::log("Resetting failed.", ELL_WARNING);
 		return false;
 	}
 
@@ -423,7 +429,7 @@ bool CD3D8Driver::reset()
 	ResetRenderStates = true;
 	LastVertexType = (E_VERTEX_TYPE)-1;
 
-	for (int i=0; i<4; ++i)
+	for (s32 i=0; i<MATERIAL_MAX_TEXTURES; ++i)
 	{
 		if (CurrentTexture[i]) CurrentTexture[i]->drop();
 			CurrentTexture[i] = 0;
@@ -486,9 +492,9 @@ bool CD3D8Driver::queryFeature(E_VIDEO_DRIVER_FEATURE feature)
 {
 	switch (feature)
 	{
-	case EVDF_BILINEAR_FILTER:
-		return true;
 	case EVDF_RENDER_TO_TARGET:
+	case EVDF_MULTITEXTURE:
+	case EVDF_BILINEAR_FILTER:
 		return true;
 	case EVDF_HARDWARE_TL:
 		return (Caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT) != 0;
@@ -514,9 +520,11 @@ bool CD3D8Driver::queryFeature(E_VIDEO_DRIVER_FEATURE feature)
 		return Caps.PixelShaderVersion >= D3DPS_VERSION(2,0);
 	case EVDF_PIXEL_SHADER_3_0:
 		return Caps.PixelShaderVersion >= D3DPS_VERSION(3,0);
+	case EVDF_TEXTURE_NPOT:
+		return (Caps.TextureCaps & D3DPTEXTURECAPS_POW2) == 0;
+	default:
+		return false;
 	};
-
-	return false;
 }
 
 
@@ -544,17 +552,16 @@ void CD3D8Driver::setTransform(E_TRANSFORMATION_STATE state, const core::matrix4
 
 
 
-
 //! sets the current Texture
-void CD3D8Driver::setTexture(s32 stage, video::ITexture* texture)
+bool CD3D8Driver::setTexture(s32 stage, video::ITexture* texture)
 {
 	if (CurrentTexture[stage] == texture)
-		return;
+		return true;
 
 	if (texture && texture->getDriverType() != EDT_DIRECT3D8)
 	{
 		os::Printer::log("Fatal Error: Tried to set a texture not owned by this driver.", ELL_ERROR);
-		return;
+		return false;
 	}
 
 	if (CurrentTexture[stage])
@@ -568,7 +575,10 @@ void CD3D8Driver::setTexture(s32 stage, video::ITexture* texture)
 	{
 		pID3DDevice->SetTexture(stage, ((CD3D8Texture*)texture)->getDX8Texture());
 		texture->grab();
+		pID3DDevice->SetTextureStageState( stage, D3DTSS_TEXTURETRANSFORMFLAGS, D3DTTFF_COUNT2 );
+		pID3DDevice->SetTransform((D3DTRANSFORMSTATETYPE)(D3DTS_TEXTURE0+stage), (D3DMATRIX*)((void*)&texture->getTransformation()));
 	}
+	return true;
 }
 
 
@@ -578,18 +588,15 @@ void CD3D8Driver::setMaterial(const SMaterial& material)
 {
 	Material = material;
 
-	setTexture(0, Material.Texture1);
-	setTexture(1, Material.Texture2);
-	setTexture(2, Material.Texture3);
-	setTexture(3, Material.Texture4);
+	for (s32 i=0; i<MATERIAL_MAX_TEXTURES; ++i)
+		setTexture(i, Material.Textures[i]);
 }
 
 
 //! returns a device dependent texture from a software surface (IImage)
 video::ITexture* CD3D8Driver::createDeviceDependentTexture(IImage* surface, const char* name)
 {
-	return new CD3D8Texture(surface, pID3DDevice,
-		TextureCreationFlags, name);
+	return new CD3D8Texture(surface, this, TextureCreationFlags, name);
 }
 
 
@@ -704,9 +711,9 @@ bool CD3D8Driver::setRenderTarget(video::ITexture* texture, bool clearBackBuffer
 }
 
 //! Creates a render target texture.
-ITexture* CD3D8Driver::createRenderTargetTexture(core::dimension2d<s32> size)
+ITexture* CD3D8Driver::createRenderTargetTexture(const core::dimension2d<s32>& size)
 {
-	return new CD3D8Texture(pID3DDevice, size, 0);
+	return new CD3D8Texture(this, size, 0);
 }
 
 
@@ -745,131 +752,72 @@ const core::rect<s32>& CD3D8Driver::getViewPort() const
 }
 
 
-//! draws an indexed triangle list
-void CD3D8Driver::drawIndexedTriangleList(const S3DVertex* vertices,
-											 s32 vertexCount, const u16* indexList, s32 triangleCount)
+
+//! draws a vertex primitive list
+void CD3D8Driver::drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType)
 {
-	if (!checkPrimitiveCount(triangleCount))
+	if (!checkPrimitiveCount(primitiveCount))
 		return;
 
-	CNullDriver::drawIndexedTriangleList(vertices, vertexCount, indexList, triangleCount);
+	CNullDriver::drawVertexPrimitiveList(vertices, vertexCount, indexList, primitiveCount, vType, pType);
 
-	if (!vertexCount || !triangleCount)
+	if (!vertexCount || !primitiveCount)
 		return;
 
-	setVertexShader(EVT_STANDARD);
+	setVertexShader(vType);
+
+	size_t stride=0;
+	switch (vType)
+	{
+		case EVT_STANDARD:
+			stride=sizeof(S3DVertex);
+			break;
+		case EVT_2TCOORDS:
+			stride=sizeof(S3DVertex2TCoords);
+			break;
+		case EVT_TANGENTS:
+			stride=sizeof(S3DVertexTangents);
+			break;
+	}
 	if (setRenderStates3DMode())
 	{
-		pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, vertexCount,
-			triangleCount, indexList, D3DFMT_INDEX16, vertices, sizeof(S3DVertex));
+		switch (pType)
+		{
+		   case scene::EPT_POINTS:
+			  pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_POINTLIST, 0, vertexCount,
+				 primitiveCount, indexList, D3DFMT_INDEX16, vertices, stride);
+			  break;
+		   case scene::EPT_LINE_STRIP:
+			  pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_LINESTRIP, 0, vertexCount,
+				 primitiveCount, indexList, D3DFMT_INDEX16, vertices, stride);
+			  break;
+		   case scene::EPT_LINE_LOOP:
+		   {
+			  pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_LINESTRIP, 0, vertexCount,
+				 primitiveCount, indexList, D3DFMT_INDEX16, vertices, stride);
+			  u16 tmpIndices[] = {0, primitiveCount};
+			  pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_LINELIST, 0, vertexCount,
+				 1, tmpIndices, D3DFMT_INDEX16, vertices, stride);
+		   }
+			  break;
+		   case scene::EPT_LINES:
+			  pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_LINELIST, 0, vertexCount,
+				 primitiveCount, indexList, D3DFMT_INDEX16, vertices, stride);
+			  break;
+		   case scene::EPT_TRIANGLE_STRIP:
+			  pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLESTRIP, 0, vertexCount,
+				 primitiveCount, indexList, D3DFMT_INDEX16, vertices, stride);
+			  break;
+		   case scene::EPT_TRIANGLE_FAN:
+			  pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLEFAN, 0, vertexCount,
+				 primitiveCount, indexList, D3DFMT_INDEX16, vertices, stride);
+			  break;
+		   case scene::EPT_TRIANGLES:
+			  pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, vertexCount,
+				 primitiveCount, indexList, D3DFMT_INDEX16, vertices, stride);
+			  break;
+		}
 	}
-}
-
-
-
-//! draws an indexed triangle list
-void CD3D8Driver::drawIndexedTriangleList(const S3DVertex2TCoords* vertices,
-											 s32 vertexCount, const u16* indexList, s32 triangleCount)
-{
-	if (!checkPrimitiveCount(triangleCount))
-		return;
-
-	CNullDriver::drawIndexedTriangleList(vertices, vertexCount, indexList, triangleCount);
-
-	if (!vertexCount || !triangleCount)
-		return;
-
-	setVertexShader(EVT_2TCOORDS);
-	if (setRenderStates3DMode())
-	{
-		pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0,	vertexCount,
-			triangleCount, indexList, D3DFMT_INDEX16, vertices, sizeof(S3DVertex2TCoords));
-	}
-}
-
-
-
-
-//! Draws an indexed triangle list.
-void CD3D8Driver::drawIndexedTriangleList(const S3DVertexTangents* vertices,
-	s32 vertexCount, const u16* indexList, s32 triangleCount)
-{
-	if (!checkPrimitiveCount(triangleCount))
-		return;
-
-	CNullDriver::drawIndexedTriangleList(vertices, vertexCount, indexList, triangleCount);
-
-	if (!vertexCount || !triangleCount)
-		return;
-
-	setVertexShader(EVT_TANGENTS);
-	if (setRenderStates3DMode())
-	{
-		pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, vertexCount,
-		    triangleCount, indexList, D3DFMT_INDEX16, vertices,	sizeof(S3DVertexTangents));
-	}
-}
-
-
-//! Draws an indexed triangle list.
-void CD3D8Driver::drawIndexedTriangleFan(const S3DVertex2TCoords* vertices,
-	s32 vertexCount, const u16* indexList, s32 triangleCount)
-{
-	if (!checkPrimitiveCount(triangleCount))
-		return;
-
-	CNullDriver::drawIndexedTriangleFan(vertices, vertexCount, indexList, triangleCount);
-
-	if (!vertexCount || !triangleCount)
-		return;
-
-	setVertexShader(EVT_2TCOORDS);
-	setRenderStates3DMode();
-
-	pID3DDevice->DrawIndexedPrimitiveUP(	D3DPT_TRIANGLEFAN, 0,
-											vertexCount,
-											triangleCount,
-											indexList,
-											D3DFMT_INDEX16,
-											vertices,
-											sizeof(S3DVertex2TCoords));
-}
-
-
-
-//! Draws an indexed triangle fan.
-void CD3D8Driver::drawIndexedTriangleFan(const S3DVertex* vertices,
-	s32 vertexCount, const u16* indexList, s32 triangleCount)
-{
-	if (!checkPrimitiveCount(triangleCount))
-		return;
-
-	CNullDriver::drawIndexedTriangleFan(vertices, vertexCount, indexList, triangleCount);
-
-	if (!vertexCount || !triangleCount)
-		return;
-
-	setVertexShader(EVT_STANDARD);
-	setRenderStates3DMode();
-
-	pID3DDevice->DrawIndexedPrimitiveUP(	D3DPT_TRIANGLEFAN, 0,
-											vertexCount,
-											triangleCount,
-											indexList,
-											D3DFMT_INDEX16,
-											vertices,
-											sizeof(S3DVertex));
-}
-
-
-
-//! draws an 2d image
-void CD3D8Driver::draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos)
-{
-	if (!texture)
-		return;
-
-	draw2DImage(texture,destPos, core::rect<s32>(core::position2d<s32>(0,0), texture->getOriginalSize()));
 }
 
 
@@ -883,19 +831,15 @@ void CD3D8Driver::draw2DImage(video::ITexture* texture, const core::position2d<s
 	if (!texture)
 		return;
 
-	if (texture->getDriverType() != EDT_DIRECT3D8)
-	{
-		os::Printer::log("Fatal Error: Tried to copy from a surface not owned by this driver.", ELL_ERROR);
-		return;
-	}
-
 	if (!sourceRect.isValid())
+		return;
+
+	if (!setTexture(0, texture))
 		return;
 
 	core::position2d<s32> targetPos = pos;
 	core::position2d<s32> sourcePos = sourceRect.UpperLeftCorner;
 	core::dimension2d<s32> sourceSize(sourceRect.getSize());
-
 	const core::dimension2d<s32>& renderTargetSize = getCurrentRenderTargetSize();
 
 	if (clipRect)
@@ -989,6 +933,8 @@ void CD3D8Driver::draw2DImage(video::ITexture* texture, const core::position2d<s
 
 	core::rect<s32> poss(targetPos, sourceSize);
 
+	setRenderStates2DMode(color.getAlpha()<255, true, useAlphaChannelOfTexture);
+
 	S3DVertex vtx[4];
 	vtx[0] = S3DVertex((f32)(poss.UpperLeftCorner.X+xPlus) * xFact, (f32)(yPlus-poss.UpperLeftCorner.Y ) * yFact , 0.0f, 0.0f, 0.0f, 0.0f, color, tcoords.UpperLeftCorner.X, tcoords.UpperLeftCorner.Y);
 	vtx[1] = S3DVertex((f32)(poss.LowerRightCorner.X+xPlus) * xFact, (f32)(yPlus- poss.UpperLeftCorner.Y) * yFact, 0.0f, 0.0f, 0.0f, 0.0f, color, tcoords.LowerRightCorner.X, tcoords.UpperLeftCorner.Y);
@@ -997,17 +943,10 @@ void CD3D8Driver::draw2DImage(video::ITexture* texture, const core::position2d<s
 
 	s16 indices[6] = {0,1,2,0,2,3};
 
-	if (useAlphaChannelOfTexture)
-		setRenderStates2DMode(false, true, true);
-	else
-		setRenderStates2DMode(false, true, false);
-
-	setTexture(0, texture);
-
 	setVertexShader(EVT_STANDARD);
 
 	pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 4, 2, &indices[0],
-										D3DFMT_INDEX16,&vtx[0],	sizeof(S3DVertex));
+			D3DFMT_INDEX16,&vtx[0],	sizeof(S3DVertex));
 }
 
 
@@ -1044,37 +983,32 @@ void CD3D8Driver::draw2DImage(video::ITexture* texture, const core::rect<s32>& d
    npos.LowerRightCorner.X = (f32)(trgRect.LowerRightCorner.X+xPlus+0.5f) * xFact;
    npos.LowerRightCorner.Y = (f32)(yPlus-trgRect.LowerRightCorner.Y+0.5f) * yFact;
 
-   bool bTempColors=false;
-   if(colors==NULL)
-   {
-      colors=new SColor[4];
-      for(int i=0;i<4;i++)
-		colors[i]=SColor(255,255,255,255);
-      bTempColors=true;
-   }
+	video::SColor temp[4] =
+	{
+		0xFFFFFFFF,
+		0xFFFFFFFF,
+		0xFFFFFFFF,
+		0xFFFFFFFF
+	};
 
-   S3DVertex vtx[4]; // clock wise
-   vtx[0] = S3DVertex(npos.UpperLeftCorner.X, npos.UpperLeftCorner.Y , 0.0f, 0.0f, 0.0f, 0.0f, colors[0], tcoords.UpperLeftCorner.X, tcoords.UpperLeftCorner.Y);
-   vtx[1] = S3DVertex(npos.LowerRightCorner.X, npos.UpperLeftCorner.Y , 0.0f, 0.0f, 0.0f, 0.0f, colors[3], tcoords.LowerRightCorner.X, tcoords.UpperLeftCorner.Y);
-   vtx[2] = S3DVertex(npos.LowerRightCorner.X, npos.LowerRightCorner.Y, 0.0f, 0.0f, 0.0f, 0.0f, colors[2], tcoords.LowerRightCorner.X, tcoords.LowerRightCorner.Y);
-   vtx[3] = S3DVertex(npos.UpperLeftCorner.X, npos.LowerRightCorner.Y, 0.0f, 0.0f, 0.0f, 0.0f, colors[1], tcoords.UpperLeftCorner.X, tcoords.LowerRightCorner.Y);
+	video::SColor* useColor = colors ? colors : temp;
 
-   s16 indices[6] = {0,1,2,0,2,3};
+	S3DVertex vtx[4]; // clock wise
+	vtx[0] = S3DVertex(npos.UpperLeftCorner.X, npos.UpperLeftCorner.Y , 0.0f, 0.0f, 0.0f, 0.0f, useColor[0], tcoords.UpperLeftCorner.X, tcoords.UpperLeftCorner.Y);
+	vtx[1] = S3DVertex(npos.LowerRightCorner.X, npos.UpperLeftCorner.Y , 0.0f, 0.0f, 0.0f, 0.0f, useColor[3], tcoords.LowerRightCorner.X, tcoords.UpperLeftCorner.Y);
+	vtx[2] = S3DVertex(npos.LowerRightCorner.X, npos.LowerRightCorner.Y, 0.0f, 0.0f, 0.0f, 0.0f, useColor[2], tcoords.LowerRightCorner.X, tcoords.LowerRightCorner.Y);
+	vtx[3] = S3DVertex(npos.UpperLeftCorner.X, npos.LowerRightCorner.Y, 0.0f, 0.0f, 0.0f, 0.0f, useColor[1], tcoords.UpperLeftCorner.X, tcoords.LowerRightCorner.Y);
 
-   if (useAlphaChannelOfTexture)
-      setRenderStates2DMode(false, true, true);
-   else
-      setRenderStates2DMode(false, true, false);
+	s16 indices[6] = {0,1,2,0,2,3};
 
-   setTexture(0, texture);
+	setRenderStates2DMode(useColor[0].getAlpha()<255 || useColor[1].getAlpha()<255 || useColor[2].getAlpha()<255 || useColor[3].getAlpha()<255, true, useAlphaChannelOfTexture);
 
-   setVertexShader(EVT_STANDARD);
+	setTexture(0, texture);
 
-   pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 4, 2, &indices[0],
-      D3DFMT_INDEX16,&vtx[0], sizeof(S3DVertex));
+	setVertexShader(EVT_STANDARD);
 
-   if (bTempColors)
-      delete [] colors;
+	pID3DDevice->DrawIndexedPrimitiveUP(D3DPT_TRIANGLELIST, 0, 4, 2, &indices[0],
+		D3DFMT_INDEX16,&vtx[0], sizeof(S3DVertex));
 }
 
 

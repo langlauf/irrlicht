@@ -102,47 +102,59 @@ E_ANIMATED_MESH_TYPE CXAnimationPlayer::getMeshType() const
 
 void CXAnimationPlayer::createAnimationData()
 {
+	int i, iCnt;
 	// get joints from x-file
-	createJointData(Reader->getRootFrame(), -1);
-
-	createMeshData();
-
-	if (IsAnimatedSkinnedMesh && AnimatedMesh)
+	core::array<CXFileReader::SXFrame>& pgRootFrames = Reader->getRootFrames();
+	iCnt = pgRootFrames.size();
+	for( i = 0; i < iCnt; i++ )
 	{
-		animateSkeleton();
-		modifySkin();	
-		updateBoundingBoxFromAnimation();
-		DebugSkeletonCrossSize = AnimatedMesh->getBoundingBox().getExtent().X / 20.0f;
+		createJointData(pgRootFrames[i], -1);
+
+		createMeshData();
+
+		if (IsAnimatedSkinnedMesh && AnimatedMesh)
+		{
+			animateSkeleton();
+			modifySkin();	
+			updateBoundingBoxFromAnimation();
+			DebugSkeletonCrossSize = AnimatedMesh->getBoundingBox().getExtent().X / 20.0f;
+		}
+		else
+			DebugSkeletonCrossSize = OriginalMesh.getBoundingBox().getExtent().X / 20.0f;
 	}
-	else
-		DebugSkeletonCrossSize = OriginalMesh.getBoundingBox().getExtent().X / 20.0f;
 }
 
 
 void CXAnimationPlayer::createMeshData()
 {
-	// create mesh
-	addFrameToMesh(Reader->getRootFrame());
+	int i, iCnt;
+	core::array<CXFileReader::SXFrame>& pgRootFrames = Reader->getRootFrames();
+	iCnt = pgRootFrames.size();
+	for( i = 0; i < iCnt; i++ )
+	{
+		// create mesh
+		addFrameToMesh(pgRootFrames[i]);
 
-	// recalculate box
-	OriginalMesh.recalculateBoundingBox();
+		// recalculate box
+		OriginalMesh.recalculateBoundingBox();
 
-	// store box (fix by jox, thnx)
-	Box = OriginalMesh.getBoundingBox();
+		// store box (fix by jox, thnx)
+		Box = OriginalMesh.getBoundingBox();
 
-	// sort weights in joints
-	for (u32 j=0; j<Joints.size(); ++j)
-		Joints[j].Weights.sort();
+		// sort weights in joints
+		for (s32 j=0; j<(s32)Joints.size(); ++j)
+			Joints[j].Weights.sort();
 
-	// copy mesh
-	AnimatedMesh = Manipulator->createMeshCopy(&OriginalMesh);
+		// copy mesh
+		AnimatedMesh = Manipulator->createMeshCopy(&OriginalMesh);
 
-	// create and link animation data
-	prepareAnimationData();
+		// create and link animation data
+		prepareAnimationData();
 
-	// first animation
-	animateSkeleton();
-	modifySkin();
+		// first animation
+		animateSkeleton();
+		modifySkin();
+	}
 }
 
 
@@ -207,13 +219,14 @@ void CXAnimationPlayer::addFacesToBuffer(s32 meshbuffernr, CXFileReader::SXMesh&
 {
 	scene::SMeshBuffer* buf = (SMeshBuffer*)OriginalMesh.MeshBuffers[meshbuffernr];
 
-	s32 tcnt = mesh.TextureCoords.size();
-	s32 ncnt = mesh.Normals.size();
-	s32 fcnt = mesh.Indices.size();
+	u32 tcnt = mesh.TextureCoords.size();
+	u32 ncnt = mesh.Normals.size();
+	u32 fcnt = mesh.Indices.size();
+	u32 ccnt = mesh.VertexColors.size();
 
 	// precompute which joint belongs to which weight array
 	core::array< s32 > jointNumberWeightNumberMap;
-	for (s32 w=0; w<(s32)mesh.SkinWeights.size(); ++w)
+	for (u32 w=0; w<mesh.SkinWeights.size(); ++w)
 	{
 		s32 jnr = getJointNumberFromName(mesh.SkinWeights[w].TransformNodeName);
 		if (jnr == -1)
@@ -233,7 +246,7 @@ void CXAnimationPlayer::addFacesToBuffer(s32 meshbuffernr, CXFileReader::SXMesh&
 	v.Color.set(255,255,255,255);
 
 	// add only those with material matnr
-	for (s32 i=0; i<(s32)mesh.MaterialList.FaceIndices.size(); ++i)
+	for (u32 i=0; i<mesh.MaterialList.FaceIndices.size(); ++i)
 	{
 		if (mesh.MaterialList.FaceIndices[i] == matnr)
 		{
@@ -247,6 +260,7 @@ void CXAnimationPlayer::addFacesToBuffer(s32 meshbuffernr, CXFileReader::SXMesh&
 
 				if (tcnt) v.TCoords = mesh.TextureCoords[idx];
 				if (ncnt) v.Normal = mesh.Normals[mesh.NormalIndices[idxidx]];
+				if (ccnt) v.Color = mesh.VertexColors[idx].Color.toSColor();
 
 				s32 nidx = buf->Vertices.linear_reverse_search(v);
 				bool alreadyIn = (nidx != -1);
@@ -293,7 +307,7 @@ void CXAnimationPlayer::addFacesToBuffer(s32 meshbuffernr, CXFileReader::SXMesh&
 				// if this vertex does not have a weight, create a virtual new 
 				// joint and attach it to this one
 				if (!isWeighted)
-					addVirtualWeight(meshbuffernr, nidx, frame);
+					addVirtualWeight(meshbuffernr, nidx, mesh, frame);
 
 			} // end for all faces
 
@@ -305,11 +319,11 @@ void CXAnimationPlayer::addFacesToBuffer(s32 meshbuffernr, CXFileReader::SXMesh&
 	{
 		video::S3DVertex* vertex = &buf->Vertices[0];
 		fcnt = buf->Indices.size();
-		for (s32 u=0; u<fcnt; u+=3)
+
+		for (s32 u=0; u<(s32)fcnt; u+=3)
 		{
 			core::plane3d<f32> p(vertex[buf->Indices[u+0]].Pos,
 				vertex[buf->Indices[u+1]].Pos, vertex[buf->Indices[u+2]].Pos);
-			p.Normal.normalize();
 			vertex[buf->Indices[u+0]].Normal = p.Normal;
 			vertex[buf->Indices[u+1]].Normal = p.Normal;
 			vertex[buf->Indices[u+2]].Normal = p.Normal;
@@ -329,7 +343,7 @@ void CXAnimationPlayer::addFacesToBuffer(s32 meshbuffernr, CXFileReader::SXMesh&
 }
 
 
-void CXAnimationPlayer::addVirtualWeight(s32 meshbuffernr, s32 vtxidx, 
+void CXAnimationPlayer::addVirtualWeight(s32 meshbuffernr, s32 vtxidx, CXFileReader::SXMesh& mesh,
 					const CXFileReader::SXFrame& frame)
 {
 	// find original joint of vertex
@@ -484,13 +498,10 @@ const core::array<core::vector3df>* CXAnimationPlayer::getDrawableSkeleton(s32 f
 //! animates the skeleton based on the animation data
 void CXAnimationPlayer::animateSkeleton()
 {
-	s32 i;
-
 	if (!AnimationSets.empty())
 	{
-
 		// reset joints
-		for (s32 jii=0; jii<(s32)Joints.size(); ++jii)
+		for (u32 jii=0; jii<Joints.size(); ++jii)
 		{
 			Joints[jii].LocalAnimatedMatrix.makeIdentity();
 			Joints[jii].WasAnimatedThisFrame = false;
@@ -499,7 +510,7 @@ void CXAnimationPlayer::animateSkeleton()
 		SXAnimationSet& currentSet = AnimationSets[CurrentAnimationSet];
 
 		// go through all animation tracks
-		for (i=0; i<(s32)currentSet.Animations.size(); ++i)
+		for (u32 i=0; i<currentSet.Animations.size(); ++i)
 		{
 			SJoint& joint = Joints[currentSet.Animations[i].jointNr];
 
@@ -508,6 +519,7 @@ void CXAnimationPlayer::animateSkeleton()
 			s32 idx2 = -1;
 
 			for (s32 t=0; t<(s32)currentSet.Animations[i].Times.size()-1; ++t)
+			{
 				if (currentSet.Animations[i].Times[t] <= CurrentAnimationTime &&
 					currentSet.Animations[i].Times[t+1] >= CurrentAnimationTime)
 				{
@@ -515,8 +527,9 @@ void CXAnimationPlayer::animateSkeleton()
 					idx2 = (t+1) % currentSet.Animations[i].Times.size();
 					break;
 				}
+			}
 
-			if (idx1 == -1 || idx2 == -1)
+			if (idx1 == -1)
 				continue;
 
 			// calculate interpolation factor
@@ -574,14 +587,13 @@ void CXAnimationPlayer::animateSkeleton()
 		}
 	}
 
-
 	// update all joints
 	for (s32 ji=0; ji<(s32)Joints.size(); ++ji)
 	{
 		if (!Joints[ji].WasAnimatedThisFrame)
 			Joints[ji].LocalAnimatedMatrix = Joints[ji].LocalMatrix;
 
-        Joints[ji].AnimatedMatrix = Joints[ji].LocalAnimatedMatrix;
+		Joints[ji].AnimatedMatrix = Joints[ji].LocalAnimatedMatrix;
 
 		if (Joints[ji].Parent != -1)
 			Joints[ji].AnimatedMatrix = Joints[Joints[ji].Parent].AnimatedMatrix * Joints[ji].AnimatedMatrix;
@@ -695,7 +707,7 @@ void CXAnimationPlayer::modifySkin()
 //! prepares animation data which was read in from the .x file
 void CXAnimationPlayer::prepareAnimationData()
 {
-    s32 animationSetCount = Reader->getAnimationSetCount();
+	s32 animationSetCount = Reader->getAnimationSetCount();
 	for (s32 i=0; i<animationSetCount; ++i)
 	{
 		AnimationSets.push_back(SXAnimationSet());

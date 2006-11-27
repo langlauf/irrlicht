@@ -63,26 +63,24 @@ IImage* CImageLoaderPCX::loadImage(irr::io::IReadFile* file)
 
 	file->read(&header, sizeof(header));
 	#ifdef __BIG_ENDIAN__
-		XMin = OSReadSwapInt16(&XMin,0);
-		YMin = OSReadSwapInt16(&YMin,0);
-		XMax = OSReadSwapInt16(&XMax,0);
-		YMax = OSReadSwapInt16(&YMax,0);
-		HorizDPI = OSReadSwapInt16(&HorizDPI,0);
-		VertDPI = OSReadSwapInt16(&VertDPI,0);
-		BytesPerLine = OSReadSwapInt16(&BytesPerLine,0);
-		PaletteType = OSReadSwapInt16(&PaletteType,0);
-		HScrSize = OSReadSwapInt16(&HScrSize,0);
-		VScrSize = OSReadSwapInt16(&VScrSize,0);
+		header.XMin = os::Byteswap::byteswap(header.XMin);
+		header.YMin = os::Byteswap::byteswap(header.YMin);
+		header.XMax = os::Byteswap::byteswap(header.XMax);
+		header.YMax = os::Byteswap::byteswap(header.YMax);
+		header.HorizDPI = os::Byteswap::byteswap(header.HorizDPI);
+		header.VertDPI = os::Byteswap::byteswap(header.VertDPI);
+		header.BytesPerLine = os::Byteswap::byteswap(header.BytesPerLine);
+		header.PaletteType = os::Byteswap::byteswap(header.PaletteType);
+		header.HScrSize = os::Byteswap::byteswap(header.HScrSize);
+		header.VScrSize = os::Byteswap::byteswap(header.VScrSize);
 	#endif
-
-	s32 pitch = 0;
 
 	//! return if the header is wrong
 	if (header.Manufacturer != 0x0a && header.Encoding != 0x01)
 		return 0;
 
 	// return if this isn't a supported type
-	if( (header.BitsPerPixel < 8) || (header.BitsPerPixel > 24) )
+	if( (header.BitsPerPixel != 8) && (header.BitsPerPixel != 24) )
 	{
 		os::Printer::log("Unsupported bits per pixel in PCX file.",
 			file->getFileName(), irr::ELL_WARNING);
@@ -90,30 +88,24 @@ IImage* CImageLoaderPCX::loadImage(irr::io::IReadFile* file)
 	}
 
 	// read palette
-	if( header.BitsPerPixel >= 8 )
+	if( header.BitsPerPixel == 8 )
 	{
+		// the palette indicator (usually a 0x0c is found infront of the actual palette data)
+		// is ignored because some exporters seem to forget to write it. This would result in
+		// no image loaded before, now only wrong colors will be set.
 		s32 pos = file->getPos();
-		u8 palIndicator;
-		file->seek( file->getSize()-256*3-1, false );
-
-		file->read( &palIndicator, 1 );
-
-		if( palIndicator != 12 )
-		{
-			os::Printer::log("Unsupported pal indicator in PCX file.",
-				file->getFileName(), irr::ELL_WARNING);
-			return 0;
-		}
+		file->seek( file->getSize()-256*3, false );
 
 		u8 *tempPalette = new u8[768];
 		PaletteData = new s32[256];
+		memset(PaletteData, 0, 256*sizeof(s32));
 		file->read( tempPalette, 768 );
 
 		for( s32 i=0; i<256; i++ )
 		{
 			PaletteData[i] = (tempPalette[i*3+0] << 16) |
-							 (tempPalette[i*3+1] << 8) | 
-							 (tempPalette[i*3+2] );
+					 (tempPalette[i*3+1] << 8) | 
+					 (tempPalette[i*3+2] );
 		}
 
 		delete [] tempPalette;
@@ -123,11 +115,12 @@ IImage* CImageLoaderPCX::loadImage(irr::io::IReadFile* file)
 	else if( header.BitsPerPixel == 4 )
 	{
 		PaletteData = new s32[16];
+		memset(PaletteData, 0, 16*sizeof(s32));
 		for( s32 i=0; i<256; i++ )
 		{
 			PaletteData[i] = (header.Palette[i*3+0] << 16) |
-							 (header.Palette[i*3+1] << 8) | 
-							 (header.Palette[i*3+2]);
+					 (header.Palette[i*3+1] << 8) | 
+					 (header.Palette[i*3+2]);
 		}
 	}
 
@@ -136,9 +129,9 @@ IImage* CImageLoaderPCX::loadImage(irr::io::IReadFile* file)
 	width = header.XMax - header.XMin + 1;
 	height = header.YMax - header.YMin + 1;
 	imagebytes = header.BytesPerLine * height * header.Planes * header.BitsPerPixel / 8;
-	PCXData = new c8[imagebytes];
+	PCXData = new u8[imagebytes];
 
-	c8 cnt, value;
+	u8 cnt, value;
 	for( s32 offset = 0; offset < imagebytes; )
 	{
 		file->read( &cnt, 1 );
@@ -152,34 +145,32 @@ IImage* CImageLoaderPCX::loadImage(irr::io::IReadFile* file)
 			cnt &= 0x3f;
 			file->read( &value, 1 );
 		}
-		while( cnt )
-		{
-			PCXData[offset] = value;
-			cnt--;
-			offset++;
-		}
+		memset(PCXData+offset, value, cnt);
+		offset += cnt;
 	}
 
 	// create image
 	video::IImage* image = 0;
-	pitch = header.BytesPerLine - width * header.Planes * header.BitsPerPixel / 8;
+	s32 pitch = header.BytesPerLine - width * header.Planes * header.BitsPerPixel / 8;
 
 	if (pitch < 0)
 		pitch = -pitch;
 
-	switch(header.BitsPerPixel)
+	switch(header.BitsPerPixel) // TODO: Other formats
 	{
 	case 8:
 		image = new CImage(ECF_A1R5G5B5, core::dimension2d<s32>(width, height));
-		CColorConverter::convert8BitTo16Bit(PCXData, (s16*)image->lock(), width, height, pitch, PaletteData);
-		image->unlock();
+		if (image)
+			CColorConverter::convert8BitTo16Bit(PCXData, (s16*)image->lock(), width, height, PaletteData, pitch);
 		break;
 	case 24:
 		image = new CImage(ECF_R8G8B8, core::dimension2d<s32>(width, height));
-		CColorConverter::convert24BitTo24BitFlipMirrorColorShuffle(PCXData, (c8*)image->lock(), width, height, pitch);
-		image->unlock();
+		if (image)
+			CColorConverter::convert24BitTo24Bit(PCXData, (u8*)image->lock(), width, height, pitch);
 		break;
 	};
+	if (image)
+		image->unlock();
 
 	// clean up
 
@@ -195,7 +186,7 @@ IImage* CImageLoaderPCX::loadImage(irr::io::IReadFile* file)
 }
 
 
-//! creates a loader which is able to load tgas
+//! creates a loader which is able to load pcx images
 IImageLoader* createImageLoaderPCX()
 {
 	return new CImageLoaderPCX();

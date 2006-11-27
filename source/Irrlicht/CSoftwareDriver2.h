@@ -10,7 +10,7 @@
 #include "CNullDriver.h"
 #include "CImage.h"
 #include "os.h"
-#include <memory.h>
+#include <string.h>
 
 namespace irr
 {
@@ -61,28 +61,8 @@ namespace video
 		//! \param color: New color of the ambient light.
 		virtual void setAmbientLight(const SColorf& color);
 
-		//! draws an indexed triangle list
-		virtual void drawIndexedTriangleList(const S3DVertex* vertices, s32 vertexCount,
-			const u16* indexList, s32 triangleCount);
-
-		//! draws an indexed triangle list
-		virtual void drawIndexedTriangleList(const S3DVertex2TCoords* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle list.
-		virtual void drawIndexedTriangleList(const S3DVertexTangents* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle fan.
-		virtual void drawIndexedTriangleFan(const S3DVertex* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! Draws an indexed triangle fan.
-		virtual void drawIndexedTriangleFan(const S3DVertex2TCoords* vertices,
-			s32 vertexCount, const u16* indexList, s32 triangleCount);
-
-		//! draws an 2d image
-		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos);
+		//! draws a vertex primitive list
+		void drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType);
 
 		//! draws an 2d image, using a color (if color is other then Color(255,255,255,255)) and the alpha channel of the texture if wanted.
 		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos,
@@ -118,7 +98,7 @@ namespace video
 		virtual const core::matrix4& getTransform(E_TRANSFORMATION_STATE state);
 
 		//! Creates a render target texture.
-		virtual ITexture* createRenderTargetTexture(core::dimension2d<s32> size);
+		virtual ITexture* createRenderTargetTexture(const core::dimension2d<s32>& size);
 	
 		//! Clears the ZBuffer. 
 		virtual void clearZBuffer();
@@ -126,13 +106,16 @@ namespace video
 		//! Returns an image created from the last rendered frame.
 		virtual IImage* createScreenShot();
 
+		//! Enables or disables a texture creation flag.
+		virtual void setTextureCreationFlag(E_TEXTURE_CREATION_FLAG flag, bool enabled);
+
 	protected:
 
 		//! sets a render target
 		void setRenderTarget(video::CImage* image);
 
 		//! sets the current Texture
-		void setTexture(u32 stage, video::ITexture* texture);
+		bool setTexture(u32 stage, video::ITexture* texture);
 
 		//! returns a device dependent texture from a software surface (IImage)
 		//! THIS METHOD HAS TO BE OVERRIDDEN BY DERIVED DRIVERS WITH OWN TEXTURES
@@ -182,15 +165,14 @@ namespace video
 		s4DVertex Temp[10];
 
 		u32 clipToFrustrum_NoStat ( s4DVertex *source, s4DVertex * temp, u32 vIn );
-		u32 clipToFrustrum_Stat ( s4DVertex *source, s4DVertex * temp, u32 vIn );
 		void ndc_2_dc_and_project ( s4DVertex *source, u32 vIn ) const;
-		f32 backface ( s4DVertex *v0 ) const;
+		f32 backface ( const s4DVertex *v0 ) const;
+		void select_polygon_mipmap ( s4DVertex *source, u32 vIn, s32 tex );
+		f32 texelarea ( const s4DVertex *v0, int tex ) const;
 
 
 		void transform_and_lighting ( s4DVertex *dest, const S3DVertex **face );
 
-		void apply_tex_coords ( s4DVertex *dest, const S3DVertex **face );
-		void apply_tex_coords ( s4DVertex *dest, const S3DVertex2TCoords ** face );
 
 		sVec4 Global_AmbientLight;
 
@@ -214,92 +196,7 @@ namespace video
 		};
 
 		SInternalMaterial Material;
-	
-		
 
-
-#ifdef SOFTWARE_DRIVER_2_STATISTIC
-		struct SClipStat
-		{
-			u32 In;
-			u32 Out;
-			u32 Part;
-		};
-		struct SStat
-		{
-			void clear ()
-			{
-				Primitive = 0;
-				Backface = 0;
-				DrawTriangle = 0;
-				for ( int i = 0; i!= 7; ++i )
-				{
-					Clip[i].In = 0;
-					Clip[i].Out = 0;
-					Clip[i].Part = 0;
-				}
-
-				Start = os::Timer::getRealTime();
-			}
-
-			void clip ( u32 vOut, int plane )
-			{
-				if ( vOut < 3 )
-				{
-					Clip[plane].Out += 1;
-				}
-				else if ( vOut == 3 )
-				{
-					Clip[plane].In += 1;
-				}
-				else
-				{
-					Clip[plane].Part += 1;
-				}
-			}
-
-			void stop ()
-			{
-				Stop = os::Timer::getRealTime();
-			}
-
-			void dump ()
-			{
-				char buf[255];
-				sprintf ( buf, "Stat: %d ms Prim: %d Back: %d Clip_In: %d Clip_Out: %d Clip_Part %d Tri: %d",
-								Stop - Start,
-								Primitive,
-								Backface,
-								Clip[6].In,
-								Clip[6].Out,
-								Clip[6].Part,
-								DrawTriangle
-							);
-				os::Printer::print(buf);
-				for ( int i = 0; i!= 6; ++i )
-				{
-					sprintf ( buf," Plane:%d Out: %d In: %d Part:%d",
-								i,
-								Clip[i].Out,
-								Clip[i].In,
-								Clip[i].Part
-							);
-					os::Printer::print(buf);
-				}
-			}
-
-			u32 Start;
-			u32 Stop;
-
-			u32 Primitive;
-			u32 Backface;
-			u32 DrawTriangle;
-
-			SClipStat Clip[6 + 1];
-			
-		};
-		SStat Stat;
-#endif
 	};
 
 } // end namespace video

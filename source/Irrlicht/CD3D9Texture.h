@@ -17,6 +17,7 @@ namespace irr
 namespace video
 {
 
+class CD3D9Driver;
 /*!
 	interface for a Video Driver dependent Texture.
 */
@@ -25,11 +26,11 @@ class CD3D9Texture : public ITexture
 public:
 
 	//! constructor
-	CD3D9Texture(IImage* image, IDirect3DDevice9* device,
+	CD3D9Texture(IImage* image, CD3D9Driver* driver,
 		u32 flags, const char* name);
 
 	//! rendertarget constructor
-	CD3D9Texture(IDirect3DDevice9* device, core::dimension2d<s32> size, const char* name);
+	CD3D9Texture(CD3D9Driver* driver, core::dimension2d<s32> size, const char* name);
 
 	//! destructor
 	virtual ~CD3D9Texture();
@@ -50,7 +51,7 @@ public:
 	virtual E_DRIVER_TYPE getDriverType();
 
 	//! returns color format of texture
-	virtual ECOLOR_FORMAT getColorFormat();
+	virtual ECOLOR_FORMAT getColorFormat() const;
 
 	//! returns pitch of texture (in bytes)
 	virtual s32 getPitch();
@@ -84,15 +85,14 @@ private:
 	//! copies the image to the texture
 	bool copyTexture();
 
-	//! optimized for 16 bit to 16 copy. This is in here because before
-	//! version 0.4.2, the engine only used A1R5G5B5 hardware textures,
+	//! optimized for 16 bit to 16 copy.
 	bool copyTo16BitTexture();
 
 	//! copies texture to 32 bit hardware texture
 	bool copyTo32BitTexture();
 
 	bool createMipMaps(s32 level=1);
-
+	
 	void copy16BitMipMap(char* src, char* tgt,
 		s32 width, s32 height,  s32 pitchsrc, s32 pitchtgt);
 
@@ -103,6 +103,7 @@ private:
 	IDirect3DDevice9* Device;
 	IDirect3DTexture9* Texture;
 	IDirect3DSurface9* RTTSurface;
+	CD3D9Driver* Driver;
 	core::dimension2d<s32> TextureSize;
 	core::dimension2d<s32> ImageSize;
 	s32 Pitch;

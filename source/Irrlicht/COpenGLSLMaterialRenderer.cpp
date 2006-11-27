@@ -103,11 +103,13 @@ void COpenGLSLMaterialRenderer::init(s32& outMaterialTypeNr,
 	if (!createProgram()) 
 		return;
 
+#if defined(GL_ARB_vertex_shader) && defined (GL_ARB_fragment_shader)
 	if (!createShader(GL_VERTEX_SHADER_ARB, vertexShaderProgram))
 		return;
 
 	if (!createShader(GL_FRAGMENT_SHADER_ARB, pixelShaderProgram)) 
 		return;
+#endif
 
 	if (!linkProgram()) 
 		return;
@@ -132,6 +134,13 @@ void COpenGLSLMaterialRenderer::OnSetMaterial(video::SMaterial& material,
 				  bool resetAllRenderstates, 
 				  video::IMaterialRendererServices* services)
 {
+	Driver->setTexture(3, material.Texture4);
+	Driver->setTexture(2, material.Texture3);
+	Driver->setTexture(1, material.Texture2);
+	Driver->setTexture(0, material.Texture1);
+
+	Driver->setBasicRenderStates(material, lastMaterial, resetAllRenderstates);
+
 	if (material.MaterialType != lastMaterial.MaterialType || resetAllRenderstates)
 	{
 		if(Program)
@@ -174,15 +183,20 @@ bool COpenGLSLMaterialRenderer::createShader(GLenum shaderType, const char* shad
 
 	int status = 0;
 
+#ifdef GL_ARB_shader_objects
 	Driver->extGlGetObjectParameterivARB(shaderHandle, GL_OBJECT_COMPILE_STATUS_ARB, &status);
+#endif
 
 	if (!status)
 	{
 		os::Printer::log("GLSL shader failed to compile");
 		// check error message and log it
-		int maxLength, length;
+		int maxLength=0;
+		GLsizei length;
+#ifdef GL_ARB_shader_objects
 		Driver->extGlGetObjectParameterivARB(shaderHandle,
 				 GL_OBJECT_INFO_LOG_LENGTH_ARB, &maxLength);
+#endif
 		GLcharARB *pInfoLog = new GLcharARB[maxLength];
 		Driver->extGlGetInfoLogARB(shaderHandle, maxLength, &length, pInfoLog);
 		os::Printer::log((const c8*)pInfoLog);
@@ -202,15 +216,20 @@ bool COpenGLSLMaterialRenderer::linkProgram()
 
 	int status = 0;
 
+#ifdef GL_ARB_shader_objects
 	Driver->extGlGetObjectParameterivARB(Program, GL_OBJECT_LINK_STATUS_ARB, &status);
+#endif
 
 	if (!status)
 	{
 		os::Printer::log("GLSL shader program failed to link");
 		// check error message and log it
-		int maxLength, length;
+		int maxLength=0;
+		GLsizei length;
+#ifdef GL_ARB_shader_objects
 		Driver->extGlGetObjectParameterivARB(Program,
 				 GL_OBJECT_INFO_LOG_LENGTH_ARB, &maxLength);
+#endif
 		GLcharARB *pInfoLog = new GLcharARB[maxLength];
 		Driver->extGlGetInfoLogARB(Program, maxLength, &length, pInfoLog);
 		os::Printer::log((const c8*)pInfoLog);
@@ -222,7 +241,9 @@ bool COpenGLSLMaterialRenderer::linkProgram()
 	// get uniforms information
 
 	int num = 0;
+#ifdef GL_ARB_shader_objects
 	Driver->extGlGetObjectParameterivARB(Program, GL_OBJECT_ACTIVE_UNIFORMS_ARB, &num);
+#endif
 
 	if (num == 0)
 	{
@@ -231,7 +252,9 @@ bool COpenGLSLMaterialRenderer::linkProgram()
 	}
 
 	int maxlen = 0;
+#ifdef GL_ARB_shader_objects
 	Driver->extGlGetObjectParameterivARB(Program, GL_OBJECT_ACTIVE_UNIFORM_MAX_LENGTH_ARB, &maxlen);
+#endif
 
 	if (maxlen == 0) 
 	{
@@ -250,7 +273,7 @@ bool COpenGLSLMaterialRenderer::linkProgram()
 		memset(buf, 0, maxlen);
 
 		GLint size;
-		Driver->extGlGetActiveUniformARB(Program, i, maxlen, 0, &size, &ui.type, buf);
+		Driver->extGlGetActiveUniformARB(Program, i, maxlen, 0, &size, &ui.type, (GLcharARB*)buf);
 		ui.name = buf;
 
 		UniformInfo.push_back(ui);
@@ -295,6 +318,7 @@ bool COpenGLSLMaterialRenderer::setPixelShaderConstant(const c8* name, const f32
 
     if (i == num) return false;
 
+#ifdef GL_ARB_shader_objects
     switch (UniformInfo[i].type) 
 	{
         case GL_FLOAT:          
@@ -322,6 +346,7 @@ bool COpenGLSLMaterialRenderer::setPixelShaderConstant(const c8* name, const f32
 			Driver->extGlUniform1ivARB(i, count, (GLint*)floats);
 			break;
     }
+#endif
 
     return true;
 }

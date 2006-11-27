@@ -32,9 +32,7 @@ CSkyBoxSceneNode::CSkyBoxSceneNode(video::ITexture* top, video::ITexture* bottom
 	Indices[0] = 0;
 	Indices[1] = 1;
 	Indices[2] = 2;
-	Indices[3] = 0;
-	Indices[4] = 2;
-	Indices[5] = 3;
+	Indices[3] = 3;
 
 	// create material
 
@@ -160,7 +158,7 @@ void CSkyBoxSceneNode::render()
 		for (s32 i=0; i<6; ++i)
 		{
 			driver->setMaterial(Material[i]);
-			driver->drawIndexedTriangleList(&Vertices[i*4], 4, Indices, 2);
+			driver->drawIndexedTriangleFan(&Vertices[i*4], 4, Indices, 2);
 		}
 	}
 	else
@@ -199,7 +197,7 @@ void CSkyBoxSceneNode::render()
 
 		if ( tex )
 		{
-			core::rect<s32> rctDest(core::position2d<s32>(-1,0), driver->getScreenSize());
+			core::rect<s32> rctDest(core::position2d<s32>(-1,0), driver->getCurrentRenderTargetSize());
 			core::rect<s32> rctSrc(core::position2d<s32>(0,0), tex->getSize());
 
 			driver->draw2DImage(tex, rctDest, rctSrc);

@@ -8,7 +8,7 @@
 #include "IParticleSystemSceneNode.h"
 #include "irrArray.h"
 #include "irrList.h"
-#include "S3DVertex.h"
+#include "SMeshBuffer.h"
 
 namespace irr
 {
@@ -16,8 +16,8 @@ namespace scene
 {
 
 //! A particle system scene node.
-/** A scene node controlling a particle System. The behavior of the particles
-can be controlling by setting the right particle emitters and effectors.
+/** A scene node controlling a particle system. The behavior of the particles
+can be controlled by setting the right particle emitters and affectors.
 */
 class CParticleSystemSceneNode : public IParticleSystemSceneNode
 {
@@ -36,7 +36,7 @@ public:
 	//! Sets the particle emitter, which creates the particles.
 	virtual void setEmitter(IParticleEmitter* emitter);
 
-	//! Adds new particle effector to the particle system.
+	//! Adds new particle affector to the particle system.
 	virtual void addAffector(IParticleAffector* affector);
 
 	//! Removes all particle affectors in the particle system.
@@ -59,7 +59,7 @@ public:
 
 	//! Creates a point particle emitter.
 	virtual IParticleEmitter* createPointEmitter(
-		core::vector3df direction = core::vector3df(0.0f,0.03f,0.0f), 
+		const core::vector3df& direction = core::vector3df(0.0f,0.03f,0.0f), 
 		u32 minParticlesPerSecond = 5,
 		u32 maxParticlePerSecond = 10,
 		video::SColor minStartColor = video::SColor(255,0,0,0),
@@ -69,8 +69,8 @@ public:
 
 	//! Creates a box particle emitter.
 	virtual IParticleEmitter* createBoxEmitter(
-		core::aabbox3d<f32> box = core::aabbox3d<f32>(-10,0,-10,5,30,10),
-		core::vector3df direction = core::vector3df(0.0f,0.03f,0.0f), 
+		const core::aabbox3df& box = core::aabbox3d<f32>(-10,0,-10,5,30,10),
+		const core::vector3df& direction = core::vector3df(0.0f,0.03f,0.0f), 
 		u32 minParticlesPerSecond = 5,
 		u32 maxParticlePerSecond = 10,
 		video::SColor minStartColor = video::SColor(255,0,0,0),
@@ -85,15 +85,15 @@ public:
 
 	//! Creates a gravity affector.
 	virtual IParticleAffector* createGravityAffector(
-		core::vector3df gravity = core::vector3df(0.0f,-0.03f,0.0f),
+		const core::vector3df& gravity = core::vector3df(0.0f,-0.03f,0.0f),
 		u32 timeForceLost = 1000);
 
 	//! Sets the size of all particles.
 	virtual void setParticleSize(
 		const core::dimension2d<f32> &size = core::dimension2d<f32>(5.0f, 5.0f));
 
-	//! Sets if the particles should be global. If it is, the particles are affected by 
-	//! the movement of the particle system scene node too, otherwise they completely 
+	//! Sets if the particles should be global. If they are, the particles are affected by
+	//! the movement of the particle system scene node too, otherwise they completely
 	//! ignore it. Default is true.
 	virtual void setParticlesAreGlobal(bool global);
 
@@ -114,13 +114,19 @@ private:
 	core::list<IParticleAffector*> AffectorList;
 	IParticleEmitter* Emitter;
 	core::array<SParticle> Particles;
-	video::SMaterial Material;
-	core::aabbox3d<f32> Box;
-	u32 lastEmitTime;
 	core::dimension2d<f32> ParticleSize;
+	u32 LastEmitTime;
+	s32 MaxParticles;
 
-	core::array<video::S3DVertex> Vertices; // 4 vertices per particle
-	core::array<u16> Indices; // 6 indices per particle
+	SMeshBuffer Buffer;
+
+	enum E_PARTICLES_PRIMITIVE
+	{
+		EPP_POINT=0,
+		EPP_BILLBOARD,
+		EPP_POINTSPRITE
+	};
+	E_PARTICLES_PRIMITIVE ParticlePrimitive;
 
 	bool ParticlesAreGlobal;
 };

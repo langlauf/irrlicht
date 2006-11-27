@@ -8,7 +8,6 @@
 
 #include "SoftwareDriver2_compile_config.h"
 #include "SoftwareDriver2_helper.h"
-#include "S3DVertex.h"
 
 namespace irr
 {
@@ -110,10 +109,10 @@ struct sVec4
 
 	void setA8R8G8B8 ( u32 argb )
 	{
-		x = ( ( argb & 0xFF000000 ) >> 24 ) / 255.f;
-		y = ( ( argb & 0x00FF0000 ) >> 16 ) / 255.f;
-		z = ( ( argb & 0x0000FF00 ) >>  8 ) / 255.f;
-		w = ( ( argb & 0x000000FF )       ) / 255.f;
+		x = ( ( argb & 0xFF000000 ) >> 24 ) * ( 1.f / 255.f );
+		y = ( ( argb & 0x00FF0000 ) >> 16 ) * ( 1.f / 255.f );
+		z = ( ( argb & 0x0000FF00 ) >>  8 ) * ( 1.f / 255.f );
+		w = ( ( argb & 0x000000FF )       ) * ( 1.f / 255.f );
 	}
 
 	void setColorf ( const irr::video::SColorf & color )
@@ -206,18 +205,17 @@ struct sVec4
 struct s4DVertex
 {
 	sVec4 Pos;
-	sVec4 Color;				
+	sVec4 Color;
 
-	sVec2 Tex0;	
-	sVec2 Tex1;	
+	sVec2 Tex[2];
 
 	// f = a * t + b * ( 1 - t )
 	void interpolate(const s4DVertex& b, const s4DVertex& a, const f32 t)
 	{
 		Pos.interpolate ( a.Pos, b.Pos, t );
 		Color.interpolate ( a.Color, b.Color, t );
-		Tex0.interpolate ( a.Tex0, b.Tex0, t );
-		Tex1.interpolate ( a.Tex1, b.Tex1, t );
+		Tex[0].interpolate ( a.Tex[0], b.Tex[0], t );
+		Tex[1].interpolate ( a.Tex[1], b.Tex[1], t );
 	}
 };
 
@@ -244,12 +242,12 @@ struct sScanConvertData
 	f32 x[2];			// x coordinate
 	f32 slopeX[2];		// x slope along edges
 
-	f32 z[2];			// z coordinate
-	f32 slopeZ[2];		// z slope along edges
-
-#ifdef SOFTWARE_DRIVER_2_PERSPECTIVE_CORRECT	
+#if defined ( SOFTWARE_DRIVER_2_USE_WBUFFER ) || defined ( SOFTWARE_DRIVER_2_PERSPECTIVE_CORRECT )
 	f32 w[2];			// w coordinate
 	f32 slopeW[2];		// w slope along edges
+#else
+	f32 z[2];			// z coordinate
+	f32 slopeZ[2];		// z slope along edges
 #endif
 
 	sVec4 c[2];			// color
@@ -268,13 +266,14 @@ struct sScanLineData
 {
 	s32 y;			// y position of scanline
 	f32 x[2];			// x start, x end of scanline
-	f32 z[2];			// z start, z end of scanline
 
-#ifdef SOFTWARE_DRIVER_2_PERSPECTIVE_CORRECT	
+#if defined ( SOFTWARE_DRIVER_2_USE_WBUFFER ) || defined ( SOFTWARE_DRIVER_2_PERSPECTIVE_CORRECT )
 	f32 w[2];			// w start, w end of scanline
+#else
+	f32 z[2];			// z start, z end of scanline
 #endif
 
-	sVec4 c[2];						// color start, color end of scanline
+	sVec4 c[2];		// color start, color end of scanline
 	sVec2 t0[2];		// texture start, texture end of scanline
 	sVec2 t1[2];		// texture start, texture end of scanline
 };
@@ -284,7 +283,7 @@ struct sScanLineData
 	load a color value
 */
 inline void getSample_plain (	tFixPoint &r, tFixPoint &g, tFixPoint &b, 
-								const sVec4 &v
+							const sVec4 &v
 							)
 {
 	r = f32_to_fixPoint ( v.y );
@@ -296,25 +295,25 @@ inline void getSample_plain (	tFixPoint &r, tFixPoint &g, tFixPoint &b,
 	load a color value
 */
 inline void getSample_color (	tFixPoint &a, tFixPoint &r, tFixPoint &g, tFixPoint &b, 
-								const sVec4 &v
+							const sVec4 &v
 							)
 {
 	a = f32_to_fixPoint ( v.x );
-	r = f32_to_fixPoint ( v.y * (f32) COLOR_MAX );
-	g = f32_to_fixPoint ( v.z * (f32) COLOR_MAX );
-	b = f32_to_fixPoint ( v.w * (f32) COLOR_MAX );
+	r = f32_to_fixPoint ( v.y, COLOR_MAX * FIX_POINT_F32_MUL);
+	g = f32_to_fixPoint ( v.z, COLOR_MAX * FIX_POINT_F32_MUL);
+	b = f32_to_fixPoint ( v.w, COLOR_MAX * FIX_POINT_F32_MUL);
 }
 
 /*
 	load a color value
 */
 inline void getSample_color (	tFixPoint &r, tFixPoint &g, tFixPoint &b, 
-								const sVec4 &v
+							const sVec4 &v
 							)
 {
-	r = f32_to_fixPoint ( v.y * (f32) COLOR_MAX );
-	g = f32_to_fixPoint ( v.z * (f32) COLOR_MAX );
-	b = f32_to_fixPoint ( v.w * (f32) COLOR_MAX );
+	r = f32_to_fixPoint ( v.y, COLOR_MAX * FIX_POINT_F32_MUL);
+	g = f32_to_fixPoint ( v.z, COLOR_MAX * FIX_POINT_F32_MUL);
+	b = f32_to_fixPoint ( v.w, COLOR_MAX * FIX_POINT_F32_MUL);
 }
 
 

@@ -142,7 +142,7 @@ int main()
 
 	printf("Please select the driver you want for this example:\n"\
 		" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.5\n"\
-		" (d) Software Renderer\n (e) Apfelbaum Software Renderer\n"\
+		" (d) Software Renderer\n (e) Burning's Software Renderer\n"\
 		" (f) NullDevice\n (otherKey) exit\n\n");
 
 	char i;
@@ -171,7 +171,7 @@ int main()
 
 	MyEventReceiver receiver;
 	device->setEventReceiver(&receiver);
-	device->setWindowCaption(L"Irrlicht Engine - User Inferface Demo");
+	device->setWindowCaption(L"Irrlicht Engine - User Interface Demo");
 
 	video::IVideoDriver* driver = device->getVideoDriver();
 	IGUIEnvironment* env = device->getGUIEnvironment();
@@ -213,6 +213,7 @@ int main()
 	env->addStaticText(L"Transparent Control:", rect<s32>(150,20,350,40), true);
 	IGUIScrollBar* scrollbar = env->addScrollBar(true, rect<s32>(150, 45, 350, 60), 0, 104);
 	scrollbar->setMax(255);
+
 	// set scrollbar position to alpha value of an arbitrary element
 	scrollbar->setPos(env->getSkin()->getColor((EGUI_DEFAULT_COLOR)0).getAlpha());
 

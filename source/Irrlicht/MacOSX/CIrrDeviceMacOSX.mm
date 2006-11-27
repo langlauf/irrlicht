@@ -75,7 +75,7 @@ CIrrDeviceMacOSX::CIrrDeviceMacOSX(video::E_DRIVER_TYPE driverType,
 	initKeycodes();
 	if (driverType != video::EDT_NULL) createWindow(windowSize,bits,fullscreen,vsync,stencilbuffer);
 	CursorControl = new CCursorControl(windowSize, this);
-	createDriver(driverType,windowSize,bits,fullscreen,stencilbuffer, antiAlias);
+	createDriver(driverType,windowSize,bits,fullscreen,stencilbuffer,vsync,antiAlias);
 	createGUIAndScene();
 }
 
@@ -256,7 +256,7 @@ void	CIrrDeviceMacOSX::setResize(int width,int height)
 	getVideoDriver()->OnResize(core::dimension2d<s32>(width, height));
 }
 
-void	CIrrDeviceMacOSX::createDriver(video::E_DRIVER_TYPE driverType,const core::dimension2d<s32>& windowSize,u32 bits,bool fullscreen,bool stencilbuffer, bool antiAlias)
+void	CIrrDeviceMacOSX::createDriver(video::E_DRIVER_TYPE driverType,const core::dimension2d<s32>& windowSize,u32 bits,bool fullscreen,bool stencilbuffer, bool vsync, bool antiAlias)
 {
 	switch (driverType)
 	{
@@ -270,7 +270,7 @@ void	CIrrDeviceMacOSX::createDriver(video::E_DRIVER_TYPE driverType,const core::
 
 		case video::EDT_OPENGL:
 		#ifdef _IRR_COMPILE_WITH_OPENGL_
-			VideoDriver = video::createOpenGLDriver(windowSize, this, fullscreen, stencilbuffer, FileSystem, false, antiAlias);
+			VideoDriver = video::createOpenGLDriver(windowSize, this, fullscreen, stencilbuffer, FileSystem, vsync, antiAlias);
 		#endif
 			break;
 
@@ -551,13 +551,6 @@ void	CIrrDeviceMacOSX::initKeycodes()
 	_keycodes[0x1B] = irr::KEY_ESCAPE;
 }
 
-#define IRRLICHT_API
-
-#if defined(_STDCALL_SUPPORTED)
-#define IRRCALLCONV __stdcall  // Declare the calling convention.
-#else
-#define IRRCALLCONV
-#endif // STDCALL_SUPPORTED
 
 IRRLICHT_API IrrlichtDevice* IRRCALLCONV createDeviceEx(const SIrrlichtCreationParameters& param)
 {

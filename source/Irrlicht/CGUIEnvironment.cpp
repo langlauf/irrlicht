@@ -15,6 +15,7 @@
 #include "CGUICheckBox.h"
 #include "CGUIListBox.h"
 #include "CGUIFileOpenDialog.h"
+#include "CGUIColorSelectDialog.h"
 #include "CGUIStaticText.h"
 #include "CGUIEditBox.h"
 #include "CGUIInOutFader.h"
@@ -28,7 +29,7 @@
 
 #include "CGUISkin.h"
 
-#include "BuildInFont.h"
+#include "BuiltInFont.h"
 #include "os.h"
 
 namespace irr
@@ -56,7 +57,7 @@ CGUIEnvironment::CGUIEnvironment(io::IFileSystem* fs, video::IVideoDriver* drive
 	IGUIEnvironment::setDebugName("CGUIEnvironment");
 	#endif
 
-	loadBuidInFont();
+	loadBuiltInFont();
 
 	IGUISkin* skin = createSkin(EGST_WINDOWS_METALLIC);
 	setSkin(skin);
@@ -92,16 +93,10 @@ CGUIEnvironment::~CGUIEnvironment()
 }
 
 
-
-void CGUIEnvironment::loadBuidInFont()
+void CGUIEnvironment::loadBuiltInFont()
 {
 	const c8* filename = "#DefaultFont";
-
-#ifdef __BIG_ENDIAN__
-	for (int i=0;i<sizeof(BuildInFontData)/sizeof(s32);i++) BuildInFontData[i] = OSReadSwapInt32(&BuildInFontData[i],0);
-#endif
-
-	io::IReadFile* file = io::createMemoryReadFile(BuildInFontData, BuildInFontDataSize, filename, false);
+	io::IReadFile* file = io::createMemoryReadFile(BuiltInFontData, BuiltInFontDataSize, filename, false);
 
 	CGUIFont* font = new CGUIFont(Driver);
 	if (!font->load(file))
@@ -490,6 +485,27 @@ IGUIFileOpenDialog* CGUIEnvironment::addFileOpenDialog(const wchar_t* title,
 }
 
 
+//! adds a color select dialog. The returned pointer must not be dropped.
+IGUIColorSelectDialog* CGUIEnvironment::addColorSelectDialog(const wchar_t* title, 
+													   bool modal,
+													   IGUIElement* parent, s32 id)
+{
+	parent = parent ? parent : this;
+
+	if (modal)
+	{
+		parent = new CGUIModalScreen(this, parent, -1);
+		parent->drop();
+	}
+
+    IGUIColorSelectDialog* d = new CGUIColorSelectDialog( title,
+			this, parent, id);
+
+	d->drop();
+	return d;
+}
+
+
 
 //! adds a static text. The returned pointer must not be dropped.
 IGUIStaticText* CGUIEnvironment::addStaticText(const wchar_t* text,  
@@ -659,8 +675,9 @@ IGUIFont* CGUIEnvironment::getBuiltInFont()
 	if (Fonts.empty())
 		return 0;
 
-	return  Fonts[0].Font;
+	return Fonts[0].Font;
 }
+
 
 
 //! Returns the root gui element. 
@@ -677,6 +694,7 @@ IGUIEnvironment* createGUIEnvironment(io::IFileSystem* fs, video::IVideoDriver* 
 {
 	return new CGUIEnvironment(fs, Driver, op);
 }
+
 
 } // end namespace gui
 } // end namespace irr

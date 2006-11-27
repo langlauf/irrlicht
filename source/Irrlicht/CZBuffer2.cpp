@@ -2,6 +2,8 @@
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
+#include "SoftwareDriver2_compile_config.h"
+
 #include "CZBuffer2.h"
 
 namespace irr
@@ -13,7 +15,7 @@ namespace video
 
 //! constructor
 CZBuffer2::CZBuffer2(const core::dimension2d<s32>& size)
-: Buffer(0), Size(0,0), TotalSize(0), BufferEnd(0)
+: Buffer(0), Size(0,0), TotalSize(0)
 {
 	#ifdef _DEBUG
 	setDebugName("CZBuffer2");
@@ -36,9 +38,14 @@ CZBuffer2::~CZBuffer2()
 //! clears the zbuffer
 void CZBuffer2::clear()
 {
-	u32 zMaxValue;
 
+#ifdef SOFTWARE_DRIVER_2_USE_WBUFFER
+	f32 zMax = 0.f;
+#else
 	f32 zMax = 1.f;
+#endif
+
+	u32 zMaxValue;
 	zMaxValue = *(u32*) &zMax;
 
 	memset32 ( Buffer, zMaxValue, TotalSize * sizeof ( TZBufferType2 ) );
@@ -59,7 +66,7 @@ void CZBuffer2::setSize(const core::dimension2d<s32>& size)
 
 	TotalSize = size.Width * size.Height;
 	Buffer = new TZBufferType2[TotalSize];
-	BufferEnd = Buffer + TotalSize;
+//	BufferEnd = Buffer + TotalSize;
 }
 
 
