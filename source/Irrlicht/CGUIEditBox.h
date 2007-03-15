@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -52,6 +52,12 @@ namespace gui
 		//! Returns maximum amount of characters, previously set by setMax();
 		virtual s32 getMax();
 
+		//! Writes attributes of the element.
+		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options);
+
+		//! Reads attributes of the element
+		virtual void deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options);
+
 	protected:
 
 		bool processKey(const SEvent& event);
@@ -61,7 +67,6 @@ namespace gui
 		bool MouseMarking;
 		bool Border;
 		bool OverrideColorEnabled;
-		bool WordWrap;
 		s32 MarkBegin;
 		s32 MarkEnd;
 

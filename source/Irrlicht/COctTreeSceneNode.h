@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -25,7 +25,7 @@ namespace scene
 		//! destructor
 		virtual ~COctTreeSceneNode();
 
-		virtual void OnPreRender();
+		virtual void OnRegisterSceneNode();
 
 		//! renders the node.
 		virtual void render();
@@ -41,10 +41,10 @@ namespace scene
 		//! This function is needed for inserting the node into the scene hirachy on a
 		//! optimal position for minimizing renderstate changes, but can also be used
 		//! to directly modify the material of a scene node.
-		virtual video::SMaterial& getMaterial(s32 i);
+		virtual video::SMaterial& getMaterial(u32 i);
 		
 		//! returns amount of materials used by this scene node.
-		virtual s32 getMaterialCount();
+		virtual u32 getMaterialCount();
 
 		//! Writes attributes of the scene node.
 		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0);
@@ -70,7 +70,8 @@ namespace scene
 		video::E_VERTEX_TYPE vertexType;
 		core::array< video::SMaterial > Materials;
 
-		IMesh* Mesh;
+		//IMesh* Mesh;
+		core::stringc MeshName;
 		s32 MinimalPolysPerNode;
 		s32 PassCount;
 	};

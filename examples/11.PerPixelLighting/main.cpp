@@ -42,10 +42,10 @@ public:
 
 		// add window and listbox
 		gui::IGUIWindow* window = env->addWindow(
-			core::rect<s32>(490,390,630,470), false, L"Use 'E' + 'R' to change");
+			core::rect<s32>(460,375,630,470), false, L"Use 'E' + 'R' to change");
 
 		ListBox = env->addListBox(
-			core::rect<s32>(2,22,135,78), window);
+			core::rect<s32>(2,22,165,88), window);
 
 		ListBox->addItem(L"Diffuse");
 		ListBox->addItem(L"Bump mapping");
@@ -56,7 +56,7 @@ public:
 		ProblemText = env->addStaticText(
 			L"Your hardware or this renderer is not able to use the "\
 			L"needed shaders for this material. Using fall back materials.",
-			core::rect<s32>(150,20,470,60));
+			core::rect<s32>(150,20,470,80));
 
 		ProblemText->setOverrideColor(video::SColor(100,255,255,255));
 
@@ -170,7 +170,7 @@ int main()
 		case 'b': driverType = video::EDT_DIRECT3D8;break;
 		case 'c': driverType = video::EDT_OPENGL;   break;
 		case 'd': driverType = video::EDT_SOFTWARE; break;
-		case 'e': driverType = video::EDT_SOFTWARE2;break;
+		case 'e': driverType = video::EDT_BURNINGSVIDEO;break;
 		case 'f': driverType = video::EDT_NULL;     break;
 		default: return 0;
 	}	
@@ -200,7 +200,7 @@ int main()
 	driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, true);
 
 	// add irrlicht logo
-	env->addImage(driver->getTexture("../../media/irrlichtlogoalpha2.tga"),
+	env->addImage(driver->getTexture("../../media/irrlichtlogo2.png"),
 		core::position2d<s32>(10,10));
 		
 	// add camera
@@ -272,10 +272,10 @@ int main()
 
 		scene::IMesh* tangentMesh = smgr->getMeshManipulator()->createMeshWithTangents(
 			roomMesh->getMesh(0));
-			
+
 		room = smgr->addMeshSceneNode(tangentMesh);
-		room->setMaterialTexture(0,	colorMap);
-		room->setMaterialTexture(1,	normalMap);
+		room->setMaterialTexture(0, colorMap);
+		room->setMaterialTexture(1, normalMap);
 
 		room->getMaterial(0).SpecularColor.set(0,0,0,0);
 
@@ -302,19 +302,23 @@ int main()
 	scene::IAnimatedMesh* earthMesh = smgr->getMesh("../../media/earth.x");
 	if (earthMesh)
 	{
+		//perform various task with the mesh manipulator
+		scene::IMeshManipulator *manipulator = smgr->getMeshManipulator();
+
 		// create mesh copy with tangent informations from original earth.x mesh
 		scene::IMesh* tangentSphereMesh = 
-			smgr->getMeshManipulator()->createMeshWithTangents(earthMesh->getMesh(0));
+			manipulator->createMeshWithTangents(earthMesh->getMesh(0));
 
 		// set the alpha value of all vertices to 200
-		smgr->getMeshManipulator()->setVertexColorAlpha(tangentSphereMesh, 200);
+		manipulator->setVertexColorAlpha(tangentSphereMesh, 200);
 		
 		// scale the mesh by factor 50
-		smgr->getMeshManipulator()->scaleMesh(
-			tangentSphereMesh, core::vector3df(50,50,50));
+		core::matrix4 m;
+		m.setScale ( core::vector3df(50,50,50) );
+		manipulator->transformMesh( tangentSphereMesh, m );
 
-		// create mesh scene node
-		scene::ISceneNode* sphere = smgr->addMeshSceneNode(tangentSphereMesh);
+		scene::ISceneNode *sphere = smgr->addMeshSceneNode(tangentSphereMesh);
+
 		sphere->setPosition(core::vector3df(-70,130,45));
 
 		// load heightmap, create normal map from it and set it
@@ -348,6 +352,7 @@ int main()
 		smgr->addLightSceneNode(0, core::vector3df(0,0,0), 
 		video::SColorf(0.5f, 1.0f, 0.5f, 0.0f), 200.0f);
 
+
 	// add fly circle animator to light 1
 	scene::ISceneNodeAnimator* anim = 
 		smgr->createFlyCircleAnimator (core::vector3df(50,300,0),190.0f, -0.003f);
@@ -380,7 +385,7 @@ int main()
 		video::SColorf(1.0f, 0.2f, 0.2f, 0.0f), 200.0f);
 
 	// add fly circle animator to light 2
-	anim = smgr->createFlyCircleAnimator (core::vector3df(0,150,0),200.0f); 
+	anim = smgr->createFlyCircleAnimator (core::vector3df(0,150,0),200.0f, 0.001f, core::vector3df ( 0.2f, 0.9f, 0.f )); 
 	light2->addAnimator(anim);
 	anim->drop();
 

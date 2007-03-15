@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -136,7 +136,7 @@ private:
 	bool readTrackChunk(io::IReadFile* file, ChunkData& data,
 				IMeshBuffer* mb, const core::vector3df& pivot);
 	bool readObjectChunk(io::IReadFile* file, ChunkData* parent);
-	bool readPercentageChunk(io::IReadFile* file, ChunkData* chunk, float&percentage);
+	bool readPercentageChunk(io::IReadFile* file, ChunkData* chunk, f32& percentage);
 	bool readColorChunk(io::IReadFile* file, ChunkData* chunk, video::SColor& out);
 
 	void readChunkData(io::IReadFile* file, ChunkData& data);
@@ -171,7 +171,6 @@ private:
 	SMesh* Mesh;
 
 	IMeshManipulator* Manipulator;
-
 };
 
 } // end namespace scene

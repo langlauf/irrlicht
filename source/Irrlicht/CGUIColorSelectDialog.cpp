@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -9,81 +9,13 @@
 #include "IGUIButton.h"
 #include "IGUIStaticText.h"
 #include "IGUIFont.h"
-#include "GUIIcons.h"
+#include "IGUISpriteBank.h"
 #include "IFileList.h"
 #include "os.h"
 #include "SoftwareDriver2_helper.h"
 
 namespace irr
 {
-namespace video
-{
-	//! Class representing a color in HSV format
-	/**	The color values for hue, saturation, value
-	are stored in a 32 bit floating point variable.
-	*/
-	class SColorHSL
-	{
-	public:
-		void setfromRGB ( const SColor &color );
-		void settoRGB ( SColor &color );
-
-		f32 Hue;
-		f32 Saturation;
-		f32 Luminance;
-	private:
-		u32 toRGB1(f32 rm1, f32 rm2, f32 rh) const;
-	};
-
-	void SColorHSL::setfromRGB ( const SColor &color )
-	{
-	}
-
-	void SColorHSL::settoRGB ( SColor &color )
-	{
-		if ( Saturation == 0.0) // grey
-		{
-			u8 c = (u8) ( Luminance * 255.0 );
-			color.setRed ( c );
-			color.setGreen ( c );
-			color.setBlue ( c );
-			return;
-		}
-
-		f32 rm1, rm2;
-			
-		if ( Luminance <= 0.5f )
-		{
-			rm2 = Luminance + Luminance * Saturation;  
-		}
-		else
-		{
-			rm2 = Luminance + Saturation - Luminance * Saturation;
-		}
-
-		rm1 = 2.0f * Luminance - rm2;   
-
-		color.setRed ( toRGB1(rm1, rm2, Hue + (120.0f * core::DEGTORAD )) );
-		color.setGreen ( toRGB1(rm1, rm2, Hue) );
-		color.setBlue ( toRGB1(rm1, rm2, Hue - (120.0f * core::DEGTORAD) ) );
-	}
-
-
-	u32 SColorHSL::toRGB1(f32 rm1, f32 rm2, f32 rh) const
-	{
-		while ( rh > 2.f * core::PI )
-			rh -= 2.f * core::PI;
-
-		while ( rh < 0.f )
-			rh += 2.f * core::PI;
-
-		if      (rh <  60.0f * core::DEGTORAD ) rm1 = rm1 + (rm2 - rm1) * rh / (60.0f * core::DEGTORAD);
-		else if (rh < 180.0f * core::DEGTORAD ) rm1 = rm2;
-		else if (rh < 240.0f * core::DEGTORAD ) rm1 = rm1 + (rm2 - rm1) * ( ( 240.0f * core::DEGTORAD ) - rh) / (60.0f * core::DEGTORAD);
-		                
-		return (u32) (rm1 * 255.f);
-	}
-}
 namespace gui
 {
 
@@ -125,17 +57,36 @@ CGUIColorSelectDialog::CGUIColorSelectDialog( const wchar_t* title, IGUIEnvironm
 
 	Text = title;
 
+	IGUISkin* skin = Environment->getSkin();
+	core::rect<s32> rec;
+
 	s32 buttonw = environment->getSkin()->getSize(EGDS_WINDOW_BUTTON_WIDTH);
 	s32 posx = RelativeRect.getWidth() - buttonw - 4;
 
-	CloseButton = Environment->addButton(core::rect<s32>(posx, 3, posx + buttonw, 3 + buttonw), this, -1, GUI_ICON_WINDOW_CLOSE);
-	CloseButton->setOverrideFont(Environment->getBuiltInFont());
+	CloseButton = Environment->addButton(core::rect<s32>(posx, 3, posx + buttonw, 3 + buttonw), 
+		this, -1, L"", skin ? skin->getDefaultText(EGDT_WINDOW_CLOSE) : L"Close");
+	if (skin && skin->getSpriteBank())
+	{
+		CloseButton->setSpriteBank(skin->getSpriteBank());
+		CloseButton->setSprite(EGBS_BUTTON_UP, skin->getIcon(EGDI_WINDOW_CLOSE), skin->getColor(EGDC_WINDOW_SYMBOL));
+		CloseButton->setSprite(EGBS_BUTTON_DOWN, skin->getIcon(EGDI_WINDOW_CLOSE), skin->getColor(EGDC_WINDOW_SYMBOL));
+	}
+	CloseButton->setSubElement(true);
+	CloseButton->setAlignment(EGUIA_LOWERRIGHT, EGUIA_LOWERRIGHT, EGUIA_UPPERLEFT, EGUIA_UPPERLEFT); 
 	CloseButton->grab();
 
-	OKButton = Environment->addButton(core::rect<s32>(RelativeRect.getWidth()-80, 30, RelativeRect.getWidth()-10, 50), this, -1, L"OK");
+	OKButton = Environment->addButton(
+		core::rect<s32>(RelativeRect.getWidth()-80, 30, RelativeRect.getWidth()-10, 50),
+		this, -1, skin ? skin->getDefaultText(EGDT_MSG_BOX_OK) : L"OK");
+	OKButton->setSubElement(true);
+	OKButton->setAlignment(EGUIA_LOWERRIGHT, EGUIA_LOWERRIGHT, EGUIA_UPPERLEFT, EGUIA_UPPERLEFT); 
 	OKButton->grab();
 
-	CancelButton = Environment->addButton(core::rect<s32>(RelativeRect.getWidth()-80, 55, RelativeRect.getWidth()-10, 75), this, -1, L"Cancel");
+	CancelButton = Environment->addButton(
+		core::rect<s32>(RelativeRect.getWidth()-80, 55, RelativeRect.getWidth()-10, 75), 
+		this, -1, skin ? skin->getDefaultText(EGDT_MSG_BOX_CANCEL) : L"Cancel");
+	CancelButton->setSubElement(true);
+	CancelButton->setAlignment(EGUIA_LOWERRIGHT, EGUIA_LOWERRIGHT, EGUIA_UPPERLEFT, EGUIA_UPPERLEFT); 
 	CancelButton->grab();
 
 	core::rect<s32> r;
@@ -144,12 +95,14 @@ CGUIColorSelectDialog::CGUIColorSelectDialog( const wchar_t* title, IGUIEnvironm
 	ColorRing.Texture = driver->getTexture ( "#colorring" );
 	if ( 0 == ColorRing.Texture )
 	{
-		buildColorRing ( core::dimension2d<s32> ( 128, 128  ), 1,  Environment->getSkin ()->getColor (EGDC_3D_SHADOW ).color );
+		buildColorRing(core::dimension2d<s32>(128, 128), 1,  
+			Environment->getSkin()->getColor(EGDC_3D_SHADOW).color);
 	}
 
 	r.UpperLeftCorner.X = 20;
 	r.UpperLeftCorner.Y = 20;
-	ColorRing.Control = Environment->addImage ( ColorRing.Texture, r.UpperLeftCorner, true, this );
+	ColorRing.Control = Environment->addImage(ColorRing.Texture, r.UpperLeftCorner, true, this);
+	ColorRing.Control->setSubElement(true);
 	ColorRing.Control->grab();
 
 	for ( u32 i = 0; i != sizeof (Template) / sizeof ( sTemplate ); ++i )
@@ -160,7 +113,8 @@ CGUIColorSelectDialog::CGUIColorSelectDialog( const wchar_t* title, IGUIEnvironm
 			r.UpperLeftCorner.Y = Template[i].y;
 			r.LowerRightCorner.X = r.UpperLeftCorner.X + 15;
 			r.LowerRightCorner.Y = r.UpperLeftCorner.Y + 20;
-			Environment->addStaticText( Template[i].pre, r, false, false, this);
+			IGUIElement *t = Environment->addStaticText( Template[i].pre, r, false, false, this);
+			t->setSubElement(true);
 		}
 
 		if ( Template[i].pos )
@@ -169,7 +123,8 @@ CGUIColorSelectDialog::CGUIColorSelectDialog( const wchar_t* title, IGUIEnvironm
 			r.UpperLeftCorner.Y = Template[i].y;
 			r.LowerRightCorner.X = r.UpperLeftCorner.X + 15;
 			r.LowerRightCorner.Y = r.UpperLeftCorner.Y + 20;
-			Environment->addStaticText( Template[i].pos, r, false, false, this);
+			IGUIElement *t = Environment->addStaticText( Template[i].pos, r, false, false, this);
+			t->setSubElement(true);
 		}
 
 		SBatteryItem item;
@@ -180,6 +135,7 @@ CGUIColorSelectDialog::CGUIColorSelectDialog( const wchar_t* title, IGUIEnvironm
 		r.LowerRightCorner.Y = r.UpperLeftCorner.Y + 20;
 
 		item.Edit = Environment->addEditBox( Template[i].init, r, true, this);
+		item.Edit->setSubElement(true);
 		item.Edit->grab();
 
 		r.UpperLeftCorner.X = Template[i].x + 70;
@@ -189,12 +145,15 @@ CGUIColorSelectDialog::CGUIColorSelectDialog( const wchar_t* title, IGUIEnvironm
 
 		item.Scrollbar = Environment->addScrollBar(true, r, this);
 		item.Scrollbar->grab ();
+		item.Scrollbar->setSubElement(true);
 		item.Scrollbar->setMax ( Template[i].range_up - Template[i].range_down );
 		item.Scrollbar->setSmallStep ( 1 );
 
 		Battery.push_back ( item );
 	}
 
+	bringToFront(CancelButton);
+	bringToFront(OKButton);
 
 }
 
@@ -445,6 +404,15 @@ bool CGUIColorSelectDialog::OnEvent(SEvent event)
 		case EMIE_MOUSE_MOVED:
 			if (Dragging)
 			{
+				// gui window should not be dragged outside its parent
+				if (Parent)
+					if (event.MouseInput.X < Parent->getAbsolutePosition().UpperLeftCorner.X +1 ||
+						event.MouseInput.Y < Parent->getAbsolutePosition().UpperLeftCorner.Y +1 ||
+						event.MouseInput.X > Parent->getAbsolutePosition().LowerRightCorner.X -1 ||
+						event.MouseInput.Y > Parent->getAbsolutePosition().LowerRightCorner.Y -1)
+
+						return true;
+
 				move(core::position2d<s32>(event.MouseInput.X - DragStart.X, event.MouseInput.Y - DragStart.Y));
 				DragStart.X = event.MouseInput.X;
 				DragStart.Y = event.MouseInput.Y;

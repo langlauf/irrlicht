@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -17,7 +17,7 @@ namespace irr
 namespace video
 {
 	class IVideoDriver;
-}
+} // end namespace video
 namespace scene
 {
 
@@ -41,16 +41,22 @@ namespace scene
 		virtual IMesh* getMesh(s32 frame, s32 detailLevel=255, s32 startFrameLoop=-1, s32 endFrameLoop=-1);
 
 		//! returns amount of mesh buffers.
-		virtual s32 getMeshBufferCount();
+		virtual u32 getMeshBufferCount() const;
 
 		//! returns pointer to a mesh buffer
-		virtual IMeshBuffer* getMeshBuffer(s32 nr);
+		virtual IMeshBuffer* getMeshBuffer(u32 nr) const;
+
+		//! Returns pointer to a mesh buffer which fits a material
+ 		/** \param material: material to search for
+		\return Returns the pointer to the mesh buffer or 
+		NULL if there is no such mesh buffer. */
+		virtual IMeshBuffer* getMeshBuffer( const video::SMaterial &material) const;
 
 		//! returns an axis aligned bounding box
 		virtual const core::aabbox3d<f32>& getBoundingBox() const;
 
-		//! returns an axis aligned bounding box
-		virtual core::aabbox3d<f32>& getBoundingBox();
+		//! set user axis aligned bounding box
+		virtual void setBoundingBox( const core::aabbox3df& box);
 
 		//! sets a flag of all contained materials to a new value
 		virtual void setMaterialFlag(video::E_MATERIAL_FLAG flag, bool newvalue);
@@ -128,7 +134,7 @@ namespace scene
 			virtual void* getVertices();
 
 			//! returns amount of vertices 
-			virtual s32 getVertexCount() const;
+			virtual u32 getVertexCount() const;
 
 			//! returns pointer to Indices 
 			virtual const u16* getIndices() const;
@@ -137,16 +143,20 @@ namespace scene
 			virtual u16* getIndices();
 
 			//! returns amount of indices 
-			virtual s32 getIndexCount() const;
+			virtual u32 getIndexCount() const;
 
 			//! returns an axis aligned bounding box 
 			virtual const core::aabbox3d<f32>& getBoundingBox() const;
 
-			//! returns an axis aligned bounding box 
-			virtual core::aabbox3d<f32>& getBoundingBox();
+			//! set user axis aligned bounding box
+			virtual void setBoundingBox( const core::aabbox3df& box);
 
 			//! returns which type of vertex data is stored. 
 			virtual video::E_VERTEX_TYPE getVertexType() const;
+
+			//! returns the byte size (stride, pitch) of the vertex
+			virtual u32 getVertexPitch() const;
+
 
 			video::SMaterial Material;                  //! material for this meshBuffer. 
 			core::array<video::S3DVertex> *Vertices;      //! Array of vertices 

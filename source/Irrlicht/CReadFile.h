@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -28,7 +28,7 @@ namespace io
 		virtual ~CReadFile();
 
 		//! returns how much was read
-		virtual s32 read(void* buffer, s32 sizeToRead);
+		virtual s32 read(void* buffer, u32 sizeToRead);
 
 		//! changes position in file, returns true if successful
 		//! if relativeMovement==true, the pos is changed relative to current pos,
@@ -39,7 +39,10 @@ namespace io
 		virtual s32 getSize();
 
 		//! returns if file is open
-		bool isOpen();
+		virtual bool isOpen() const
+		{
+			return File != 0;
+		}
 
 		//! returns where in the file we are.
 		virtual s32 getPos();
@@ -50,7 +53,7 @@ namespace io
 	private:
 
 		//! opens the file
-		void openFile();	
+		void openFile();
 
 		core::stringc Filename;
 		FILE* File;

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -34,11 +34,17 @@ namespace gui
 		//! draws the element and its children
 		virtual void draw();
 
+		//! Writes attributes of the element.
+		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options);
+
+		//! Reads attributes of the element
+		virtual void deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options);
 
 	private:
 
 		bool Pressed;
 		bool Checked;
+		u32 checkTime;
 	};
 
 } // end namespace gui

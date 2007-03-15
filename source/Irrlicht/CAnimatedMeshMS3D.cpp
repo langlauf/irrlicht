@@ -1,10 +1,9 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CAnimatedMeshMS3D.h"
 #include "os.h"
-#include <string.h>
 #include "IVideoDriver.h"
 
 namespace irr
@@ -287,7 +286,7 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 		tmpBuffer.Material.EmissiveColor = video::SColorf(material->Emissive[0], material->Emissive[1], material->Emissive[2], material->Emissive[3]).toSColor ();
 		tmpBuffer.Material.SpecularColor = video::SColorf(material->Specular[0], material->Specular[1], material->Specular[2], material->Specular[3]).toSColor ();
 		tmpBuffer.Material.Shininess = material->Shininess;
-		tmpBuffer.Material.Texture1 = Driver->getTexture((const c8*)material->Texture);
+		tmpBuffer.Material.Textures[0] = Driver->getTexture((const c8*)material->Texture);
 		tmpBuffer.BoundingBox = &BoundingBox;
 		tmpBuffer.Vertices = &AnimatedVertices;
 	}
@@ -435,6 +434,8 @@ bool CAnimatedMeshMS3D::loadFile(io::IReadFile* file)
 			v.Normal.Z = triangles[i].VertexNormals[j][2];
 			if(triangles[i].GroupIndex < Groups.size() && Groups[triangles[i].GroupIndex].MaterialIdx < Buffers.size())
 				v.Color = Buffers[Groups[triangles[i].GroupIndex].MaterialIdx].Material.DiffuseColor;
+			else
+				v.Color.set(255,255,255,255);
 			v.Pos.X = vertices[triangles[i].VertexIndices[j]].Vertex[0];
 			v.Pos.Y = vertices[triangles[i].VertexIndices[j]].Vertex[1];
 			v.Pos.Z = vertices[triangles[i].VertexIndices[j]].Vertex[2];
@@ -633,11 +634,14 @@ void CAnimatedMeshMS3D::animate(s32 frame)
 		for (s32 j=0; j<(s32)Joints[i].VertexIds.size(); ++j)
 		{
 			Joints[i].AbsoluteTransformationAnimated.transformVect(
-			Vertices[Joints[i].VertexIds[j]].Pos, 
-				AnimatedVertices[Joints[i].VertexIds[j]].Pos);
+				AnimatedVertices[Joints[i].VertexIds[j]].Pos,
+				Vertices[Joints[i].VertexIds[j]].Pos
+			);
+
 			Joints[i].AbsoluteTransformationAnimated.transformVect(
-			Vertices[Joints[i].VertexIds[j]].Normal, 
-				AnimatedVertices[Joints[i].VertexIds[j]].Normal);
+				AnimatedVertices[Joints[i].VertexIds[j]].Normal,
+				Vertices[Joints[i].VertexIds[j]].Normal
+			);
 
 			// TODO: this could be done much more faster by 
 			// first getting 8 extreme points and putting them in.
@@ -650,7 +654,7 @@ void CAnimatedMeshMS3D::animate(s32 frame)
 
 
 //! returns amount of mesh buffers.
-s32 CAnimatedMeshMS3D::getMeshBufferCount()
+u32 CAnimatedMeshMS3D::getMeshBufferCount() const
 {
 	return Buffers.size();
 }
@@ -658,9 +662,23 @@ s32 CAnimatedMeshMS3D::getMeshBufferCount()
 
 
 //! returns pointer to a mesh buffer
-IMeshBuffer* CAnimatedMeshMS3D::getMeshBuffer(s32 nr)
+IMeshBuffer* CAnimatedMeshMS3D::getMeshBuffer(u32 nr) const
 {
-	return &Buffers[nr];
+	if (nr < Buffers.size())
+		return (IMeshBuffer*) &Buffers[nr];
+	else
+		return 0;
+}
+
+//! Returns pointer to a mesh buffer which fits a material
+IMeshBuffer* CAnimatedMeshMS3D::getMeshBuffer( const video::SMaterial &material) const
+{
+	for (u32 i=0; i<Buffers.size(); ++i)
+	{
+		if (Buffers[i].getMaterial() == material)
+			return (IMeshBuffer*) &Buffers[i];
+	}
+	return 0;
 }
 
 
@@ -671,18 +689,17 @@ const core::aabbox3d<f32>& CAnimatedMeshMS3D::getBoundingBox() const
 }
 
 
-//! returns an axis aligned bounding box
-core::aabbox3d<f32>& CAnimatedMeshMS3D::getBoundingBox()
+//! set user axis aligned bounding box
+void CAnimatedMeshMS3D::setBoundingBox( const core::aabbox3df& box)
 {
-	return BoundingBox;
+	BoundingBox = box;
 }
-
 
 //! sets a flag of all contained materials to a new value
 void CAnimatedMeshMS3D::setMaterialFlag(video::E_MATERIAL_FLAG flag, bool newvalue)
 {
 	for (s32 i=0; i<(int)Buffers.size(); ++i) 
-		Buffers[i].Material.Flags[flag] = newvalue;
+		Buffers[i].Material.setFlag(flag, newvalue);
 }
 
 
@@ -730,7 +747,7 @@ void* CAnimatedMeshMS3D::SMS3DMeshBuffer::getVertices()
 } 
 
 //! returns amount of vertices 
-s32 CAnimatedMeshMS3D::SMS3DMeshBuffer::getVertexCount() const 
+u32 CAnimatedMeshMS3D::SMS3DMeshBuffer::getVertexCount() const 
 { 
 	return Vertices->size(); 
 } 
@@ -748,7 +765,7 @@ u16* CAnimatedMeshMS3D::SMS3DMeshBuffer::getIndices()
 } 
 
 //! returns amount of indices 
-s32 CAnimatedMeshMS3D::SMS3DMeshBuffer::getIndexCount() const 
+u32 CAnimatedMeshMS3D::SMS3DMeshBuffer::getIndexCount() const 
 { 
 	return Indices.size(); 
 } 
@@ -760,9 +777,9 @@ const core::aabbox3d<f32>& CAnimatedMeshMS3D::SMS3DMeshBuffer::getBoundingBox() 
 } 
 
 //! returns an axis aligned bounding box 
-core::aabbox3d<f32>& CAnimatedMeshMS3D::SMS3DMeshBuffer::getBoundingBox() 
+void CAnimatedMeshMS3D::SMS3DMeshBuffer::setBoundingBox( const core::aabbox3df& box) 
 { 
-	return *BoundingBox; 
+	*BoundingBox = box; 
 } 
 
 //! returns which type of vertex data is stored.
@@ -770,6 +787,13 @@ video::E_VERTEX_TYPE CAnimatedMeshMS3D::SMS3DMeshBuffer::getVertexType() const
 {
 	return video::EVT_STANDARD;
 }
+
+//! returns the byte size (stride, pitch) of the vertex
+u32 CAnimatedMeshMS3D::SMS3DMeshBuffer::getVertexPitch() const
+{
+	return sizeof ( video::S3DVertex );
+}
+
 
 } // end namespace scene
 } // end namespace irr

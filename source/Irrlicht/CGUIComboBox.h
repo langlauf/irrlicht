@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -37,17 +37,29 @@ namespace gui
 		//! deletes all items in the combo box
 		virtual void clear();
 
+		//! returns the text of the currently selected item
+		virtual const wchar_t* getText();
+
 		//! returns id of selected item. returns -1 if no item is selected.
 		virtual s32 getSelected();
 
 		//! sets the selected item. Set this to -1 if no item should be selected
 		virtual void setSelected(s32 id);
 
+		//! update the position
+		virtual void updateAbsolutePosition();
+
 		//! called if an event happened.
 		virtual bool OnEvent(SEvent event);
 
 		//! draws the element and its children
 		virtual void draw();
+
+		//! Writes attributes of the element.
+		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options);
+
+		//! Reads attributes of the element
+		virtual void deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options);
 
 	private:
 

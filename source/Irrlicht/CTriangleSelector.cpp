@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -28,8 +28,8 @@ CTriangleSelector::CTriangleSelector(IMesh* mesh, ISceneNode* node)
 	setDebugName("CTriangleSelector");
 	#endif
 
-	s32 cnt = mesh->getMeshBufferCount();
-	for (s32 i=0; i<cnt; ++i)
+	u32 cnt = mesh->getMeshBufferCount();
+	for (u32 i=0; i<cnt; ++i)
 	{
 		IMeshBuffer* buf = mesh->getMeshBuffer(i);
 
@@ -54,6 +54,18 @@ CTriangleSelector::CTriangleSelector(IMesh* mesh, ISceneNode* node)
 		case video::EVT_2TCOORDS:
 			{
 				video::S3DVertex2TCoords* vtx = (video::S3DVertex2TCoords*)buf->getVertices();
+				for (s32 j=0; j<idxCnt; j+=3)
+				{
+					tri.pointA = vtx[indices[j+0]].Pos;
+					tri.pointB = vtx[indices[j+1]].Pos;
+					tri.pointC = vtx[indices[j+2]].Pos;
+					Triangles.push_back(tri);
+				}
+			}
+			break;
+		case video::EVT_TANGENTS:
+			{
+				video::S3DVertexTangents* vtx = (video::S3DVertexTangents*)buf->getVertices();
 				for (s32 j=0; j<idxCnt; j+=3)
 				{
 					tri.pointA = vtx[indices[j+0]].Pos;

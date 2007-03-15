@@ -1,8 +1,12 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CSoftwareDriver.h"
+
+#include "IrrCompileConfig.h"
+#ifdef _IRR_COMPILE_WITH_SOFTWARE_
+
 #include "CSoftwareTexture.h"
 #include "os.h"
 #include "S3DVertex.h"
@@ -15,8 +19,8 @@ namespace video
 
 //! constructor
 CSoftwareDriver::CSoftwareDriver(const core::dimension2d<s32>& windowSize, bool fullscreen, io::IFileSystem* io, video::IImagePresenter* presenter)
-: CNullDriver(io, windowSize), CurrentTriangleRenderer(0), Texture(0),
-	ZBuffer(0), RenderTargetTexture(0), RenderTargetSurface(0)
+: CNullDriver(io, windowSize), RenderTargetTexture(0), RenderTargetSurface(0),
+	CurrentTriangleRenderer(0), ZBuffer(0), Texture(0)
 {
 	#ifdef _DEBUG
 	setDebugName("CSoftwareDriver");
@@ -213,7 +217,13 @@ bool CSoftwareDriver::setTexture(video::ITexture* texture)
 void CSoftwareDriver::setMaterial(const SMaterial& material)
 {
 	Material = material;
-	setTexture(Material.Texture1);
+
+	for (u32 i = 0; i < 1; ++i)
+	{
+		setTexture(Material.Textures[i]);
+		setTransform ((E_TRANSFORMATION_STATE) ( ETS_TEXTURE_0 + i ),
+				material.getTextureMatrix(i));
+	}
 }
 
 
@@ -316,17 +326,100 @@ void CSoftwareDriver::setViewPort(const core::rect<s32>& area)
 
 
 //! draws a vertex primitive list
-void CSoftwareDriver::drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType)
+void CSoftwareDriver::drawVertexPrimitiveList(const void* vertices, u32 vertexCount, const u16* indexList, u32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType)
 {
 	const u16* indexPointer=0;
 	core::array<u16> newBuffer;
 	switch (pType)
 	{
+		case scene::EPT_LINE_STRIP:
+			{
+				switch (vType)
+				{
+					case EVT_STANDARD:
+						{
+							for (u32 i=0; i < primitiveCount-1; ++i)
+								draw3DLine(((S3DVertex*)vertices)[indexList[i]].Pos,
+									((S3DVertex*)vertices)[indexList[i+1]].Pos,
+									((S3DVertex*)vertices)[indexList[i]].Color);
+						}
+						break;
+					case EVT_2TCOORDS:
+						{
+							for (u32 i=0; i < primitiveCount-1; ++i)
+								draw3DLine(((S3DVertex2TCoords*)vertices)[indexList[i]].Pos,
+									((S3DVertex2TCoords*)vertices)[indexList[i+1]].Pos,
+									((S3DVertex2TCoords*)vertices)[indexList[i]].Color);
+						}
+						break;
+					case EVT_TANGENTS:
+						{
+							for (u32 i=0; i < primitiveCount-1; ++i)
+								draw3DLine(((S3DVertexTangents*)vertices)[indexList[i]].Pos,
+									((S3DVertexTangents*)vertices)[indexList[i+1]].Pos,
+									((S3DVertexTangents*)vertices)[indexList[i]].Color);
+						}
+						break;
+				}
+			}
+			return;
+		case scene::EPT_LINE_LOOP:
+			drawVertexPrimitiveList(vertices, vertexCount, indexList, primitiveCount-1, vType, scene::EPT_LINE_STRIP);
+			switch (vType)
+			{
+				case EVT_STANDARD:
+					draw3DLine(((S3DVertex*)vertices)[indexList[primitiveCount-1]].Pos,
+						((S3DVertex*)vertices)[indexList[0]].Pos,
+						((S3DVertex*)vertices)[indexList[primitiveCount-1]].Color);
+					break;
+				case EVT_2TCOORDS:
+					draw3DLine(((S3DVertex2TCoords*)vertices)[indexList[primitiveCount-1]].Pos,
+						((S3DVertex2TCoords*)vertices)[indexList[0]].Pos,
+						((S3DVertex2TCoords*)vertices)[indexList[primitiveCount-1]].Color);
+					break;
+				case EVT_TANGENTS:
+					draw3DLine(((S3DVertexTangents*)vertices)[indexList[primitiveCount-1]].Pos,
+						((S3DVertexTangents*)vertices)[indexList[0]].Pos,
+						((S3DVertexTangents*)vertices)[indexList[primitiveCount-1]].Color);
+					break;
+			}
+			return;
+		case scene::EPT_LINES:
+			{
+				switch (vType)
+				{
+					case EVT_STANDARD:
+						{
+							for (u32 i=0; i < 2*primitiveCount; i+=2)
+								draw3DLine(((S3DVertex*)vertices)[indexList[i]].Pos,
+									((S3DVertex*)vertices)[indexList[i+1]].Pos,
+									((S3DVertex*)vertices)[indexList[i]].Color);
+						}
+						break;
+					case EVT_2TCOORDS:
+						{
+							for (u32 i=0; i < 2*primitiveCount; i+=2)
+								draw3DLine(((S3DVertex2TCoords*)vertices)[indexList[i]].Pos,
+									((S3DVertex2TCoords*)vertices)[indexList[i+1]].Pos,
+									((S3DVertex2TCoords*)vertices)[indexList[i]].Color);
+						}
+						break;
+					case EVT_TANGENTS:
+						{
+							for (u32 i=0; i < 2*primitiveCount; i+=2)
+								draw3DLine(((S3DVertexTangents*)vertices)[indexList[i]].Pos,
+									((S3DVertexTangents*)vertices)[indexList[i+1]].Pos,
+									((S3DVertexTangents*)vertices)[indexList[i]].Color);
+						}
+						break;
+				}
+			}
+			return;
 		case scene::EPT_TRIANGLE_FAN:
 			{
 				// TODO: don't convert fan to list
 				newBuffer.reallocate(primitiveCount*3);
-				for( s32 t=0; t<primitiveCount; ++t )
+				for( u32 t=0; t<primitiveCount; ++t )
 				{
 					newBuffer.push_back(indexList[0]);
 					newBuffer.push_back(indexList[t+1]);
@@ -338,6 +431,7 @@ void CSoftwareDriver::drawVertexPrimitiveList(const void* vertices, s32 vertexCo
 			break;
 		case scene::EPT_TRIANGLES:
 			indexPointer=indexList;
+			break;
 	}
 	switch (vType)
 	{
@@ -373,13 +467,13 @@ void CSoftwareDriver::drawClippedIndexedTriangleListT(const VERTEXTYPE* vertices
 	core::matrix4 worldinv(TransformationMatrix[ETS_WORLD]);
 	worldinv.makeInverse();
 
-	// calculate view frustrum planes
-	scene::SViewFrustrum frustrum(TransformationMatrix[ETS_PROJECTION] * TransformationMatrix[ETS_VIEW]);
+	// calculate view frustum planes
+	scene::SViewFrustum frustum(TransformationMatrix[ETS_PROJECTION] * TransformationMatrix[ETS_VIEW]);
 
 	// copy and transform clipping planes ignoring far plane
 	core::plane3df planes[5]; // ordered by near, left, right, bottom, top
 	for (int p=0; p<5; ++p)
-		worldinv.transformPlane(frustrum.planes[p+1], planes[p]);
+		worldinv.transformPlane(frustum.planes[p+1], planes[p]);
 
 	core::EIntersectionRelation3D inout[3]; // is point in front or back of plane?
 
@@ -597,7 +691,7 @@ void CSoftwareDriver::draw3DLine(const core::vector3df& start,
 {
 	core::vector3df vect = start.crossProduct(end);
 	vect.normalize();
-	vect *= Material.Thickness;
+	vect *= Material.Thickness*0.3f;
 
 	S3DVertex vtx[4];
 
@@ -619,7 +713,7 @@ void CSoftwareDriver::draw3DLine(const core::vector3df& start,
 
 
 
-//! clips a triangle against the viewing frustrum
+//! clips a triangle against the viewing frustum
 void CSoftwareDriver::clipTriangle(f32* transformedPos)
 {
 }
@@ -629,7 +723,7 @@ void CSoftwareDriver::clipTriangle(f32* transformedPos)
 //! creates the clipping planes from the matrix
 void CSoftwareDriver::createPlanes(const core::matrix4& mat)
 {
-	Frustrum = scene::SViewFrustrum(mat);
+	Frustum = scene::SViewFrustum(mat);
 }
 
 
@@ -748,10 +842,33 @@ IImage* CSoftwareDriver::createScreenShot()
 }
 
 
+//! Returns the maximum amount of primitives (mostly vertices) which
+//! the device is able to render with one drawIndexedTriangleList
+//! call.
+u32 CSoftwareDriver::getMaximalPrimitiveCount()
+{
+	return 0x00800000;
+}
+
+} // end namespace video
+} // end namespace irr
+
+#endif // _IRR_COMPILE_WITH_SOFTWARE_
+
+namespace irr
+{
+namespace video
+{
+
+
 //! creates a video driver
 IVideoDriver* createSoftwareDriver(const core::dimension2d<s32>& windowSize, bool fullscreen, io::IFileSystem* io, video::IImagePresenter* presenter)
 {
+	#ifdef _IRR_COMPILE_WITH_SOFTWARE_
 	return new CSoftwareDriver(windowSize, fullscreen, io, presenter);
+	#else
+	return 0;
+	#endif
 }
 
 

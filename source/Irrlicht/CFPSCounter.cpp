@@ -1,8 +1,9 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CFPSCounter.h"
+#include "irrMath.h"
 
 namespace irr
 {
@@ -11,7 +12,8 @@ namespace video
 
 
 CFPSCounter::CFPSCounter()
-: fps(0), startTime(0), framesCounted(100)
+:	FPS(60), Primitive(0), StartTime(0), FramesCounted(0),
+	PrimitivesCounted(0), PrimitiveAverage(0)
 {
 
 }
@@ -21,24 +23,41 @@ CFPSCounter::CFPSCounter()
 //! returns current fps
 s32 CFPSCounter::getFPS()
 {
-	return fps;
+	return FPS;
+}
+
+//! returns current primitive count
+u32 CFPSCounter::getPrimitive()
+{
+	return Primitive;
 }
 
 
+u32 CFPSCounter::getPrimitiveAverage()
+{
+	return PrimitiveAverage;
+}
+
 
 //! to be called every frame
-void CFPSCounter::registerFrame(u32 now)
+void CFPSCounter::registerFrame(u32 now, u32 primitivesDrawn )
 {
-	framesCounted++;
+	++FramesCounted;
+	Primitive += primitivesDrawn;
+	PrimitivesCounted += primitivesDrawn;
 
-	u32 milliseconds = now - startTime;
+	u32 milliseconds = now - StartTime;
 
-	if (milliseconds > 2000)
+	if (milliseconds >= 1500 )
 	{
-		fps = (s32)((f32)framesCounted / ((f32)milliseconds / 1000.0f));
+		f32 invMilli = core::reciprocal ( (f32) milliseconds );
+		
+		FPS = core::ceil32 ( ( 1000 * FramesCounted ) * invMilli );
+		PrimitiveAverage = core::ceil32 ( ( 1000 * PrimitivesCounted ) * invMilli );
 
-		startTime = now;
-		framesCounted = 0;
+		FramesCounted = 0;
+		PrimitivesCounted = 0;
+		StartTime = now;
 	}
 }
 

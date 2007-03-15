@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -59,7 +59,14 @@ private:
 		core::stringc FullName;
 		s32 Size;
 		bool isDirectory;
-		bool operator<(const struct FileEntry& other) const {return Name<other.Name;}
+
+		bool operator <(const struct FileEntry& other) const
+		{
+			if ( isDirectory ^ other.isDirectory )
+				return isDirectory;
+
+			return Name.lower_ignore_case ( other.Name );
+		}
 	};
 
 	core::stringc Path;

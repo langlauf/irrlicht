@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -34,12 +34,15 @@ public:
 	//! opens a file for read access
 	virtual IReadFile* createAndOpenFile(const c8* filename);
 
+	//! Creates an IReadFile interface for accessing memory like a file.
+	virtual IReadFile* createMemoryReadFile(void* memory, s32 len, const c8* fileName, bool deleteMemoryWhenDropped = false);
+
 	//! Opens a file for write access.
 	virtual IWriteFile* createAndWriteFile(const c8* filename, bool append=false);
 
 	//! adds an zip archive to the filesystem
 	virtual bool addZipFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true);
-	virtual bool addUnZipFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true);
+	virtual bool addFolderFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true);
 
 	//! adds an pak archive to the filesystem
 	virtual bool addPakFileArchive(const c8* filename, bool ignoreCase = true, bool ignorePaths = true);

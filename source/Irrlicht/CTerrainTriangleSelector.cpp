@@ -1,12 +1,10 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CTerrainTriangleSelector.h"
 #include "CTerrainSceneNode.h"
 #include "os.h"
-#include <stdio.h>
-#include <string.h>
 
 namespace irr
 {
@@ -125,6 +123,7 @@ void CTerrainTriangleSelector::getTriangles ( core::triangle3df* triangles, s32 
 	s32 tIndex = 0;
 
 	for (s32 i=0; i<TrianglePatches.NumPatches; ++i)
+	{
 		if (tIndex + TrianglePatches.TrianglePatchArray[i].NumTriangles <= count &&
 			TrianglePatches.TrianglePatchArray[i].Box.intersectsWithBox(box))
 			for (s32 j=0; j<TrianglePatches.TrianglePatchArray[i].NumTriangles; ++j)
@@ -137,6 +136,7 @@ void CTerrainTriangleSelector::getTriangles ( core::triangle3df* triangles, s32 
 
 				++tIndex;
 			}
+	}
 
 	outTriangleCount = tIndex;
 }

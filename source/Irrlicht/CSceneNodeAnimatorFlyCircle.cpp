@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -11,7 +11,7 @@ namespace scene
 
 //! constructor
 CSceneNodeAnimatorFlyCircle::CSceneNodeAnimatorFlyCircle(u32 time, const core::vector3df& center, f32 radius, f32 speed, const core::vector3df& direction)
-: Radius(radius), Center(center), Speed(speed), StartTime(time), Direction ( direction )
+: Center(center), Direction(direction), Radius(radius), Speed(speed), StartTime(time)
 {
 	#ifdef _DEBUG
 	setDebugName("CSceneNodeAnimatorFlyCircle");
@@ -31,16 +31,15 @@ CSceneNodeAnimatorFlyCircle::~CSceneNodeAnimatorFlyCircle()
 //! animates a scene node
 void CSceneNodeAnimatorFlyCircle::animateNode(ISceneNode* node, u32 timeMs)
 {
-	if (node)
-	{
-		f32 t = (timeMs-StartTime) * Speed;
+	if ( 0 == node )
+		return;
 
-		core::vector3df circle(Radius * sinf(t), 0, Radius * cosf(t));
+	const f32 t = (timeMs-StartTime) * Speed;
 
-		circle = circle.crossProduct ( Direction );
+	core::vector3df circle(Radius * sinf(t), 0, Radius * cosf(t));
+	circle = circle.crossProduct ( Direction );
 
-		node->setPosition(Center + circle);
-	}
+	node->setPosition(Center + circle);
 }
 
 

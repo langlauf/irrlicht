@@ -1,9 +1,9 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 // The code for the TerrainSceneNode is based on the GeoMipMapSceneNode
-// developed by Spinz. He made it available for Irrlicht and allowed it to be 
+// developed by Spintz. He made it available for Irrlicht and allowed it to be 
 // distributed under this licence. I only modified some parts. A lot of thanks go to him. 
 
 #ifndef __C_TERRAIN_SCENE_NODE_H__
@@ -11,8 +11,8 @@
 
 #include "ITerrainSceneNode.h"
 #include "SMesh.h"
-#include "SMaterial.h"
 #include "IReadFile.h"
+#include "ITextSceneNode.h"
 
 namespace irr
 {
@@ -20,7 +20,7 @@ namespace scene
 {
 	//! A scene node for displaying terrain using the geo mip map algorithm.
 	/** The code for the TerrainSceneNode is based on the GeoMipMapSceneNode
-	 * developed by Spinz. He made it available for Irrlicht and allowed it to be 
+	 * developed by Spintz. He made it available for Irrlicht and allowed it to be 
 	 * distributed under this licence. I only modified some parts. A lot of thanks go to him. 
 	 **/
 	class CTerrainSceneNode : public ITerrainSceneNode
@@ -49,24 +49,24 @@ namespace scene
 
 		//! Initializes the terrain data.  Loads the vertices from the heightMapFile.
 		virtual bool loadHeightMap(io::IReadFile* file, 
-			video::SColor vertexColor = video::SColor ( 255, 255, 255, 255 ) );
+			video::SColor vertexColor = video::SColor ( 255, 255, 255, 255 ), s32 smoothFactor = 0 );
 
 		//! Initializes the terrain data.  Loads the vertices from the heightMapFile.
 		virtual bool loadHeightMapRAW(io::IReadFile* file, s32 bitsPerPixel = 16,
-			video::SColor vertexColor = video::SColor ( 255, 255, 255, 255 ) );
+			video::SColor vertexColor = video::SColor ( 255, 255, 255, 255 ), s32 smoothFactor = 0 );
 
 		//! Returns the material based on the zero based index i. This scene node only uses
 		//! 1 material.
 		//! \param i: Zero based index i. UNUSED, left in for virtual purposes.
 		//! \return Returns the single material this scene node uses.
-		virtual video::SMaterial& getMaterial ( s32 i ) 
+		virtual video::SMaterial& getMaterial ( u32 i ) 
 		{ 
 			return Mesh.getMeshBuffer(i)->getMaterial();
 		}
 
 		//! Returns amount of materials used by this scene node ( always 1 )
 		//! \return Returns current count of materials used by this scene node ( always 1 )
-		virtual s32 getMaterialCount()
+		virtual u32 getMaterialCount()
 		{
 			return Mesh.getMeshBufferCount(); 
 		}
@@ -89,7 +89,7 @@ namespace scene
 
 		//! Gets the last rotation factor applied to the scene node.
 		//! \return Returns the last rotation factor applied to the scene node.
-		virtual const core::vector3df getRotation() const 
+		virtual const core::vector3df& getRotation() const 
 		{
 			return TerrainData.Rotation;
 		}
@@ -117,9 +117,9 @@ namespace scene
 		//! Updates the scene nodes indices if the camera has moved or rotated by a certain
 		//! threshold, which can be changed using the SetCameraMovementDeltaThreshold and 
 		//! SetCameraRotationDeltaThreshold functions.  This also determines if a given patch
-		//! for the scene node is within the view frustrum and if it's not the indices are not
+		//! for the scene node is within the view frustum and if it's not the indices are not
 		//! generated for that patch.
-		virtual void OnPreRender();
+		virtual void OnRegisterSceneNode();
 
 		//! Render the scene node
 		virtual void render();
@@ -131,7 +131,7 @@ namespace scene
 		virtual const core::aabbox3d<f32>& getBoundingBox(s32 patchX, s32 patchZ) const;
 
 		//! Return the number of indices currently used to draw the scene node.
-		virtual s32 getIndexCount() { return IndicesToRender; }
+		virtual u32 getIndexCount() { return IndicesToRender; }
 
 		//! Returns the mesh
 		virtual IMesh* getMesh() { return &Mesh; }
@@ -213,31 +213,39 @@ namespace scene
 
 		struct SPatch
 		{
-			s32					CurrentLOD;
-			core::aabbox3df		BoundingBox;
-			core::vector3df		Center;
-			SPatch*				Top;
-			SPatch*				Bottom;
-			SPatch*				Right;
-			SPatch*				Left;
-
 			SPatch()
-			: CurrentLOD( -1 )
-			, Top( 0 )
-			, Bottom( 0 )
-			, Right( 0 )
-			, Left( 0 )
+			: CurrentLOD(-1), DebugText(0),
+			Top(0), Bottom(0), Right(0), Left(0)
 			{
 			}
+
+			s32			CurrentLOD;
+			core::aabbox3df		BoundingBox;
+			core::vector3df		Center;
+			scene::ITextSceneNode*	DebugText;
+			SPatch*			Top;
+			SPatch*			Bottom;
+			SPatch*			Right;
+			SPatch*			Left;
 		};
 
 		struct STerrainData
 		{
 			STerrainData()
+			: Size(0), PatchSize(0), CalcPatchSize(0),
+				PatchCount(0), MaxLOD(0),
+				BoundingBox(core::aabbox3df( 99999.9f, 99999.9f, 99999.9f, -99999.9f, -99999.9f, -99999.9f)),
+				LODDistanceThreshold(0), Patches(0)
 			{
-				Patches = 0;
-				LODDistanceThreshold = 0;
-				BoundingBox = core::aabbox3df( 99999.9f, 99999.9f, 99999.9f, -99999.9f, -99999.9f, -99999.9f);
+			}
+
+			STerrainData(s32 patchSize, s32 maxLOD, const core::vector3df& position, const core::vector3df& rotation, const core::vector3df& scale)
+			: Size(0), Position(position), Rotation(rotation), Scale(scale),
+				PatchSize(patchSize), CalcPatchSize(patchSize-1),
+				PatchCount(0), MaxLOD(maxLOD),
+				BoundingBox(core::aabbox3df( 99999.9f, 99999.9f, 99999.9f, -99999.9f, -99999.9f, -99999.9f)),
+				LODDistanceThreshold(0), Patches(0)
+			{
 			}
 
 			s32		Size;
@@ -256,6 +264,7 @@ namespace scene
 		};
 
 		virtual void preRenderLODCalculations();
+		virtual void preRenderLODCalculations_old();
 		virtual void preRenderIndicesCalculations();
 
 		//! get indices when generating index data for patches at varying levels of detail.
@@ -296,6 +305,7 @@ namespace scene
 		core::vector3df	OldCameraRotation;
 		f32 CameraMovementDelta;
 		f32 CameraRotationDelta;
+
 	};
 
 } // end namespace scene

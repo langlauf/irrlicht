@@ -5,7 +5,6 @@
 #include "IWriteFile.h"
 #include "irrString.h"
 #include "os.h" // for logging
-#include <string.h>
 
 #include "IrrCompileConfig.h"
 #ifdef _IRR_COMPILE_WITH_LIBPNG_
@@ -63,7 +62,7 @@ bool CImageWriterPNG::isAWriteableFileExtension(const c8* fileName)
 #endif
 }
 
-bool CImageWriterPNG::writeImage(io::IWriteFile* file, IImage* image)
+bool CImageWriterPNG::writeImage(io::IWriteFile* file, IImage* image,u32 param)
 {
 #ifdef _IRR_COMPILE_WITH_LIBPNG_
 	if (!file || !image)
@@ -189,5 +188,5 @@ bool CImageWriterPNG::writeImage(io::IWriteFile* file, IImage* image)
 #endif
 }
 
-}; // namespace video
-}; // namespace irr
+} // namespace video
+} // namespace irr

@@ -1,6 +1,10 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
+
+#include "IrrCompileConfig.h"
+
+#ifdef _IRR_COMPILE_WITH_OPENGL_
 
 #include "irrTypes.h"
 #include "COpenGLTexture.h"
@@ -8,10 +12,7 @@
 #include "os.h"
 #include "CColorConverter.h"
 
-#include "IrrCompileConfig.h"
-#ifdef _IRR_COMPILE_WITH_OPENGL_
-
-#include <string.h>
+#include "irrString.h"
 
 namespace irr
 {
@@ -74,10 +75,11 @@ const bool checkFBOStatus(COpenGLDriver* Driver)
 
 //! constructor
 COpenGLTexture::COpenGLTexture(IImage* image, bool generateMipLevels, const char* name, COpenGLDriver* driver)
- : ITexture(name), Pitch(0), ImageSize(0,0), HasMipMaps(generateMipLevels),
-  Driver(driver), ImageData(0), ColorFormat(ECF_A8R8G8B8), TextureName(0),
-  InternalFormat(GL_RGBA), PixelFormat(GL_BGRA_EXT), PixelType(GL_UNSIGNED_BYTE),
-  ColorFrameBuffer(0), DepthRenderBuffer(0)
+ : ITexture(name), Pitch(0), SurfaceHasSameSize(false), ImageData(0),
+  ColorFormat(ECF_A8R8G8B8), Driver(driver), TextureName(0),
+  InternalFormat(GL_RGBA), PixelFormat(GL_BGRA_EXT),
+  PixelType(GL_UNSIGNED_BYTE), HasMipMaps(generateMipLevels),
+  ColorFrameBuffer(0), DepthRenderBuffer(0), StencilRenderBuffer(0)
 {
 	#ifdef _DEBUG
 	setDebugName("COpenGLTexture");
@@ -97,10 +99,11 @@ COpenGLTexture::COpenGLTexture(const core::dimension2d<s32>& size,
                                 bool extPackedDepthStencilSupported,
                                 const char* name,
                                 COpenGLDriver* driver)
- : ITexture(name), Pitch(0), ImageSize(size), HasMipMaps(false),
-  Driver(driver), ImageData(0), ColorFormat(ECF_A8R8G8B8), TextureName(0),
-  InternalFormat(GL_RGBA), PixelFormat(GL_BGRA_EXT), PixelType(GL_UNSIGNED_BYTE),
-  ColorFrameBuffer(0), DepthRenderBuffer(0)
+ : ITexture(name), ImageSize(size), Pitch(0), SurfaceHasSameSize(false),
+  ImageData(0), ColorFormat(ECF_A8R8G8B8), Driver(driver), TextureName(0),
+  InternalFormat(GL_RGBA), PixelFormat(GL_BGRA_EXT),
+  PixelType(GL_UNSIGNED_BYTE), HasMipMaps(false),
+  ColorFrameBuffer(0), DepthRenderBuffer(0), StencilRenderBuffer(0)
 {
 	#ifdef _DEBUG
 	setDebugName("COpenGLTexture_FBO");
@@ -109,11 +112,11 @@ COpenGLTexture::COpenGLTexture(const core::dimension2d<s32>& size,
 	// generate color texture
 	glGenTextures(1, &TextureName);
 	glBindTexture(GL_TEXTURE_2D, TextureName);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, ImageSize.Width,
 		ImageSize.Height, 0, GL_RGBA, GL_INT, 0);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 #ifdef GL_EXT_packed_depth_stencil
 	if (extPackedDepthStencilSupported)
@@ -121,11 +124,11 @@ COpenGLTexture::COpenGLTexture(const core::dimension2d<s32>& size,
 		// generate packed depth stencil texture
 		glGenTextures(1, &DepthRenderBuffer);
 		glBindTexture(GL_TEXTURE_2D, DepthRenderBuffer);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_STENCIL_EXT, ImageSize.Width,
 			ImageSize.Height, 0, GL_DEPTH_STENCIL_EXT, GL_UNSIGNED_INT_24_8_EXT, 0);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		StencilRenderBuffer = DepthRenderBuffer; // stencil is packed with depth
 	}
 	else // generate separate stencil and depth textures
@@ -134,11 +137,11 @@ COpenGLTexture::COpenGLTexture(const core::dimension2d<s32>& size,
 		// generate depth texture
 		glGenTextures(1, &DepthRenderBuffer);
 		glBindTexture(GL_TEXTURE_2D, DepthRenderBuffer);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, ImageSize.Width,
 			ImageSize.Height, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_BYTE, 0);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
         // we 're in trouble! the code below does not complete the FBO currently...
         // stencil buffer is only supported with EXT_packed_depth_stencil extension (above)
@@ -353,8 +356,8 @@ void COpenGLTexture::copyTexture(bool newTexture)
 	if (HasMipMaps) // might have changed in regenerateMipMapLevels
 	{
 		// enable bilinear mipmap filter
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
-		glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	}
 	else
 	#else
@@ -439,7 +442,7 @@ ECOLOR_FORMAT COpenGLTexture::getColorFormat() const
 
 
 //! returns pitch of texture (in bytes)
-s32 COpenGLTexture::getPitch()
+u32 COpenGLTexture::getPitch() const
 {
 	return Pitch;
 }

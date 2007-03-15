@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -18,7 +18,6 @@
 
 namespace irr
 {
-
 	class CIrrDeviceWin32 : public CIrrDeviceStub, video::IImagePresenter
 	{
 	public:
@@ -37,6 +36,13 @@ namespace irr
 
 		//! runs the device. Returns false if device wants to be deleted
 		virtual bool run();
+
+		//! Cause the device to temporarily pause execution and let other processes to run
+		// This should bring down processor usage without major performance loss for Irrlicht
+		virtual void yield();
+
+		//! Pause execution and let other processes to run for a specified amount of time.
+		virtual void sleep(u32 timeMs, bool pauseTimer);
 
 		//! sets the caption of the window
 		virtual void setWindowCaption(const wchar_t* text);
@@ -66,7 +72,7 @@ namespace irr
 		public:
 
 			CCursorControl(const core::dimension2d<s32>& wsize, HWND hwnd, bool fullscreen)
-				: WindowSize(wsize), IsVisible(true), InvWindowSize(0.0f, 0.0f),
+				: WindowSize(wsize), InvWindowSize(0.0f, 0.0f), IsVisible(true),
 					HWnd(hwnd), BorderX(0), BorderY(0)
 			{
 				if (WindowSize.Width!=0)
@@ -154,7 +160,7 @@ namespace irr
 
 			core::position2d<s32> CursorPos;
 			core::dimension2d<s32> WindowSize;
-			core::dimension2d<float> InvWindowSize;
+			core::dimension2d<f32> InvWindowSize;
 			bool IsVisible;
 			HWND HWnd;
 
@@ -166,8 +172,6 @@ namespace irr
 		CCursorControl* getWin32CursorControl();
 
 	private:
-
-
 
 		//! create the driver
 		void createDriver(video::E_DRIVER_TYPE driverType,

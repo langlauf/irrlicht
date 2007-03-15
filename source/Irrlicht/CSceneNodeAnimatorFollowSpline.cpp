@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -13,7 +13,7 @@ namespace scene
 CSceneNodeAnimatorFollowSpline::CSceneNodeAnimatorFollowSpline(u32 time,
 	const core::array< core::vector3df >& points, f32 speed,
 	f32 tightness)
-: Points(points), Speed(speed), StartTime(time), Tightness(tightness)
+: Points(points), Speed(speed), Tightness(tightness), StartTime(time)
 {
 	#ifdef _DEBUG
 	setDebugName("CSceneNodeAnimatorFollowSpline");
@@ -41,14 +41,18 @@ void CSceneNodeAnimatorFollowSpline::animateNode(ISceneNode* node, u32 timeMs)
 	core::vector3df p, p0, p1, p2, p3;
 	core::vector3df t1, t2;
 
-	f32 dt = ( (timeMs-StartTime) * Speed );
-	s32 idx = irr::core::floor32( 0.001f * dt ) % Points.size();
-	f32 u = 0.001f * fmodf( dt, 1000.0f );
+	const u32 pSize = Points.size();
 
-	p0 = Points[ clamp( idx - 1, Points.size() ) ];
-	p1 = Points[ clamp( idx, Points.size() ) ];
-	p2 = Points[ clamp( idx + 1, Points.size() ) ];
-	p3 = Points[ clamp( idx + 2, Points.size() ) ];
+	const f32 dt = ( (timeMs-StartTime) * Speed * 0.001f );
+	const f32 u = core::fract ( dt );
+	s32 idx = core::floor32( dt ) % pSize;
+	//f32 u = 0.001f * fmodf( dt, 1000.0f );
+	
+
+	p0 = Points[ clamp( idx - 1, pSize ) ];
+	p1 = Points[ clamp( idx + 0, pSize ) ];
+	p2 = Points[ clamp( idx + 1, pSize ) ];
+	p3 = Points[ clamp( idx + 2, pSize ) ];
 
 	// hermite polynomials
 	f32 h1 = 2.0f * u * u * u - 3.0f * u * u + 1.0f;

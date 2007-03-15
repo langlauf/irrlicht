@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -25,6 +25,9 @@ namespace gui
 
 		//! called if an event happened.
 		virtual bool OnEvent(SEvent event);
+
+		//! update absolute position
+		virtual void updateAbsolutePosition();
 
 		//! draws the element and its children
 		virtual void draw();

@@ -35,7 +35,7 @@ int main()
 		case 'b': driverType = video::EDT_DIRECT3D8;break;
 		case 'c': driverType = video::EDT_OPENGL;   break;
 		case 'd': driverType = video::EDT_SOFTWARE; break;
-		case 'e': driverType = video::EDT_SOFTWARE2;break;
+		case 'e': driverType = video::EDT_BURNINGSVIDEO;break;
 		case 'f': driverType = video::EDT_NULL;     break;
 		default: return 1;
 	}	
@@ -76,13 +76,29 @@ int main()
 	smgr->addCameraSceneNodeFPS();
 
 	// and draw everything.
-	
+
+	int lastFPS = -1;
+
 	while(device->run())
 	if (device->isWindowActive())
 	{
 		driver->beginScene(true, true, video::SColor(0,200,200,200));
 		smgr->drawAll();
 		driver->endScene();
+
+		int fps = driver->getFPS();
+
+		if (lastFPS != fps)
+		{
+		  core::stringw str = L"Load Irrlicht File example - Irrlicht Engine [";
+		  str += driver->getName();
+		  str += "] FPS:";
+		  str += fps;
+
+		  device->setWindowCaption(str.c_str());
+		  lastFPS = fps;
+		}
+
 	}
 
 	device->drop();

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -7,7 +7,6 @@
 #include "IGUIEnvironment.h"
 #include "IVideoDriver.h"
 #include "IGUIFont.h"
-#include "GUIIcons.h"
 
 #include "os.h"
 
@@ -24,6 +23,8 @@ CGUIMenu::CGUIMenu(IGUIEnvironment* environment, IGUIElement* parent,
 	#ifdef _DEBUG
 	setDebugName("CGUIMenu");
 	#endif
+
+	Type = EGUIET_MENU;
 
 	recalculateSize();
 }
@@ -45,11 +46,10 @@ void CGUIMenu::draw()
 	IGUIFont* font = skin->getFont();
 
 	core::rect<s32> rect = AbsoluteRect;
-	core::rect<s32>* clip = &AbsoluteClippingRect;
 
 	// draw frame
 
-	skin->draw3DToolBar(this, rect, clip);
+	skin->draw3DToolBar(this, rect, &AbsoluteClippingRect);
 
 	// loop through all menu items
 
@@ -77,8 +77,9 @@ void CGUIMenu::draw()
 			if (!Items[i].Enabled)
 				c = EGDC_GRAY_TEXT;
 
-			font->draw(Items[i].Text.c_str(), rect, 
-				skin->getColor(c), true, true, clip);
+			if (font)
+				font->draw(Items[i].Text.c_str(), rect, 
+					skin->getColor(c), true, true, &AbsoluteClippingRect);
 		}
 	}
 
@@ -98,7 +99,8 @@ bool CGUIMenu::OnEvent(SEvent event)
 		switch(event.GUIEvent.EventType)
 		{
 		case gui::EGET_ELEMENT_FOCUS_LOST:
-			closeAllSubMenus();
+			if (event.GUIEvent.Caller == (IGUIElement*)this)
+				closeAllSubMenus();
             return true;
 		}
 		break;
@@ -108,7 +110,7 @@ bool CGUIMenu::OnEvent(SEvent event)
 		case EMIE_LMOUSE_LEFT_UP:
 			{
 				core::position2d<s32> p(event.MouseInput.X, event.MouseInput.Y);
-				if (AbsoluteRect.isPointInside(p))
+				if (AbsoluteClippingRect.isPointInside(p))
 				{
 					if (HighLighted != -1)
 						Environment->removeFocus(this);
@@ -149,12 +151,20 @@ void CGUIMenu::recalculateSize()
 	IGUIFont* font = skin->getFont();
 
 	if (!font)
+	{
+		if (Parent && skin)
+			RelativeRect = core::rect<s32>(0,0,
+								Parent->getAbsolutePosition().LowerRightCorner.X,
+								skin->getSize(EGDS_MENU_HEIGHT));
 		return;
+	}
 
 	core::rect<s32> rect;
 	rect.UpperLeftCorner.X = 0;
 	rect.UpperLeftCorner.Y = 0;
 	s32 height = font->getDimension(L"A").Height + 5;
+	//if (skin && height < skin->getSize ( EGDS_MENU_HEIGHT ))
+	//	height = skin->getSize(EGDS_MENU_HEIGHT);
 	s32 width = 0;
 	s32 i;
 
@@ -180,8 +190,8 @@ void CGUIMenu::recalculateSize()
 
 	rect.LowerRightCorner.X = width;
 	rect.LowerRightCorner.Y = height;
-	RelativeRect = rect;
-	updateAbsolutePosition();
+
+	setRelativePosition(rect);
 
 	// recalculate submenus
 	for (i=0; i<(s32)Items.size(); ++i)

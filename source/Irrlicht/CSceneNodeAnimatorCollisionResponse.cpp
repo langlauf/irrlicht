@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -20,9 +20,9 @@ CSceneNodeAnimatorCollisionResponse::CSceneNodeAnimatorCollisionResponse(
 		const core::vector3df& gravityPerSecond,
 		const core::vector3df& ellipsoidTranslation,
 		f32 slidingSpeed)
-: SceneManager(scenemanager), World(world), Object(object),
-	Radius(ellipsoidRadius), Gravity(gravityPerSecond / 1000.0f),
-	SlidingSpeed(slidingSpeed), Translation(ellipsoidTranslation)
+: Radius(ellipsoidRadius), Gravity(gravityPerSecond / 1000.0f), Translation(ellipsoidTranslation),
+	World(world), Object(object), SceneManager(scenemanager),
+	SlidingSpeed(slidingSpeed), Falling(false)
 {
 	if (World)
 		World->grab();
@@ -30,14 +30,8 @@ CSceneNodeAnimatorCollisionResponse::CSceneNodeAnimatorCollisionResponse(
 	if (Object)
 		LastPosition = Object->getPosition();
 
-	Falling = false;
-
 	LastTime = os::Timer::getTime();
 	FallStartTime = LastTime;
-
-	RefTriangle.pointA.set(0.0f, 0.0f, 0.0f);
-	RefTriangle.pointB.set(0.0f, 0.0f, 0.0f);
-	RefTriangle.pointC.set(0.0f, 0.0f, 0.0f);
 }
 
 
@@ -91,7 +85,7 @@ core::vector3df CSceneNodeAnimatorCollisionResponse::getGravity() const
 
 
 //! Sets the translation of the ellipsoid for collision detection.
-void CSceneNodeAnimatorCollisionResponse::setEllipsoidTranslation(core::vector3df translation)
+void CSceneNodeAnimatorCollisionResponse::setEllipsoidTranslation(const core::vector3df &translation)
 {
 	Translation = translation;
 }
@@ -109,12 +103,19 @@ core::vector3df CSceneNodeAnimatorCollisionResponse::getEllipsoidTranslation() c
 //! the scene node may collide.
 void CSceneNodeAnimatorCollisionResponse::setWorld(ITriangleSelector* newWorld)
 {
+	Falling = false;
+
+	LastTime = os::Timer::getTime();
+	FallStartTime = LastTime;
+
+
 	if (World)
 		World->drop();
 
 	World = newWorld;
 	if (World)
 		World->grab();
+
 }
 
 
@@ -128,7 +129,6 @@ ITriangleSelector* CSceneNodeAnimatorCollisionResponse::getWorld() const
 
 
 
-//! animates a scene node
 void CSceneNodeAnimatorCollisionResponse::animateNode(ISceneNode* node, u32 timeMs)
 {
 	if (node != Object)
@@ -145,14 +145,23 @@ void CSceneNodeAnimatorCollisionResponse::animateNode(ISceneNode* node, u32 time
 
 	core::vector3df pos = Object->getPosition();
 	core::vector3df vel = pos - LastPosition;
-	core::vector3df g = Gravity;// * (f32)diff;
 
+	//g = Gravity * (f32)((timeMs - FallStartTime) * diff);
+
+	f32 dt = 1.f;
 	if (Falling)
-		g = Gravity * (f32)((timeMs - FallStartTime) * diff);
+	{
+		dt = f32 ( ( timeMs - FallStartTime ) * diff );
+	}
+	core::vector3df g = Gravity * dt;
 
 	core::triangle3df triangle = RefTriangle;
 
-	if (vel+g != core::vector3df(0,0,0))
+	core::vector3df force = vel + g;
+
+	const core::vector3df nullVector ( 0.f, 0.f, 0.f );
+
+	if ( force != nullVector )
 	{
 		// TODO: divide SlidingSpeed by frame time
 
@@ -178,7 +187,6 @@ void CSceneNodeAnimatorCollisionResponse::animateNode(ISceneNode* node, u32 time
 
 	LastPosition = Object->getPosition();
 }
-
 
 //! Writes attributes of the scene node animator.
 void CSceneNodeAnimatorCollisionResponse::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options)

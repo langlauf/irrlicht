@@ -1,11 +1,11 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "os.h"
 #include "irrString.h"
-#include <stdio.h>
 #include "IrrCompileConfig.h"
+#include "irrMath.h"
 
 #ifdef _IRR_WINDOWS_
 	#if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER < 1299))

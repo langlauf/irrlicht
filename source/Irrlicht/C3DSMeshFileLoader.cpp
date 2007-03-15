@@ -1,9 +1,8 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "C3DSMeshFileLoader.h"
-#include <string.h>
 #include "os.h"
 #include "SMeshBuffer.h"
 #include "SAnimatedMesh.h"
@@ -100,8 +99,8 @@ const u16 C3DS_PERCENTAGE_F = 0x0031;
 
 //! Constructor
 C3DSMeshFileLoader::C3DSMeshFileLoader(IMeshManipulator* manip,io::IFileSystem* fs, video::IVideoDriver* driver)
-: FileSystem(fs), Driver(driver), Vertices(0), CountVertices(0), Indices(0),
-	CountFaces(0), CountTCoords(0), TCoords(0), Mesh(0), Manipulator(manip)
+: FileSystem(fs), Driver(driver), Vertices(0), Indices(0), TCoords(0),
+	CountVertices(0), CountFaces(0), CountTCoords(0), Mesh(0), Manipulator(manip)
 {
 	TransformationMatrix.makeIdentity();
 	if (FileSystem)
@@ -175,7 +174,7 @@ IAnimatedMesh* C3DSMeshFileLoader::createMesh(io::IReadFile* file)
 		SAnimatedMesh* am = new SAnimatedMesh();
 		am->Type = EAMT_3DS;
 
-		for (s32 i=0; i<Mesh->getMeshBufferCount(); ++i)
+		for (u32 i=0; i<Mesh->getMeshBufferCount(); ++i)
 		{
 			SMeshBuffer* mb = ((SMeshBuffer*)Mesh->getMeshBuffer(i));
 			// drop empty buffers
@@ -205,12 +204,13 @@ IAnimatedMesh* C3DSMeshFileLoader::createMesh(io::IReadFile* file)
 
 
 bool C3DSMeshFileLoader::readPercentageChunk(io::IReadFile* file,
-					ChunkData* chunk, float& percentage)
+					ChunkData* chunk, f32& percentage)
 {
 	ChunkData data;
 	readChunkData(file, data);
 
-	s16 intpercentage;
+	short intpercentage;
+	float fpercentage;
 
 	switch(data.header.id)
 	{
@@ -228,11 +228,13 @@ bool C3DSMeshFileLoader::readPercentageChunk(io::IReadFile* file,
 	case C3DS_PERCENTAGE_F:
 	{
 		// read float
-		file->read(&percentage, 4);
+		file->read(&fpercentage, sizeof(float));
+		data.read += sizeof(float);
 #ifdef __BIG_ENDIAN__
-		percentage = os::Byteswap::byteswap(percentage);
+		percentage = os::Byteswap::byteswap(fpercentage);
+#else
+		percentage = (f32)fpercentage;
 #endif
-		data.read += 4;
 	}
 	break;
 	default:
@@ -335,7 +337,7 @@ bool C3DSMeshFileLoader::readMaterialChunk(io::IReadFile* file, ChunkData* paren
 			break;
 		case C3DS_TRANSPARENCY:
 			{
-				float percentage;
+				f32 percentage;
 				readPercentageChunk(file, &data, percentage);
 				if (percentage>0.0f)
 				{
@@ -494,7 +496,7 @@ bool C3DSMeshFileLoader::readTrackChunk(io::IReadFile* file, ChunkData& data,
 		// Angle
 		file->read(&angle, sizeof(f32));
 #ifdef __BIG_ENDIAN__
-	angle = os::Byteswap::byteswap(angle);
+		angle = os::Byteswap::byteswap(angle);
 #endif
 		data.read += sizeof(f32);
 	}
@@ -516,7 +518,7 @@ bool C3DSMeshFileLoader::readTrackChunk(io::IReadFile* file, ChunkData& data,
 		video::S3DVertex *vertices=(video::S3DVertex*)mb->getVertices();
 		if (data.header.id==C3DS_POS_TRACK_TAG)
 		{
-			for (s32 i=0; i<mb->getVertexCount(); ++i)
+			for (u32 i=0; i<mb->getVertexCount(); ++i)
 				vertices[i].Pos+=vec;
 		}
 		else if (data.header.id==C3DS_ROT_TRACK_TAG)
@@ -868,7 +870,7 @@ bool C3DSMeshFileLoader::readObjectChunk(io::IReadFile* file, ChunkData* parent)
 
 void C3DSMeshFileLoader::composeObject(io::IReadFile* file, const core::stringc& name)
 {
-	if (Mesh->getMeshBufferCount() != (s32)Materials.size())
+	if (Mesh->getMeshBufferCount() != Materials.size())
 		loadMaterials(file);
 
 	if (MaterialGroups.empty())
@@ -896,21 +898,25 @@ void C3DSMeshFileLoader::composeObject(io::IReadFile* file, const core::stringc&
 		}
 	}
 
-
 	for (u32 i=0; i<MaterialGroups.size(); ++i)
 	{
 		SMeshBuffer* mb = 0;
 		video::SMaterial* mat=0;
+		u32 mbPos;
+		// -3 because we add three vertices at once
+		u32 maxPrimitives = core::min_(Driver->getMaximalPrimitiveCount(), (u32)((1<<16)-1))-3; // currently hardcoded s16 max value for index pointers
 
 		// find mesh buffer for this group
-		for (u32 j=0; j<Materials.size(); ++j)
-			if (MaterialGroups[i].MaterialName == Materials[j].Name)
+		for (mbPos=0; mbPos<Materials.size(); ++mbPos)
+		{
+			if (MaterialGroups[i].MaterialName == Materials[mbPos].Name)
 			{
-				mb = (SMeshBuffer*)Mesh->getMeshBuffer(j);
-				mat=&Materials[j].Material;
-				MeshBufferNames[j]=name;
+				mb = (SMeshBuffer*)Mesh->getMeshBuffer(mbPos);
+				mat=&Materials[mbPos].Material;
+				MeshBufferNames[mbPos]=name;
 				break;
 			}
+		}
 
 		if (mb != 0)
 		{
@@ -927,7 +933,16 @@ void C3DSMeshFileLoader::composeObject(io::IReadFile* file, const core::stringc&
 
 			for (s32 f=0; f<MaterialGroups[i].faceCount; ++f)
 			{
-				s32 vtxCount = mb->Vertices.size();
+				u32 vtxCount = mb->Vertices.size();
+				if (vtxCount>maxPrimitives)
+				{
+					Mesh->addMeshBuffer(new SMeshBuffer());
+					IMeshBuffer* tmp = mb;
+					mb=(SMeshBuffer*)(Mesh->MeshBuffers[mbPos]=Mesh->MeshBuffers.getLast());
+					Mesh->MeshBuffers[Mesh->MeshBuffers.size()-1]=tmp;
+					mb->Material=*mat;
+					vtxCount=0;
+				}
 
 				for (s32 v=0; v<3; ++v)
 				{
@@ -1009,34 +1024,34 @@ void C3DSMeshFileLoader::loadMaterials(io::IReadFile* file)
 		m->Material = Materials[i].Material;
 		if (Materials[i].Filename[0].size())
 		{
-			m->Material.Texture1 = Driver->getTexture(Materials[i].Filename[0].c_str());
+			m->Material.Textures[0] = Driver->getTexture(Materials[i].Filename[0].c_str());
 			
-			if (!m->Material.Texture1)
+			if (!m->Material.Textures[0])
 			{
 				core::stringc fname = getTextureFileName(
 					Materials[i].Filename[0], modelFilename);
 				if (fname.size())
-					m->Material.Texture1 = Driver->getTexture(fname.c_str());				
+					m->Material.Textures[0] = Driver->getTexture(fname.c_str());				
 			}
 
-			if (!m->Material.Texture1)
+			if (!m->Material.Textures[0])
 				os::Printer::log("Could not load a texture for entry in 3ds file",
 					Materials[i].Filename[0].c_str(), ELL_WARNING);
 		}
 
 		if (Materials[i].Filename[2].size())
 		{
-			m->Material.Texture1 = Driver->getTexture(Materials[i].Filename[2].c_str());
+			m->Material.Textures[0] = Driver->getTexture(Materials[i].Filename[2].c_str());
 			
-			if (!m->Material.Texture1)
+			if (!m->Material.Textures[0])
 			{
 				core::stringc fname = getTextureFileName(
 					Materials[i].Filename[2], modelFilename);
 				if (fname.size())
-					m->Material.Texture1 = Driver->getTexture(fname.c_str());				
+					m->Material.Textures[0] = Driver->getTexture(fname.c_str());				
 			}
 
-			if (!m->Material.Texture1)
+			if (!m->Material.Textures[0])
 			{
 				os::Printer::log("Could not load a texture for entry in 3ds file",
 					Materials[i].Filename[2].c_str(), ELL_WARNING);
@@ -1049,24 +1064,24 @@ void C3DSMeshFileLoader::loadMaterials(io::IReadFile* file)
 
 		if (Materials[i].Filename[3].size())
 		{
-			m->Material.Texture2=m->Material.Texture1;
-			m->Material.Texture1=0;
-			m->Material.Texture1 = Driver->getTexture(Materials[i].Filename[3].c_str());
+			m->Material.Textures[1]=m->Material.Textures[0];
+			m->Material.Textures[0]=0;
+			m->Material.Textures[0] = Driver->getTexture(Materials[i].Filename[3].c_str());
 			
-			if (!m->Material.Texture1)
+			if (!m->Material.Textures[0])
 			{
 				core::stringc fname = getTextureFileName(
 					Materials[i].Filename[3], modelFilename);
 				if (fname.size())
-					m->Material.Texture1 = Driver->getTexture(fname.c_str());				
+					m->Material.Textures[0] = Driver->getTexture(fname.c_str());				
 			}
 
-			if (!m->Material.Texture1)
+			if (!m->Material.Textures[0])
 			{
 				os::Printer::log("Could not load a texture for entry in 3ds file",
 					Materials[i].Filename[3].c_str(), ELL_WARNING);
-				m->Material.Texture1=m->Material.Texture2;
-				m->Material.Texture2=0;
+				m->Material.Textures[0]=m->Material.Textures[1];
+				m->Material.Textures[1]=0;
 			}
 			else
 			{
@@ -1076,22 +1091,22 @@ void C3DSMeshFileLoader::loadMaterials(io::IReadFile* file)
 
 		if (Materials[i].Filename[4].size())
 		{
-			m->Material.Texture2 = Driver->getTexture(Materials[i].Filename[4].c_str());
+			m->Material.Textures[1] = Driver->getTexture(Materials[i].Filename[4].c_str());
 			
-			if (!m->Material.Texture2)
+			if (!m->Material.Textures[1])
 			{
 				core::stringc fname = getTextureFileName(
 					Materials[i].Filename[4], modelFilename);
 				if (fname.size())
-					m->Material.Texture2 = Driver->getTexture(fname.c_str());				
+					m->Material.Textures[1] = Driver->getTexture(fname.c_str());				
 			}
 
-			if (!m->Material.Texture2)
+			if (!m->Material.Textures[1])
 				os::Printer::log("Could not load a texture for entry in 3ds file",
 					Materials[i].Filename[4].c_str(), ELL_WARNING);
 			else
 			{
-				Driver->makeNormalMapTexture(m->Material.Texture2, 9.0f);
+				Driver->makeNormalMapTexture(m->Material.Textures[1], 9.0f);
 				m->Material.MaterialType=video::EMT_PARALLAX_MAP_SOLID;
 				m->Material.MaterialTypeParam=0.035f;
 			}

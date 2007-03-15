@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -14,10 +14,10 @@
 #include "os.h"
 #include "IrrCompileConfig.h"
 #include "CAttributes.h"
+#include "CMemoryReadFile.h"
 
 #ifdef _IRR_WINDOWS_
 #include <direct.h> // for _chdir
-#include <stdlib.h>
 #endif
 
 #if (defined(LINUX) || defined(MACOSX))
@@ -90,6 +90,15 @@ IReadFile* CFileSystem::createAndOpenFile(const c8* filename)
 	return file;
 }
 
+//! Creates an IReadFile interface for treating memory like a file.
+IReadFile* CFileSystem::createMemoryReadFile(void* memory, s32 len, 
+											const c8* fileName, bool deleteMemoryWhenDropped)
+{
+	if (!memory)
+		return 0;
+	else
+		return new CMemoryReadFile(memory, len, fileName, deleteMemoryWhenDropped);
+}
 
 //! Opens a file for write access.
 IWriteFile* CFileSystem::createAndWriteFile(const c8* filename, bool append)
@@ -98,7 +107,7 @@ IWriteFile* CFileSystem::createAndWriteFile(const c8* filename, bool append)
 }
 
 
-bool CFileSystem::addUnZipFileArchive(const c8* filename, bool ignoreCase, bool ignorePaths)
+bool CFileSystem::addFolderFileArchive(const c8* filename, bool ignoreCase, bool ignorePaths)
 {
 	bool ret = false;
 
@@ -200,7 +209,7 @@ bool CFileSystem::changeWorkingDirectoryTo(const c8* newDirectory)
 #endif
 
 #if (defined(LINUX) || defined(MACOSX))
-	success=(chdir(newDirectory) != 0);
+	success=(chdir(newDirectory) == 0);
 #endif
 	return success;
 }

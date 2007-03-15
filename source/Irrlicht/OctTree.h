@@ -1,15 +1,15 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #ifndef __C_OCT_TREE_H_INCLUDED__
 #define __C_OCT_TREE_H_INCLUDED__
 
-#include "SViewFrustrum.h"
+#include "SViewFrustum.h"
 #include "S3DVertex.h"
 #include "aabbox3d.h"
 #include "irrArray.h"
-#include <string.h>
+#include "irrString.h"
 
 namespace irr
 {
@@ -21,7 +21,7 @@ class OctTree
 {
 public:
 
-	s32 nodeCount;
+	u32 nodeCount;
 
 	struct SMeshChunk
 	{
@@ -65,7 +65,7 @@ public:
 			IndexData[i].Indices = new u16[IndexData[i].MaxSize];
 
 			ic.MaterialId = meshes[i].MaterialId;
-			(*indexChunks).push_back(ic);
+			indexChunks->push_back(ic);
 
 			SIndexChunk& tic = (*indexChunks)[i];
 
@@ -82,20 +82,20 @@ public:
 	//! by this bounding box.
 	void calculatePolys(const core::aabbox3d<f32>& box)
 	{
-		for (s32 i=0; i<IndexDataCount; ++i)
+		for (u32 i=0; i<IndexDataCount; ++i)
 			IndexData[i].CurrentSize = 0;
 
-		Root->getPolys(box, IndexData);
+		Root->getPolys(box, IndexData, 0);
 	}
 
 	//! returns all ids of polygons partially or fully enclosed 
-	//! by a view frustrum.
-	void calculatePolys(const scene::SViewFrustrum& frustrum)
+	//! by a view frustum.
+	void calculatePolys(const scene::SViewFrustum& frustum)
 	{
-		for (s32 i=0; i<IndexDataCount; ++i)
+		for (u32 i=0; i<IndexDataCount; ++i)
 			IndexData[i].CurrentSize = 0;
 
-		Root->getPolys(frustrum, IndexData);
+		Root->getPolys(frustum, IndexData);
 	}
 
 
@@ -104,7 +104,7 @@ public:
 		return IndexData;
 	}
 
-	s32 getIndexDataCount()
+	u32 getIndexDataCount()
 	{
 		return IndexDataCount;
 	}
@@ -119,7 +119,7 @@ public:
 	//! destructor
 	~OctTree()
 	{
-		for (s32 i=0; i<IndexDataCount; ++i)
+		for (u32 i=0; i<IndexDataCount; ++i)
 			delete [] IndexData[i].Indices;
 
 		delete [] IndexData;
@@ -134,12 +134,12 @@ private:
 	public:
 
 		// constructor
-		OctTreeNode(s32& nodeCount, s32 currentdepth,
+		OctTreeNode(u32& nodeCount, u32 currentdepth,
 			const core::array<SMeshChunk>& allmeshdata,
 			core::array<SIndexChunk>* indices,
-			s32 minimalPolysPerNode) : IndexData(0)
+			s32 minimalPolysPerNode) : IndexData(0),
+			Depth(currentdepth+1)
 		{
-			depth = currentdepth+1;
 			++nodeCount;
 			
 			u32 i; // new ISO for scoping problem with different compilers
@@ -147,7 +147,7 @@ private:
 			for (i=0; i<8; ++i)
 				Children[i] = 0;
 
-			if ((*indices).empty())
+			if (indices->empty())
 			{
 				delete indices;
 				return;
@@ -157,7 +157,7 @@ private:
 
 			// find first point for bounding box
 
-			for (i=0; i<(*indices).size(); ++i)
+			for (i=0; i<indices->size(); ++i)
 			{
 				if (!(*indices)[i].Indices.empty())
 				{
@@ -175,8 +175,8 @@ private:
 
 			s32 totalPrimitives = 0;
 
-			// now letz calculate our bounding box
-			for (i=0; i<(*indices).size(); ++i)
+			// now lets calculate our bounding box
+			for (i=0; i<indices->size(); ++i)
 			{
 				totalPrimitives += (*indices)[i].Indices.size();
 				for (u32 j=0; j<(*indices)[i].Indices.size(); ++j)
@@ -205,7 +205,7 @@ private:
 				{
 					SIndexChunk ic;
 					ic.MaterialId = allmeshdata[i].MaterialId;
-					(*cindexChunks).push_back(ic);
+					cindexChunks->push_back(ic);
 
 					SIndexChunk& tic = (*cindexChunks)[i];
 
@@ -229,7 +229,7 @@ private:
 				}
 
 				if (added)
-					Children[ch] = new OctTreeNode(nodeCount, depth, 
+					Children[ch] = new OctTreeNode(nodeCount, Depth, 
 						allmeshdata, cindexChunks, minimalPolysPerNode);
 				else
 					delete cindexChunks;
@@ -246,7 +246,7 @@ private:
 		{
 			delete IndexData;
 
-			for (s32 i=0; i<8; ++i)
+			for (u32 i=0; i<8; ++i)
 				delete Children[i];
 		}
 
@@ -254,12 +254,24 @@ private:
 
 		// returns all ids of polygons partially or full enclosed 
 		// by this bounding box.
-		void getPolys(const core::aabbox3d<f32>& box, SIndexData* idxdata)
+		void getPolys(const core::aabbox3d<f32>& box, SIndexData* idxdata, u32 parentTest ) const
 		{
-			if (Box.intersectsWithBox(box))
+			// if not full inside
+			if ( parentTest != 2 )
 			{
-				s32 cnt = (*IndexData).size();
-				s32 i; // new ISO for scoping problem in some compilers
+				// partially inside ?
+				parentTest = (u32) Box.intersectsWithBox(box);
+				if ( 0 == parentTest )
+					return;
+
+				// fully inside ?
+				parentTest+= Box.isFullInside(box);
+			}
+
+			//if (Box.intersectsWithBox(box))
+			{
+				u32 cnt = IndexData->size();
+				u32 i; // new ISO for scoping problem in some compilers
 				
 				for (i=0; i<cnt; ++i)
 				{
@@ -275,61 +287,115 @@ private:
 
 				for (i=0; i<8; ++i)
 					if (Children[i])
-						Children[i]->getPolys(box, idxdata);
+						Children[i]->getPolys(box, idxdata,parentTest);
 			}
 		}
 
 
-
+#if 0
 		// returns all ids of polygons partially or full enclosed 
-		// by the view frustrum.
-		void getPolys(const scene::SViewFrustrum& frustrum, SIndexData* idxdata)
+		// by the view frustum.
+		void getPolys(const scene::SViewFrustum& frustum, SIndexData* idxdata,u32 parentTest) const
 		{
-			s32 i; // new ISO for scoping problem in some compilers
-
-			bool visible = true;
-
-			core::vector3df edges[8];
-			Box.getEdges(edges);
-
-			for (i=0; i<scene::SViewFrustrum::VF_PLANE_COUNT; ++i)
+			// not full inside
+			//if ( parentTest != 2 )
 			{
-				bool boxInFrustrum = false;
+				s32 i; // new ISO for scoping problem in some compilers
 
-				for (int j=0; j<8; ++j)
-				if (frustrum.planes[i].classifyPointRelation(edges[j]) != core::ISREL3D_BACK)
+				core::vector3df edges[8];
+				Box.getEdges(edges);
+
+				u32 bitTest = 0;
+				for (i=0; i<scene::SViewFrustum::VF_PLANE_COUNT; ++i)
 				{
-					boxInFrustrum = true;
-					break;
+					bool boxInFrustum = false;
+
+					for (int j=0; j<8; ++j)
+					if (frustum.planes[i].classifyPointRelation(edges[j]) != core::ISREL3D_BACK)
+					{
+						boxInFrustum = true;
+						break;
+					}
+
+					if (!boxInFrustum)
+					{
+						return;
+					}
 				}
 
-				if (!boxInFrustrum)
-				{
-					visible = false;
-					break;
-				}
 			}
 
-			if (visible)
+			s32 cnt = IndexData->size();
+			
+			for (i=0; i<cnt; ++i)
 			{
-				s32 cnt = (*IndexData).size();
-				
-				for (i=0; i<cnt; ++i)
-				{
-					s32 idxcnt = (*IndexData)[i].Indices.size();
+				s32 idxcnt = (*IndexData)[i].Indices.size();
 
-					if (idxcnt)
-					{
-						memcpy(&idxdata[i].Indices[idxdata[i].CurrentSize], 
-							&(*IndexData)[i].Indices[0], idxcnt * sizeof(s16));
-						idxdata[i].CurrentSize += idxcnt;
-					}
+				if (idxcnt)
+				{
+					memcpy(&idxdata[i].Indices[idxdata[i].CurrentSize], 
+						&(*IndexData)[i].Indices[0], idxcnt * sizeof(s16));
+					idxdata[i].CurrentSize += idxcnt;
 				}
 			}
 
 			for (i=0; i<8; ++i)
 				if (Children[i])
-					Children[i]->getPolys(frustrum, idxdata);
+					Children[i]->getPolys(frustum, idxdata,parentTest);
+		}
+#endif
+
+		// returns all ids of polygons partially or full enclosed 
+		// by the view frustum.
+		void getPolys(const scene::SViewFrustum& frustum, SIndexData* idxdata,u32 parentTest) const
+		{
+			u32 totalIn = 0;
+			s32 i; // new ISO for scoping problem in some compilers
+			
+			// not full inside
+			//if ( parentTest != 2 )
+			{
+
+				core::vector3df edges[8];
+				Box.getEdges(edges);
+
+				u32 bitTest = 0;
+				for (i=0; i<scene::SViewFrustum::VF_PLANE_COUNT; ++i)
+				{
+					bool boxInFrustum = false;
+
+					for (int j=0; j<8; ++j)
+					if (frustum.planes[i].isFrontFacing(edges[j]) )
+					{
+						boxInFrustum = true;
+						break;
+					}
+
+					if (!boxInFrustum)
+					{
+						return;
+					}
+				}
+
+			}
+
+			s32 cnt = IndexData->size();
+			
+			for (i=0; i<cnt; ++i)
+			{
+				s32 idxcnt = (*IndexData)[i].Indices.size();
+
+				if (idxcnt)
+				{
+					memcpy(&idxdata[i].Indices[idxdata[i].CurrentSize], 
+						&(*IndexData)[i].Indices[0], idxcnt * sizeof(s16));
+					idxdata[i].CurrentSize += idxcnt;
+				}
+			}
+
+			for (i=0; i<8; ++i)
+				if (Children[i])
+					Children[i]->getPolys(frustum, idxdata,parentTest);
 		}
 
 
@@ -341,7 +407,7 @@ private:
 			{
 				outBoxes.push_back(Box);
 				
-				for (s32 i=0; i<8; ++i)
+				for (u32 i=0; i<8; ++i)
 					if (Children[i])
 						Children[i]->renderBoundingBoxes(box, outBoxes);
 			}
@@ -349,15 +415,15 @@ private:
 
 	private:
 
-		core::aabbox3d<f32> Box;
+		core::aabbox3df Box;
 		core::array<SIndexChunk>* IndexData;
 		OctTreeNode* Children[8];
-		s32 depth;
+		u32 Depth;
 	};
 
 	OctTreeNode* Root;
 	SIndexData* IndexData;
-	s32 IndexDataCount;
+	u32 IndexDataCount;
 };
 
 } // end namespace

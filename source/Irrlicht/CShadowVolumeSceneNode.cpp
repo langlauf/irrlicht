@@ -1,10 +1,11 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CShadowVolumeSceneNode.h"
 #include "ISceneManager.h"
 #include "IVideoDriver.h"
+#include "SLight.h"
 
 namespace irr
 {
@@ -14,21 +15,19 @@ namespace scene
 
 //! constructor
 CShadowVolumeSceneNode::CShadowVolumeSceneNode(ISceneNode* parent,
-						ISceneManager* mgr,
-						s32 id,
-						bool zfailmethod,
-						f32 infinity)
-: IShadowVolumeSceneNode(parent, mgr, id), Edges(0), EdgeCount(0),
-	ShadowVolumesUsed(0), Indices(0), Vertices(0), IndexCount(0),
-	VertexCount(0),	IndexCountAllocated(0),
-	VertexCountAllocated(0), UseZFailMethod(zfailmethod),
-	Adjacency(0), FaceData(0), Infinity(infinity)
+					ISceneManager* mgr, s32 id,
+					bool zfailmethod, f32 infinity)
+: IShadowVolumeSceneNode(parent, mgr, id), Indices(0), Vertices(0),
+	Adjacency(0), FaceData(0), UseZFailMethod(zfailmethod),
+	IndexCountAllocated(0), VertexCountAllocated(0),
+	IndexCount(0), VertexCount(0), ShadowVolumesUsed(0),
+	Edges(0), EdgeCount(0), Infinity(infinity)
 {
 	#ifdef _DEBUG
 	setDebugName("CShadowVolumeSceneNode");
 	#endif
 
-	setAutomaticCulling(false);
+	setAutomaticCulling(scene::EAC_OFF);
 }
 
 
@@ -280,10 +279,10 @@ void CShadowVolumeSceneNode::setMeshToRenderFrom(IMesh* mesh)
 
 	// calculate total amount of vertices and indices
 
-	s32 i;
+	u32 i;
 	s32 totalVertices = 0;
 	s32 totalIndices = 0;
-	s32 bufcnt = mesh->getMeshBufferCount();
+	u32 bufcnt = mesh->getMeshBufferCount();
 	IMeshBuffer* b;
 
 	for (i=0; i<bufcnt; ++i)
@@ -352,6 +351,15 @@ void CShadowVolumeSceneNode::setMeshToRenderFrom(IMesh* mesh)
 					Vertices[VertexCount++] = (*vp).Pos;
 			}
 			break;
+		case video::EVT_TANGENTS:
+			{
+				const video::S3DVertexTangents* vp = (video::S3DVertexTangents*)b->getVertices();
+				const video::S3DVertexTangents* vpend = vp + vtxcnt;
+
+				for (; vp!=vpend; ++vp)
+					Vertices[VertexCount++] = (*vp).Pos;
+			}
+			break;
 		}
 	}
 
@@ -363,7 +371,7 @@ void CShadowVolumeSceneNode::setMeshToRenderFrom(IMesh* mesh)
 	// create as much shadow volumes as there are lights but
 	// do not ignore the max light settings.
 
-	s32 lights = SceneManager->getVideoDriver()->getDynamicLightCount();
+	u32 lights = SceneManager->getVideoDriver()->getDynamicLightCount();
 	core::matrix4 mat = Parent->getAbsoluteTransformation();
 	core::vector3df parentpos = Parent->getAbsolutePosition();
 	core::vector3df lpos;
@@ -385,12 +393,12 @@ void CShadowVolumeSceneNode::setMeshToRenderFrom(IMesh* mesh)
 
 
 //! pre render method
-void CShadowVolumeSceneNode::OnPreRender()
+void CShadowVolumeSceneNode::OnRegisterSceneNode()
 {
 	if (IsVisible)
 	{
 		SceneManager->registerNodeForRendering(this, scene::ESNRP_SHADOW);
-		ISceneNode::OnPreRender();
+		ISceneNode::OnRegisterSceneNode();
 	}
 }
 
@@ -422,7 +430,7 @@ const core::aabbox3d<f32>& CShadowVolumeSceneNode::getBoundingBox() const
 
 
 //! returns the material based on the zero based index i.
-video::SMaterial& CShadowVolumeSceneNode::getMaterial(s32 i)
+video::SMaterial& CShadowVolumeSceneNode::getMaterial(u32 i)
 {
 	// this should never be called, because a shadow volume has got no
 	// material
@@ -433,7 +441,7 @@ video::SMaterial& CShadowVolumeSceneNode::getMaterial(s32 i)
 
 
 //! returns amount of materials used by this scene node.
-s32 CShadowVolumeSceneNode::getMaterialCount()
+u32 CShadowVolumeSceneNode::getMaterialCount()
 {
 	return 0;
 }

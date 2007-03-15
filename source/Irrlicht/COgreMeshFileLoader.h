@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 // orginally written by Christian Stehno, modified by Nikolaus Gebhardt
@@ -21,7 +21,7 @@ namespace irr
 namespace scene
 {
 
-//! Meshloader capable of loading 3ds meshes.
+//! Meshloader capable of loading ogre meshes.
 class COgreMeshFileLoader : public IMeshLoader
 {
 public:
@@ -197,7 +197,6 @@ private:
 	bool readVertexDeclaration(io::IReadFile* file, ChunkData& parent, OgreGeometry& geometry);
 	bool readVertexBuffer(io::IReadFile* file, ChunkData& parent, OgreGeometry& geometry);
 	bool readSubMesh(io::IReadFile* file, ChunkData& parent, OgreSubMesh& subMesh);
-	bool readPercentageChunk(io::IReadFile* file, ChunkData& chunk, float&percentage);
 
 	void readChunkData(io::IReadFile* file, ChunkData& data);
 	void readString(io::IReadFile* file, ChunkData& data, core::stringc& out);

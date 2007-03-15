@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -6,7 +6,6 @@
 #include "ISceneNode.h"
 
 #include "os.h"
-#include <stdio.h>
 
 namespace irr
 {
@@ -110,13 +109,14 @@ void COctTreeTriangleSelector::getTriangles(core::triangle3df* triangles,
 									const core::matrix4* transform)
 {
 	core::matrix4 mat;
+	core::aabbox3d<f32> invbox = box;
 
 	if (SceneNode)
+	{
 		mat = SceneNode->getAbsoluteTransformation();
-
-	mat.makeInverse();
-	core::aabbox3d<f32> invbox = box;
-	mat.transformBox(invbox);
+		mat.makeInverse();
+		mat.transformBox(invbox);
+	}
 
 	mat.makeIdentity();
 

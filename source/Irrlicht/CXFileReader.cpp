@@ -1,15 +1,11 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CXFileReader.h"
 #include "os.h"
 #include "fast_atof.h"
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-
+#include "coreutil.h"
 
 namespace irr
 {
@@ -17,7 +13,9 @@ namespace scene
 {
 
 CXFileReader::CXFileReader(io::IReadFile* file)
-: ErrorHappened(false), Buffer(0), Size(0), P(0), End(0), binary(false), m_pgCurFrame(0)
+: MajorVersion(0), MinorVersion(0), binary(false), binaryNumCount(0),
+	Buffer(0), Size(0), FloatSize(0), P(0), End(0), ErrorHappened(false),
+	m_bFrameRemoved(false), m_pgCurFrame(0)
 {
 	if (!file)
 	{
@@ -217,7 +215,7 @@ bool CXFileReader::parseFile()
 	}
 	// loop through hiearchy and combine frames that have no mesh
 	// and no name into its parent
-	
+
 	m_bFrameRemoved = false;
 	for( u32Idx = 0; u32Idx < RootFrames.size(); u32Idx++ )
 	{
@@ -245,17 +243,14 @@ void CXFileReader::optimizeFrames( SXFrame * pgFrame,  SXFrame * pgParent )
 		{
 			// combine this frame with parent
 			// add child frames to parent
-			pgParent->LocalMatrix = pgParent->LocalMatrix * pgFrame->LocalMatrix;
+			pgParent->LocalMatrix *= pgFrame->LocalMatrix;
 
 			u32 c;
 
 			for( c=0; c<pgFrame->ChildFrames.size(); ++c )
 			{
 				// add child frames to parent
-				for (u32 c=0; c<pgFrame->ChildFrames.size(); ++c)
-				{
-					pgParent->ChildFrames.push_back(pgFrame->ChildFrames[c]);
-				}
+				pgParent->ChildFrames.push_back(pgFrame->ChildFrames[c]);
 			}
 
 			// add meshes to parent
@@ -266,7 +261,7 @@ void CXFileReader::optimizeFrames( SXFrame * pgFrame,  SXFrame * pgParent )
 				pgParent->Meshes.push_back( pgFrame->Meshes[c] );
 			}
 
-			// remove child fames in our list
+			// remove child frames in our list
 			pgFrame->ChildFrames.clear();
 
 			// remove meshes
@@ -305,8 +300,16 @@ bool CXFileReader::parseDataObject()
 	else
 	if (objectName == "Frame")
 	{
-		RootFrames.push_back(SXFrame());
-		m_pgCurFrame = &RootFrames[ RootFrames.size() - 1 ];
+		if (!m_pgCurFrame)
+		{
+			RootFrames.push_back(SXFrame());
+			m_pgCurFrame = &RootFrames.getLast();
+		}
+		else
+		{
+			m_pgCurFrame->ChildFrames.push_back(SXFrame());
+			m_pgCurFrame = &(m_pgCurFrame->ChildFrames.getLast());
+		}
 		return parseDataObjectFrame( * m_pgCurFrame );
 	}
 	else
@@ -316,16 +319,16 @@ bool CXFileReader::parseDataObject()
 		if (!m_pgCurFrame)
 		{
 			RootFrames.push_back(SXFrame());
-			m_pgCurFrame = &RootFrames[ RootFrames.size() - 1 ];
+			m_pgCurFrame = &RootFrames.getLast();
 		}
 		m_pgCurFrame->Meshes.push_back(SXMesh());
-		return parseDataObjectMesh(m_pgCurFrame->Meshes[m_pgCurFrame->Meshes.size()-1]);
+		return parseDataObjectMesh(m_pgCurFrame->Meshes.getLast());
 	}
 	else
 	if (objectName == "AnimationSet")
 	{
 		AnimationSets.push_back(SXAnimationSet());
-		return parseDataObjectAnimationSet(AnimationSets[AnimationSets.size()-1]);
+		return parseDataObjectAnimationSet(AnimationSets.getLast());
 	}
 	else
 	if (objectName == "Material")
@@ -381,7 +384,7 @@ bool CXFileReader::parseDataObjectFrame(SXFrame& frame)
 		if (objectName == "Frame")
 		{
 			frame.ChildFrames.push_back(SXFrame());
-			if (!parseDataObjectFrame(frame.ChildFrames[frame.ChildFrames.size()-1]))
+			if (!parseDataObjectFrame(frame.ChildFrames.getLast()))
 				return false;
 		}
 		else
@@ -394,7 +397,7 @@ bool CXFileReader::parseDataObjectFrame(SXFrame& frame)
 		if (objectName == "Mesh")
 		{
 			frame.Meshes.push_back(SXMesh());
-			if (!parseDataObjectMesh(frame.Meshes[frame.Meshes.size()-1]))
+			if (!parseDataObjectMesh(frame.Meshes.getLast()))
 				return false;
 		}
 		else
@@ -657,7 +660,7 @@ bool CXFileReader::parseDataObjectMesh(SXMesh &mesh)
 		if (objectName == "SkinWeights")
 		{
 			mesh.SkinWeights.push_back(SXSkinWeight());
-			if (!parseDataObjectSkinWeights(mesh.SkinWeights[mesh.SkinWeights.size()-1]))
+			if (!parseDataObjectSkinWeights(mesh.SkinWeights.getLast()))
 				return false;
 		}
 		else
@@ -780,8 +783,8 @@ bool CXFileReader::parseDataObjectSkinMeshHeader(SXSkinMeshHeader& header)
 
 
 bool CXFileReader::parseDataObjectMeshMaterialList(SXMeshMaterialList& mlist,
-												   s32 triangulatedIndexCount,
-												   core::array< s32 >& indexCountPerFace)
+					s32 triangulatedIndexCount,
+					core::array< s32 >& indexCountPerFace)
 {
 #ifdef _XREADER_DEBUG
 	os::Printer::log("CXFileReader: Reading mesh material list");
@@ -794,7 +797,7 @@ bool CXFileReader::parseDataObjectMeshMaterialList(SXMeshMaterialList& mlist,
 	}
 
 	// read material count
-	s32 nMaterials = readInt();
+	readInt();
 
 	// read non triangulated face material index count
 	s32 nFaceIndices = readInt();
@@ -859,7 +862,7 @@ bool CXFileReader::parseDataObjectMeshMaterialList(SXMeshMaterialList& mlist,
 		if (objectName == "Material")
 		{
 			mlist.Materials.push_back(SXMaterial());
-			if (!parseDataObjectMaterial(mlist.Materials[mlist.Materials.size()-1]))
+			if (!parseDataObjectMaterial(mlist.Materials.getLast()))
 				return false;
 		}
 		else
@@ -873,11 +876,10 @@ bool CXFileReader::parseDataObjectMeshMaterialList(SXMeshMaterialList& mlist,
 			if (!parseUnknownDataObject())
 				return false;
 		}
-
 	}
-
 	return true;
 }
+
 
 
 bool CXFileReader::parseDataObjectMaterial(SXMaterial& material)
@@ -1017,7 +1019,7 @@ bool CXFileReader::parseDataObjectAnimationSet(SXAnimationSet& set)
 		if (objectName == "Animation")
 		{
 			set.Animations.push_back(SXAnimation());
-			if (!parseDataObjectAnimation(set.Animations[set.Animations.size()-1]))
+			if (!parseDataObjectAnimation(set.Animations.getLast()))
 				return false;
 		}
 		else
@@ -1026,11 +1028,10 @@ bool CXFileReader::parseDataObjectAnimationSet(SXAnimationSet& set)
 			if (!parseUnknownDataObject())
 				return false;
 		}
-
 	}
-
 	return true;
 }
+
 
 
 bool CXFileReader::parseDataObjectAnimation(SXAnimation& anim)
@@ -1066,7 +1067,7 @@ bool CXFileReader::parseDataObjectAnimation(SXAnimation& anim)
 		if (objectName == "AnimationKey")
 		{
 			anim.Keys.push_back(SXAnimationKey());
-			if (!parseDataObjectAnimationKey(anim.Keys[anim.Keys.size()-1]))
+			if (!parseDataObjectAnimationKey(anim.Keys.getLast()))
 				return false;
 		}
 		else
@@ -1102,11 +1103,10 @@ bool CXFileReader::parseDataObjectAnimation(SXAnimation& anim)
 					return false;
 			}
 		}
-
 	}
-
 	return true;
 }
+
 
 
 bool CXFileReader::parseDataObjectAnimationKey(SXAnimationKey& animkey)
@@ -1132,6 +1132,11 @@ bool CXFileReader::parseDataObjectAnimationKey(SXAnimationKey& animkey)
 
 	// read number of keys
 	animkey.numberOfKeys = readInt();
+
+	// eat the semicolon after the "0".  if there are keys present, readInt()
+	// does this for us.  If there aren't, we need to do it explicitly
+	if (!binary && animkey.numberOfKeys == 0)
+		getNextToken(); // skip semicolon
 
 	animkey.init();
 
@@ -1308,9 +1313,9 @@ bool CXFileReader::parseDataObjectTextureFilename(core::stringc& texturename)
 
 
 bool CXFileReader::parseDataObjectMeshNormals(core::array<core::vector3df>& normals,
-											  core::array< s32 >& normalIndices,
-											  s32 triangulatedIndexCount,
-											  core::array< s32 >& indexCountPerFace)
+					core::array< s32 >& normalIndices,
+					s32 triangulatedIndexCount,
+					core::array< s32 >& indexCountPerFace)
 {
 #ifdef _XREADER_DEBUG
 	os::Printer::log("CXFileReader: reading mesh normals");
@@ -1689,7 +1694,7 @@ core::stringc CXFileReader::getNextToken()
 		if (P >= End)
 			return s;
 
-		while(P < End && !isspace(P[0]))
+		while(P < End && !core::isspace(P[0]))
 		{
 			s.append(P[0]);
 			++P;
@@ -1709,7 +1714,7 @@ void CXFileReader::findNextNoneWhiteSpaceNumber()
 	while(true)
 	{
 		while((P < End) && (P[0] != '-') && (P[0] != '.') &&
-				!(isdigit(P[0])))
+			!( core::isdigit(P[0])))
 			++P;
 
 		if (P >= End)

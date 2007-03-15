@@ -89,7 +89,7 @@ private:
 	gui::IGUIStaticText* statusText;
 	gui::IGUIInOutFader* inOutFader;
 
-	scene::IAnimatedMesh* quakeLevelMesh;
+	scene::IQ3LevelMesh* quakeLevelMesh;
 	scene::ISceneNode* quakeLevelNode;
 	scene::ISceneNode* skyboxNode;
 	scene::IAnimatedMeshSceneNode* model1;
@@ -99,8 +99,8 @@ private:
 	scene::IMetaTriangleSelector* metaSelector;
 	scene::ITriangleSelector* mapSelector;
 
-	u32 sceneStartTime;
-	u32 timeForThisScene;
+	s32 sceneStartTime;
+	s32 timeForThisScene;
 
 	core::array<SParticleImpact> Impacts;
 };

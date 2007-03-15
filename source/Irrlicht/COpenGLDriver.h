@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in Irrlicht.h
 
@@ -18,8 +18,10 @@
 	#include <GL/gl.h>
 	#include <GL/glu.h>
 	#include "glext.h"
+#ifdef _MSC_VER
 	#pragma comment(lib, "OpenGL32.lib")
 	#pragma comment(lib, "GLu32.lib")
+#endif
 #elif defined(MACOSX)
 	#define GL_EXT_texture_env_combine 1
 	#include "CIrrDeviceMacOSX.h"
@@ -39,6 +41,7 @@
 	#include <GL/glx.h>
 	#if defined(_IRR_OPENGL_USE_EXTPOINTER_)
 	#include "glext.h"
+	#undef GLX_ARB_get_proc_address // avoid problems with local glxext.h
 	#include "glxext.h"
 	#endif
 #endif
@@ -86,7 +89,7 @@ namespace video
 		virtual void setTransform(E_TRANSFORMATION_STATE state, const core::matrix4& mat);
 
 		//! draws a vertex primitive list
-		void drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType);
+		void drawVertexPrimitiveList(const void* vertices, u32 vertexCount, const u16* indexList, u32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType);
 
 		//! queries the features of the driver, returns true if feature is available
 		bool queryFeature(E_VIDEO_DRIVER_FEATURE feature);
@@ -159,7 +162,7 @@ namespace video
 		virtual void addDynamicLight(const SLight& light);
 
 		//! returns the maximal amount of dynamic lights the device can handle
-		virtual s32 getMaximalDynamicLightAmount();
+		virtual u32 getMaximalDynamicLightAmount();
 
 		//! Sets the dynamic ambient light color. The default color is
 		//! (0,0,0,0) which means it is dark.
@@ -287,6 +290,11 @@ namespace video
 		//! IMaterialRendererServices)
 		virtual IVideoDriver* getVideoDriver();
 
+		//! Returns the maximum amount of primitives (mostly vertices) which
+		//! the device is able to render with one drawIndexedTriangleList
+		//! call.
+		virtual u32 getMaximalPrimitiveCount();
+
 		ITexture* createRenderTargetTexture(const core::dimension2d<s32>& size);
 
 		bool setRenderTarget(video::ITexture* texture, bool clearBackBuffer,
@@ -311,6 +319,8 @@ namespace video
 
 		//! creates a transposed matrix in supplied GLfloat array to pass to OpenGL
 		void createGLMatrix(GLfloat gl_matrix[16], const core::matrix4& m);
+		void createGLTextureMatrix(GLfloat gl_matrix[16], const core::matrix4& m);
+
 
 		//! sets the needed renderstates
 		void setRenderStates3DMode();
@@ -353,6 +363,7 @@ namespace video
 		bool TextureNPOTExtension;
 		bool FramebufferObjectExtension;
 		bool EXTPackedDepthStencil;
+		bool EXTSeparateSpecularColor;
 
 		SMaterial Material, LastMaterial;
 		COpenGLTexture* RenderTargetTexture;
@@ -362,6 +373,7 @@ namespace video
 
 		GLint MaxTextureUnits;
 		GLint MaxLights;
+		GLint MaxIndices;
 
 		core::dimension2d<s32> CurrentRendertargetSize;
 
@@ -413,11 +425,11 @@ namespace video
 			PFNGLGENFRAMEBUFFERSEXTPROC pGlGenFramebuffersEXT;
 			PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC pGlCheckFramebufferStatusEXT;
 			PFNGLFRAMEBUFFERTEXTURE2DEXTPROC pGlFramebufferTexture2DEXT;
-            PFNGLBINDRENDERBUFFEREXTPROC pGlBindRenderBufferEXT;
-            PFNGLDELETERENDERBUFFERSEXTPROC pGlDeleteRenderBuffersEXT;
-            PFNGLGENRENDERBUFFERSEXTPROC pGlGenRenderbuffersEXT;
-            PFNGLRENDERBUFFERSTORAGEEXTPROC pGlRenderbufferStorageEXT;
-            PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC pGlFramebufferRenderbufferEXT;
+			PFNGLBINDRENDERBUFFEREXTPROC pGlBindRenderbufferEXT;
+			PFNGLDELETERENDERBUFFERSEXTPROC pGlDeleteRenderbuffersEXT;
+			PFNGLGENRENDERBUFFERSEXTPROC pGlGenRenderbuffersEXT;
+			PFNGLRENDERBUFFERSTORAGEEXTPROC pGlRenderbufferStorageEXT;
+			PFNGLFRAMEBUFFERRENDERBUFFEREXTPROC pGlFramebufferRenderbufferEXT;
 		#endif
 
 		#ifdef _IRR_WINDOWS_

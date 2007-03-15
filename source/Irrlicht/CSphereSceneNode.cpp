@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -123,18 +123,18 @@ void CSphereSceneNode::setSizeAndPolys()
 
 	// calculate the angle which separates all points in a circle
 
-	float Angle = 2 * core::PI / (f32)PolyCount;
-	float sinay;
-	float cosay;
-	float sinaxz;
-	float cosaxz;
+	f32 Angle = 2 * core::PI / (f32)PolyCount;
+	f32 sinay;
+	f32 cosay;
+	f32 sinaxz;
+	f32 cosaxz;
 
 	i = 0;
-	float axz;
+	f32 axz;
 
 	// we don't start at 0.
 
-	float ay = -Angle / 4;
+	f32 ay = -Angle / 4;
 
 	for (int y = 0; y < PolyCount; ++y)
 	{
@@ -213,12 +213,12 @@ const core::aabbox3d<f32>& CSphereSceneNode::getBoundingBox() const
 }
 
 
-void CSphereSceneNode::OnPreRender()
+void CSphereSceneNode::OnRegisterSceneNode()
 {
 	if (IsVisible)
 		SceneManager->registerNodeForRendering(this);
 
-	ISceneNode::OnPreRender();
+	ISceneNode::OnRegisterSceneNode();
 }
 
 
@@ -227,14 +227,14 @@ void CSphereSceneNode::OnPreRender()
 //! This function is needed for inserting the node into the scene hirachy on a
 //! optimal position for minimizing renderstate changes, but can also be used
 //! to directly modify the material of a scene node.
-video::SMaterial& CSphereSceneNode::getMaterial(s32 i)
+video::SMaterial& CSphereSceneNode::getMaterial(u32 i)
 {
 	return Buffer.Material;
 }
 
 
 //! returns amount of materials used by this scene node.
-s32 CSphereSceneNode::getMaterialCount()
+u32 CSphereSceneNode::getMaterialCount()
 {
 	return 1;
 }

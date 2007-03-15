@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -7,7 +7,6 @@
 #include "ISceneManager.h"
 #include "ICameraSceneNode.h"
 #include "IVideoDriver.h"
-#include <string.h>
 
 #include "CParticlePointEmitter.h"
 #include "CParticleBoxEmitter.h"
@@ -25,7 +24,7 @@ CParticleSystemSceneNode::CParticleSystemSceneNode(bool createDefaultEmitter,
 	const core::vector3df& position, const core::vector3df& rotation,
 	const core::vector3df& scale)
 	: IParticleSystemSceneNode(parent, mgr, id, position, rotation, scale),
-	Emitter(0), ParticlesAreGlobal(true), LastEmitTime(0)
+	Emitter(0), LastEmitTime(0), ParticlesAreGlobal(true)
 {
 	#ifdef _DEBUG
 	setDebugName("CParticleSystemSceneNode");
@@ -90,7 +89,7 @@ void CParticleSystemSceneNode::removeAllAffectors()
 
 
 //! Returns the material based on the zero based index i.
-video::SMaterial& CParticleSystemSceneNode::getMaterial(s32 i)
+video::SMaterial& CParticleSystemSceneNode::getMaterial(u32 i)
 {
 	return Buffer.Material;
 }
@@ -98,7 +97,7 @@ video::SMaterial& CParticleSystemSceneNode::getMaterial(s32 i)
 
 
 //! Returns amount of materials used by this scene node.
-s32 CParticleSystemSceneNode::getMaterialCount()
+u32 CParticleSystemSceneNode::getMaterialCount()
 {
 	return 1;
 }
@@ -150,14 +149,14 @@ IParticleAffector* CParticleSystemSceneNode::createGravityAffector(
 
 
 //! pre render event
-void CParticleSystemSceneNode::OnPreRender()
+void CParticleSystemSceneNode::OnRegisterSceneNode()
 {
 	doParticleSystem(os::Timer::getTime());
 
 	if (IsVisible && (Particles.size() != 0))
 	{
 		SceneManager->registerNodeForRendering(this);
-		ISceneNode::OnPreRender();
+		ISceneNode::OnRegisterSceneNode();
 	}
 }
 
@@ -172,6 +171,8 @@ void CParticleSystemSceneNode::render()
 	if (!camera || !driver)
 		return;
 
+
+#if 0
 	// calculate vectors for letting particles look to camera
 	core::vector3df view(camera->getTarget() - camera->getAbsolutePosition());
 	view.normalize();
@@ -185,6 +186,22 @@ void CParticleSystemSceneNode::render()
 	vertical *= 0.5f * ParticleSize.Height;
 
 	view *= -1.0f;
+
+#else
+
+	const core::matrix4 &m = camera->getViewFrustum()->Matrices [ video::ETS_VIEW ];
+
+	f32 f;
+
+	f = 0.5f * ParticleSize.Width;
+	const core::vector3df horizontal ( m[0] * f, m[4] * f, m[8] * f );
+
+	f = -0.5f * ParticleSize.Height;
+	const core::vector3df vertical ( m[1] * f, m[5] * f, m[9] * f );
+
+	const core::vector3df view ( -m[2], -m[6] , -m[10] );
+
+#endif
 
 	// reallocate arrays, if they are too small
 	reallocateBuffers();
@@ -346,10 +363,10 @@ void CParticleSystemSceneNode::setParticleSize(const core::dimension2d<f32> &siz
 
 void CParticleSystemSceneNode::reallocateBuffers()
 {
-	if (Particles.size() * 4 > (u32)Buffer.getVertexCount() ||
-			Particles.size() * 6 > (u32)Buffer.getIndexCount())
+	if (Particles.size() * 4 > Buffer.getVertexCount() ||
+			Particles.size() * 6 > Buffer.getIndexCount())
 	{
-		s32 oldSize = Buffer.getVertexCount();
+		u32 oldSize = Buffer.getVertexCount();
 		Buffer.Vertices.set_used(Particles.size() * 4);
 
 		u32 i;
@@ -364,8 +381,8 @@ void CParticleSystemSceneNode::reallocateBuffers()
 		}
 
 		// fill remaining indices
-		s32 oldIdxSize = Buffer.getIndexCount();
-		s32 oldvertices = oldSize;
+		u32 oldIdxSize = Buffer.getIndexCount();
+		u32 oldvertices = oldSize;
 		Buffer.Indices.set_used(Particles.size() * 6);
 
 		for (i=oldIdxSize; i<Buffer.Indices.size(); i+=6)
@@ -453,6 +470,8 @@ void CParticleSystemSceneNode::deserializeAttributes(io::IAttributes* in, io::SA
 	case EPET_BOX:
 		Emitter = createBoxEmitter();
 		break;
+	default:
+		break;
 	}
 
 	s32 idx = 0;
@@ -486,6 +505,9 @@ void CParticleSystemSceneNode::deserializeAttributes(io::IAttributes* in, io::SA
 			break;
 		case EPAT_GRAVITY:
 			aff = createGravityAffector();
+			break;
+		case EPAT_NONE:
+		default:
 			break;
 		}
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -24,7 +24,7 @@ CGUITab::CGUITab(s32 number, IGUIEnvironment* environment,
 	IGUIElement* parent, const core::rect<s32>& rectangle, 
 	s32 id)
 	: IGUITab(environment, parent, id, rectangle), Number(number),
-	BackColor(0,0,0,0), DrawBackground(false)
+		DrawBackground(false), BackColor(0,0,0,0)
 {
 	#ifdef _DEBUG
 	setDebugName("CGUITab");
@@ -81,6 +81,37 @@ void CGUITab::setBackgroundColor(video::SColor c)
 	BackColor = c;
 }
 
+
+//! Writes attributes of the element.
+void CGUITab::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0)
+{
+	IGUITab::serializeAttributes(out,options);
+
+	out->addInt		("TabNumber",		Number);
+	out->addBool	("DrawBackground",	DrawBackground);
+	out->addColor	("BackColor",		BackColor);
+
+}
+
+//! Reads attributes of the element
+void CGUITab::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options=0)
+{
+	IGUITab::deserializeAttributes(in,options);
+
+	setNumber(in->getAttributeAsInt("TabNumber"));
+	setDrawBackground(in->getAttributeAsBool("DrawBackground"));
+	setBackgroundColor(in->getAttributeAsColor("BackColor"));
+
+	if (Parent && Parent->getType() == EGUIET_TAB_CONTROL)
+	{
+		((CGUITabControl*)Parent)->addTab(this);
+		if (isVisible())
+			((CGUITabControl*)Parent)->setActiveTab(this);
+	}
+
+}
+
+
 // ------------------------------------------------------------------
 // Tabcontrol
 // ------------------------------------------------------------------
@@ -119,6 +150,7 @@ IGUITab* CGUITabControl::addTab(const wchar_t* caption, s32 id)
 
 	CGUITab* tab = new CGUITab(Tabs.size(), Environment, this, 
 		r, id);
+	tab->setAlignment(EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT, EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT);
 
 	tab->setText(caption);
 	tab->setVisible(false);
@@ -133,6 +165,41 @@ IGUITab* CGUITabControl::addTab(const wchar_t* caption, s32 id)
 	return tab;
 }
 
+//! adds a tab which has been created elsewhere
+void CGUITabControl::addTab(CGUITab* tab)
+{
+	if (!tab)
+		return;
+
+	// check if its already added
+	for (s32 i=0; i < (s32)Tabs.size(); ++i)
+		if (Tabs[i] == tab)
+			return;
+
+	tab->grab();
+
+	if (tab->getNumber() == -1)
+		tab->setNumber((s32)Tabs.size());
+
+	while (tab->getNumber() >= (s32)Tabs.size())
+		Tabs.push_back(0);
+
+	if (Tabs[tab->getNumber()])
+	{
+		Tabs.push_back(Tabs[tab->getNumber()]);
+		Tabs[Tabs.size()-1]->setNumber(Tabs.size());
+	}
+	Tabs[tab->getNumber()] = tab;
+
+	if (ActiveTab == -1)
+		ActiveTab = tab->getNumber();
+
+
+	if (tab->getNumber() == ActiveTab)
+	{
+		setActiveTab(ActiveTab);
+	}
+}
 
 //! Returns amount of tabs in the tabcontrol
 s32 CGUITabControl::getTabcount()
@@ -165,7 +232,8 @@ bool CGUITabControl::OnEvent(SEvent event)
 		switch(event.GUIEvent.EventType)
 		{
 			case gui::EGET_ELEMENT_FOCUS_LOST:
-				return true;
+				if (event.GUIEvent.Caller == (IGUIElement*)this)
+					return true;
 		}
 		break;
 	case EET_MOUSE_INPUT_EVENT:
@@ -205,7 +273,10 @@ void CGUITabControl::selectTab(core::position2d<s32> p)
 			text = Tabs[i]->getText();
 
 		// get text length
-		s32 len = font->getDimension(text).Width + 20;
+		s32 len = 20;
+		if (font)
+			len += font->getDimension(text).Width;
+
 		frameRect.UpperLeftCorner.X = pos;
 		frameRect.LowerRightCorner.X = frameRect.UpperLeftCorner.X + len;
 		pos += len;
@@ -319,6 +390,13 @@ s32 CGUITabControl::getActiveTab()
 }
 
 
+bool CGUITabControl::setActiveTab(IGUIElement *tab)
+{
+	for (s32 i=0; i<(s32)Tabs.size(); ++i)
+		if (Tabs[i] == tab)
+			return setActiveTab(i);
+	return false;
+}
 
 //! Brings a tab to front.
 bool CGUITabControl::setActiveTab(s32 idx)
@@ -372,6 +450,31 @@ void CGUITabControl::removeChild(IGUIElement* child)
 
 	// remove real element
 	IGUIElement::removeChild(child);
+}
+
+
+//! Writes attributes of the element.
+void CGUITabControl::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options=0)
+{
+	IGUITabControl::serializeAttributes(out,options);
+
+	out->addInt	("ActiveTab",		ActiveTab);
+	out->addBool("Border",			Border);
+	out->addBool("FillBackground",	FillBackground);
+
+}
+
+//! Reads attributes of the element
+void CGUITabControl::deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options=0)
+{
+	Border			= in->getAttributeAsBool("Border");
+	FillBackground  = in->getAttributeAsBool("FillBackground");
+
+	ActiveTab = -1;
+
+	IGUITabControl::deserializeAttributes(in,options);
+
+	setActiveTab(in->getAttributeAsInt("ActiveTab"));
 }
 
 

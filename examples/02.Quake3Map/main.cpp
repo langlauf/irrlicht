@@ -64,7 +64,7 @@ int main()
 		case 'b': driverType = video::EDT_DIRECT3D8;break;
 		case 'c': driverType = video::EDT_OPENGL;   break;
 		case 'd': driverType = video::EDT_SOFTWARE; break;
-		case 'e': driverType = video::EDT_SOFTWARE2;break;
+		case 'e': driverType = video::EDT_BURNINGSVIDEO;break;
 		case 'f': driverType = video::EDT_NULL;     break;
 		default: return 1;
 	}	
@@ -114,7 +114,7 @@ int main()
 	scene::ISceneNode* node = 0;
 	
 	if (mesh)
-		node = smgr->addOctTreeSceneNode(mesh->getMesh(0));
+		node = smgr->addOctTreeSceneNode(mesh->getMesh(0), 0, -1, 128);
 
 	/*
 	Because the level was modelled not around the origin (0,0,0), we translate
@@ -175,7 +175,6 @@ int main()
 	In the end, delete the Irrlicht device.
 	*/
 	device->drop();
-	
 	return 0;
 }
 

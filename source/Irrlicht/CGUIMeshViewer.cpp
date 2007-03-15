@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -147,7 +147,7 @@ void CGUIMeshViewer::draw()
 		driver->setMaterial(Material);
 
 		scene::IMesh* m = Mesh->getMesh(os::Timer::getTime()/20);
-		for (s32 i=0; i<m->getMeshBufferCount(); ++i)
+		for (u32 i=0; i<m->getMeshBufferCount(); ++i)
 		{
 			scene::IMeshBuffer* mb = m->getMeshBuffer(i);
 
@@ -158,6 +158,9 @@ void CGUIMeshViewer::draw()
 				break;
 			case video::EVT_2TCOORDS:
 				driver->drawIndexedTriangleList((video::S3DVertex2TCoords*)mb->getVertices(), mb->getVertexCount(), mb->getIndices(), mb->getIndexCount()/ 3);
+				break;
+			case video::EVT_TANGENTS:
+				driver->drawIndexedTriangleList((video::S3DVertexTangents*)mb->getVertices(), mb->getVertexCount(), mb->getIndices(), mb->getIndexCount()/ 3);
 				break;
 			}
 		}

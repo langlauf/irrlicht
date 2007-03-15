@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 // 
@@ -20,10 +20,10 @@
 #ifndef __DMF_SUPPORT_H_INCLUDED__
 #define __DMF_SUPPORT_H_INCLUDED__
 
-#include <stdlib.h>
-
 using namespace irr;
 using namespace video;
+
+#include "irrString.h"
 
 /** A structure representing some DeleD infos. 
  This structure contains data about DeleD level file like: version, ambient colour, number of objects etc...*/
@@ -106,7 +106,7 @@ This function converts an hex string (i.e. FF) to its int value (i.e. 255).
 \return An int representing the hex input value.*/
 int axtoi(const char *hexStg)
 {
-  int intValue = 0;  // integer value of hex string
+  unsigned int intValue = 0;  // integer value of hex string
 
   sscanf(hexStg, "%x", &intValue);
   return (intValue);
@@ -344,69 +344,72 @@ bool GetDMFHeader (StringList RawFile, dmfHeader & header)
 You must give in input a StringList representing a DMF file loaded with LoadFromFile.
 \return true if function succeed or false on fail.*/          
 bool GetDMFMaterials(StringList RawFile /**<StringList representing a DMF file.*/,
-                     dmfMaterial materials[]/**<Materials returned.*/,
-                     int num_material/**<Number of materials contained in DMF file.*/,
-                     bool use_material_dirs=false/**<Here you can choose to use default DeleD structure for material dirs.*/){
-     int offs=4;
-     StringList temp;
-     StringList temp1;
-     StringList temp2;
+			dmfMaterial materials[]/**<Materials returned.*/,
+			int num_material/**<Number of materials contained in DMF file.*/,
+			bool use_material_dirs=false/**<Here you can choose to use default DeleD structure for material dirs.*/)
+{
+	int offs=4;
+	StringList temp;
+	StringList temp1;
+	StringList temp2;
 
-     //Checking if this is a DeleD map File of version >= 0.91
-     temp=SubdivideString(RawFile[0],String(";"));//file info
+	//Checking if this is a DeleD map File of version >= 0.91
+	temp=SubdivideString(RawFile[0],String(";"));//file info
 
-     if ( temp[0] != String("DeleD Map File") ) 
-		 return false;//not a deled file
+	if ( temp[0] != String("DeleD Map File") ) 
+		return false;//not a deled file
 
-     temp.clear();
-     temp=SubdivideString(RawFile[1],String(" "));//get version
-     temp1=SubdivideString(temp[1],String(";"));
+	temp.clear();
+	temp=SubdivideString(RawFile[1],String(" "));//get version
+	temp1=SubdivideString(temp[1],String(";"));
 
-     if (atof(temp1[0].c_str()) < 0.91) 
-		 return false;//not correct version
+	if (atof(temp1[0].c_str()) < 0.91) 
+		return false;//not correct version
 
-     //end checking
-     temp.clear();
-     temp1.clear();
+	//end checking
+	temp.clear();
+	temp1.clear();
      
-     for(int i=0;i<num_material; ++i)
-	 {
-             temp=SubdivideString(RawFile[offs+i],";");
-             materials[i].materialID = i;
-             temp1=SubdivideString(temp[5],",");
+	for(int i=0;i<num_material; ++i)
+	{
+		temp=SubdivideString(RawFile[offs+i],";");
+		materials[i].materialID = i;
+		temp1=SubdivideString(temp[5],",");
 
-             materials[i].textureFlag = atoi(temp1[0].c_str());
-             if(!use_material_dirs){
-             temp2=SubdivideString(temp1[1],"\\");
+		materials[i].textureFlag = atoi(temp1[0].c_str());
+		if(!use_material_dirs)
+		{
+			temp2=SubdivideString(temp1[1],"\\");
 
-             sprintf(materials[i].textureName, "%s", temp2[temp2.size()-1].c_str());
-             }
-             else sprintf(materials[i].textureName, "%s", temp1[1].c_str());
-             materials[i].textureBlend = atoi(temp1[2].c_str());
-             temp1.clear();
-             temp2.clear();
-             int a=temp.size();
-/*             sprintf(buffer,"Size material %d: %d",i,a);
-             MessageBox (NULL,"Debug",buffer,0);*/
-             if(a>=9)
-			 {
-                temp1=SubdivideString(temp[temp.size() - 1],",");
-                materials[i].lightmapFlag=atoi(temp1[0].c_str());
-                if(!use_material_dirs){
-                temp2=SubdivideString(temp1[1],"\\");
-                sprintf(materials[i].lightmapName,"%s",temp2[temp2.size() - 1].c_str());
-                }
-                else sprintf(materials[i].lightmapName,"%s",temp1[1].c_str());
+			sprintf(materials[i].textureName, "%s", temp2[temp2.size()-1].c_str());
+		}
+		else
+			sprintf(materials[i].textureName, "%s", temp1[1].c_str());
+		materials[i].textureBlend = atoi(temp1[2].c_str());
+		temp1.clear();
+		temp2.clear();
+		int a=temp.size();
+		if(a>=9)
+		{
+			temp1=SubdivideString(temp[temp.size() - 1],",");
+			materials[i].lightmapFlag=atoi(temp1[0].c_str());
+			if(!use_material_dirs)
+			{
+				temp2=SubdivideString(temp1[1],"\\");
+				sprintf(materials[i].lightmapName,"%s",temp2[temp2.size() - 1].c_str());
 			}
-             else 
-			 {
-                  materials[i].lightmapFlag=1;
-                  sprintf(materials[i].lightmapName,"");
-             }
-             temp1.clear();
-             temp2.clear();
-     }
-     return true;
+			else
+				sprintf(materials[i].lightmapName,"%s",temp1[1].c_str());
+		}
+		else 
+		{
+			materials[i].lightmapFlag=1;
+			materials[i].lightmapName[0]=0;
+		}
+		temp1.clear();
+		temp2.clear();
+	}
+	return true;
 }
 
 

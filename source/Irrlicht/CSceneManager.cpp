@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -12,7 +12,6 @@
 #include "ISceneUserDataSerializer.h"
 
 #include "os.h"
-#include <string.h>
 
 #include "CGeometryCreator.h"
 
@@ -27,6 +26,7 @@
 #include "CDMFLoader.h"
 #include "COgreMeshFileLoader.h"
 #include "COBJMeshFileLoader.h"
+#include "CMD3MeshFileLoader.h"
 
 #include "CCubeSceneNode.h"
 #include "CSphereSceneNode.h"
@@ -65,22 +65,25 @@
 #include "CSceneNodeAnimatorFollowSpline.h"
 #include "CDefaultSceneNodeAnimatorFactory.h"
 
+#include "CQuake3ShaderSceneNode.h"
+
+//! Enable debug features
+#define SCENEMANAGER_DEBUG
+
 namespace irr
 {
 namespace scene
 {
 
-const core::stringw IRR_XML_FORMAT_SCENE		(L"irr_scene");
-const core::stringw IRR_XML_FORMAT_NODE			(L"node");
-const core::stringw IRR_XML_FORMAT_NODE_ATTR_TYPE	(L"type");
-
 //! constructor
 CSceneManager::CSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs,
-							 gui::ICursorControl* cursorControl, CMeshCache* cache)
-: ISceneNode(0, 0), Driver(driver), FileSystem(fs), ActiveCamera(0),
-	CursorControl(cursorControl), CollisionManager(0),
-	ShadowColor(150,0,0,0), MeshManipulator(0), CurrentRendertime(ESNRP_COUNT),
-	MeshCache(cache), AmbientLight(0,0,0,0)
+							 gui::ICursorControl* cursorControl, CMeshCache* cache,
+							 gui::IGUIEnvironment * gui)
+: ISceneNode(0, 0), Driver(driver), FileSystem(fs), GUIEnvironment(gui),
+	CursorControl(cursorControl), CollisionManager(0), MeshManipulator(0),
+	ActiveCamera(0), ShadowColor(150,0,0,0), AmbientLight(0,0,0,0),
+	MeshCache(cache), CurrentRendertime(ESNRP_COUNT),
+	IRR_XML_FORMAT_SCENE(L"irr_scene"), IRR_XML_FORMAT_NODE(L"node"), IRR_XML_FORMAT_NODE_ATTR_TYPE(L"type")
 {
 	#ifdef _DEBUG
 	ISceneManager::setDebugName("CSceneManager ISceneManager");
@@ -95,6 +98,9 @@ CSceneManager::CSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs,
 
 	if (CursorControl)
 		CursorControl->grab();
+
+	if ( GUIEnvironment )
+		GUIEnvironment->grab ();
 
 	// create mesh cache if not there already
 	if (!MeshCache)
@@ -121,6 +127,7 @@ CSceneManager::CSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs,
 	MeshLoaderList.push_back(new CDMFLoader(Driver, this));
 	MeshLoaderList.push_back(new COgreMeshFileLoader(MeshManipulator, FileSystem, Driver));
 	MeshLoaderList.push_back(new COBJMeshFileLoader(FileSystem, Driver));
+	MeshLoaderList.push_back(new CMD3MeshFileLoader(FileSystem, Driver));
 	// factories
 
 	ISceneNodeFactory* factory = new CDefaultSceneNodeFactory(this);
@@ -153,6 +160,9 @@ CSceneManager::~CSceneManager()
 
 	if (MeshManipulator)
 		MeshManipulator->drop();
+
+	if ( GUIEnvironment )
+		GUIEnvironment->drop ();
 
 	u32 i;
 
@@ -194,6 +204,7 @@ IAnimatedMesh* CSceneManager::getMesh(const c8* filename)
 
 	s32 count = MeshLoaderList.size();
 	for (s32 i=count-1; i>=0; --i)
+	{
 		if (MeshLoaderList[i]->isALoadableFileExtension(name.c_str()))
 		{
 			// reset file to avoid side effects of previous calls to createMesh
@@ -206,6 +217,7 @@ IAnimatedMesh* CSceneManager::getMesh(const c8* filename)
 				break;
 			}
 		}
+	}
 
 	file->drop();
 
@@ -224,6 +236,11 @@ video::IVideoDriver* CSceneManager::getVideoDriver()
 	return Driver;
 }
 
+//! returns the GUI Environment
+gui::IGUIEnvironment* CSceneManager::getGUIEnvironment ()
+{
+	return GUIEnvironment;
+}
 //! Adds a text scene node, which is able to display
 //! 2d text at a position in three dimensional space
 ITextSceneNode* CSceneManager::addTextSceneNode(gui::IGUIFont* font, const wchar_t* text,
@@ -242,6 +259,49 @@ ITextSceneNode* CSceneManager::addTextSceneNode(gui::IGUIFont* font, const wchar
 	t->drop();
 
 	return t;
+}
+
+//! Adds a text scene node, which uses billboards
+ITextSceneNode* CSceneManager::addBillboardTextSceneNode(gui::IGUIFont* font, const wchar_t* text,
+			ISceneNode* parent,
+			const core::dimension2d<f32>& size, 
+			const core::vector3df& position, s32 id,
+			video::SColor shade_top, video::SColor shade_down)
+{
+	if (!font)
+		return 0;
+
+	if (!parent)
+		parent = this;
+
+	ITextSceneNode* node = new CBillboardTextSceneNode(parent, this, id, font, text, position, size,
+		shade_top, shade_down);
+	node->drop();
+
+	return node;
+
+}
+
+
+//! Adds a scene node, which can render a quake3 shader
+ISceneNode* CSceneManager::addQuake3SceneNode(	IMeshBuffer* meshBuffer,
+												const quake3::SShader * shader,
+												ISceneNode* parent,
+												s32 id
+											)
+
+{
+	if ( 0 == shader )
+		return 0;
+
+	if (!parent)
+		parent = this;
+
+	CQuake3ShaderSceneNode* node = new CQuake3ShaderSceneNode ( parent, this, id, FileSystem, meshBuffer, shader );
+	node->drop();
+
+	return node;
+
 }
 
 
@@ -420,13 +480,13 @@ ICameraSceneNode* CSceneManager::addCameraSceneNodeMaya(ISceneNode* parent,
 //! like in most first person shooters (FPS):
 ICameraSceneNode* CSceneManager::addCameraSceneNodeFPS(ISceneNode* parent,
 	f32 rotateSpeed, f32 moveSpeed, s32 id,
-	SKeyMap* keyMapArray, s32 keyMapSize, bool noVerticalMovement)
+	SKeyMap* keyMapArray, s32 keyMapSize, bool noVerticalMovement,f32 jumpSpeed)
 {
 	if (!parent)
 		parent = this;
 
 	ICameraSceneNode* node = new CCameraFPSSceneNode(parent, this, CursorControl,
-		id, rotateSpeed, moveSpeed, keyMapArray, keyMapSize, noVerticalMovement);
+		id, rotateSpeed, moveSpeed, jumpSpeed, keyMapArray, keyMapSize, noVerticalMovement);
 	node->drop();
 
 	setActiveCamera(node);
@@ -457,12 +517,15 @@ ILightSceneNode* CSceneManager::addLightSceneNode(ISceneNode* parent,
 //! which always looks to the camera. It is usually used for things like explosions, fire,
 //! lensflares and things like that.
 IBillboardSceneNode* CSceneManager::addBillboardSceneNode(ISceneNode* parent,
-	const core::dimension2d<f32>& size, const core::vector3df& position, s32 id)
+	const core::dimension2d<f32>& size, const core::vector3df& position, s32 id,
+	video::SColor shade_top, video::SColor shade_down
+	)
 {
 	if (!parent)
 		parent = this;
 
-	IBillboardSceneNode* node = new CBillboardSceneNode(parent, this, id, position, size);
+	IBillboardSceneNode* node = new CBillboardSceneNode(parent, this, id, position, size,
+		shade_top, shade_down);
 	node->drop();
 
 	return node;
@@ -529,7 +592,7 @@ ITerrainSceneNode* CSceneManager::addTerrainSceneNode(
 	const core::vector3df& rotation,
 	const core::vector3df& scale,
 	video::SColor vertexColor,
-	s32 maxLOD, E_TERRAIN_PATCH_SIZE patchSize)
+	s32 maxLOD, E_TERRAIN_PATCH_SIZE patchSize, s32 smoothFactor)
 {
 	io::IReadFile* file = FileSystem->createAndOpenFile(heightMapFileName);
 	if (!file)
@@ -540,7 +603,7 @@ ITerrainSceneNode* CSceneManager::addTerrainSceneNode(
 	}
 
 	ITerrainSceneNode* terrain = addTerrainSceneNode(file, parent, id,
-		position, rotation, scale, vertexColor, maxLOD, patchSize);
+		position, rotation, scale, vertexColor, maxLOD, patchSize, smoothFactor);
 	file->drop();
 
 	return terrain;
@@ -554,7 +617,8 @@ ITerrainSceneNode* CSceneManager::addTerrainSceneNode(
 	const core::vector3df& rotation,
 	const core::vector3df& scale,
 	video::SColor vertexColor,
-	s32 maxLOD, E_TERRAIN_PATCH_SIZE patchSize)
+	s32 maxLOD, E_TERRAIN_PATCH_SIZE patchSize,
+	s32 smoothFactor)
 {
 	if (!parent)
 		parent = this;
@@ -562,7 +626,7 @@ ITerrainSceneNode* CSceneManager::addTerrainSceneNode(
 	CTerrainSceneNode* node = new CTerrainSceneNode(parent, this, id,
 		maxLOD, patchSize, position, rotation, scale);
 
-	if (!node->loadHeightMap(heightMapFile, vertexColor))
+	if (!node->loadHeightMap(heightMapFile, vertexColor, smoothFactor))
 	{
 		node->remove();
 		node->drop();
@@ -649,6 +713,26 @@ IAnimatedMesh* CSceneManager::addTerrainMesh(const c8* name,
 	return animatedMesh;
 }
 
+//! Adds an arrow mesh to the mesh pool.
+IAnimatedMesh* CSceneManager::addArrowMesh(const c8* name,u32 tesselationCylinder, u32 tesselationCone, f32 height, f32 cylinderHeight, f32 width0,f32 width1, video::SColor vtxColor0, video::SColor vtxColor1)
+{
+	
+	if (!name || MeshCache->isMeshLoaded(name))
+		return 0;
+
+	IAnimatedMesh* animatedMesh = CGeometryCreator::createArrowMesh(
+		tesselationCylinder, tesselationCone, height, cylinderHeight, width0,width1, vtxColor0, vtxColor1);
+
+	if (!animatedMesh)
+		return 0;
+
+	MeshCache->addMesh(name, animatedMesh);
+
+	animatedMesh->drop();
+
+	return animatedMesh;
+}
+
 
 
 //! Returns the root scene node. This is the scene node wich is parent
@@ -688,6 +772,7 @@ void CSceneManager::setActiveCamera(ICameraSceneNode* camera)
 
 
 
+
 //! renders the node.
 void CSceneManager::render()
 {
@@ -708,89 +793,199 @@ const core::aabbox3d<f32>& CSceneManager::getBoundingBox() const
 //! returns if node is culled
 bool CSceneManager::isCulled(ISceneNode* node)
 {
-	if (!node->getAutomaticCulling())
-		return false;
-
 	ICameraSceneNode* cam = getActiveCamera();
 	if (!cam)
 		return false;
 
-	core::aabbox3d<f32> tbox = node->getBoundingBox();
-	node->getAbsoluteTransformation().transformBox(tbox);
-	return !(tbox.intersectsWithBox(cam->getViewFrustrum()->boundingBox));
+	switch ( node->getAutomaticCulling() )
+	{
+		// can be seen by a bounding box ?
+		case scene::EAC_BOX:
+		{
+			core::aabbox3d<f32> tbox = node->getBoundingBox();
+			node->getAbsoluteTransformation().transformBox(tbox);
+			return !(tbox.intersectsWithBox(cam->getViewFrustum()->getBoundingBox() ));
+		};
+		break;
 
-	// This is a slower but more exact version:
-	//
-	// SViewFrustrum f = *cam->getViewFrustrum();
-	// core::matrix4 invTrans;
-	// AbsoluteTransformation.getInverse(invTrans);
-	// f.transform(invTrans);
-	// culled = !(f.boundingBox.intersectsWithBox(Mesh->getBoundingBox()));
+		// can be seen by a bounding sphere
+		case scene::EAC_FRUSTUM_SPHERE:
+		{
+		};
+		break;
+
+		// can be seen by cam pyramid planes ?
+		case scene::EAC_FRUSTUM_BOX:
+		{
+
+			SViewFrustum frust = *cam->getViewFrustum();
+
+			//transform the frustum to the node's current absolute transformation
+			core::matrix4 invTrans(node->getAbsoluteTransformation());
+			invTrans.makeInverse();
+			frust.transform(invTrans);
+
+			core::vector3df edges[8];
+			node->getBoundingBox().getEdges(edges);
+
+			bool visible = true;
+			for (s32 i=0; i<scene::SViewFrustum::VF_PLANE_COUNT; ++i)
+			{
+				bool boxInFrustum = false;
+
+				for (u32 j=0; j<8; ++j)
+				{
+					if (frust.planes[i].isFrontFacing(edges[j]) )
+					{
+						boxInFrustum = true;
+						break;
+					}
+				}
+
+				if (!boxInFrustum)
+				{
+					visible = false;
+					break;
+				}
+
+			}
+
+			return !visible;
+
+		}
+		break;
+		case scene::EAC_OFF:
+		break;
+	}
+
+	return false;
 }
 
 
 
+
 //! registers a node for rendering it at a specific time.
-void CSceneManager::registerNodeForRendering(ISceneNode* node, E_SCENE_NODE_RENDER_PASS time)
+u32 CSceneManager::registerNodeForRendering(ISceneNode* node, E_SCENE_NODE_RENDER_PASS time)
 {
+	u32 taken = 0;
+
 	switch(time)
 	{
-	// hack to support ESNRP_LIGHT_AND_CAMERA
-	case ESNRP_LIGHT_AND_CAMERA:
-		if ( node->getType() == ESNT_LIGHT )
-			LightList.push_back(node);
-		else
-			CameraList.push_back(node);
+		// take camera if it doesn't exists
+		case ESNRP_CAMERA:
+		{
+			taken = 1;
+			for ( u32 i = 0; i != CameraList.size(); ++i )
+			{
+				if ( CameraList[i] == node )
+				{
+					taken = 0;
+					break;
+				}
+			}
+			if ( taken )
+			{
+				CameraList.push_back(node);
+			}
+		}break;
+
+	case ESNRP_LIGHT:
+		// TODO: Point Light culling..
+		// Lighting modell in irrlicht has to be redone..
+		//if (!isCulled(node))
+		{
+			LightList.push_back(DistanceNodeEntry(node, camWorldPos));
+			taken = 1;
+		}
 		break;
 
-	case ESNRP_CAMERA:
-		CameraList.push_back(node);
-		break;
-	case ESNRP_LIGHT:
-		LightList.push_back(node);
-		break;
 	case ESNRP_SKY_BOX:
 		SkyBoxList.push_back(node);
+		taken = 1;
 		break;
 	case ESNRP_SOLID:
 		if (!isCulled(node))
-			SolidNodeList.push_back(node);
+		{
+			SolidNodeList.push_back( node );
+			taken = 1;
+		}
 		break;
 	case ESNRP_TRANSPARENT:
 		if (!isCulled(node))
-			TransparentNodeList.push_back(TransparentNodeEntry(node, camTransPos));
+		{
+			TransparentNodeList.push_back(TransparentNodeEntry(node, camWorldPos));
+			taken = 1;
+		}
 		break;
 	case ESNRP_AUTOMATIC:
 		if (!isCulled(node))
 		{
-			s32 count = node->getMaterialCount();
+			u32 count = node->getMaterialCount();
 
-			for (s32 i=0; i<count; ++i)
+			taken = 0;
+			for (u32 i=0; i<count; ++i)
 			{
 				video::IMaterialRenderer* rnd =
 					Driver->getMaterialRenderer(node->getMaterial(i).MaterialType);
 				if (rnd && rnd->isTransparent())
 				{
 					// register as transparent node
-					TransparentNodeEntry e(node, camTransPos);
+					TransparentNodeEntry e(node, camWorldPos);
 					TransparentNodeList.push_back(e);
-					return;
+					taken = 1;
+					break;
 				}
 			}
 
 			// not transparent, register as solid
-			SolidNodeList.push_back(node);
+			if ( 0 == taken )
+			{
+				SolidNodeList.push_back( node );
+				taken = 1;
+			}
 		}
 		break;
 	case ESNRP_SHADOW:
 		if (!isCulled(node))
+		{
 			ShadowNodeList.push_back(node);
+			taken = 1;
+		}
 		break;
+	case ESNRP_SHADER_0:
+	case ESNRP_SHADER_1:
+	case ESNRP_SHADER_2:
+	case ESNRP_SHADER_3:
+	case ESNRP_SHADER_4:
+	case ESNRP_SHADER_5:
+	case ESNRP_SHADER_6:
+	case ESNRP_SHADER_7:
+	case ESNRP_SHADER_8:
+	case ESNRP_SHADER_9:
+	case ESNRP_SHADER_10:
+		if ( !isCulled(node) )
+		{
+			ShaderNodeList[ time - ESNRP_SHADER_0].push_back( ShaderNodeEntry ( node,time - ESNRP_SHADER_0 ));
+			taken = 1;
+		} break;
+
 	case ESNRP_COUNT: // ignore this one
 		break;
 	}
-}
 
+#ifdef SCENEMANAGER_DEBUG
+	s32 index = Parameters.findAttribute ( "calls" );
+	Parameters.setAttribute ( index, Parameters.getAttributeAsInt ( index ) + 1 );
+
+	if ( 0 == taken )
+	{
+		index = Parameters.findAttribute ( "culled" );
+		Parameters.setAttribute ( index, Parameters.getAttributeAsInt ( index ) + 1 );
+	}
+#endif
+
+	return taken;
+}
 
 //! This method is called just before the rendering process of the whole scene.
 //! draws all scene nodes
@@ -799,85 +994,135 @@ void CSceneManager::drawAll()
 	if (!Driver)
 		return;
 
-	Driver->setAmbientLight(AmbientLight);
+	// reset attributes
+	Parameters.setAttribute ( "culled", 0 );
+	Parameters.setAttribute ( "calls", 0 );
+	Parameters.setAttribute ( "drawn", 0 );
 
-	// calculate camera pos.
-	camTransPos.set(0,0,0);
-	if (ActiveCamera)
-		camTransPos = ActiveCamera->getAbsolutePosition();
+	// reset all transforms
+	video::IVideoDriver* driver = getVideoDriver();
+	if ( driver )
+	{
+		core::matrix4 identity;
+		driver->setTransform ( video::ETS_PROJECTION, identity );
+		driver->setTransform ( video::ETS_VIEW, identity );
+		driver->setTransform ( video::ETS_WORLD, identity );
+		driver->setTransform ( video::ETS_TEXTURE_0, identity );
+		driver->setTransform ( video::ETS_TEXTURE_1, identity );
+		driver->setTransform ( video::ETS_TEXTURE_2, identity );
+		driver->setTransform ( video::ETS_TEXTURE_3, identity );
+	}
 
-	// let all nodes register themselfes
-	OnPreRender();
+	// do animations and other stuff.
+	OnAnimate(os::Timer::getTime());
 
-	// render cameras
+	/*!
+		First Scene Node for prerendering should be the active camera
+		consistent Camera is needed for culling
+	*/
+	camWorldPos.set(0,0,0);
+	if ( ActiveCamera )
+	{
+		ActiveCamera->OnRegisterSceneNode();
+		camWorldPos = ActiveCamera->getAbsolutePosition();
+	}
 
-	CurrentRendertime = ESNRP_CAMERA;
-	
+	// let all nodes register themselves
+	OnRegisterSceneNode();
+
 	u32 i; // new ISO for scoping problem in some compilers
 
-	for (i=0; i<CameraList.size(); ++i)
-		CameraList[i]->render();
+	//render camera scenes
+	{
+		CurrentRendertime = ESNRP_CAMERA;
+		for (i=0; i<CameraList.size(); ++i)
+			CameraList[i]->render();
 
-	CameraList.clear();
+		CameraList.clear();
+	}
 
-	// render lights
+	//render lights scenes
+	{
+		CurrentRendertime = ESNRP_LIGHT;
 
-	CurrentRendertime = ESNRP_LIGHT;
+		Driver->deleteAllDynamicLights();
 
-	Driver->deleteAllDynamicLights();
+		Driver->setAmbientLight(AmbientLight);
 
-	for (i=0; i<LightList.size(); ++i)
-		LightList[i]->render();
+		LightList.sort ();		// on distance to camera
 
-	LightList.clear();
+		u32 maxLights = irr::core::min_ ( Driver->getMaximalDynamicLightAmount (), LightList.size () );
+		for (i=0; i< maxLights; ++i)
+			LightList[i].node->render();
+
+		LightList.clear();
+	}
 
 	// render skyboxes
+	{
+		CurrentRendertime = ESNRP_SKY_BOX;
 
-	CurrentRendertime = ESNRP_SKY_BOX;
+		for (i=0; i<SkyBoxList.size(); ++i)
+			SkyBoxList[i]->render();
 
-	for (i=0; i<SkyBoxList.size(); ++i)
-		SkyBoxList[i]->render();
-
-	SkyBoxList.clear();
+		SkyBoxList.clear();
+	}
 
 
 	// render default objects
+	{
+		CurrentRendertime = ESNRP_SOLID;
+		SolidNodeList.sort(); // sort by textures
 
-	CurrentRendertime = ESNRP_SOLID;
+		for (i=0; i<SolidNodeList.size(); ++i)
+			SolidNodeList[i].node->render();
 
-	SolidNodeList.sort(); // sort by textures
+		Parameters.setAttribute ( "drawn", (s32) SolidNodeList.size () );
 
-	for (i=0; i<SolidNodeList.size(); ++i)
-		SolidNodeList[i].node->render();
-
-	SolidNodeList.clear();
+		SolidNodeList.clear();
+	}
 
 	// render shadows
+	{
+		CurrentRendertime = ESNRP_SHADOW;
+		for (i=0; i<ShadowNodeList.size(); ++i)
+			ShadowNodeList[i]->render();
 
-	CurrentRendertime = ESNRP_SHADOW;
+		if (!ShadowNodeList.empty())
+			Driver->drawStencilShadow(true,ShadowColor, ShadowColor,
+				ShadowColor, ShadowColor);
 
-	for (i=0; i<ShadowNodeList.size(); ++i)
-		ShadowNodeList[i]->render();
-
-	if (!ShadowNodeList.empty())
-		Driver->drawStencilShadow(true,ShadowColor, ShadowColor,
-			ShadowColor, ShadowColor);
-
-	ShadowNodeList.clear();
+		ShadowNodeList.clear();
+	}
 
 	// render transparent objects.
+	{
+		CurrentRendertime = ESNRP_TRANSPARENT;
+		TransparentNodeList.sort(); // sort by distance from camera
 
-	CurrentRendertime = ESNRP_TRANSPARENT;
+		for (i=0; i<TransparentNodeList.size(); ++i)
+			TransparentNodeList[i].node->render();
 
-	TransparentNodeList.sort(); // sort by distance from camera
+		TransparentNodeList.clear();
+	}
 
-	for (i=0; i<TransparentNodeList.size(); ++i)
-		TransparentNodeList[i].node->render();
+	// render shader objects.
+	{
+		for ( u32 g = 0; g!= ESNRP_SHADER_10 - ESNRP_SHADER_0 + 1; ++g )
+		{
+			CurrentRendertime = (scene::E_SCENE_NODE_RENDER_PASS) (ESNRP_SHADER_0 + g);
 
-	TransparentNodeList.clear();
+			const u32 size = ShaderNodeList[g].size ();
+			if ( 0 == size )
+				continue;
 
-	// do animations and other stuff.
-	OnPostRender(os::Timer::getTime());
+			ShaderNodeList[g].sort(); // sort by textures
+			for (i=0; i< size; ++i)
+				ShaderNodeList[g][i].node->render();
+
+			ShaderNodeList[g].clear();
+		}
+	}
 
 	clearDeletionList();
 
@@ -913,9 +1158,8 @@ ISceneNodeAnimator* CSceneManager::createRotationAnimator(const core::vector3df&
 
 //! creates a fly circle animator, which lets the attached scene node fly around a center.
 ISceneNodeAnimator* CSceneManager::createFlyCircleAnimator(const core::vector3df& normal,
-														   f32 radius, f32 speed,
-														   const core::vector3df& direction
-														   )
+					   f32 radius, f32 speed,
+					   const core::vector3df& direction)
 {
 	ISceneNodeAnimator* anim = new CSceneNodeAnimatorFlyCircle(os::Timer::getTime(), normal,
 			radius, speed, direction);
@@ -1426,7 +1670,8 @@ void CSceneManager::readSceneNode(io::IXMLReader* reader, ISceneNode* parent, IS
 				os::Printer::log("Found unknown element in irrlicht scene file",
 								 core::stringc(reader->getNodeName()).c_str());
 			}
-
+			break;
+		default:
 			break;
 		}
 
@@ -1439,7 +1684,7 @@ void CSceneManager::readSceneNode(io::IXMLReader* reader, ISceneNode* parent, IS
 //! reads materials of a node
 void CSceneManager::readMaterials(io::IXMLReader* reader, ISceneNode* node)
 {
-	s32 nr = 0;
+	u32 nr = 0;
 
 	while(reader->read())
 	{
@@ -1467,6 +1712,8 @@ void CSceneManager::readMaterials(io::IXMLReader* reader, ISceneNode* node)
 				attr->drop();
 				++nr;
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -1514,6 +1761,8 @@ void CSceneManager::readAnimators(io::IXMLReader* reader, ISceneNode* node)
 				++cnt;
 			}
 			break;
+		default:
+			break;
 		}
 	}
 }
@@ -1546,6 +1795,8 @@ void CSceneManager::readUserData(io::IXMLReader* reader, ISceneNode* node, IScen
 
 				attr->drop();
 			}
+			break;
+		default:
 			break;
 		}
 	}
@@ -1595,7 +1846,7 @@ void CSceneManager::writeSceneNode(io::IXMLWriter* writer, ISceneNode* node, ISc
 		writer->writeElement(materialElement);
 		writer->writeLineBreak();
 
-		for (int i=0; i<(int)node->getMaterialCount(); ++i)
+		for (u32 i=0; i < node->getMaterialCount(); ++i)
 		{
 			io::IAttributes* attr =
 				getVideoDriver()->createAttributesFromMaterial(node->getMaterial(i));
@@ -1707,8 +1958,8 @@ void CSceneManager::deserializeAttributes(io::IAttributes* in, io::SAttributeRea
 	RelativeRotation.set(0,0,0);
 	RelativeScale.set(1,1,1);
 	IsVisible = true;
-	AutomaticCullingEnabled = true;
-	DebugDataVisible = false;
+	AutomaticCullingState = scene::EAC_BOX;
+	DebugDataVisible = scene::EDS_OFF;
 	IsDebugObject = false;
 
 	updateAbsolutePosition();
@@ -1716,7 +1967,7 @@ void CSceneManager::deserializeAttributes(io::IAttributes* in, io::SAttributeRea
 
 
 //! Sets ambient color of the scene
-void CSceneManager::setAmbientLight(video::SColorf ambientColor)
+void CSceneManager::setAmbientLight(const video::SColorf &ambientColor)
 {
 	AmbientLight = ambientColor;
 }
@@ -1731,9 +1982,10 @@ video::SColorf CSceneManager::getAmbientLight()
 
 // creates a scenemanager
 ISceneManager* createSceneManager(video::IVideoDriver* driver, io::IFileSystem* fs,
-								  gui::ICursorControl* cursorcontrol)
+								  gui::ICursorControl* cursorcontrol, 
+								  gui::IGUIEnvironment *guiEnvironment )
 {
-	return new CSceneManager(driver, fs, cursorcontrol);
+	return new CSceneManager(driver, fs, cursorcontrol, 0, guiEnvironment );
 }
 
 

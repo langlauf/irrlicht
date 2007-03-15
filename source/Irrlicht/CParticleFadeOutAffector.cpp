@@ -1,11 +1,10 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CParticleFadeOutAffector.h"
 #include "IAttributes.h"
 #include "os.h"
-#include <string.h>
 
 namespace irr
 {

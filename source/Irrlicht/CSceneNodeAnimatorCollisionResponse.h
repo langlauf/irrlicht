@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -55,7 +55,7 @@ namespace scene
 		virtual core::vector3df getGravity() const;
 
 		//! Sets the translation of the ellipsoid for collision detection.
-		virtual void setEllipsoidTranslation(core::vector3df translation);
+		virtual void setEllipsoidTranslation(const core::vector3df &translation);
 
 		//! Returns the translation of the ellipsoid for collision detection.
 		virtual core::vector3df getEllipsoidTranslation() const;
@@ -81,7 +81,6 @@ namespace scene
 		virtual ESCENE_NODE_ANIMATOR_TYPE getType()	{ return ESNAT_COLLISION_RESPONSE; }
 
 	private:
-
 		core::vector3df LastPosition;
 		core::vector3df Radius;
 		core::vector3df Gravity;

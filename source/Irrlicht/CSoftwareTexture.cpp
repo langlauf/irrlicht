@@ -1,6 +1,9 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
+
+#include "IrrCompileConfig.h"
+#ifdef _IRR_COMPILE_WITH_SOFTWARE_
 
 #include "CSoftwareTexture.h"
 #include "os.h"
@@ -136,7 +139,7 @@ ECOLOR_FORMAT CSoftwareTexture::getColorFormat() const
 
 
 //! returns pitch of texture (in bytes)
-s32 CSoftwareTexture::getPitch()
+u32 CSoftwareTexture::getPitch() const
 {
 	return Image->getDimension().Width * 2;
 }
@@ -153,3 +156,6 @@ void CSoftwareTexture::regenerateMipMapLevels()
 
 } // end namespace video
 } // end namespace irr
+
+#endif // _IRR_COMPILE_WITH_SOFTWARE_
+

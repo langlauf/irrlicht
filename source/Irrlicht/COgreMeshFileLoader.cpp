@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 // orginally written by Christian Stehno, modified by Nikolaus Gebhardt
@@ -8,8 +8,7 @@
 #include "SMeshBuffer.h"
 #include "SAnimatedMesh.h"
 #include "fast_atof.h"
-#include <string.h>
-#include <ctype.h>
+#include "coreutil.h"
 
 namespace irr
 {
@@ -43,7 +42,7 @@ const u16 COGRE_SUBMESH_TEXTURE_ALIAS= 0x4200;
 
 //! Constructor
 COgreMeshFileLoader::COgreMeshFileLoader(IMeshManipulator* manip,io::IFileSystem* fs, video::IVideoDriver* driver)
-: FileSystem(fs), Driver(driver), Manipulator(manip), Mesh(0)
+: FileSystem(fs), Driver(driver), SwapEndian(false), Mesh(0), Manipulator(manip), NumUV(0)
 {
 	if (FileSystem)
 		FileSystem->grab();
@@ -115,7 +114,7 @@ IAnimatedMesh* COgreMeshFileLoader::createMesh(io::IReadFile* file)
 		SAnimatedMesh* am = new SAnimatedMesh();
 		am->Type = EAMT_3DS;
 
-		for (s32 i=0; i<Mesh->getMeshBufferCount(); ++i)
+		for (u32 i=0; i<Mesh->getMeshBufferCount(); ++i)
 			((SMeshBuffer*)Mesh->getMeshBuffer(i))->recalculateBoundingBox();
 
 		Mesh->recalculateBoundingBox();
@@ -370,14 +369,14 @@ void COgreMeshFileLoader::composeMeshBufferMaterial(scene::IMeshBuffer* mb, cons
 			material=Materials[k].Techniques[0].Passes[0].Material;
 			if (Materials[k].Techniques[0].Passes[0].Texture.Filename.size())
 			{
-				material.Texture1=Driver->getTexture(Materials[k].Techniques[0].Passes[0].Texture.Filename.c_str());
-				if (!material.Texture1)
+				material.Textures[0]=Driver->getTexture(Materials[k].Techniques[0].Passes[0].Texture.Filename.c_str());
+				if (!material.Textures[0])
 				{
 					// retry with relative path
 					core::stringc relative = CurrentlyLoadingFromPath;
 					relative += '/';
 					relative += Materials[k].Techniques[0].Passes[0].Texture.Filename;
-					material.Texture1 = Driver->getTexture(relative.c_str());
+					material.Textures[0] = Driver->getTexture(relative.c_str());
 				}
 			}
 			break;
@@ -594,7 +593,7 @@ void COgreMeshFileLoader::getMaterialToken(io::IReadFile* file, core::stringc& t
 	token = "";
 
 	file->read(&c, sizeof(c8));
-	while (isspace(c) && (file->getPos() < file->getSize()))
+	while ( core::isspace(c) && (file->getPos() < file->getSize()))
 	{
 		if (noNewLine && c=='\n')
 		{
@@ -616,14 +615,14 @@ void COgreMeshFileLoader::getMaterialToken(io::IReadFile* file, core::stringc& t
 			else
 			{
 				token.append('/');
-				if (isspace(c))
+				if (core::isspace(c))
 					return;
 			}
 		}
 		token.append(c);
 		file->read(&c, sizeof(c8));
 	}
-	while ((!isspace(c)) && (file->getPos() < file->getSize()));
+	while ((!core::isspace(c)) && (file->getPos() < file->getSize()));
 	if (c == '\n' && noNewLine)
 		file->seek(-1, true);
 }
@@ -932,9 +931,9 @@ void COgreMeshFileLoader::readString(io::IReadFile* file, ChunkData& data, core:
 
 void COgreMeshFileLoader::readBool(io::IReadFile* file, ChunkData& data, bool& out)
 {
-	c8 c = 0;
-
-	file->read(&c, sizeof(c8));
+	// normal C type because we read a bit string
+	char c = 0;
+	file->read(&c, sizeof(char));
 	out=(c!=0);
 	++data.read;
 }
@@ -942,34 +941,43 @@ void COgreMeshFileLoader::readBool(io::IReadFile* file, ChunkData& data, bool& o
 
 void COgreMeshFileLoader::readInt(io::IReadFile* file, ChunkData& data, s32& out)
 {
-	file->read(&out, sizeof(s32));
+	// normal C type because we read a bit string
+	int tmp;
+	file->read(&tmp, sizeof(int));
 	if (SwapEndian)
 	{
-		out = os::Byteswap::byteswap(out);
+		tmp = os::Byteswap::byteswap(tmp);
 	}
-	data.read+=sizeof(s32);
+	out=tmp;
+	data.read+=sizeof(int);
 }
 
 
 void COgreMeshFileLoader::readShort(io::IReadFile* file, ChunkData& data, u16& out)
 {
-	file->read(&out, sizeof(u16));
+	// normal C type because we read a bit string
+	short tmp;
+	file->read(&tmp, sizeof(short));
 	if (SwapEndian)
 	{
-		out = os::Byteswap::byteswap(out);
+		tmp = os::Byteswap::byteswap(tmp);
 	}
-	data.read+=sizeof(u16);
+	out=tmp;
+	data.read+=sizeof(short);
 }
 
 
 void COgreMeshFileLoader::readFloat(io::IReadFile* file, ChunkData& data, f32& out)
 {
-	file->read(&out, sizeof(f32));
+	// normal C type because we read a bit string
+	float tmp;
+	file->read(&tmp, sizeof(float));
 	if (SwapEndian)
 	{
-		out = os::Byteswap::byteswap(out);
+		tmp = os::Byteswap::byteswap(tmp);
 	}
-	data.read+=sizeof(f32);
+	out=tmp;
+	data.read+=sizeof(float);
 }
 
 
@@ -1002,8 +1010,8 @@ void COgreMeshFileLoader::clearMeshes()
 {
 	for (u32 i=0; i<Meshes.size(); ++i)
 	{
-		for (int h=0; h<(int)Meshes[i].Geometry.Buffers.size(); ++h)
-			Meshes[i].Geometry.Buffers[h].destroy();
+		for (int k=0; k<(int)Meshes[i].Geometry.Buffers.size(); ++k)
+			Meshes[i].Geometry.Buffers[k].destroy();
 
 		for (u32 j=0; j<Meshes[i].SubMeshes.size(); ++j)
 		{

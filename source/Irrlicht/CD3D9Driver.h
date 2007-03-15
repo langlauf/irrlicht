@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -10,8 +10,9 @@
 #ifdef _IRR_WINDOWS_
 #define WIN32_LEAN_AND_MEAN
 #include "CNullDriver.h"
-#include <windows.h>
 #include "IMaterialRendererServices.h"
+#include <windows.h>
+#endif
 
 #ifdef _IRR_COMPILE_WITH_DIRECT3D_9_
 #include <d3d9.h>
@@ -58,7 +59,7 @@ namespace video
 		virtual const core::rect<s32>& getViewPort() const;
 
 		//! draws a vertex primitive list
-		virtual void drawVertexPrimitiveList(const void* vertices, s32 vertexCount, const u16* indexList, s32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType);
+		virtual void drawVertexPrimitiveList(const void* vertices, u32 vertexCount, const u16* indexList, u32 primitiveCount, E_VERTEX_TYPE vType, scene::E_PRIMITIVE_TYPE pType);
 
 		//! draws an 2d image, using a color (if color is other then Color(255,255,255,255)) and the alpha channel of the texture if wanted.
 		virtual void draw2DImage(video::ITexture* texture, const core::position2d<s32>& destPos,
@@ -100,7 +101,7 @@ namespace video
 		virtual void addDynamicLight(const SLight& light);
 
 		//! returns the maximal amount of dynamic lights the device can handle
-		virtual s32 getMaximalDynamicLightAmount();
+		virtual u32 getMaximalDynamicLightAmount();
 
 		//! Sets the dynamic ambient light color. The default color is
 		//! (0,0,0,0) which means it is dark.
@@ -124,7 +125,7 @@ namespace video
 		//! Returns the maximum amount of primitives (mostly vertices) which
 		//! the device is able to render with one drawIndexedTriangleList
 		//! call.
-		virtual s32 getMaximalPrimitiveCount();
+		virtual u32 getMaximalPrimitiveCount();
 
 		//! Enables or disables a texture creation flag.
 		virtual void setTextureCreationFlag(E_TEXTURE_CREATION_FLAG flag, bool enabled);
@@ -248,18 +249,16 @@ namespace video
 			return v;
 		}
 
-
 		E_RENDER_MODE CurrentRenderMode;
 		D3DPRESENT_PARAMETERS present;
-
-		core::matrix4 Matrices[ETS_COUNT]; // matrizes of the 3d mode we need to restore when we switch back from the 2d mode.
 
 		SMaterial Material, LastMaterial;
 		bool ResetRenderStates; // bool to make all renderstates be reseted if set.
 		bool Transformation3DChanged;
 		bool StencilBuffer;
-		bool LastTextureMipMapsAvailable[MATERIAL_MAX_TEXTURES];
 		ITexture* CurrentTexture[MATERIAL_MAX_TEXTURES];
+		bool LastTextureMipMapsAvailable[MATERIAL_MAX_TEXTURES];
+		core::matrix4 Matrices[ETS_COUNT]; // matrizes of the 3d mode we need to restore when we switch back from the 2d mode.
 
 		HINSTANCE D3DLibrary;
 		IDirect3D9* pID3D;
@@ -272,6 +271,7 @@ namespace video
 
 		E_VERTEX_TYPE LastVertexType;
 
+		u32 MaxTextureUnits;
 		f32 MaxLightDistance;
 		s32 LastSetLight;
 		bool DeviceLost;
@@ -286,6 +286,5 @@ namespace video
 
 
 #endif // _IRR_COMPILE_WITH_DIRECT3D_9_
-#endif // _IRR_WINDOWS_
 #endif // __C_VIDEO_DIRECTX_8_H_INCLUDED__
 

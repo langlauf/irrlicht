@@ -1,6 +1,9 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt/Alten Thomas
+// Copyright (C) 2002-2007 Nikolaus Gebhardt / Thomas Alten
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
+
+#include "IrrCompileConfig.h"
+#ifdef _IRR_COMPILE_WITH_BURNINGSVIDEO_
 
 #include "SoftwareDriver2_compile_config.h"
 #include "SoftwareDriver2_helper.h"
@@ -14,16 +17,13 @@ namespace video
 
 //! constructor
 CSoftwareTexture2::CSoftwareTexture2(IImage* image, const char* name, bool generateMipLevels)
-: ITexture(name), HasMipMaps(generateMipLevels),MipMapLOD(0)
+: ITexture(name), MipMapLOD(0), HasMipMaps(generateMipLevels)
 {
 	#ifndef SOFTWARE_DRIVER_2_MIPMAPPING
-		HasMipMaps = false;
+		HasMipMaps = 0;
 	#endif
 
-	for ( s32 i = 0; i!= SOFTWARE_DRIVER_2_MIPMAPPING_MAX; ++i )
-	{
-		MipMap[i] = 0;
-	}
+	memset32 ( MipMap, 0, sizeof ( MipMap ) );
 
 	if (image)
 	{
@@ -35,8 +35,6 @@ CSoftwareTexture2::CSoftwareTexture2(IImage* image, const char* name, bool gener
 		optSize.Width = getTextureSizeFromSurfaceSize(origSize.Width);
 		optSize.Height = getTextureSizeFromSurfaceSize(origSize.Height);
 		
-		OrigSize = optSize;
-
 		if ( origSize == optSize )
 		{
 			MipMap[0] = new CImage(ECF_SOFTWARE2, image);
@@ -71,52 +69,6 @@ CSoftwareTexture2::~CSoftwareTexture2()
 }
 
 
-
-//! lock function
-void* CSoftwareTexture2::lock()
-{
-	return MipMap[MipMapLOD]->lock();
-}
-
-
-
-//! unlock function
-void CSoftwareTexture2::unlock()
-{
-	MipMap[MipMapLOD]->unlock();
-}
-
-
-//! Returns original size of the texture.
-const core::dimension2d<s32>& CSoftwareTexture2::getOriginalSize()
-{
-	return MipMap[0]->getDimension();
-}
-
-
-//! Returns (=size) of the texture.
-const core::dimension2d<s32>& CSoftwareTexture2::getSize()
-{
-	return MipMap[MipMapLOD]->getDimension();
-}
-
-
-//! returns unoptimized surface
-CImage* CSoftwareTexture2::getImage()
-{
-	return MipMap[0];
-}
-
-
-
-//! returns texture surface
-CImage* CSoftwareTexture2::getTexture()
-{
-	return MipMap[MipMapLOD];
-}
-
-
-
 //! returns the size of a texture which would be the optimize size for rendering it
 inline s32 CSoftwareTexture2::getTextureSizeFromSurfaceSize(s32 size)
 {
@@ -125,7 +77,7 @@ inline s32 CSoftwareTexture2::getTextureSizeFromSurfaceSize(s32 size)
 		ts <<= 1;
 
 /*
-	if (ts > size && ts > 64)
+	if (ts > size && ts > 256 )
 		ts >>= 1;
 */
 	return ts;
@@ -133,41 +85,11 @@ inline s32 CSoftwareTexture2::getTextureSizeFromSurfaceSize(s32 size)
 
 
 
-//! returns driver type of texture (=the driver, who created the texture)
-E_DRIVER_TYPE CSoftwareTexture2::getDriverType()
-{
-	return EDT_SOFTWARE2;
-}
-
-
-
-//! returns color format of texture
-ECOLOR_FORMAT CSoftwareTexture2::getColorFormat() const
-{
-	return ECF_SOFTWARE2;
-}
-
-
-
-//! returns pitch of texture (in bytes)
-s32 CSoftwareTexture2::getPitch()
-{
-	return MipMap[MipMapLOD]->getPitch();
-}
-
-//! Select a Mipmap Level
-void CSoftwareTexture2::setCurrentMipMapLOD ( s32 lod )
-{
-	if ( HasMipMaps )
-		MipMapLOD = lod;
-}
-
-
 //! Regenerates the mip map levels of the texture. Useful after locking and 
 //! modifying the texture
 void CSoftwareTexture2::regenerateMipMapLevels()
 {
-	if ( false == HasMipMaps )
+	if ( 0 == HasMipMaps )
 		return;
 
 	s32 i;
@@ -187,8 +109,8 @@ void CSoftwareTexture2::regenerateMipMapLevels()
 	while ( i < SOFTWARE_DRIVER_2_MIPMAPPING_MAX )
 	{
 		currentSize = c->getDimension();
-		newSize.Width = max ( 1, currentSize.Width >> 1 );
-		newSize.Height = max ( 1, currentSize.Height >> 1 );
+		newSize.Width = core::s32_max ( 1, currentSize.Width >> 1 );
+		newSize.Height = core::s32_max ( 1, currentSize.Height >> 1 );
 
 		MipMap[i] = new CImage(ECF_SOFTWARE2, newSize);
 		MipMap[0]->copyToScalingBoxFilter ( MipMap[i], 0 );
@@ -200,3 +122,5 @@ void CSoftwareTexture2::regenerateMipMapLevels()
 
 } // end namespace video
 } // end namespace irr
+
+#endif // _IRR_COMPILE_WITH_BURNINGSVIDEO_

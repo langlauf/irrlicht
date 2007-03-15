@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/utsname.h>
+#include <time.h>
 #include "IEventReceiver.h"
 #include "irrList.h"
 #include "os.h"
@@ -26,8 +27,6 @@ namespace irr
 		IVideoDriver* createOpenGLDriver(const core::dimension2d<s32>& screenSize,
 			bool fullscreen, bool stencilBuffer, io::IFileSystem* io, bool vsync, bool antiAlias);
 	}
-
-
 } // end namespace irr
 
 
@@ -44,11 +43,13 @@ CIrrDeviceLinux::CIrrDeviceLinux(video::E_DRIVER_TYPE driverType,
 	bool sbuffer, bool vsync, bool antiAlias,
 	IEventReceiver* receiver,
 	const char* version)
- : CIrrDeviceStub(version, receiver), Close(false), WindowActive(false), UseXVidMode(false), UseXRandR(false), UseGLXWindow(false),
+ : CIrrDeviceStub(version, receiver),
 #ifdef _IRR_COMPILE_WITH_X11_
-	SoftwareImage(0),
+	display(0), screennr(0), window(0), SoftwareImage(0),
 #endif
-	DriverType(driverType), Fullscreen(fullscreen), StencilBuffer(sbuffer), AntiAlias(antiAlias)
+	Fullscreen(fullscreen), StencilBuffer(sbuffer), AntiAlias(antiAlias), DriverType(driverType),
+	Width(windowSize.Width), Height(windowSize.Height), Depth(24),
+	Close(false), WindowActive(false), WindowMinimized(false), UseXVidMode(false), UseXRandR(false), UseGLXWindow(false)
 {
 	#ifdef _DEBUG
 	setDebugName("CIrrDeviceLinux");
@@ -132,7 +133,7 @@ CIrrDeviceLinux::~CIrrDeviceLinux()
 		}
 		#endif
 
-		if (DriverType == video::EDT_SOFTWARE || DriverType == video::EDT_SOFTWARE2)
+		if (DriverType == video::EDT_SOFTWARE || DriverType == video::EDT_BURNINGSVIDEO)
 			XDestroyImage(SoftwareImage);
 		XDestroyWindow(display,window);
 		XCloseDisplay(display);
@@ -194,7 +195,6 @@ bool CIrrDeviceLinux::createWindow(const core::dimension2d<s32>& windowSize,
 			XF86VidModeGetAllModeLines(display, screennr, &modeCount, &modes);
 
 			// save current video mode
-
 			oldVideoMode = *modes[0];
 
 			// find fitting mode
@@ -205,7 +205,7 @@ bool CIrrDeviceLinux::createWindow(const core::dimension2d<s32>& windowSize,
 			{
 				if (bestMode==-1 && modes[i]->hdisplay >= Width && modes[i]->vdisplay >= Height)
 					bestMode = i;
-				else if (bestMode!=-1 && modes[i]->hdisplay >= Width && modes[i]->vdisplay >= Height && modes[i]->hdisplay < modes[bestMode]->vdisplay && modes[i]->vdisplay < modes[bestMode]->hdisplay)
+				else if (bestMode!=-1 && modes[i]->hdisplay >= Width && modes[i]->vdisplay >= Height && modes[i]->hdisplay < modes[bestMode]->hdisplay && modes[i]->vdisplay < modes[bestMode]->vdisplay)
 					bestMode = i;
 				VideoModeList.addMode(core::dimension2d<s32>(
 					modes[i]->hdisplay, modes[i]->vdisplay), defaultDepth);
@@ -266,7 +266,7 @@ bool CIrrDeviceLinux::createWindow(const core::dimension2d<s32>& windowSize,
 
 	Context=0;
 	GLXFBConfig glxFBConfig;
-	s32 major, minor;
+	int major, minor;
 	bool isAvailableGLX=false;
 	if (DriverType==video::EDT_OPENGL)
 	{
@@ -502,9 +502,9 @@ bool CIrrDeviceLinux::createWindow(const core::dimension2d<s32>& windowSize,
 			GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
 	}
 	else
-	{
-		// we want windowed mode
+	{ // we want windowed mode
 		attributes.event_mask |= ExposureMask;
+		attributes.event_mask |= FocusChangeMask;
 
 		window = XCreateWindow(display,
 				RootWindow(display, visual->screen),
@@ -524,6 +524,7 @@ bool CIrrDeviceLinux::createWindow(const core::dimension2d<s32>& windowSize,
 
 	// connect glx context to window
 	if (isAvailableGLX && DriverType==video::EDT_OPENGL)
+	{
 	if (UseGLXWindow)
 	{
 		glxWin=glXCreateWindow(display,glxFBConfig,window,NULL);
@@ -565,17 +566,19 @@ bool CIrrDeviceLinux::createWindow(const core::dimension2d<s32>& windowSize,
 			os::Printer::log("Could not create GLX rendering context.", ELL_WARNING);
 		}
 	}
+	}
 #endif // _IRR_COMPILE_WITH_OPENGL_
 
 	Window tmp;
 	u32 borderWidth;
+	int x,y;
 
 	XGetGeometry(display, window, &tmp, &x, &y, &Width, &Height, &borderWidth, &Depth);
 
 	// create an XImage for the software renderer 
 	//(thx to Nadav for some clues on how to do that!)
 
-	if (DriverType == video::EDT_SOFTWARE || DriverType == video::EDT_SOFTWARE2)
+	if (DriverType == video::EDT_SOFTWARE || DriverType == video::EDT_BURNINGSVIDEO)
 	{
 		SoftwareImage = XCreateImage(display, 
 			visual->visual, visual->depth, 
@@ -600,11 +603,19 @@ void CIrrDeviceLinux::createDriver(const core::dimension2d<s32>& windowSize,
 #ifdef _IRR_COMPILE_WITH_X11_
 
 	case video::EDT_SOFTWARE:
+		#ifdef _IRR_COMPILE_WITH_SOFTWARE_
 		VideoDriver = video::createSoftwareDriver(windowSize, Fullscreen, FileSystem, this);
+		#else
+		os::Printer::log("No Software driver support compiled in.", ELL_WARNING);
+		#endif
 		break;
 		
-	case video::EDT_SOFTWARE2:
+	case video::EDT_BURNINGSVIDEO:
+		#ifdef _IRR_COMPILE_WITH_BURNINGSVIDEO_
 		VideoDriver = video::createSoftwareDriver2(windowSize, Fullscreen, FileSystem, this);
+		#else
+		os::Printer::log("Burning's video driver was not compiled in.", ELL_WARNING);
+		#endif
 		break;
 
 	case video::EDT_OPENGL:
@@ -656,8 +667,8 @@ bool CIrrDeviceLinux::run()
 			{
 			case ConfigureNotify:
 				// check for changed window size
-				if ((event.xconfigure.width != Width) ||
-					(event.xconfigure.height != Height))
+				if ((event.xconfigure.width != (int) Width) ||
+					(event.xconfigure.height != (int) Height))
 				{
 					Width = event.xconfigure.width;
 					Height = event.xconfigure.height;
@@ -667,10 +678,18 @@ bool CIrrDeviceLinux::run()
 				break;
 
 			case MapNotify:
-				WindowActive=true;
+				WindowMinimized=false;
 				break;
 
 			case UnmapNotify:
+				WindowMinimized=true;
+				break;
+
+			case FocusIn:
+				WindowActive=true;
+				break;
+
+			case FocusOut:
 				WindowActive=false;
 				break;
 
@@ -741,7 +760,10 @@ bool CIrrDeviceLinux::run()
 					if (idx != -1)
 						irrevent.KeyInput.Key = (EKEY_CODE)KeyMap[idx].Win32Key;
 					else
+					{
+						irrevent.KeyInput.Key = (EKEY_CODE)0;
 						os::Printer::log("Could not find win32 key for x11 key.", ELL_WARNING);
+					}
 					irrevent.EventType = irr::EET_KEY_INPUT_EVENT;
 					irrevent.KeyInput.PressedDown = (event.type == KeyPress);
 					mbtowc(&irrevent.KeyInput.Char, buf, 4);
@@ -752,11 +774,14 @@ bool CIrrDeviceLinux::run()
 				break;
 
 			case ClientMessage:
-				if (*XGetAtomName(display, event.xclient.message_type) ==
-					*wmDeleteWindow)
 				{
-					os::Printer::log("Quit message received.", ELL_INFORMATION);
-					Close = true;
+					char *atom = XGetAtomName(display, event.xclient.message_type);
+					if (*atom == *wmDeleteWindow)
+					{
+						os::Printer::log("Quit message received.", ELL_INFORMATION);
+						Close = true;
+					}
+					XFree(atom);
 				}
 				break;
 
@@ -772,6 +797,30 @@ bool CIrrDeviceLinux::run()
 }
 
 
+//! Pause the current process for the minimum time allowed only to allow other processes to execute
+void CIrrDeviceLinux::yield()
+{
+	struct timespec ts = {0,0};
+	nanosleep(&ts, NULL);
+}
+
+//! Pause execution and let other processes to run for a specified amount of time.
+void CIrrDeviceLinux::sleep(u32 timeMs, bool pauseTimer=false)
+{
+	bool wasStopped = Timer ? Timer->isStopped() : true;
+	
+	struct timespec ts;
+	ts.tv_sec = (time_t) (timeMs / 1000);
+	ts.tv_nsec = (long) (timeMs % 1000) * 1000000;
+
+	if (pauseTimer && !wasStopped)
+		Timer->stop();
+
+	nanosleep(&ts, NULL);
+
+	if (pauseTimer && !wasStopped)
+		Timer->start();
+}
 
 //! sets the caption of the window
 void CIrrDeviceLinux::setWindowCaption(const wchar_t* text)
@@ -793,7 +842,7 @@ void CIrrDeviceLinux::present(video::IImage* image, s32 windowId, core::rect<s32
 {
 #ifdef _IRR_COMPILE_WITH_X11_
 	// this is only necessary for software drivers.
-	if (DriverType != video::EDT_SOFTWARE && DriverType != video::EDT_SOFTWARE2)
+	if (DriverType != video::EDT_SOFTWARE && DriverType != video::EDT_BURNINGSVIDEO)
 		return;
 
 	// thx to Nadav, who send me some clues of how to display the image 

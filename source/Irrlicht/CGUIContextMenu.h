@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -31,8 +31,9 @@ namespace gui
 		virtual s32 getItemCount() const;
 
 		//! Adds a menu item.
-		virtual s32 addItem(const wchar_t* text, s32 commandid, bool enabled=true,
-			bool hasSubMenu=false);
+		virtual s32 addItem(const wchar_t* text, s32 commandid, bool enabled,
+			bool hasSubMenu,
+			bool checked);
 
 		//! Adds a separator item to the menu
 		virtual void addSeparator();
@@ -48,6 +49,9 @@ namespace gui
 
 		//! Sets if the menu item should be enabled.
 		virtual void setItemEnabled(s32 idx, bool enabled);
+
+		//! Sets if the menu item should be checked.
+		virtual void setItemChecked(s32 idx, bool enabled);
 
 		//! Removes a menu item
 		virtual void removeItem(s32 idx);
@@ -77,6 +81,9 @@ namespace gui
 		//! Sets the command id of a menu item
 		virtual void setItemCommandId(s32 idx, s32 id);
 
+		//! Adds a sub menu from an element that already exists.
+		virtual void setSubMenu(s32 index, CGUIContextMenu* menu);
+
 	protected:
 
 		struct SItem
@@ -84,6 +91,7 @@ namespace gui
 			core::stringw Text;
 			bool IsSeparator;
 			bool Enabled;
+			bool Checked;
 			core::dimension2d<s32> Dim;
 			s32 PosY;
 			CGUIContextMenu* SubMenu;
@@ -107,9 +115,16 @@ namespace gui
 		//! Gets drawing rect of Item
 		virtual core::rect<s32> getRect(const SItem& i, const core::rect<s32>& absolute);
 
+		//! Writes attributes of the element.
+		virtual void serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options);
+
+		//! Reads attributes of the element
+		virtual void deserializeAttributes(io::IAttributes* in, io::SAttributeReadWriteOptions* options);
+
 		s32 HighLighted;
 		core::array<SItem> Items;
 		core::position2d<s32> Pos;
+		u32 ChangeTime;
 	};
 
 } // end namespace gui

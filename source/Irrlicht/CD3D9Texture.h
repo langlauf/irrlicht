@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -54,7 +54,7 @@ public:
 	virtual ECOLOR_FORMAT getColorFormat() const;
 
 	//! returns pitch of texture (in bytes)
-	virtual s32 getPitch();
+	virtual u32 getPitch() const;
 
 	//! returns the DIRECT3D9 Texture
 	IDirect3DTexture9* getDX9Texture();

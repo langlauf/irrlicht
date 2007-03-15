@@ -1,10 +1,12 @@
-// Copyright (C) 2002-2006 Nikolaus Gebhardt
+// Copyright (C) 2002-2007 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CLightSceneNode.h"
 #include "IVideoDriver.h"
 #include "ISceneManager.h"
+#include "ICameraSceneNode.h"
+
 #include "os.h"
 
 namespace irr
@@ -21,13 +23,11 @@ CLightSceneNode::CLightSceneNode(ISceneNode* parent, ISceneManager* mgr, s32 id,
 	setDebugName("CLightSceneNode");
 	#endif
 
-	setAutomaticCulling(false);
 	LightData.Radius = radius;
 	LightData.DiffuseColor = color;
-	LightData.Position = position;
 
 	// set some useful specular color
-	LightData.SpecularColor = color.getInterpolated(video::SColor(255,255,255,255),0.5f);
+	LightData.SpecularColor = color.getInterpolated(video::SColor(255,255,255,255),0.7f);
 }
 
 CLightSceneNode::~CLightSceneNode()
@@ -36,12 +36,14 @@ CLightSceneNode::~CLightSceneNode()
 
 
 //! pre render event
-void CLightSceneNode::OnPreRender()
+void CLightSceneNode::OnRegisterSceneNode()
 {
-	if (IsVisible)
+	doLightRecalc ();
+
+	if (IsVisible  )
 	{
 		SceneManager->registerNodeForRendering(this, ESNRP_LIGHT);
-		ISceneNode::OnPreRender();
+		ISceneNode::OnRegisterSceneNode();
 	}
 }
 
@@ -53,13 +55,73 @@ void CLightSceneNode::render()
 	if (!driver)
 		return;
 
+	if (DebugDataVisible)
+	{
+		driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
+		video::SMaterial m;
+		m.Lighting = false;
+		driver->setMaterial(m);
+
+		switch ( LightData.Type )
+		{
+			case video::ELT_POINT:
+				driver->draw3DBox( BBox, LightData.DiffuseColor.toSColor());
+				break;
+
+			case video::ELT_DIRECTIONAL:
+				driver->draw3DLine (	core::vector3df ( 0.f, 0.f, 0.f ), 
+										core::vector3df ( 0.f, 0.f, 0.f ) + (LightData.Position * 10.f ),
+										LightData.DiffuseColor.toSColor()
+									);
+				break;
+		}
+	}
+
+	driver->addDynamicLight(LightData);
+}
+
+
+//! returns the light data
+void CLightSceneNode::setLightData(const video::SLight& light)
+{
+	LightData = light;
+	ISceneNode::setPosition(light.Position);
+	ISceneNode::updateAbsolutePosition ();
+}
+
+
+//! \return Returns the light data.
+video::SLight& CLightSceneNode::getLightData()
+{
+	return LightData;
+}
+
+
+//! returns the axis aligned bounding box of this node
+const core::aabbox3d<f32>& CLightSceneNode::getBoundingBox() const
+{
+	return BBox;
+}
+
+
+void CLightSceneNode::doLightRecalc()
+{
 	switch ( LightData.Type )
 	{
 		case video::ELT_POINT:
+		{
+			f32 r = LightData.Radius * LightData.Radius * 0.5f;
+			BBox.MaxEdge.set ( r, r, r );
+			BBox.MinEdge.set ( -r, -r, -r );
+			setAutomaticCulling ( scene::EAC_BOX );
+
 			LightData.Position = getAbsolutePosition();
-			break;
+		} break;
 
 		case video::ELT_DIRECTIONAL:
+			BBox.reset ( 0, 0, 0 );
+			setAutomaticCulling ( scene::EAC_OFF );
+
 			// misuse Position as direction..
 			LightData.Position = getAbsolutePosition();
 			LightData.Position.invert();
@@ -75,49 +137,7 @@ void CLightSceneNode::render()
 			break;
 	}
 
-	if (DebugDataVisible)
-	{
-		driver->setTransform(video::ETS_WORLD, AbsoluteTransformation);
-		video::SMaterial m;
-		m.Lighting = false;
-		driver->setMaterial(m);
-//		driver->draw3DBox(BBox, LightData.DiffuseColor.toSColor());
-
-		core::aabbox3df radius = BBox;
-		switch ( LightData.Type )
-		{
-			case video::ELT_POINT:
-				radius.MaxEdge *= LightData.Radius;
-				radius.MinEdge *= LightData.Radius;
-				driver->draw3DBox(radius, LightData.DiffuseColor.toSColor());
-				break;
-
-			case video::ELT_DIRECTIONAL:
-				driver->draw3DLine (	core::vector3df ( 0.f, 0.f, 0.f ), 
-										core::vector3df ( 0.f, 0.f, 0.f ) + (LightData.Position * 10.f ),
-										LightData.DiffuseColor.toSColor()
-									);
-				break;
-		}
-							
-	}
-
-	driver->addDynamicLight(LightData);
 }
-
-
-//! returns the light data
-video::SLight& CLightSceneNode::getLightData()
-{
-	return LightData;
-}
-
-//! returns the axis aligned bounding box of this node
-const core::aabbox3d<f32>& CLightSceneNode::getBoundingBox() const
-{
-	return BBox;
-}
-
 
 //! Writes attributes of the scene node.
 void CLightSceneNode::serializeAttributes(io::IAttributes* out, io::SAttributeReadWriteOptions* options)
@@ -138,12 +158,13 @@ void CLightSceneNode::deserializeAttributes(io::IAttributes* in, io::SAttributeR
 	LightData.AmbientColor =	in->getAttributeAsColorf("AmbientColor");
 	LightData.DiffuseColor =	in->getAttributeAsColorf("DiffuseColor");
 	LightData.SpecularColor =	in->getAttributeAsColorf("SpecularColor");
-	LightData.Radius =			in->getAttributeAsFloat("Radius");
+	LightData.Radius =		in->getAttributeAsFloat("Radius");
 	LightData.CastShadows =		in->getAttributeAsBool("CastShadows");
-	LightData.Type =			(video::E_LIGHT_TYPE)in->getAttributeAsEnumeration("LightType", video::LightTypeNames);
+	LightData.Type =		(video::E_LIGHT_TYPE)in->getAttributeAsEnumeration("LightType", video::LightTypeNames);
 
 	ILightSceneNode::deserializeAttributes(in, options);
 }
 
 } // end namespace scene
 } // end namespace irr
+
