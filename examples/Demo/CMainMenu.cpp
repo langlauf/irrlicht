@@ -35,16 +35,16 @@ public:
 
 		irr::scene::ILightSceneNode* l = (irr::scene::ILightSceneNode*) node;
 
-		core::vector3df now = l->getPosition();
-
 		if ( ToFollow )
 		{
+			core::vector3df now = l->getPosition();
 			now += ToFollow->getBoundingBox().getCenter();
 			now += Offset;
+			l->setPosition(now);
 		}
 
 		irr::video::SColorHSL color;
-		irr::video::SColor rgb;
+		irr::video::SColor rgb(0);
 		color.Hue = ( ( timeMs + Phase ) % Frequency  ) * ( 2.f * irr::core::PI / Frequency );
 		color.Saturation = 1.f;
 		color.Luminance = 0.5f;
@@ -52,7 +52,6 @@ public:
 
 		video::SLight light = l->getLightData();
 		light.DiffuseColor = rgb;
-		light.Position = now;
 		l->setLightData(light);
 	}
 
@@ -69,7 +68,7 @@ private:
 
 
 CMainMenu::CMainMenu()
-: startButton(0), device(0), start(false), fullscreen(true), selected(2),
+: startButton(0), device(0), selected(2), start(false), fullscreen(true),
 	music(true), shadows(false), additive(false), transparent(true), vsync(true)
 {
 }
@@ -318,7 +317,7 @@ bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 
 
 
-bool CMainMenu::OnEvent(SEvent event)
+bool CMainMenu::OnEvent(const SEvent& event)
 {
 	if (event.EventType == EET_KEY_INPUT_EVENT &&
 		event.KeyInput.Key == KEY_F9 &&

@@ -23,6 +23,13 @@ CGUIEditWindow::CGUIEditWindow(IGUIEnvironment* environment, core::rect<s32> rec
 	setDebugName("CGUIEditWindow");
 	#endif
 
+	// we can't tab out of this window
+	setTabGroup(true);
+	// we can ctrl+tab to it
+	setTabStop(true);
+	// the tab order number is auto-assigned
+	setTabOrder(-1);
+
 	// set window text
 	setText(L"GUI Editor");
 
@@ -41,6 +48,11 @@ CGUIEditWindow::CGUIEditWindow(IGUIEnvironment* environment, core::rect<s32> rec
 	TabControl->setAlignment(EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT, EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT);
 
 	IGUITab* ToolsTab = TabControl->addTab(L"Tools");
+	//L"Texture Cache Browser"
+	//L"Font Browser"
+	//L"Font Generator"
+	//L"Sprite Editor"
+	//Environment->addGUIElement("textureCacheBrowser", this);
 
 	IGUITab* OptionsTab = TabControl->addTab(L"Attributes");
 
@@ -72,7 +84,12 @@ CGUIEditWindow::CGUIEditWindow(IGUIEnvironment* environment, core::rect<s32> rec
 	AttribEditor->setRelativePosition( core::rect<f32>(0.0f, 0.0f, 1.0f, 1.0f));
 	AttribEditor->setAlignment(EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT, EGUIA_UPPERLEFT, EGUIA_LOWERRIGHT);
 	
-	ResizeButton = environment->addStaticText(L"/",core::rect<s32>(199-th,449-th,199,449), true, false, this, true);
+	ResizeButton = environment->addButton(core::rect<s32>(199-th,449-th,199,449), this);
+	ResizeButton->setDrawBorder(false);
+	ResizeButton->setEnabled(false);
+	ResizeButton->setSpriteBank(skin->getSpriteBank());
+	ResizeButton->setSprite(EGBS_BUTTON_UP, skin->getIcon(EGDI_WINDOW_RESIZE), skin->getColor(EGDC_WINDOW_SYMBOL));
+	ResizeButton->setSprite(EGBS_BUTTON_DOWN, skin->getIcon(EGDI_WINDOW_RESIZE), skin->getColor(EGDC_WINDOW_SYMBOL));
 	ResizeButton->grab();
 	ResizeButton->setSubElement(true);
 	ResizeButton->setAlignment(EGUIA_LOWERRIGHT, EGUIA_LOWERRIGHT, EGUIA_LOWERRIGHT, EGUIA_LOWERRIGHT);
@@ -93,24 +110,23 @@ CGUIEditWindow::~CGUIEditWindow()
 		ResizeButton->drop();
 }
 
-CGUIAttributeEditor* CGUIEditWindow::getEnvironmentEditor()
+CGUIAttributeEditor* CGUIEditWindow::getEnvironmentEditor() const
 {
 	return EnvEditor;
 }
 
-CGUIAttributeEditor* CGUIEditWindow::getAttributeEditor()
+CGUIAttributeEditor* CGUIEditWindow::getAttributeEditor() const
 {
 	return AttribEditor;
 }
 
-CGUIAttributeEditor* CGUIEditWindow::getOptionEditor()
+CGUIAttributeEditor* CGUIEditWindow::getOptionEditor() const
 {
 	return OptionEditor;
 }
 
 void CGUIEditWindow::setSelectedElement(IGUIElement *sel)
 {
-
 	// save changes
 	AttribEditor->updateAttribs();
 
@@ -164,7 +180,7 @@ void CGUIEditWindow::draw()
 
 
 //! called if an event happened.
-bool CGUIEditWindow::OnEvent(SEvent event)
+bool CGUIEditWindow::OnEvent(const SEvent &event)
 {
 	switch(event.EventType)
 	{
@@ -172,13 +188,12 @@ bool CGUIEditWindow::OnEvent(SEvent event)
 		switch(event.GUIEvent.EventType)
 		{
 		case EGET_ELEMENT_FOCUS_LOST:
-			Dragging = false;
-			Resizing = false;
-			return true;
-
-			break;
-
-		case EGET_BUTTON_CLICKED:
+			if (event.GUIEvent.Caller == this ||
+				event.GUIEvent.Caller == ResizeButton)
+			{
+				Dragging = false;
+				Resizing = false;
+			}
 			break;
 		}
 
@@ -197,7 +212,7 @@ bool CGUIEditWindow::OnEvent(SEvent event)
 			if (clickedElement == this)
 			{
 				Dragging = true;
-				Environment->setFocus(this);
+				//Environment->setFocus(this);
 				if (Parent)
 					Parent->bringToFront(this);
 				return true;
@@ -205,7 +220,7 @@ bool CGUIEditWindow::OnEvent(SEvent event)
 			else if (clickedElement == ResizeButton)
 			{
 				Resizing = true;
-				Environment->setFocus(this);
+				//Environment->setFocus(this);
 				if (Parent)
 					Parent->bringToFront(this);
 				return true;
@@ -216,7 +231,7 @@ bool CGUIEditWindow::OnEvent(SEvent event)
 			if (Dragging || Resizing)
 			{
 				Dragging = false;
-				Environment->removeFocus(this);
+				Resizing = false;
 				return true;
 			}
 			break;
@@ -261,6 +276,6 @@ bool CGUIEditWindow::OnEvent(SEvent event)
 
 // we're supposed to supply these if we're creating an IGUIWindow
 // but we don't need them so we'll just return null
-IGUIButton* CGUIEditWindow::getCloseButton()	   {return 0;}
-IGUIButton* CGUIEditWindow::getMinimizeButton() {return 0;}
-IGUIButton* CGUIEditWindow::getMaximizeButton() {return 0;}
+IGUIButton* CGUIEditWindow::getCloseButton() const     {return 0;}
+IGUIButton* CGUIEditWindow::getMinimizeButton() const  {return 0;}
+IGUIButton* CGUIEditWindow::getMaximizeButton() const  {return 0;}

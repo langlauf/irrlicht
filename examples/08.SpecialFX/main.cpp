@@ -99,7 +99,7 @@ int main()
 
 	mesh = smgr->addHillPlaneMesh("myHill",
 		core::dimension2d<f32>(20,20),
-		core::dimension2d<s32>(40,40), 0, 0,
+		core::dimension2d<u32>(40,40), 0, 0,
 		core::dimension2d<f32>(0,0),
 		core::dimension2d<f32>(10,10));
 
@@ -121,7 +121,7 @@ int main()
 	// create light
 
 	node = smgr->addLightSceneNode(0, core::vector3df(0,0,0),
-		video::SColorf(1.0f, 0.6f, 0.7f, 1.0f), 600.0f);
+		video::SColorf(1.0f, 0.6f, 0.7f, 1.0f), 1200.0f);
 	scene::ISceneNodeAnimator* anim = 0;
 	anim = smgr->createFlyCircleAnimator (core::vector3df(0,150,0),250.0f);
 	node->addAnimator(anim);
@@ -187,6 +187,7 @@ int main()
 	paf->drop();
 
 	ps->setMaterialFlag(video::EMF_LIGHTING, false);
+	ps->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
 	ps->setMaterialTexture(0, driver->getTexture("../../media/fire.bmp"));
 	ps->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
 
@@ -248,13 +249,13 @@ int main()
 
 		if (lastFPS != fps)
 		{
-		  core::stringw str = L"Irrlicht Engine - SpecialFX example [";
-		  str += driver->getName();
-		  str += "] FPS:";
-		  str += fps;
+			core::stringw str = L"Irrlicht Engine - SpecialFX example [";
+			str += driver->getName();
+			str += "] FPS:";
+			str += fps;
 
-		  device->setWindowCaption(str.c_str());
-		  lastFPS = fps;
+			device->setWindowCaption(str.c_str());
+			lastFPS = fps;
 		}
 	}
 

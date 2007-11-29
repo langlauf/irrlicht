@@ -13,8 +13,8 @@ namespace gui
 	{
 	public:
 		//
-		CGUIColorAttribute(IGUIEnvironment* environment, IGUIElement *parent) :
-		  	CGUIAttribute(environment, parent),
+		CGUIColorAttribute(IGUIEnvironment* environment, IGUIElement *parent, s32 myParentID) :
+		  	CGUIAttribute(environment, parent, myParentID),
 			AttribEditBox(0), AttribSliderA(0), AttribSliderR(0), AttribSliderG(0), AttribSliderB(0)
 		{
 
@@ -89,7 +89,7 @@ namespace gui
 			CGUIAttribute::setAttrib(attribs, attribIndex);
 		}
 
-		virtual bool OnEvent(SEvent e)
+		virtual bool OnEvent(const SEvent &e)
 		{
 			switch (e.EventType)
 			{
@@ -108,9 +108,8 @@ namespace gui
 						AttribSliderR->setPos(col.getRed()); 
 						AttribSliderG->setPos(col.getGreen());
 						AttribSliderB->setPos(col.getBlue());
-
-						return updateAttrib();
 					}
+					break;
 				case EGET_SCROLL_BAR_CHANGED:
 					{
 						// update editbox from scrollbars
@@ -130,13 +129,16 @@ namespace gui
 		// save the attribute and possibly post the event to its parent
 		virtual bool updateAttrib(bool sendEvent=true)
 		{
+			if (!Attribs)
+				return true;
+
 			Attribs->setAttribute(Index, AttribEditBox->getText());
 			AttribEditBox->setText(Attribs->getAttributeAsStringW(Index).c_str());
 			return CGUIAttribute::updateAttrib(sendEvent);
 		}
 
 		//! this shoudln't be serialized, but this is included as it's an example
-		virtual const c8* getTypeName() 
+		virtual const c8* getTypeName() const
 		{ 
 			return "color_attribute"; 
 		}

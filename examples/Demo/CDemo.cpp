@@ -4,15 +4,19 @@
 #include "CDemo.h"
 
 CDemo::CDemo(bool f, bool m, bool s, bool a, bool v, video::E_DRIVER_TYPE d)
-: fullscreen(f), driverType(d), currentScene(-2),
- model1(0), model2(0), music(m),
- shadows(s), quakeLevelMesh(0), quakeLevelNode(0), timeForThisScene(0),
- skyboxNode(0), mapSelector(0), metaSelector(0), campFire(0), device(0),
- additive(a), vsync(v)
-{
+: fullscreen(f), music(m), shadows(s), additive(a), vsync(v),
+ driverType(d), device(0),
 #ifdef USE_IRRKLANG
-	irrKlang = 0;
+	irrKlang(0), ballSound(0), impactSound(0),
 #endif
+#ifdef USE_SDL_MIXER
+	stream(0), ballSound(0), impactSound(0),
+#endif
+ currentScene(-2), backColor(0), statusText(0), inOutFader(0),
+ quakeLevelMesh(0), quakeLevelNode(0), skyboxNode(0), model1(0), model2(0),
+ campFire(0), metaSelector(0), mapSelector(0), sceneStartTime(0),
+ timeForThisScene(0)
+{
 }
 
 
@@ -112,7 +116,7 @@ void CDemo::run()
 }
 
 
-bool CDemo::OnEvent(SEvent event)
+bool CDemo::OnEvent(const SEvent& event)
 {
 	if (!device)
 		return false;
@@ -717,7 +721,7 @@ void CDemo::createParticleImpacts()
 			#ifdef USE_IRRKLANG
 			if (irrKlang)
 			{
-				audio::ISound* sound = 
+				irrklang::ISound* sound = 
 					irrKlang->play3D(impactSound, Impacts[i].pos, false, false, true);
 
 				if (sound)
@@ -745,14 +749,14 @@ void CDemo::createParticleImpacts()
 #ifdef USE_IRRKLANG
 void CDemo::startIrrKlang()
 {
-	irrKlang = audio::createIrrKlangDevice();
+	irrKlang = irrklang::createIrrKlangDevice();
 
 	if (!irrKlang)
 		return;
 
 	// play music
 
-	audio::ISound* snd = irrKlang->play2D("../../media/IrrlichtTheme.ogg", true, false, true);
+	irrklang::ISound* snd = irrKlang->play2D("../../media/IrrlichtTheme.ogg", true, false, true);
 	if ( !snd )
 		snd = irrKlang->play2D("IrrlichtTheme.ogg", true, false, true);
 
