@@ -69,7 +69,7 @@ private:
 
 CMainMenu::CMainMenu()
 : startButton(0), device(0), selected(2), start(false), fullscreen(true),
-	music(true), shadows(false), additive(false), transparent(true), vsync(true)
+	music(true), shadows(false), additive(false), transparent(true), vsync(false)
 {
 }
 
@@ -78,11 +78,13 @@ CMainMenu::CMainMenu()
 bool CMainMenu::run(bool& outFullscreen, bool& outMusic, bool& outShadows,
 					bool& outAdditive, bool &outVSync, video::E_DRIVER_TYPE& outDriver)
 {
-	device = createDevice( video::EDT_BURNINGSVIDEO,
+	device = createDevice( outDriver, //Varmint: 2007/12/18 video::EDT_BURNINGSVIDEO,
 		core::dimension2d<s32>(512, 384), 16, false, false, false, this);
 
-	device->getFileSystem()->addZipFileArchive("irrlicht.dat");
-	device->getFileSystem()->addZipFileArchive("../../media/irrlicht.dat");
+	if (device->getFileSystem()->existFile("irrlicht.dat"))
+		device->getFileSystem()->addZipFileArchive("irrlicht.dat");
+	else
+		device->getFileSystem()->addZipFileArchive("../../media/irrlicht.dat");
 
 	video::IVideoDriver* driver = device->getVideoDriver();
 	scene::ISceneManager* smgr = device->getSceneManager();
