@@ -3,8 +3,8 @@
 
 #include "CDemo.h"
 
-CDemo::CDemo(bool f, bool m, bool s, bool a, bool v, video::E_DRIVER_TYPE d)
-: fullscreen(f), music(m), shadows(s), additive(a), vsync(v),
+CDemo::CDemo(bool f, bool m, bool s, bool a, bool v, bool fsaa, video::E_DRIVER_TYPE d)
+: fullscreen(f), music(m), shadows(s), additive(a), vsync(v), aa(fsaa),
  driverType(d), device(0),
 #ifdef USE_IRRKLANG
 	irrKlang(0), ballSound(0), impactSound(0),
@@ -45,7 +45,17 @@ void CDemo::run()
 		resolution.Height = 480;
 	}
 
-	device = createDevice(driverType,resolution, 32, fullscreen, shadows, vsync, this);
+	irr::SIrrlichtCreationParameters params;
+	params.DriverType=driverType;
+	params.WindowSize=resolution;
+	params.Bits=32;
+	params.Fullscreen=fullscreen;
+	params.Stencilbuffer=shadows;
+	params.Vsync=vsync;
+	params.AntiAlias=aa;
+	params.EventReceiver=this;
+
+	device = createDeviceEx(params);
 	if (!device)
 		return;
 
@@ -161,6 +171,7 @@ bool CDemo::OnEvent(const SEvent& event)
 			device->getVideoDriver()->writeImageToFile(image, "screenshot.tga");
 			device->getVideoDriver()->writeImageToFile(image, "screenshot.ppm");
 			device->getVideoDriver()->writeImageToFile(image, "screenshot.jpg");
+			device->getVideoDriver()->writeImageToFile(image, "screenshot.pcx");
 			image->drop();
 		}
 	}
@@ -313,13 +324,13 @@ void CDemo::switchToNextScene()
 			keyMap[8].Action = EKA_JUMP_UP;
 			keyMap[8].KeyCode = KEY_KEY_J;
 
-			camera = sm->addCameraSceneNodeFPS(0, 100.0f, 400.0f, -1, keyMap, 9, false, 0.f);
+			camera = sm->addCameraSceneNodeFPS(0, 100.0f, .4f, -1, keyMap, 9, false, 3.f);
 			camera->setPosition(core::vector3df(108,140,-140));
 
 			scene::ISceneNodeAnimatorCollisionResponse* collider =
 				sm->createCollisionResponseAnimator(
 				metaSelector, camera, core::vector3df(25,50,25),
-				core::vector3df(0, quakeLevelMesh ? -2.5f : 0.0f,0),
+				core::vector3df(0, quakeLevelMesh ? -10.f : 0.0f,0),
 					core::vector3df(0,45,0), 0.005f);
 
 			camera->addAnimator(collider);
@@ -368,7 +379,7 @@ void CDemo::loadSceneData()
 				quakeLevelNode, 128);
 
 			// if not using shader and no gamma it's better to use more lighting, because
-			// quake3 level are dark
+			// quake3 level are usually dark
 			quakeLevelNode->setMaterialType ( video::EMT_LIGHTMAP_M4 );
 
 			// set additive blending if wanted
@@ -468,9 +479,10 @@ void CDemo::loadSceneData()
 	core::array<video::ITexture*> textures;
 	for (s32 g=1; g<8; ++g)
 	{
-		char tmp[64];
-		snprintf(tmp, 64, "../../media/portal%d.bmp", g);
-		video::ITexture* t = driver->getTexture(tmp);
+		core::stringc tmp("../../media/portal");
+		tmp += g;
+		tmp += ".bmp";
+		video::ITexture* t = driver->getTexture( tmp.c_str () );
 		textures.push_back(t);
 	}
 
@@ -521,13 +533,14 @@ void CDemo::loadSceneData()
 	campFire->setPosition(core::vector3df(100,120,600));
 	campFire->setScale(core::vector3df(2,2,2));
 
-	campFire->setParticleSize(core::dimension2d<f32>(20.0f, 10.0f));
 
 	scene::IParticleEmitter* em = campFire->createBoxEmitter(
 		core::aabbox3d<f32>(-7,0,-7,7,1,7),
 		core::vector3df(0.0f,0.06f,0.0f),
 		80,100, video::SColor(0,255,255,255),video::SColor(0,255,255,255), 800,2000);
 
+	em->setMinStartSize(core::dimension2d<f32>(20.0f, 10.0f));
+	em->setMaxStartSize(core::dimension2d<f32>(20.0f, 10.0f));
 	campFire->setEmitter(em);
 	em->drop();
 
@@ -536,6 +549,7 @@ void CDemo::loadSceneData()
 	paf->drop();
 
 	campFire->setMaterialFlag(video::EMF_LIGHTING, false);
+	campFire->setMaterialFlag(video::EMF_ZWRITE_ENABLE, false);
 	campFire->setMaterialTexture(0, driver->getTexture("../../media/fireball.bmp"));
 	campFire->setMaterialType(video::EMT_TRANSPARENT_VERTEX_ALPHA);
 
