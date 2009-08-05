@@ -7,6 +7,7 @@
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Win32 - Debug - dll">
+				<Option platforms="Windows;" />
 				<Option output="..\..\lib\gcc\Irrlicht" prefix_auto="1" extension_auto="1" />
 				<Option object_output="..\obj\win32-gcc-debug-dll" />
 				<Option type="3" />
@@ -26,6 +27,7 @@
 					<Add option="-D_USRDLL" />
 					<Add option="-DIRRLICHT_EXPORTS" />
 					<Add option="-D_CRT_SECURE_NO_DEPRECATE" />
+					<Add option="-D__GNUWIN32__" />
 					<Add directory="..\..\include" />
 					<Add directory="zlib" />
 				</Compiler>
@@ -44,10 +46,11 @@
 					<Add library="winmm" />
 				</Linker>
 				<ExtraCommands>
-					<Add after="mv ../../lib/gcc/Irrlicht.dll ../../bin/gcc/Irrlicht.dll" />
+					<Add after="cmd /c move ..\..\lib\gcc\Irrlicht.dll ..\..\bin\gcc\Irrlicht.dll" />
 				</ExtraCommands>
 			</Target>
 			<Target title="Win32 - Release - accurate math - dll">
+				<Option platforms="Windows;" />
 				<Option output="..\..\lib\gcc\Irrlicht" prefix_auto="1" extension_auto="1" />
 				<Option object_output="..\obj\win32-gcc-release-dll" />
 				<Option type="3" />
@@ -65,6 +68,7 @@
 					<Add option="-D_USRDLL" />
 					<Add option="-DIRRLICHT_EXPORTS" />
 					<Add option="-D_CRT_SECURE_NO_DEPRECATE" />
+					<Add option="-D__GNUWIN32__" />
 					<Add directory="..\..\include" />
 					<Add directory="zlib" />
 				</Compiler>
@@ -83,10 +87,11 @@
 					<Add library="winmm" />
 				</Linker>
 				<ExtraCommands>
-					<Add after="mv ../../lib/gcc/Irrlicht.dll ../../bin/gcc/Irrlicht.dll" />
+					<Add after="cmd /c move ..\..\lib\gcc\Irrlicht.dll ..\..\bin\gcc\Irrlicht.dll" />
 				</ExtraCommands>
 			</Target>
 			<Target title="Win32 - Release - fast math - dll">
+				<Option platforms="Windows;" />
 				<Option output="..\..\lib\gcc\Irrlicht" prefix_auto="1" extension_auto="1" />
 				<Option object_output="..\obj\win32-gcc-release-fast-dll" />
 				<Option type="3" />
@@ -105,6 +110,7 @@
 					<Add option="-D_USRDLL" />
 					<Add option="-DIRRLICHT_EXPORTS" />
 					<Add option="-D_CRT_SECURE_NO_DEPRECATE" />
+					<Add option="-D__GNUWIN32__" />
 					<Add directory="..\..\include" />
 					<Add directory="zlib" />
 				</Compiler>
@@ -123,10 +129,11 @@
 					<Add library="winmm" />
 				</Linker>
 				<ExtraCommands>
-					<Add after="mv ../../lib/gcc/Irrlicht.dll ../../bin/gcc/Irrlicht.dll" />
+					<Add after="cmd /c move ..\..\lib\gcc\Irrlicht.dll ..\..\bin\gcc\Irrlicht.dll" />
 				</ExtraCommands>
 			</Target>
 			<Target title="Linux - Debug - shared">
+				<Option platforms="Unix;" />
 				<Option output="..\..\lib\gcc\libIrrlicht" prefix_auto="0" extension_auto="1" />
 				<Option object_output="..\obj\linux-gcc-debug-shared" />
 				<Option type="3" />
@@ -137,12 +144,14 @@
 					<Add option="-W" />
 					<Add option="-Wall" />
 					<Add option="-g" />
+					<Add option="-D_DEBUG" />
 					<Add option="-O0" />
 					<Add option="-Wextra" />
 					<Add option="-Wno-unused-parameter" />
 					<Add directory="..\..\include" />
 					<Add directory="zlib" />
 					<Add directory="libpng" />
+					<Add directory="jpeglib" />
 				</Compiler>
 				<Linker>
 					<Add library="GLU" />
@@ -153,6 +162,7 @@
 				</Linker>
 			</Target>
 			<Target title="Linux - Release - accurate math - shared">
+				<Option platforms="Unix;" />
 				<Option output="..\..\lib\gcc\libIrrlicht" prefix_auto="0" extension_auto="1" />
 				<Option object_output="..\obj\linux-gcc-release-shared" />
 				<Option type="3" />
@@ -167,6 +177,7 @@
 					<Add directory="..\..\include" />
 					<Add directory="zlib" />
 					<Add directory="libpng" />
+					<Add directory="jpeglib" />
 				</Compiler>
 				<Linker>
 					<Add library="GLU" />
@@ -177,6 +188,7 @@
 				</Linker>
 			</Target>
 			<Target title="Linux - Release - fast math - shared">
+				<Option platforms="Unix;" />
 				<Option output="..\..\lib\gcc\libIrrlicht" prefix_auto="0" extension_auto="1" />
 				<Option object_output="..\obj\linux-gcc-release-fast-shared" />
 				<Option type="3" />
@@ -192,6 +204,7 @@
 					<Add directory="..\..\include" />
 					<Add directory="zlib" />
 					<Add directory="libpng" />
+					<Add directory="jpeglib" />
 				</Compiler>
 				<Linker>
 					<Add library="GLU" />
@@ -203,11 +216,8 @@
 			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="All" targets="Win32 - Debug - dll;Win32 - Release - accurate math - dll;Win32 - Release - fast math - dll;" />
+			<Add alias="All" targets="Win32 - Debug - dll;Win32 - Release - accurate math - dll;Win32 - Release - fast math - dll;Linux - Debug - shared;Linux - Release - accurate math - shared;Linux - Release - fast math - shared;" />
 		</VirtualTargets>
-		<Compiler>
-			<Add option="-D__GNUWIN32__" />
-		</Compiler>
 		<Unit filename="..\..\changes.txt" />
 		<Unit filename="..\..\include\ECullingTypes.h" />
 		<Unit filename="..\..\include\EDebugSceneTypes.h" />

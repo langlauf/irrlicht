@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2008 Nikolaus Gebhardt / Gaz Davidson
+// Copyright (C) 2002-2009 Nikolaus Gebhardt / Gaz Davidson
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -54,15 +54,14 @@ namespace gui
 	private:
 
 		void updateImageList();
-		core::array<IGUIImage*> Images;
 
-		bool Dragging;
+		core::array<IGUIImage*> Images;
 		core::position2d<s32> DragStart;
 
 		IGUIButton* CloseButton;
 		CGUIPanel*	Panel;
 		s32 SelectedTexture;
-
+		bool Dragging;
 	};
 
 
@@ -70,5 +69,4 @@ namespace gui
 } // end namespace irr
 
 #endif
-
 

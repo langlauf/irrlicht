@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2008 Nikolaus Gebhardt / Gaz Davidson
+// Copyright (C) 2002-2009 Nikolaus Gebhardt / Gaz Davidson
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -27,8 +27,8 @@ namespace gui
 //! constructor
 CGUIEditWorkspace::CGUIEditWorkspace(IGUIEnvironment* environment, s32 id, IGUIElement *parent)
 : IGUIElement(EGUIET_ELEMENT, environment, parent ? parent : environment->getRootGUIElement(), id, environment->getRootGUIElement()->getAbsolutePosition()),
-	DrawGrid(false), UseGrid(true), GridSize(10,10), MenuCommandStart(0x3D17),
 	CurrentMode(EGUIEDM_SELECT), MouseOverMode(EGUIEDM_SELECT),
+	GridSize(10,10), MenuCommandStart(0x3D17), DrawGrid(false), UseGrid(true),
 	MouseOverElement(0), SelectedElement(0), EditorWindow(0)
 {
 	#ifdef _DEBUG
@@ -860,13 +860,11 @@ void CGUIEditWorkspace::PasteXMLToSelectedElement()
 	// rewind file
 	memWrite->seek(0, false);
 
-	io::IXMLReader* xmlReader = (io::IXMLReader*) Environment->getFileSystem()->createXMLReader(memWrite);
-
 	// read xml
-	Environment->readGUIElement(xmlReader, SelectedElement);
+	Environment->loadGUI(memWrite, SelectedElement);
 
-	// drop the xml reader
-	xmlReader->drop();
+	// reset focus
+	Environment->setFocus(this);
 	
 	// drop the read file
 	memWrite->drop();

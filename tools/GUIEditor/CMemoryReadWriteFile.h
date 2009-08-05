@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2008 Nikolaus Gebhardt
+// Copyright (C) 2002-2009 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -61,8 +61,8 @@ namespace io
 	private:
 
 		core::array<c8> Data;
-		s32 Pos;
 		core::stringc FileName;
+		long Pos;
 	};
 
 	

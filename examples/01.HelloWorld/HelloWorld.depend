@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1229235382 source:c:\development\irrlicht-1.5\examples\01.helloworld\main.cpp
+1229238982 source:c:\development\irrlicht-1.5\examples\01.helloworld\main.cpp
 	<irrlicht.h>
 
-1229235367 c:\development\irrlicht-1.5\include\irrlicht.h
+1249117311 c:\development\irrlicht-1.5\include\irrlicht.h
 	"IrrCompileConfig.h"
 	"aabbox3d.h"
 	"CDynamicMeshBuffer.h"
@@ -155,21 +155,21 @@
 	"vector3d.h"
 	"SIrrCreationParameters.h"
 
-1229235366 c:\development\irrlicht-1.5\include\irrcompileconfig.h
+1249118024 c:\development\irrlicht-1.5\include\irrcompileconfig.h
 	<stdio.h>
 
-1229235366 c:\development\irrlicht-1.5\include\aabbox3d.h
+1249117311 c:\development\irrlicht-1.5\include\aabbox3d.h
 	"irrMath.h"
 	"plane3d.h"
 	"line3d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\irrmath.h
+1249117311 c:\development\irrlicht-1.5\include\irrmath.h
 	"IrrCompileConfig.h"
 	"irrTypes.h"
 	<math.h>
 	<stdlib.h>
 
-1229235367 c:\development\irrlicht-1.5\include\irrtypes.h
+1249117311 c:\development\irrlicht-1.5\include\irrtypes.h
 	"IrrCompileConfig.h"
 	<wchar.h>
 	<crtdbg.h>
@@ -177,28 +177,28 @@
 	<stdlib.h>
 	<crtdbg.h>
 
-1229235366 c:\development\irrlicht-1.5\include\plane3d.h
+1249117311 c:\development\irrlicht-1.5\include\plane3d.h
 	"irrMath.h"
 	"vector3d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\vector3d.h
+1249117311 c:\development\irrlicht-1.5\include\vector3d.h
 	"irrMath.h"
 
-1229235366 c:\development\irrlicht-1.5\include\line3d.h
+1249117311 c:\development\irrlicht-1.5\include\line3d.h
 	"irrTypes.h"
 	"vector3d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\cdynamicmeshbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\cdynamicmeshbuffer.h
 	"IDynamicMeshBuffer.h"
 	"CVertexBuffer.h"
 	"CIndexBuffer.h"
 
-1229235366 c:\development\irrlicht-1.5\include\idynamicmeshbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\idynamicmeshbuffer.h
 	"IMeshBuffer.h"
 	"IVertexBuffer.h"
 	"IIndexBuffer.h"
 
-1229235366 c:\development\irrlicht-1.5\include\imeshbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\imeshbuffer.h
 	"IReferenceCounted.h"
 	"SMaterial.h"
 	"aabbox3d.h"
@@ -206,10 +206,10 @@
 	"SVertexIndex.h"
 	"EHardwareBufferFlags.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ireferencecounted.h
+1249117311 c:\development\irrlicht-1.5\include\ireferencecounted.h
 	"irrTypes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\smaterial.h
+1249117311 c:\development\irrlicht-1.5\include\smaterial.h
 	"SColor.h"
 	"matrix4.h"
 	"irrArray.h"
@@ -217,11 +217,11 @@
 	"EMaterialFlags.h"
 	"SMaterialLayer.h"
 
-1229235366 c:\development\irrlicht-1.5\include\scolor.h
+1249117310 c:\development\irrlicht-1.5\include\scolor.h
 	"irrTypes.h"
 	"irrMath.h"
 
-1229235367 c:\development\irrlicht-1.5\include\matrix4.h
+1249117311 c:\development\irrlicht-1.5\include\matrix4.h
 	"irrTypes.h"
 	"vector3d.h"
 	"vector2d.h"
@@ -230,22 +230,23 @@
 	"rect.h"
 	"irrString.h"
 
-1229235367 c:\development\irrlicht-1.5\include\vector2d.h
+1249117311 c:\development\irrlicht-1.5\include\vector2d.h
 	"irrMath.h"
 
-1229235367 c:\development\irrlicht-1.5\include\rect.h
+1249117311 c:\development\irrlicht-1.5\include\rect.h
 	"irrTypes.h"
 	"dimension2d.h"
 	"position2d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\dimension2d.h
+1249117311 c:\development\irrlicht-1.5\include\dimension2d.h
 	"irrTypes.h"
+	"irrMath.h"
 
-1229235367 c:\development\irrlicht-1.5\include\position2d.h
+1249117311 c:\development\irrlicht-1.5\include\position2d.h
 	"irrTypes.h"
 	"dimension2d.h"
 
-1229235367 c:\development\irrlicht-1.5\include\irrstring.h
+1249117311 c:\development\irrlicht-1.5\include\irrstring.h
 	"irrTypes.h"
 	"irrAllocator.h"
 	"irrMath.h"
@@ -253,126 +254,126 @@
 	<string.h>
 	<stdlib.h>
 
-1229235366 c:\development\irrlicht-1.5\include\irrallocator.h
+1249117311 c:\development\irrlicht-1.5\include\irrallocator.h
 	"irrTypes.h"
 	<new>
 	<memory.h>
 
-1229235366 c:\development\irrlicht-1.5\include\irrarray.h
+1249117311 c:\development\irrlicht-1.5\include\irrarray.h
 	"irrTypes.h"
 	"heapsort.h"
 	"irrAllocator.h"
 
-1229235367 c:\development\irrlicht-1.5\include\heapsort.h
+1249117311 c:\development\irrlicht-1.5\include\heapsort.h
 	"irrTypes.h"
 
-1229235367 c:\development\irrlicht-1.5\include\ematerialtypes.h
+1249117311 c:\development\irrlicht-1.5\include\ematerialtypes.h
 
-1229235366 c:\development\irrlicht-1.5\include\ematerialflags.h
+1249117311 c:\development\irrlicht-1.5\include\ematerialflags.h
 
-1229235366 c:\development\irrlicht-1.5\include\smateriallayer.h
+1249117311 c:\development\irrlicht-1.5\include\smateriallayer.h
 	"matrix4.h"
 	"irrAllocator.h"
 
-1229235367 c:\development\irrlicht-1.5\include\s3dvertex.h
+1249117311 c:\development\irrlicht-1.5\include\s3dvertex.h
 	"vector3d.h"
 	"vector2d.h"
 	"SColor.h"
 
-1229235366 c:\development\irrlicht-1.5\include\svertexindex.h
+1249117311 c:\development\irrlicht-1.5\include\svertexindex.h
 	"irrTypes.h"
 
-1229235367 c:\development\irrlicht-1.5\include\ehardwarebufferflags.h
+1249117311 c:\development\irrlicht-1.5\include\ehardwarebufferflags.h
 
-1229235366 c:\development\irrlicht-1.5\include\ivertexbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\ivertexbuffer.h
 	"IReferenceCounted.h"
 	"irrArray.h"
 	"S3DVertex.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iindexbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\iindexbuffer.h
 	"IReferenceCounted.h"
 	"irrArray.h"
 	"SVertexIndex.h"
 
-1229235367 c:\development\irrlicht-1.5\include\cvertexbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\cvertexbuffer.h
 	"IVertexBuffer.h"
 
-1229235367 c:\development\irrlicht-1.5\include\cindexbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\cindexbuffer.h
 	"IIndexBuffer.h"
 
-1229235366 c:\development\irrlicht-1.5\include\cmeshbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\cmeshbuffer.h
 	"irrArray.h"
 	"IMeshBuffer.h"
 
-1229235366 c:\development\irrlicht-1.5\include\coreutil.h
+1249117311 c:\development\irrlicht-1.5\include\coreutil.h
 	"irrString.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ecullingtypes.h
+1249117311 c:\development\irrlicht-1.5\include\ecullingtypes.h
 	"irrTypes.h"
 
-1229235367 c:\development\irrlicht-1.5\include\edebugscenetypes.h
+1249117311 c:\development\irrlicht-1.5\include\edebugscenetypes.h
 
-1229235366 c:\development\irrlicht-1.5\include\edriverfeatures.h
+1249117311 c:\development\irrlicht-1.5\include\edriverfeatures.h
 
-1229235367 c:\development\irrlicht-1.5\include\edrivertypes.h
+1249117311 c:\development\irrlicht-1.5\include\edrivertypes.h
 
-1229235366 c:\development\irrlicht-1.5\include\eguialignment.h
+1249117311 c:\development\irrlicht-1.5\include\eguialignment.h
 
-1229235367 c:\development\irrlicht-1.5\include\eguielementtypes.h
+1249117311 c:\development\irrlicht-1.5\include\eguielementtypes.h
 	"irrTypes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\emeshwriterenums.h
+1249117311 c:\development\irrlicht-1.5\include\emeshwriterenums.h
 	"irrTypes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\emessageboxflags.h
+1249117311 c:\development\irrlicht-1.5\include\emessageboxflags.h
 
-1229235366 c:\development\irrlicht-1.5\include\escenenodeanimatortypes.h
+1249117311 c:\development\irrlicht-1.5\include\escenenodeanimatortypes.h
 
-1229235366 c:\development\irrlicht-1.5\include\escenenodetypes.h
+1249117310 c:\development\irrlicht-1.5\include\escenenodetypes.h
 	"irrTypes.h"
 
-1229235367 c:\development\irrlicht-1.5\include\eterrainelements.h
+1249117311 c:\development\irrlicht-1.5\include\eterrainelements.h
 
-1229235366 c:\development\irrlicht-1.5\include\fast_atof.h
+1249117311 c:\development\irrlicht-1.5\include\fast_atof.h
 	<stdlib.h>
 	"irrMath.h"
 	<float.h>
 	<limits.h>
 
-1229235366 c:\development\irrlicht-1.5\include\ianimatedmesh.h
+1249117311 c:\development\irrlicht-1.5\include\ianimatedmesh.h
 	"aabbox3d.h"
 	"IMesh.h"
 
-1229235366 c:\development\irrlicht-1.5\include\imesh.h
+1249117311 c:\development\irrlicht-1.5\include\imesh.h
 	"IReferenceCounted.h"
 	"SMaterial.h"
 	"EHardwareBufferFlags.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ianimatedmeshmd2.h
+1249117311 c:\development\irrlicht-1.5\include\ianimatedmeshmd2.h
 	"IAnimatedMesh.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ianimatedmeshmd3.h
+1249117311 c:\development\irrlicht-1.5\include\ianimatedmeshmd3.h
 	"IAnimatedMesh.h"
 	"IQ3Shader.h"
 	"quaternion.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iq3shader.h
+1249117311 c:\development\irrlicht-1.5\include\iq3shader.h
 	"irrArray.h"
 	"fast_atof.h"
 	"IFileSystem.h"
 	"IVideoDriver.h"
 	"coreutil.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ifilesystem.h
+1249117311 c:\development\irrlicht-1.5\include\ifilesystem.h
 	"IReferenceCounted.h"
 	"IXMLReader.h"
 	"irrString.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ixmlreader.h
+1249117311 c:\development\irrlicht-1.5\include\ixmlreader.h
 	"IReferenceCounted.h"
 	"irrXML.h"
 
-1229235366 c:\development\irrlicht-1.5\include\irrxml.h
+1249117311 c:\development\irrlicht-1.5\include\irrxml.h
 	<stdio.h>
 	"IrrCompileConfig.h"
 	<irrXML.h>
@@ -381,7 +382,7 @@
 	<irrXML.h>
 	<irrXML.h>
 
-1229235366 c:\development\irrlicht-1.5\include\ivideodriver.h
+1249117311 c:\development\irrlicht-1.5\include\ivideodriver.h
 	"rect.h"
 	"SColor.h"
 	"ITexture.h"
@@ -396,7 +397,7 @@
 	"EDriverTypes.h"
 	"EDriverFeatures.h"
 
-1229235366 c:\development\irrlicht-1.5\include\itexture.h
+1249117310 c:\development\irrlicht-1.5\include\itexture.h
 	"IReferenceCounted.h"
 	"IImage.h"
 	"dimension2d.h"
@@ -404,31 +405,31 @@
 	"irrString.h"
 	"matrix4.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iimage.h
+1249117311 c:\development\irrlicht-1.5\include\iimage.h
 	"IReferenceCounted.h"
 	"position2d.h"
 	"rect.h"
 	"SColor.h"
 
-1229235366 c:\development\irrlicht-1.5\include\triangle3d.h
+1249117310 c:\development\irrlicht-1.5\include\triangle3d.h
 	"vector3d.h"
 	"line3d.h"
 	"plane3d.h"
 	"aabbox3d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\quaternion.h
+1249117311 c:\development\irrlicht-1.5\include\quaternion.h
 	"irrTypes.h"
 	"irrMath.h"
 	"matrix4.h"
 	"vector3d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ianimatedmeshscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\ianimatedmeshscenenode.h
 	"ISceneNode.h"
 	"IBoneSceneNode.h"
 	"IAnimatedMeshMD2.h"
 	"IAnimatedMeshMD3.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\iscenenode.h
 	"IAttributeExchangingObject.h"
 	"ESceneNodeTypes.h"
 	"ECullingTypes.h"
@@ -442,38 +443,38 @@
 	"irrList.h"
 	"IAttributes.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iattributeexchangingobject.h
+1249117311 c:\development\irrlicht-1.5\include\iattributeexchangingobject.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iscenenodeanimator.h
+1249117311 c:\development\irrlicht-1.5\include\iscenenodeanimator.h
 	"IReferenceCounted.h"
 	"vector3d.h"
 	"ESceneNodeAnimatorTypes.h"
 	"IAttributeExchangingObject.h"
 	"IEventReceiver.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ieventreceiver.h
+1249117311 c:\development\irrlicht-1.5\include\ieventreceiver.h
 	"ILogger.h"
 	"position2d.h"
 	"Keycodes.h"
 	"irrString.h"
 
-1229235367 c:\development\irrlicht-1.5\include\ilogger.h
+1249117311 c:\development\irrlicht-1.5\include\ilogger.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\keycodes.h
+1249117310 c:\development\irrlicht-1.5\include\keycodes.h
 
-1229235366 c:\development\irrlicht-1.5\include\itriangleselector.h
+1249117311 c:\development\irrlicht-1.5\include\itriangleselector.h
 	"IReferenceCounted.h"
 	"triangle3d.h"
 	"aabbox3d.h"
 	"matrix4.h"
 	"line3d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\irrlist.h
+1249117311 c:\development\irrlicht-1.5\include\irrlist.h
 	"irrTypes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iattributes.h
+1249117311 c:\development\irrlicht-1.5\include\iattributes.h
 	"IReferenceCounted.h"
 	"SColor.h"
 	"vector3d.h"
@@ -493,42 +494,42 @@
 	"irrArray.h"
 	"IXMLReader.h"
 
-1229235367 c:\development\irrlicht-1.5\include\line2d.h
+1249117311 c:\development\irrlicht-1.5\include\line2d.h
 	"irrTypes.h"
 	"vector2d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ibonescenenode.h
+1249117311 c:\development\irrlicht-1.5\include\ibonescenenode.h
 	"ISceneNode.h"
 
-1229235367 c:\development\irrlicht-1.5\include\ibillboardscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\ibillboardscenenode.h
 	"ISceneNode.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ibillboardtextscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\ibillboardtextscenenode.h
 	"IBillboardSceneNode.h"
 
-1229235367 c:\development\irrlicht-1.5\include\icamerascenenode.h
+1249117311 c:\development\irrlicht-1.5\include\icamerascenenode.h
 	"ISceneNode.h"
 	"IEventReceiver.h"
 
-1229235366 c:\development\irrlicht-1.5\include\icursorcontrol.h
+1249117311 c:\development\irrlicht-1.5\include\icursorcontrol.h
 	"IReferenceCounted.h"
 	"position2d.h"
 	"rect.h"
 
-1229235366 c:\development\irrlicht-1.5\include\idummytransformationscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\idummytransformationscenenode.h
 	"ISceneNode.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ifilelist.h
+1249117311 c:\development\irrlicht-1.5\include\ifilelist.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\igpuprogrammingservices.h
+1249117311 c:\development\irrlicht-1.5\include\igpuprogrammingservices.h
 	"IReferenceCounted.h"
 	"SMaterial.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguibutton.h
+1249117311 c:\development\irrlicht-1.5\include\iguibutton.h
 	"IGUIElement.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguielement.h
+1249117311 c:\development\irrlicht-1.5\include\iguielement.h
 	"IAttributeExchangingObject.h"
 	"irrList.h"
 	"rect.h"
@@ -538,27 +539,27 @@
 	"EGUIAlignment.h"
 	"IAttributes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguicheckbox.h
+1249117311 c:\development\irrlicht-1.5\include\iguicheckbox.h
 	"IGUIElement.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguicolorselectdialog.h
+1249117311 c:\development\irrlicht-1.5\include\iguicolorselectdialog.h
 	"IGUIElement.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguicombobox.h
+1249117311 c:\development\irrlicht-1.5\include\iguicombobox.h
 	"IGUIElement.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguicontextmenu.h
+1249117311 c:\development\irrlicht-1.5\include\iguicontextmenu.h
 	"IGUIElement.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguieditbox.h
+1249117310 c:\development\irrlicht-1.5\include\iguieditbox.h
 	"IGUIElement.h"
 	"SColor.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguielementfactory.h
+1249117311 c:\development\irrlicht-1.5\include\iguielementfactory.h
 	"IReferenceCounted.h"
 	"EGUIElementTypes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguienvironment.h
+1249117311 c:\development\irrlicht-1.5\include\iguienvironment.h
 	"IReferenceCounted.h"
 	"IGUISkin.h"
 	"rect.h"
@@ -566,103 +567,103 @@
 	"IEventReceiver.h"
 	"IXMLReader.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguiskin.h
+1249117311 c:\development\irrlicht-1.5\include\iguiskin.h
 	"IAttributeExchangingObject.h"
 	"EGUIAlignment.h"
 	"SColor.h"
 	"rect.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguifileopendialog.h
+1249117311 c:\development\irrlicht-1.5\include\iguifileopendialog.h
 	"IGUIElement.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguifont.h
+1249117311 c:\development\irrlicht-1.5\include\iguifont.h
 	"IReferenceCounted.h"
 	"SColor.h"
 	"rect.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguifontbitmap.h
+1249117311 c:\development\irrlicht-1.5\include\iguifontbitmap.h
 	"IGUIFont.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguiimage.h
+1249117311 c:\development\irrlicht-1.5\include\iguiimage.h
 	"IGUIElement.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguiinoutfader.h
-	"IGUIElement.h"
-	"SColor.h"
-
-1229235366 c:\development\irrlicht-1.5\include\iguilistbox.h
+1249117311 c:\development\irrlicht-1.5\include\iguiinoutfader.h
 	"IGUIElement.h"
 	"SColor.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguimeshviewer.h
+1249117310 c:\development\irrlicht-1.5\include\iguilistbox.h
+	"IGUIElement.h"
+	"SColor.h"
+
+1249117311 c:\development\irrlicht-1.5\include\iguimeshviewer.h
 	"IGUIElement.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguiscrollbar.h
+1249117311 c:\development\irrlicht-1.5\include\iguiscrollbar.h
 	"IGUIElement.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguispinbox.h
+1249117311 c:\development\irrlicht-1.5\include\iguispinbox.h
 	"IGUIElement.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguispritebank.h
+1249117311 c:\development\irrlicht-1.5\include\iguispritebank.h
 	"IReferenceCounted.h"
 	"irrArray.h"
 	"SColor.h"
 	"rect.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguistatictext.h
+1249117311 c:\development\irrlicht-1.5\include\iguistatictext.h
 	"IGUIElement.h"
 	"SColor.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguitabcontrol.h
+1249117311 c:\development\irrlicht-1.5\include\iguitabcontrol.h
 	"IGUIElement.h"
 	"SColor.h"
 	"IGUISkin.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguitable.h
+1249117311 c:\development\irrlicht-1.5\include\iguitable.h
 	"IGUIElement.h"
 	"irrTypes.h"
 	"SColor.h"
 	"IGUISkin.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iguitoolbar.h
+1249117311 c:\development\irrlicht-1.5\include\iguitoolbar.h
 	"IGUIElement.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iguiwindow.h
+1249117311 c:\development\irrlicht-1.5\include\iguiwindow.h
 	"IGUIElement.h"
 	"EMessageBoxFlags.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iimageloader.h
+1249117311 c:\development\irrlicht-1.5\include\iimageloader.h
 	"IReferenceCounted.h"
 	"IImage.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iimagewriter.h
+1249117311 c:\development\irrlicht-1.5\include\iimagewriter.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ilightscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\ilightscenenode.h
 	"ISceneNode.h"
 	"SLight.h"
 
-1229235366 c:\development\irrlicht-1.5\include\slight.h
+1249117311 c:\development\irrlicht-1.5\include\slight.h
 	"SColor.h"
 
-1229235366 c:\development\irrlicht-1.5\include\imaterialrenderer.h
+1249117311 c:\development\irrlicht-1.5\include\imaterialrenderer.h
 	"IReferenceCounted.h"
 	"SMaterial.h"
 	"S3DVertex.h"
 
-1229235367 c:\development\irrlicht-1.5\include\imaterialrendererservices.h
+1249117311 c:\development\irrlicht-1.5\include\imaterialrendererservices.h
 	"IReferenceCounted.h"
 	"SMaterial.h"
 	"S3DVertex.h"
 
-1229235367 c:\development\irrlicht-1.5\include\imeshcache.h
+1249117311 c:\development\irrlicht-1.5\include\imeshcache.h
 	"IReferenceCounted.h"
 	"irrString.h"
 
-1229235366 c:\development\irrlicht-1.5\include\imeshloader.h
+1249117311 c:\development\irrlicht-1.5\include\imeshloader.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\imeshmanipulator.h
+1249117311 c:\development\irrlicht-1.5\include\imeshmanipulator.h
 	"IReferenceCounted.h"
 	"vector3d.h"
 	"aabbox3d.h"
@@ -670,20 +671,20 @@
 	"IAnimatedMesh.h"
 	"SColor.h"
 
-1229235366 c:\development\irrlicht-1.5\include\imeshscenenode.h
+1249117310 c:\development\irrlicht-1.5\include\imeshscenenode.h
 	"ISceneNode.h"
 
-1229235366 c:\development\irrlicht-1.5\include\imeshwriter.h
+1249117311 c:\development\irrlicht-1.5\include\imeshwriter.h
 	"IReferenceCounted.h"
 	"EMeshWriterEnums.h"
 
-1229235366 c:\development\irrlicht-1.5\include\imetatriangleselector.h
+1249117311 c:\development\irrlicht-1.5\include\imetatriangleselector.h
 	"ITriangleSelector.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iosoperator.h
+1249117311 c:\development\irrlicht-1.5\include\iosoperator.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iparticlesystemscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\iparticlesystemscenenode.h
 	"ISceneNode.h"
 	"IParticleAnimatedMeshSceneNodeEmitter.h"
 	"IParticleBoxEmitter.h"
@@ -697,60 +698,60 @@
 	"IParticleRotationAffector.h"
 	"dimension2d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iparticleanimatedmeshscenenodeemitter.h
+1249117311 c:\development\irrlicht-1.5\include\iparticleanimatedmeshscenenodeemitter.h
 	"IParticleEmitter.h"
 	"IAnimatedMeshSceneNode.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iparticleemitter.h
+1249117311 c:\development\irrlicht-1.5\include\iparticleemitter.h
 	"IAttributeExchangingObject.h"
 	"SParticle.h"
 
-1229235366 c:\development\irrlicht-1.5\include\sparticle.h
+1249117311 c:\development\irrlicht-1.5\include\sparticle.h
 	"vector3d.h"
 	"dimension2d.h"
 	"SColor.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iparticleboxemitter.h
+1249117311 c:\development\irrlicht-1.5\include\iparticleboxemitter.h
 	"IParticleEmitter.h"
 	"aabbox3d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iparticlecylinderemitter.h
+1249117311 c:\development\irrlicht-1.5\include\iparticlecylinderemitter.h
 	"IParticleEmitter.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iparticlemeshemitter.h
+1249117311 c:\development\irrlicht-1.5\include\iparticlemeshemitter.h
 	"IParticleEmitter.h"
 	"IMesh.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iparticleringemitter.h
+1249117311 c:\development\irrlicht-1.5\include\iparticleringemitter.h
 	"IParticleEmitter.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iparticlesphereemitter.h
+1249117311 c:\development\irrlicht-1.5\include\iparticlesphereemitter.h
 	"IParticleEmitter.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iparticleattractionaffector.h
+1249117311 c:\development\irrlicht-1.5\include\iparticleattractionaffector.h
 	"IParticleAffector.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iparticleaffector.h
+1249117311 c:\development\irrlicht-1.5\include\iparticleaffector.h
 	"IAttributeExchangingObject.h"
 	"SParticle.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iparticlefadeoutaffector.h
+1249117311 c:\development\irrlicht-1.5\include\iparticlefadeoutaffector.h
 	"IParticleAffector.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iparticlegravityaffector.h
+1249117311 c:\development\irrlicht-1.5\include\iparticlegravityaffector.h
 	"IParticleAffector.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iparticlerotationaffector.h
+1249117311 c:\development\irrlicht-1.5\include\iparticlerotationaffector.h
 	"IParticleAffector.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iq3levelmesh.h
+1249117311 c:\development\irrlicht-1.5\include\iq3levelmesh.h
 	"IAnimatedMesh.h"
 	"IQ3Shader.h"
 
-1229235367 c:\development\irrlicht-1.5\include\ireadfile.h
+1249117311 c:\development\irrlicht-1.5\include\ireadfile.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\irrlichtdevice.h
+1249117311 c:\development\irrlicht-1.5\include\irrlichtdevice.h
 	"IReferenceCounted.h"
 	"dimension2d.h"
 	"IVideoDriver.h"
@@ -761,24 +762,24 @@
 	"ITimer.h"
 	"IOSOperator.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ivideomodelist.h
+1249117311 c:\development\irrlicht-1.5\include\ivideomodelist.h
 	"IReferenceCounted.h"
 	"dimension2d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\itimer.h
+1249117310 c:\development\irrlicht-1.5\include\itimer.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\irrmap.h
+1249117311 c:\development\irrlicht-1.5\include\irrmap.h
 	"irrTypes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iscenecollisionmanager.h
+1249117311 c:\development\irrlicht-1.5\include\iscenecollisionmanager.h
 	"IReferenceCounted.h"
 	"vector3d.h"
 	"triangle3d.h"
 	"position2d.h"
 	"line3d.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iscenemanager.h
+1249117311 c:\development\irrlicht-1.5\include\iscenemanager.h
 	"IReferenceCounted.h"
 	"irrArray.h"
 	"vector3d.h"
@@ -789,100 +790,100 @@
 	"EMeshWriterEnums.h"
 	"SceneParameters.h"
 
-1229235366 c:\development\irrlicht-1.5\include\sceneparameters.h
+1249117311 c:\development\irrlicht-1.5\include\sceneparameters.h
 
-1229235366 c:\development\irrlicht-1.5\include\iscenenodeanimatorcamerafps.h
+1249117311 c:\development\irrlicht-1.5\include\iscenenodeanimatorcamerafps.h
 	"ISceneNodeAnimator.h"
 	"IEventReceiver.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iscenenodeanimatorcameramaya.h
+1249117311 c:\development\irrlicht-1.5\include\iscenenodeanimatorcameramaya.h
 	"ISceneNodeAnimator.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iscenenodeanimatorcollisionresponse.h
+1249117311 c:\development\irrlicht-1.5\include\iscenenodeanimatorcollisionresponse.h
 	"ISceneNode.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iscenenodeanimatorfactory.h
+1249117311 c:\development\irrlicht-1.5\include\iscenenodeanimatorfactory.h
 	"IReferenceCounted.h"
 	"ESceneNodeAnimatorTypes.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iscenenodefactory.h
+1249117311 c:\development\irrlicht-1.5\include\iscenenodefactory.h
 	"IReferenceCounted.h"
 	"ESceneNodeTypes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\isceneuserdataserializer.h
+1249117311 c:\development\irrlicht-1.5\include\isceneuserdataserializer.h
 	"IReferenceCounted.h"
 
-1229235367 c:\development\irrlicht-1.5\include\ishaderconstantsetcallback.h
+1249117311 c:\development\irrlicht-1.5\include\ishaderconstantsetcallback.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ishadowvolumescenenode.h
+1249117311 c:\development\irrlicht-1.5\include\ishadowvolumescenenode.h
 	"ISceneNode.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iskinnedmesh.h
+1249117311 c:\development\irrlicht-1.5\include\iskinnedmesh.h
 	"irrArray.h"
 	"IBoneSceneNode.h"
 	"IAnimatedMesh.h"
 	"SSkinMeshBuffer.h"
 
-1229235367 c:\development\irrlicht-1.5\include\sskinmeshbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\sskinmeshbuffer.h
 	"IMeshBuffer.h"
 	"S3DVertex.h"
 
-1229235366 c:\development\irrlicht-1.5\include\iterrainscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\iterrainscenenode.h
 	"ETerrainElements.h"
 	"ISceneNode.h"
 	"IDynamicMeshBuffer.h"
 	"irrArray.h"
 
-1229235366 c:\development\irrlicht-1.5\include\itextscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\itextscenenode.h
 	"ISceneNode.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ivolumelightscenenode.h
+1249117311 c:\development\irrlicht-1.5\include\ivolumelightscenenode.h
 	"ISceneNode.h"
 
-1229235367 c:\development\irrlicht-1.5\include\iwritefile.h
+1249117311 c:\development\irrlicht-1.5\include\iwritefile.h
 	"IReferenceCounted.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ixmlwriter.h
+1249117311 c:\development\irrlicht-1.5\include\ixmlwriter.h
 	"IReferenceCounted.h"
 	"irrArray.h"
 	"irrString.h"
 
-1229235366 c:\development\irrlicht-1.5\include\sanimatedmesh.h
+1249117311 c:\development\irrlicht-1.5\include\sanimatedmesh.h
 	"IAnimatedMesh.h"
 	"IMesh.h"
 	"aabbox3d.h"
 	"irrArray.h"
 
-1229235366 c:\development\irrlicht-1.5\include\sexposedvideodata.h
+1249117311 c:\development\irrlicht-1.5\include\sexposedvideodata.h
 
-1229235367 c:\development\irrlicht-1.5\include\sirrcreationparameters.h
+1249117311 c:\development\irrlicht-1.5\include\sirrcreationparameters.h
 	"EDriverTypes.h"
 	"dimension2d.h"
 
-1229235367 c:\development\irrlicht-1.5\include\skeymap.h
+1249117311 c:\development\irrlicht-1.5\include\skeymap.h
 	"Keycodes.h"
 
-1229235366 c:\development\irrlicht-1.5\include\smesh.h
+1249117311 c:\development\irrlicht-1.5\include\smesh.h
 	"IMesh.h"
 	"IMeshBuffer.h"
 	"aabbox3d.h"
 	"irrArray.h"
 
-1229235366 c:\development\irrlicht-1.5\include\smeshbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\smeshbuffer.h
 	"CMeshBuffer.h"
 
-1229235366 c:\development\irrlicht-1.5\include\smeshbufferlightmap.h
+1249117311 c:\development\irrlicht-1.5\include\smeshbufferlightmap.h
 	"CMeshBuffer.h"
 
-1229235367 c:\development\irrlicht-1.5\include\smeshbuffertangents.h
+1249117311 c:\development\irrlicht-1.5\include\smeshbuffertangents.h
 	"CMeshBuffer.h"
 
-1229235366 c:\development\irrlicht-1.5\include\ssharedmeshbuffer.h
+1249117311 c:\development\irrlicht-1.5\include\ssharedmeshbuffer.h
 	"irrArray.h"
 	"IMeshBuffer.h"
 
-1229235366 c:\development\irrlicht-1.5\include\sviewfrustum.h
+1249117311 c:\development\irrlicht-1.5\include\sviewfrustum.h
 	"plane3d.h"
 	"vector3d.h"
 	"aabbox3d.h"
