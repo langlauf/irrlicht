@@ -18,7 +18,7 @@ using namespace irr;
 #pragma comment(lib, "Irrlicht.lib")
 #endif
 
-int main()
+int main(int argc, char** argv)
 {
 	// ask user for driver
 
@@ -46,7 +46,7 @@ int main()
 	// create device and exit if creation failed
 
 	IrrlichtDevice* device =
-		createDevice(driverType, core::dimension2d<s32>(640, 480));
+		createDevice(driverType, core::dimension2d<u32>(640, 480));
 
 	if (device == 0)
 		return 1; // could not create selected driver.
@@ -68,7 +68,10 @@ int main()
 	*/
 
 	// load the scene
-	smgr->loadScene("../../media/example.irr");
+	if (argc>1)
+		smgr->loadScene(argv[1]);
+	else
+		smgr->loadScene("../../media/example.irr");
 
 	/*
 	Now we'll create a camera, and give it a collision response animator

@@ -35,6 +35,7 @@ core::stringw Caption;
 scene::ISceneNode* Model = 0;
 scene::ISceneNode* SkyBox = 0;
 bool Octree=false;
+bool useLight=false;
 
 scene::ICameraSceneNode* Camera[2] = {0, 0};
 
@@ -133,18 +134,18 @@ void loadModel(const c8* fn)
 		extension == ".bmp" || extension == ".wal")
 	{
 		video::ITexture * texture =
-			Device->getVideoDriver()->getTexture( filename.c_str() );
+			Device->getVideoDriver()->getTexture( filename );
 		if ( texture && Model )
 		{
 			// always reload texture
 			Device->getVideoDriver()->removeTexture(texture);
-			texture = Device->getVideoDriver()->getTexture( filename.c_str() );
+			texture = Device->getVideoDriver()->getTexture( filename );
 
 			Model->setMaterialTexture(0, texture);
 		}
 		return;
 	}
-	// if a archive is loaded add it to the FileSystems..
+	// if a archive is loaded add it to the FileArchive..
 	else if (extension == ".pk3" || extension == ".zip")
 	{
 		Device->getFileSystem()->addZipFileArchive(filename.c_str());
@@ -186,7 +187,8 @@ void loadModel(const c8* fn)
 		animModel->setAnimationSpeed(30);
 		Model = animModel;
 	}
-	Model->setMaterialFlag(video::EMF_LIGHTING, false);
+	Model->setMaterialFlag(video::EMF_LIGHTING, useLight);
+	Model->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, useLight);
 //	Model->setMaterialFlag(video::EMF_BACK_FACE_CULLING, false);
 	Model->setDebugDataVisible(scene::EDS_OFF);
 
@@ -299,6 +301,20 @@ public:
 					IGUIElement* elem = Device->getGUIEnvironment()->getRootGUIElement()->getElementFromId(GUI_ID_POSITION_TEXT);
 					if (elem)
 						elem->setVisible(!elem->isVisible());
+				}
+			}
+			else if (event.KeyInput.Key == irr::KEY_KEY_M)
+			{
+				if (Device)
+					Device->minimizeWindow();
+			}
+			else if (event.KeyInput.Key == irr::KEY_KEY_L)
+			{
+				useLight=!useLight;
+				if (Model)
+				{
+					Model->setMaterialFlag(video::EMF_LIGHTING, useLight);
+					Model->setMaterialFlag(video::EMF_NORMALIZE_NORMALS, useLight);
 				}
 			}
 		}
@@ -574,13 +590,13 @@ int main(int argc, char* argv[])
 	// create device and exit if creation failed
 
 	MyEventReceiver receiver;
-	Device = createDevice(driverType, core::dimension2d<s32>(800, 600),
+	Device = createDevice(driverType, core::dimension2d<u32>(800, 600),
 		16, false, false, false, &receiver);
 
 	if (Device == 0)
 		return 1; // could not create selected driver.
 
-	Device->setResizeAble(true);
+	Device->setResizable(true);
 
 	Device->setWindowCaption(L"Irrlicht Engine - Loading...");
 
@@ -592,8 +608,8 @@ int main(int argc, char* argv[])
 	driver->setTextureCreationFlag(video::ETCF_ALWAYS_32_BIT, true);
 
 	smgr->addLightSceneNode();
-	smgr->addLightSceneNode(0, core::vector3df(50,-50,GUI_ID_OPEN_MODEL),
-			video::SColorf(1.0f,1.0f,1.0f),20000);
+	smgr->addLightSceneNode(0, core::vector3df(200,200,200),
+		video::SColorf(1.0f,1.0f,1.0f),2000);
 	// add our media directory as "search path"
 	Device->getFileSystem()->addFolderFileArchive("../../media/");
 
@@ -618,7 +634,7 @@ int main(int argc, char* argv[])
 
 	// read configuration from xml file
 
-	io::IXMLReader* xml = Device->getFileSystem()->createXMLReader("config.xml");
+	io::IXMLReader* xml = Device->getFileSystem()->createXMLReader( L"config.xml");
 
 	while(xml && xml->read())
 	{

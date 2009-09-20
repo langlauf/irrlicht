@@ -49,6 +49,19 @@ namespace gui
 		//! Returns pointer to the maximize button
 		virtual IGUIButton* getMaximizeButton() const { return 0;}
 
+		//! get draggable
+		virtual bool isDraggable() const;
+
+		//! get draggable
+		virtual void setDraggable(bool draggable);
+
+		//! not used
+        virtual void setDrawBackground(bool draw)  { }
+		virtual bool getDrawBackground() const { return true; }
+		virtual void setDrawTitlebar(bool draw) { }
+		virtual bool getDrawTitlebar() const { return true; }
+
+
 		void setSelected(s32 index=-1);
 
 	private:
@@ -62,6 +75,7 @@ namespace gui
 		CGUIPanel*	Panel;
 		s32 SelectedTexture;
 		bool Dragging;
+		bool IsDraggable;
 	};
 
 

@@ -58,6 +58,9 @@ CGUISkin::CGUISkin(EGUI_SKIN_TYPE type, video::IVideoDriver* driver)
 
 		Sizes[EGDS_TEXT_DISTANCE_X] = 2;
 		Sizes[EGDS_TEXT_DISTANCE_Y] = 0;
+
+		Sizes[EGDS_TITLEBARTEXT_DISTANCE_X] = 2;
+		Sizes[EGDS_TITLEBARTEXT_DISTANCE_Y] = 0;
 	}
 	else
 	{
@@ -96,6 +99,9 @@ CGUISkin::CGUISkin(EGUI_SKIN_TYPE type, video::IVideoDriver* driver)
 
 		Sizes[EGDS_TEXT_DISTANCE_X] = 3;
 		Sizes[EGDS_TEXT_DISTANCE_Y] = 2;
+
+		Sizes[EGDS_TITLEBARTEXT_DISTANCE_X] = 3;
+		Sizes[EGDS_TITLEBARTEXT_DISTANCE_Y] = 2;
 	}
 
 	Texts[EGDT_MSG_BOX_OK] = L"OK";
@@ -192,7 +198,7 @@ void CGUISkin::setSize(EGUI_DEFAULT_SIZE which, s32 size)
 //! returns the default font
 IGUIFont* CGUISkin::getFont(EGUI_DEFAULT_FONT which) const
 {
-	if (((u32)which < EGDF_COUNT) && Fonts[which])
+	if (((u32)which < EGDS_COUNT) && Fonts[which])
 		return Fonts[which];
 	else
 		return Fonts[EGDF_DEFAULT];
@@ -202,7 +208,7 @@ IGUIFont* CGUISkin::getFont(EGUI_DEFAULT_FONT which) const
 //! sets a default font
 void CGUISkin::setFont(IGUIFont* font, EGUI_DEFAULT_FONT which)
 {
-	if ((u32)which >= EGDF_COUNT)
+	if ((u32)which >= EGDS_COUNT)
 		return;
 
 	if (font)
