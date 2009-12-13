@@ -1,4 +1,29 @@
-Changes in version 1.5.1 (05.08 2009)
+Changes in version 1.5.2 (16.12.2009)
+
+ - Properly check boundaries in getFont and setFont.
+
+ - Reinit values in the driver when scene manager is cleared.
+
+ - Normals handling fixed in createMeshWithTangents, existing normals are not always destroyed now.
+
+ - Fix terrain smoothing, bug found by loverlinfish
+
+ - SOLARIS recognition removed. Please specify the platform define manually. This allows for compilation under sparc/Linux and sparc/Solaris
+
+ - Some uninitialized variables fixed
+
+ - FreeBSD joystick support added (for Debian package)
+
+ - Fix cursor problems found by buffer and by rvl2 as described in http://irrlicht.sourceforge.net/phpBB2/viewtopic.php?t=34823&highlight=
+
+ - OSX/XCode updates
+
+ - MS3D loader bug fixed
+
+ - Float parse bug fixed
+
+-------------------------------------
+Changes in version 1.5.1 (05.08.2009)
 
  - Make sure a missing font does not corrupt the skin.
 

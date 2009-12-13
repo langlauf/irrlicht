@@ -8,11 +8,12 @@
 //! Irrlicht SDK Version
 #define IRRLICHT_VERSION_MAJOR 1
 #define IRRLICHT_VERSION_MINOR 5
-#define IRRLICHT_VERSION_REVISION 1
+#define IRRLICHT_VERSION_REVISION 2
 // This flag will be defined only in SVN, the official release code will have
 // it undefined
 //#define IRRLICHT_VERSION_SVN
-#define IRRLICHT_SDK_VERSION "1.5.1"
+//#define IRRLICHT_SDK_VERSION "1.5.2-SVN"
+#define IRRLICHT_SDK_VERSION "1.5.2"
 
 #include <stdio.h> // TODO: Although included elsewhere this is required at least for mingw
 
@@ -64,10 +65,7 @@
 #endif
 
 #if !defined(_IRR_WINDOWS_API_) && !defined(_IRR_OSX_PLATFORM_)
-#if defined(__sparc__) || defined(__sun__)
-#define __BIG_ENDIAN__
-#define _IRR_SOLARIS_PLATFORM_
-#else
+#ifndef _IRR_SOLARIS_PLATFORM_
 #define _IRR_LINUX_PLATFORM_
 #endif
 #define _IRR_POSIX_API_
@@ -75,6 +73,10 @@
 #ifndef _IRR_USE_SDL_DEVICE_
 #define _IRR_USE_LINUX_DEVICE_
 #endif
+#endif
+
+#if defined(__sparc__) || defined(__sun__)
+#define __BIG_ENDIAN__
 #endif
 
 //! Define _IRR_COMPILE_WITH_JOYSTICK_SUPPORT_ if you want joystick events.
@@ -336,9 +338,17 @@ precision will be lower but speed higher. currently X86 only
 #define IRRCALLCONV __cdecl
 #endif // STDCALL_SUPPORTED
 
+#else // _IRR_WINDOWS_API_
+
+// Force symbol export in shared libraries built with gcc.
+#if (__GNUC__ >= 4) && !defined(_IRR_STATIC_LIB_) && defined(IRRLICHT_EXPORTS)
+#define IRRLICHT_API __attribute__ ((visibility("default")))
 #else
 #define IRRLICHT_API
+#endif
+
 #define IRRCALLCONV
+
 #endif // _IRR_WINDOWS_API_
 
 // We need to disable DIRECT3D9 support for Visual Studio 6.0 because
@@ -375,4 +385,3 @@ precision will be lower but speed higher. currently X86 only
 #endif
 
 #endif // __IRR_COMPILE_CONFIG_H_INCLUDED__
-
