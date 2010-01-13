@@ -208,17 +208,30 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			event.KeyInput.Key = (irr::EKEY_CODE)wParam;
 			event.KeyInput.PressedDown = (message==WM_KEYDOWN || message == WM_SYSKEYDOWN);
 
+			const UINT MY_MAPVK_VSC_TO_VK_EX = 3; // MAPVK_VSC_TO_VK_EX should be in SDK according to MSDN, but isn't in mine.
+			if ( event.KeyInput.Key == irr::KEY_SHIFT )
+			{
+				// this will fail on systems before windows NT/2000/XP, not sure _what_ will return there instead.
+				event.KeyInput.Key = (irr::EKEY_CODE)MapVirtualKey( ((lParam>>16) & 255), MY_MAPVK_VSC_TO_VK_EX );
+			}
+			if ( event.KeyInput.Key == irr::KEY_CONTROL )
+			{
+				event.KeyInput.Key = (irr::EKEY_CODE)MapVirtualKey( ((lParam>>16) & 255), MY_MAPVK_VSC_TO_VK_EX );
+				// some keyboards will just return LEFT for both - left and right keys. So also check extend bit.
+				if (lParam & 0x1000000) 
+					event.KeyInput.Key = irr::KEY_RCONTROL;
+			}
+			if ( event.KeyInput.Key == irr::KEY_MENU )
+			{
+				event.KeyInput.Key = (irr::EKEY_CODE)MapVirtualKey( ((lParam>>16) & 255), MY_MAPVK_VSC_TO_VK_EX );
+				if (lParam & 0x1000000) 
+					event.KeyInput.Key = irr::KEY_RMENU;
+			}
+			
 			WORD KeyAsc=0;
 			GetKeyboardState(allKeys);
 			ToAscii((UINT)wParam,(UINT)lParam,allKeys,&KeyAsc,0);
 
-			if (event.KeyInput.Key==irr::KEY_SHIFT)
-			{
-				if ((allKeys[VK_LSHIFT] & 0x80)!=0)
-					event.KeyInput.Key=irr::KEY_LSHIFT;
-				else if ((allKeys[VK_RSHIFT] & 0x80)!=0)
-					event.KeyInput.Key=irr::KEY_RSHIFT;
-			}
 			event.KeyInput.Shift = ((allKeys[VK_SHIFT] & 0x80)!=0);
 			event.KeyInput.Control = ((allKeys[VK_CONTROL] & 0x80)!=0);
 			event.KeyInput.Char = (KeyAsc & 0x00ff); //KeyAsc >= 0 ? KeyAsc : 0;
@@ -263,6 +276,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			dev->postEventFromUser(event);
 
 		return 0;
+
+	case WM_SETCURSOR:
+		// because Windows forgot about that in the meantime
+		dev = getDeviceFromHWnd(hWnd);
+		if (dev)
+			dev->getCursorControl()->setVisible( dev->getCursorControl()->isVisible() );
+		break;
+
 	}
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
@@ -336,6 +357,11 @@ CIrrDeviceWin32::CIrrDeviceWin32(const SIrrlichtCreationParameters& params)
 		s32 windowLeft = (GetSystemMetrics(SM_CXSCREEN) - realWidth) / 2;
 		s32 windowTop = (GetSystemMetrics(SM_CYSCREEN) - realHeight) / 2;
 
+		if ( windowLeft < 0 )
+			windowLeft = 0;
+		if ( windowTop < 0 )
+			windowTop = 0;	// make sure window menus are in screen on creation
+
 		if (CreationParams.Fullscreen)
 		{
 			windowLeft = 0;
@@ -353,6 +379,9 @@ CIrrDeviceWin32::CIrrDeviceWin32(const SIrrlichtCreationParameters& params)
 
 		// fix ugly ATI driver bugs. Thanks to ariaci
 		MoveWindow(HWnd, windowLeft, windowTop, realWidth, realHeight, TRUE);
+
+		// make sure everything gets updated to the real sizes
+		Resized = true;	
 	}
 	else if (CreationParams.WindowId)
 	{
@@ -515,8 +544,6 @@ bool CIrrDeviceWin32::run()
 
 	MSG msg;
 
-	bool quit = false;
-
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		TranslateMessage(&msg);
@@ -527,17 +554,17 @@ bool CIrrDeviceWin32::run()
 			DispatchMessage(&msg);
 
 		if (msg.message == WM_QUIT)
-			quit = true;
+			Close = true;
 	}
 
-	if (!quit)
+	if (!Close)
 		resizeIfNecessary();
 
-	if(!quit)
+	if(!Close)
 		pollJoysticks();
 
 	_IRR_IMPLEMENT_MANAGED_MARSHALLING_BUGFIX;
-	return !quit;
+	return !Close;
 }
 
 
@@ -596,7 +623,7 @@ void CIrrDeviceWin32::setWindowCaption(const wchar_t* text)
 	if (IsNonNTWindows)
 	{
 		const core::stringc s = text;
-#ifdef WIN64
+#if defined(_WIN64) || defined(WIN64)
 		SetWindowTextA(HWnd, s.c_str());
 #else
 		SendMessageTimeout(HWnd, WM_SETTEXT, 0,
@@ -606,7 +633,7 @@ void CIrrDeviceWin32::setWindowCaption(const wchar_t* text)
 	}
 	else
 	{
-#ifdef WIN64
+#if defined(_WIN64) || defined(WIN64)
 		SetWindowTextW(HWnd, text);
 #else
 		SendMessageTimeoutW(HWnd, WM_SETTEXT, 0,
@@ -675,6 +702,7 @@ void CIrrDeviceWin32::closeDevice()
 	PostQuitMessage(0);
 	PeekMessage(&msg, NULL, WM_QUIT, WM_QUIT, PM_REMOVE);
 	DestroyWindow(HWnd);
+	Close=true;
 }
 
 

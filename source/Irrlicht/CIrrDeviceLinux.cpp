@@ -25,6 +25,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#ifdef __FREE_BSD_
+#include <sys/joystick.h>
+#else
+
 // linux/joystick.h includes linux/input.h, which #defines values for various KEY_FOO keys.
 // These override the irr::KEY_FOO equivalents, which stops key handling from working.
 // As a workaround, defining _INPUT_H stops linux/input.h from being included; it
@@ -33,6 +37,8 @@
 #include <sys/ioctl.h> // Would normally be included in linux/input.h
 #include <linux/joystick.h>
 #undef _INPUT_H
+#endif
+
 #endif // _IRR_COMPILE_WITH_JOYSTICK_EVENTS_
 
 namespace irr
@@ -68,7 +74,7 @@ CIrrDeviceLinux::CIrrDeviceLinux(const SIrrlichtCreationParameters& param)
 #endif
 #endif
 	Width(param.WindowSize.Width), Height(param.WindowSize.Height),
-	Close(false), WindowHasFocus(false), WindowMinimized(false),
+	WindowHasFocus(false), WindowMinimized(false),
 	UseXVidMode(false), UseXRandR(false), UseGLXWindow(false),
 	ExternalWindow(false), AutorepeatSupport(0)
 {
@@ -201,6 +207,35 @@ int IrrPrintXError(Display *display, XErrorEvent *event)
 }
 #endif
 
+#if defined(_IRR_COMPILE_WITH_X11_)
+void IrrPrintXGrabError(int grabResult, const c8 * grabCommand )
+{
+	if ( grabResult == GrabSuccess )
+	{
+//		os::Printer::log(grabCommand, ": GrabSuccess", ELL_INFORMATION);
+		return;
+	}
+
+	switch ( grabResult )
+	{
+		case AlreadyGrabbed:
+			os::Printer::log(grabCommand, ": AlreadyGrabbed", ELL_WARNING);
+			break;
+		case GrabNotViewable:
+			os::Printer::log(grabCommand, ": GrabNotViewable", ELL_WARNING);
+			break;
+		case GrabFrozen:
+			os::Printer::log(grabCommand, ": GrabFrozen", ELL_WARNING);
+			break;
+		case GrabInvalidTime:
+			os::Printer::log(grabCommand, ": GrabInvalidTime", ELL_WARNING);
+			break;
+		default:
+			os::Printer::log(grabCommand, ": grab failed with unknown problem", ELL_WARNING);
+			break;
+	}
+}
+#endif
 
 bool CIrrDeviceLinux::createWindow()
 {
@@ -316,7 +351,7 @@ bool CIrrDeviceLinux::createWindow()
 		{
 #ifdef GLX_VERSION_1_3
 			typedef GLXFBConfig * ( * PFNGLXCHOOSEFBCONFIGPROC) (Display *dpy, int screen, const int *attrib_list, int *nelements);
-			
+
 #ifdef _IRR_OPENGL_USE_EXTPOINTER_
 			PFNGLXCHOOSEFBCONFIGPROC glxChooseFBConfig = (PFNGLXCHOOSEFBCONFIGPROC)glXGetProcAddress(reinterpret_cast<const GLubyte*>("glXChooseFBConfig"));
 #else
@@ -581,10 +616,13 @@ bool CIrrDeviceLinux::createWindow()
 
 			XWarpPointer(display, None, window, 0, 0, 0, 0, 0, 0);
 			XMapRaised(display, window);
-			XGrabKeyboard(display, window, True, GrabModeAsync,
+ 			XSetInputFocus(display, window, RevertToParent, CurrentTime);
+			int grabKb = XGrabKeyboard(display, window, True, GrabModeAsync,
 				GrabModeAsync, CurrentTime);
-			XGrabPointer(display, window, True, ButtonPressMask,
+			IrrPrintXGrabError(grabKb, "XGrabKeyboard");
+			int grabPointer = XGrabPointer(display, window, True, ButtonPressMask,
 				GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
+			IrrPrintXGrabError(grabPointer, "XGrabPointer");
 		}
 		else
 		{ // we want windowed mode
@@ -688,6 +726,9 @@ bool CIrrDeviceLinux::createWindow()
 
 	XGetGeometry(display, window, &tmp, &x, &y, &Width, &Height, &borderWidth, &bits);
 	CreationParams.Bits = bits;
+	CreationParams.WindowSize.Width = Width;
+	CreationParams.WindowSize.Height = Height;
+
 	StdHints = XAllocSizeHints();
 	long num;
 	XGetWMNormalHints(display, window, StdHints, &num);
@@ -954,7 +995,7 @@ bool CIrrDeviceLinux::run()
 					else
 					{
 						irrevent.KeyInput.Key = (EKEY_CODE)0;
-						os::Printer::log("Could not find win32 key for x11 key.", ELL_WARNING);
+						os::Printer::log("Could not find win32 key for x11 key.", core::stringc((int)mp.X11Key).c_str(), ELL_WARNING);
 					}
 					irrevent.EventType = irr::EET_KEY_INPUT_EVENT;
 					irrevent.KeyInput.PressedDown = (event.type == KeyPress);
@@ -1347,6 +1388,7 @@ void CIrrDeviceLinux::createKeyMap()
 	KeyMap.push_back(SKeyMap(XK_Page_Down, KEY_NEXT));
 	KeyMap.push_back(SKeyMap(XK_End, KEY_END));
 	KeyMap.push_back(SKeyMap(XK_Begin, KEY_HOME));
+	KeyMap.push_back(SKeyMap(XK_Num_Lock, KEY_NUMLOCK));
 	KeyMap.push_back(SKeyMap(XK_KP_Space, KEY_SPACE));
 	KeyMap.push_back(SKeyMap(XK_KP_Tab, KEY_TAB));
 	KeyMap.push_back(SKeyMap(XK_KP_Enter, KEY_RETURN));
@@ -1354,10 +1396,12 @@ void CIrrDeviceLinux::createKeyMap()
 	KeyMap.push_back(SKeyMap(XK_KP_F2, KEY_F2));
 	KeyMap.push_back(SKeyMap(XK_KP_F3, KEY_F3));
 	KeyMap.push_back(SKeyMap(XK_KP_F4, KEY_F4));
+	KeyMap.push_back(SKeyMap(XK_KP_Home, KEY_HOME));
 	KeyMap.push_back(SKeyMap(XK_KP_Left, KEY_LEFT));
 	KeyMap.push_back(SKeyMap(XK_KP_Up, KEY_UP));
 	KeyMap.push_back(SKeyMap(XK_KP_Right, KEY_RIGHT));
 	KeyMap.push_back(SKeyMap(XK_KP_Down, KEY_DOWN));
+	KeyMap.push_back(SKeyMap(XK_Print, KEY_PRINT));
 	KeyMap.push_back(SKeyMap(XK_KP_Prior, KEY_PRIOR));
 	KeyMap.push_back(SKeyMap(XK_KP_Page_Up, KEY_PRIOR));
 	KeyMap.push_back(SKeyMap(XK_KP_Next, KEY_NEXT));
@@ -1540,15 +1584,26 @@ bool CIrrDeviceLinux::activateJoysticks(core::array<SJoystickInfo> & joystickInf
 			devName = "/dev/input/js";
 			devName += joystick;
 			info.fd = open(devName.c_str(), O_RDONLY);
+			if(-1 == info.fd)
+			{
+				// and BSD here
+				devName = "/dev/joy";
+				devName += joystick;
+				info.fd = open(devName.c_str(), O_RDONLY);
+			}
 		}
 
 		if(-1 == info.fd)
 			continue;
 
+#ifdef __FREE_BSD_
+		info.axes=2;
+		info.buttons=2;
+#else
 		ioctl( info.fd, JSIOCGAXES, &(info.axes) );
 		ioctl( info.fd, JSIOCGBUTTONS, &(info.buttons) );
-
 		fcntl( info.fd, F_SETFL, O_NONBLOCK );
+#endif
 
 		(void)memset(&info.persistentData, 0, sizeof(info.persistentData));
 		info.persistentData.EventType = irr::EET_JOYSTICK_INPUT_EVENT;
@@ -1565,9 +1620,11 @@ bool CIrrDeviceLinux::activateJoysticks(core::array<SJoystickInfo> & joystickInf
 		returnInfo.Axes = info.axes;
 		returnInfo.Buttons = info.buttons;
 
+#ifndef __FREE_BSD_
 		char name[80];
 		ioctl( info.fd, JSIOCGNAME(80), name);
 		returnInfo.Name = name;
+#endif
 
 		joystickInfo.push_back(returnInfo);
 	}
@@ -1594,11 +1651,19 @@ void CIrrDeviceLinux::pollJoysticks()
 	if(0 == ActiveJoysticks.size())
 		return;
 
-	u32 joystick;
-	for(joystick = 0; joystick < ActiveJoysticks.size(); ++joystick)
+	u32 j;
+	for(j= 0; j< ActiveJoysticks.size(); ++j)
 	{
-		JoystickInfo & info =  ActiveJoysticks[joystick];
+		JoystickInfo & info =  ActiveJoysticks[j];
 
+#ifdef __FREE_BSD_
+		struct joystick js;
+		if( read( info.fd, &js, JS_RETURN ) == JS_RETURN )
+		{
+			info.persistentData.JoystickEvent.ButtonStates = js.buttons; /* should be a two-bit field */
+			info.persistentData.JoystickEvent.Axis[0] = js.x; /* X axis */
+			info.persistentData.JoystickEvent.Axis[1] = js.y; /* Y axis */
+#else
 		struct js_event event;
 		while(sizeof(event) == read(info.fd, &event, sizeof(event)))
 		{
@@ -1619,6 +1684,7 @@ void CIrrDeviceLinux::pollJoysticks()
 				break;
 			}
 		}
+#endif
 
 		// Send an irrlicht joystick event once per ::run() even if no new data were received.
 		(void)postEventFromUser(info.persistentData);

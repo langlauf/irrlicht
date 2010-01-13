@@ -107,8 +107,9 @@ namespace irr
 		public:
 
 			CCursorControl(const core::dimension2d<u32>& wsize, HWND hwnd, bool fullscreen)
-				: WindowSize(wsize), InvWindowSize(0.0f, 0.0f), IsVisible(true),
-					HWnd(hwnd), BorderX(0), BorderY(0), UseReferenceRect(false)
+				: WindowSize(wsize), InvWindowSize(0.0f, 0.0f),
+					HWnd(hwnd), BorderX(0), BorderY(0),
+					UseReferenceRect(false), IsVisible(true)
 			{
 				if (WindowSize.Width!=0)
 					InvWindowSize.Width = 1.0f / WindowSize.Width;
@@ -128,31 +129,23 @@ namespace irr
 			{
 				CURSORINFO info;
 				info.cbSize = sizeof(CURSORINFO);
-
-				if ( visible )
+				BOOL gotCursorInfo = GetCursorInfo(&info);
+				while ( gotCursorInfo )
 				{
-					while ( GetCursorInfo(&info) )
+					if ( (visible && info.flags == CURSOR_SHOWING) 	// visible
+						|| (!visible && info.flags == 0 ) )			// hidden
 					{
-						if ( info.flags == CURSOR_SHOWING )
-						{
-							IsVisible = visible;
-							break;
-						}
-						ShowCursor(true);   // this only increases an internal display counter in windows, so it might have to be called some more
+						break;
 					}
-				}
-				else
-				{
-					while ( GetCursorInfo(&info) )
+					int showResult = ShowCursor(visible);   // this only increases an internal display counter in windows, so it might have to be called some more
+					if ( showResult < 0 )
 					{
-						if ( info.flags == 0 )  // cursor hidden
-						{
-							IsVisible = visible;
-							break;
-						}
-						ShowCursor(false);   // this only decreases an internal display counter in windows, so it might have to be called some more
+						break;
 					}
+					info.cbSize = sizeof(CURSORINFO);	// yes, it really must be set each time
+					gotCursorInfo = GetCursorInfo(&info);
 				}
+				IsVisible = visible;
 			}
 
 			//! Returns if the cursor is currently visible.
@@ -172,9 +165,9 @@ namespace irr
 			virtual void setPosition(f32 x, f32 y)
 			{
 				if (!UseReferenceRect)
-					setPosition((s32)(x*WindowSize.Width), (s32)(y*WindowSize.Height));
+					setPosition(core::round32(x*WindowSize.Width), core::round32(y*WindowSize.Height));
 				else
-					setPosition((s32)(x*ReferenceRect.getWidth()), (s32)(y*ReferenceRect.getHeight()));
+					setPosition(core::round32(x*ReferenceRect.getWidth()), core::round32(y*ReferenceRect.getHeight()));
 			}
 
 			//! Sets the new position of the cursor.
@@ -247,6 +240,7 @@ namespace irr
 			/** Used to notify the cursor that the window was resized. */
 			virtual void OnResize(const core::dimension2d<u32>& size)
 			{
+				WindowSize = size;
 				if (size.Width!=0)
 					InvWindowSize.Width = 1.0f / size.Width;
 				else 
@@ -297,12 +291,12 @@ namespace irr
 			core::position2d<s32> CursorPos;
 			core::dimension2d<u32> WindowSize;
 			core::dimension2d<f32> InvWindowSize;
-			bool IsVisible;
 			HWND HWnd;
 
 			s32 BorderX, BorderY;
-			bool UseReferenceRect;
 			core::rect<s32> ReferenceRect;
+			bool UseReferenceRect;
+			bool IsVisible;
 		};
 
 		//! returns the win32 cursor control
