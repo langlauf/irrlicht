@@ -1,7 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
-	<ActiveTarget name="Win32 - Release - accurate math - static" />
-	<File name="os.cpp" open="1" top="1" tabpos="1">
-		<Cursor position="3228" topLine="86" />
-	</File>
+	<ActiveTarget name="Win32 - Release - accurate math - dll" />
 </CodeBlocks_layout_file>

@@ -1,3 +1,200 @@
+Changes in 1.7
+
+ - Implement minimize and deminimize under OSX.
+
+ - Define sorting order for vector2d and vector3d in operators <, <=, > and >= to fix bugs 2783509 and 2783510. Operators order now by X,Y,Z and use float tolerances.
+
+ - Ogre mesh 32bit indices fixed.
+
+ - Fix tooltips for gui-elements with sub-element like IGUISpinBox (id: 2927079, found by ArakisTheKitsune)
+
+ - ITimer no longer stops when started twice
+
+ - wchar_t filesystem updates under Windows.
+
+ - Joystick POV fixed under Windows, ids fixed under OSX.
+
+ - Some updates to skinned mesh for better bones support and scaling animations.
+
+ - OSX supports external window id in creation parameters now.
+
+ - Fix bbox collision tests.
+
+ - Updates for win32 key handling
+
+ - new convenience method for flat plane creation.
+
+ - Sky dome and other meshes use VBOs by default now.
+
+ - Speed up b3d loading for files with many frames, material color flags and vertex color support enhanced.
+
+ - Add hasType to IGUIElement as a dynamic_cast substitute.
+
+ - Add another parameter to IGUISkin::draw3DWindowBackground to allow getting the client area without actually drawing 
+
+ - Add function getClientRect to IGUIWindow for getting the draw-able area
+
+ - Fix bug that menus on IGUIWindows with titlebar got drawn too high (id: 2714400)
+
+ - Renamed OctTree to Octree
+
+ - Allow getting a ConstIterator from a non-const core:list
+
+ - Add swap functions to irrMath and to the core classes.
+
+ - Deprecate map::isEmpty() and replace it with map::empty() to make it similar to other base classes.
+
+ - Allow to set the logging level already in SIrrlichtCreationParameters.
+
+ - Add clearSystemMessages to devices (implemented only for Linux and Win32 so far).
+ 
+ - Support changing the render window from beginScene also with OpenGL driver.
+
+ - Add getMaterial2D which allows to alter the 2d render state settings, such as filtering, anti-aliasing, thickness, etc.
+
+ - Fix incorrect cursorpos for resizable windows on Windows Vista (found and patched by buffer)
+
+ - Change the beginScene window parameter from void* to SExposedVideoData&. This will allow to manage contexts for OpenGL at some point.
+
+ - Add bzip2 and LZMA decompression modes for zip loader.
+
+ - Add OBJ_TEXTURE_PATH and B3D_TEXTURE_PATH to SceneParameters to allow setting texture-paths for obj and b3d.
+
+ - Irrlicht keeps now filenames additionally to the internally used names, thereby fixing some problems with uppercase-filenames on Linux.
+
+ - Bugfix: Mousewheel no longer sends EMIE_MOUSE_WHEEL messages twice on Linux.
+
+ - Use latest jpeglib
+
+ - refactoring: E_ATTRIBUTE_TYPE and IAttribute have now own headers
+
+ - CStringWArrayAttribute speedup
+
+ - SceneNodeAnimatorFollowSpline can now loop and pingpong
+
+ - Meshviewer.example got some fast-scale buttons.
+
+ - Support AES-encrypted zip files. Should work with 128, 196, and 256 bit AES. This addition also adds a new PRNG, SHA, and other algorithms to the engine, though no interface is yet added for them. The implementation of the encryption algorithms is provided by Dr Brian Gladman.
+
+ - flattenFilename and getAbsolutePath fixed and properly added at several places.
+
+ - Added geometry shaders for OpenGL. A first version of the code was submitted by Matthew Kielan (devsh).
+
+ - Bugfix: irrArray should no longer crash when using other allocators.
+
+ - Add MaterialViewer example.
+
+ - Texture activation now back in setMaterial, which simplifies writing external material renderers (OpenGL only).
+
+ - Checkbox uses now disabled text color when disabled.
+
+ - Changed colors for window-title caption to keep them readable when not active.
+
+ - Draw sub-menus to left side if they would be outside main-window otherwise.
+
+ - Give ListBox better defaults for the ScrollBar stepsizes.
+
+ - Double and triple click events now for each mouse-button. Old events for that got removed.
+
+ - Fix adding archives twice, which caused multiple archives of the same name and type covering each other. This one required a texture name change from using backslashes to slashes under Windows.
+
+ - Give access to texture mipmaps. You can provide custom mipmap textures upon generation, regeneration, and locking.
+   Make sure the provided data is large enough and covers all miplevels. Also the returned pointer (from lock) will only cover the smaller data of the mipmap level dimension chosen (level 0 is the original texture).
+
+ - Separate TextureWrap mode into U and V fields
+
+ - Add mirror texture wrap modes
+ 
+ - windows show now active/inactive state
+
+ - remove unneeded drop/grab calls found by manik_sheeri
+
+ - fix rounding problem in IGUIElements which have EGUIA_SCALE alignments.
+
+ - MessageBox supports now automatic resizing and images.
+   Deprecated EGDS_MESSAGE_BOX_WIDTH and EGDS_MESSAGE_BOX_HEIGHT
+
+ - Let maya-cam animator react on a setTarget call to the camera which happened outside it's own control
+
+ - New contextmenue features:
+	automatic checking for checked flag.
+	close handling now customizable
+	serialization can handle incomplete xml's
+	setEventParent now in public interface
+	New function findItemWithCommandId
+  	New function insertItem
+
+ - new vector3d::getSphericalCoordinateAngles method.
+
+ - new triangle3d::isTotalOutsideBox method.
+
+ - Newly introduced VertexManipulator interface. This allows for very easy creation of vertex manipulation algorithms. Several manipulators, e.g. vertex color changer and transformation algorithms are already available.
+
+ - createMeshWith1TCoords avoids vertex duplication
+
+ - getRotation now handles matrices with scaling as well
+
+ - Ogre format animations now supported.
+
+ - irrArray: Fixed issues with push_front and reallocation
+   Changed behavior for set_pointer and clear, when free_when_destroyed is false
+
+ - NPK (Nebula device archive) reader added, it's an uncompressed PAK-like format
+
+ - SSkinMeshBuffer::MoveTo* methods renamed to convertTo*
+
+ - Multiple Render Target (MRT) support added, including some enhanced blend features where supported
+
+ - Directory changing fixed for virtual file systems (Archives etc)
+
+ - Fix texture matrix init in scene manager and driver
+
+ - More draw2dimage support in software drivers
+
+ - Sphere node now properly chooses a good tesselation based on the parameters
+
+ - Active camera not registered twice anymore
+
+ - Parallax/normal map shader rotation bug under OpenGL fixed 
+
+ - bump map handling for obj files fixed
+
+ - Fog serialization added
+
+ - New context menu features added
+
+ - Bounding Box updates for skinned meshes fixed
+
+ - The current FPS for an animated scene node can be queried now, added some variables to serialization
+
+ - Scrollbars fixed
+
+ - Fixed 2d vertex primitive method to correctly handle transparency
+
+ - Fullscreen handling has been enhanced for Windows, now proper resolution is restored on Alt-Tab etc.
+
+ - Cameras can now be added to the scene node without automatically activating them
+   Clone method added
+
+ - New video driver method getMaxTextureSize
+
+ - PAK archive reader fixed
+
+ - TRANSPARENT_ALPHA_CHANNEL_REF uses modulate to enable lighting
+
+ - LIGHTMAP_ADD now always uses add operator
+
+ - Some Unicode file system fixes
+
+ - destructor of irrString not virtual anymore, please don't derive from irrString
+   Some new methods added, for searching and splitting
+   Assignment operator optimized
+
+ - new lightness method for SColor
+
+ - draw3DTriangle now renders filled polygons, old behavior can be achieved by setting EMT_WIREFRAME
+
+----------------
 Changes in 1.6.1
 
  - Fix pingpong for CSceneNodeAnimatorFlyStraight (found by gbox)
@@ -47,6 +244,7 @@ Changes in 1.6.1
 
  - Fix ninja animation range which got messed up a little when b3d animations got fixed (thx gbox for finding)
 
+---------------------------
 Changes in 1.6 (23.09.2009)
 
  - Added IFileSystem::createEmptyFileList, exposed IFileList::sort, addItem and added getID

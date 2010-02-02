@@ -129,6 +129,8 @@ CIrrDeviceLinux::~CIrrDeviceLinux()
 #ifdef _IRR_COMPILE_WITH_X11_
 	if (StdHints)
 		XFree(StdHints);
+	// Disable cursor and free it later on
+	CursorControl->setVisible(false);
 	if (display)
 	{
 		#ifdef _IRR_COMPILE_WITH_OPENGL_
@@ -150,21 +152,8 @@ CIrrDeviceLinux::~CIrrDeviceLinux()
 		}
 		#endif // #ifdef _IRR_COMPILE_WITH_OPENGL_
 
-		#ifdef _IRR_LINUX_X11_VIDMODE_
-		if (UseXVidMode && CreationParams.Fullscreen)
-		{
-			XF86VidModeSwitchToMode(display, screennr, &oldVideoMode);
-			XF86VidModeSetViewPort(display, screennr, 0, 0);
-		}
-		#endif
-		#ifdef _IRR_LINUX_X11_RANDR_
-		if (UseXRandR && CreationParams.Fullscreen)
-		{
-			XRRScreenConfiguration *config=XRRGetScreenInfo(display,DefaultRootWindow(display));
-			XRRSetScreenConfig(display,config,DefaultRootWindow(display),oldRandrMode,oldRandrRotation,CurrentTime);
-			XRRFreeScreenConfigInfo(config);
-		}
-		#endif
+		// Reset fullscreen resolution change
+		switchToFullscreen(true);
 
 		if (SoftwareImage)
 			XDestroyImage(SoftwareImage);
@@ -207,6 +196,110 @@ int IrrPrintXError(Display *display, XErrorEvent *event)
 }
 #endif
 
+
+bool CIrrDeviceLinux::switchToFullscreen(bool reset)
+{
+	if (!CreationParams.Fullscreen)
+		return true;
+	if (reset)
+	{
+#ifdef _IRR_LINUX_X11_VIDMODE_
+		if (UseXVidMode && CreationParams.Fullscreen)
+		{
+			XF86VidModeSwitchToMode(display, screennr, &oldVideoMode);
+			XF86VidModeSetViewPort(display, screennr, 0, 0);
+		}
+		#endif
+		#ifdef _IRR_LINUX_X11_RANDR_
+		if (UseXRandR && CreationParams.Fullscreen)
+		{
+			XRRScreenConfiguration *config=XRRGetScreenInfo(display,DefaultRootWindow(display));
+			XRRSetScreenConfig(display,config,DefaultRootWindow(display),oldRandrMode,oldRandrRotation,CurrentTime);
+			XRRFreeScreenConfigInfo(config);
+		}
+		#endif
+		return true;
+	}
+
+	getVideoModeList();
+	#if defined(_IRR_LINUX_X11_VIDMODE_) || defined(_IRR_LINUX_X11_RANDR_)
+	s32 eventbase, errorbase;
+	s32 bestMode = -1;
+	#endif
+
+	#ifdef _IRR_LINUX_X11_VIDMODE_
+	if (XF86VidModeQueryExtension(display, &eventbase, &errorbase))
+	{
+		// enumerate video modes
+		s32 modeCount;
+		XF86VidModeModeInfo** modes;
+
+		XF86VidModeGetAllModeLines(display, screennr, &modeCount, &modes);
+
+		// find fitting mode
+		for (s32 i = 0; i<modeCount; ++i)
+		{
+			if (bestMode==-1 && modes[i]->hdisplay >= Width && modes[i]->vdisplay >= Height)
+				bestMode = i;
+			else if (bestMode!=-1 &&
+					modes[i]->hdisplay >= Width &&
+					modes[i]->vdisplay >= Height &&
+					modes[i]->hdisplay < modes[bestMode]->hdisplay &&
+					modes[i]->vdisplay < modes[bestMode]->vdisplay)
+				bestMode = i;
+		}
+		if (bestMode != -1)
+		{
+			os::Printer::log("Starting fullscreen mode...", ELL_INFORMATION);
+			XF86VidModeSwitchToMode(display, screennr, modes[bestMode]);
+			XF86VidModeSetViewPort(display, screennr, 0, 0);
+			UseXVidMode=true;
+		}
+		else
+		{
+			os::Printer::log("Could not find specified video mode, running windowed.", ELL_WARNING);
+			CreationParams.Fullscreen = false;
+		}
+
+		XFree(modes);
+	}
+	else
+	#endif
+	#ifdef _IRR_LINUX_X11_RANDR_
+	if (XRRQueryExtension(display, &eventbase, &errorbase))
+	{
+		s32 modeCount;
+		XRRScreenConfiguration *config=XRRGetScreenInfo(display,DefaultRootWindow(display));
+		XRRScreenSize *modes=XRRConfigSizes(config,&modeCount);
+		for (s32 i = 0; i<modeCount; ++i)
+		{
+			if (bestMode==-1 && (u32)modes[i].width >= Width && (u32)modes[i].height >= Height)
+				bestMode = i;
+			else if (bestMode!=-1 &&
+					(u32)modes[i].width >= Width &&
+					(u32)modes[i].height >= Height &&
+					modes[i].width < modes[bestMode].width &&
+					modes[i].height < modes[bestMode].height)
+				bestMode = i;
+		}
+		if (bestMode != -1)
+		{
+			XRRSetScreenConfig(display,config,DefaultRootWindow(display),bestMode,oldRandrRotation,CurrentTime);
+			UseXRandR=true;
+		}
+		XRRFreeScreenConfigInfo(config);
+	}
+	else
+	#endif
+	{
+		os::Printer::log("VidMode or RandR extension must be installed to allow Irrlicht "
+		"to switch to fullscreen mode. Running in windowed mode instead.", ELL_WARNING);
+		CreationParams.Fullscreen = false;
+	}
+	return CreationParams.Fullscreen;
+}
+
+
 #if defined(_IRR_COMPILE_WITH_X11_)
 void IrrPrintXGrabError(int grabResult, const c8 * grabCommand )
 {
@@ -237,6 +330,7 @@ void IrrPrintXGrabError(int grabResult, const c8 * grabCommand )
 }
 #endif
 
+
 bool CIrrDeviceLinux::createWindow()
 {
 #ifdef _IRR_COMPILE_WITH_X11_
@@ -258,86 +352,7 @@ bool CIrrDeviceLinux::createWindow()
 
 	screennr = DefaultScreen(display);
 
-	// query extension
-
-	if (CreationParams.Fullscreen)
-	{
-		getVideoModeList();
-		#if defined(_IRR_LINUX_X11_VIDMODE_) || defined(_IRR_LINUX_X11_RANDR_)
-		s32 eventbase, errorbase;
-		s32 bestMode = -1;
-		#endif
-
-		#ifdef _IRR_LINUX_X11_VIDMODE_
-		if (XF86VidModeQueryExtension(display, &eventbase, &errorbase))
-		{
-			// enumerate video modes
-			s32 modeCount;
-			XF86VidModeModeInfo** modes;
-
-			XF86VidModeGetAllModeLines(display, screennr, &modeCount, &modes);
-
-			// find fitting mode
-			for (s32 i = 0; i<modeCount; ++i)
-			{
-				if (bestMode==-1 && modes[i]->hdisplay >= Width && modes[i]->vdisplay >= Height)
-					bestMode = i;
-				else if (bestMode!=-1 &&
-						modes[i]->hdisplay >= Width &&
-						modes[i]->vdisplay >= Height &&
-						modes[i]->hdisplay < modes[bestMode]->hdisplay &&
-						modes[i]->vdisplay < modes[bestMode]->vdisplay)
-					bestMode = i;
-			}
-			if (bestMode != -1)
-			{
-				os::Printer::log("Starting fullscreen mode...", ELL_INFORMATION);
-				XF86VidModeSwitchToMode(display, screennr, modes[bestMode]);
-				XF86VidModeSetViewPort(display, screennr, 0, 0);
-				UseXVidMode=true;
-			}
-			else
-			{
-				os::Printer::log("Could not find specified video mode, running windowed.", ELL_WARNING);
-				CreationParams.Fullscreen = false;
-			}
-
-			XFree(modes);
-		}
-		else
-		#endif
-		#ifdef _IRR_LINUX_X11_RANDR_
-		if (XRRQueryExtension(display, &eventbase, &errorbase))
-		{
-			s32 modeCount;
-			XRRScreenConfiguration *config=XRRGetScreenInfo(display,DefaultRootWindow(display));
-			XRRScreenSize *modes=XRRConfigSizes(config,&modeCount);
-			for (s32 i = 0; i<modeCount; ++i)
-			{
-				if (bestMode==-1 && (u32)modes[i].width >= Width && (u32)modes[i].height >= Height)
-					bestMode = i;
-				else if (bestMode!=-1 &&
-						(u32)modes[i].width >= Width &&
-						(u32)modes[i].height >= Height &&
-						modes[i].width < modes[bestMode].width &&
-						modes[i].height < modes[bestMode].height)
-					bestMode = i;
-			}
-			if (bestMode != -1)
-			{
-				XRRSetScreenConfig(display,config,DefaultRootWindow(display),bestMode,oldRandrRotation,CurrentTime);
-				UseXRandR=true;
-			}
-			XRRFreeScreenConfigInfo(config);
-		}
-		else
-		#endif
-		{
-			os::Printer::log("VidMode or RandR extension must be installed to allow Irrlicht "
-			"to switch to fullscreen mode. Running in windowed mode instead.", ELL_WARNING);
-			CreationParams.Fullscreen = false;
-		}
-	}
+	switchToFullscreen();
 
 #ifdef _IRR_COMPILE_WITH_OPENGL_
 
@@ -593,7 +608,7 @@ bool CIrrDeviceLinux::createWindow()
 
 	attributes.colormap = colormap;
 	attributes.border_pixel = 0;
-	attributes.event_mask = StructureNotifyMask | FocusChangeMask;
+	attributes.event_mask = StructureNotifyMask | FocusChangeMask | ExposureMask;
 	if (!CreationParams.IgnoreInput)
 		attributes.event_mask |= PointerMotionMask |
 				ButtonPressMask | KeyPressMask |
@@ -601,21 +616,22 @@ bool CIrrDeviceLinux::createWindow()
 
 	if (!CreationParams.WindowId)
 	{
-		// create Window, either for Fullscreen or windowed mode
+		// create new Window
+		// Remove window manager decoration in fullscreen
+		attributes.override_redirect = CreationParams.Fullscreen;
+		window = XCreateWindow(display,
+				RootWindow(display, visual->screen),
+				0, 0, Width, Height, 0, visual->depth,
+				InputOutput, visual->visual,
+				CWBorderPixel | CWColormap | CWEventMask | CWOverrideRedirect,
+				&attributes);
+		XMapRaised(display, window);
+		CreationParams.WindowId = (void*)window;
+		Atom wmDelete;
+		wmDelete = XInternAtom(display, wmDeleteWindow, True);
+		XSetWMProtocols(display, window, &wmDelete, 1);
 		if (CreationParams.Fullscreen)
 		{
-			attributes.override_redirect = True;
-
-			window = XCreateWindow(display,
-					RootWindow(display, visual->screen),
-					0, 0, Width, Height, 0, visual->depth,
-					InputOutput, visual->visual,
-					CWBorderPixel | CWColormap | CWEventMask | CWOverrideRedirect,
-					&attributes);
-			CreationParams.WindowId = (void*)window;
-
-			XWarpPointer(display, None, window, 0, 0, 0, 0, 0, 0);
-			XMapRaised(display, window);
  			XSetInputFocus(display, window, RevertToParent, CurrentTime);
 			int grabKb = XGrabKeyboard(display, window, True, GrabModeAsync,
 				GrabModeAsync, CurrentTime);
@@ -623,25 +639,7 @@ bool CIrrDeviceLinux::createWindow()
 			int grabPointer = XGrabPointer(display, window, True, ButtonPressMask,
 				GrabModeAsync, GrabModeAsync, window, None, CurrentTime);
 			IrrPrintXGrabError(grabPointer, "XGrabPointer");
-		}
-		else
-		{ // we want windowed mode
-			attributes.event_mask |= ExposureMask;
-			attributes.event_mask |= FocusChangeMask;
-
-			window = XCreateWindow(display,
-					RootWindow(display, visual->screen),
-					0, 0, Width, Height, 0, visual->depth,
-					InputOutput, visual->visual,
-					CWBorderPixel | CWColormap | CWEventMask,
-					&attributes);
-
-			CreationParams.WindowId = (void*)window;
-
-			Atom wmDelete;
-			wmDelete = XInternAtom(display, wmDeleteWindow, True);
-			XSetWMProtocols(display, window, &wmDelete, 1);
-			XMapRaised(display, window);
+			XWarpPointer(display, None, window, 0, 0, 0, 0, 0, 0);
 		}
 	}
 	else
@@ -930,13 +928,19 @@ bool CIrrDeviceLinux::run()
 					break;
 
 				case  Button4:
-					irrevent.MouseInput.Event = EMIE_MOUSE_WHEEL;
-					irrevent.MouseInput.Wheel = 1.0f;
+					if (event.type == ButtonPress)
+					{
+						irrevent.MouseInput.Event = EMIE_MOUSE_WHEEL;
+						irrevent.MouseInput.Wheel = 1.0f;
+					}
 					break;
 
 				case  Button5:
-					irrevent.MouseInput.Event = EMIE_MOUSE_WHEEL;
-					irrevent.MouseInput.Wheel = -1.0f;
+					if (event.type == ButtonPress)
+					{
+						irrevent.MouseInput.Event = EMIE_MOUSE_WHEEL;
+						irrevent.MouseInput.Wheel = -1.0f;
+					}
 					break;
 				}
 
@@ -944,17 +948,17 @@ bool CIrrDeviceLinux::run()
 				{
 					postEventFromUser(irrevent);
 
-					if ( irrevent.MouseInput.Event == EMIE_LMOUSE_PRESSED_DOWN )
+					if ( irrevent.MouseInput.Event >= EMIE_LMOUSE_PRESSED_DOWN && irrevent.MouseInput.Event <= EMIE_MMOUSE_PRESSED_DOWN )
 					{
-						u32 clicks = checkSuccessiveClicks(irrevent.MouseInput.X, irrevent.MouseInput.Y);
+						u32 clicks = checkSuccessiveClicks(irrevent.MouseInput.X, irrevent.MouseInput.Y, irrevent.MouseInput.Event);
 						if ( clicks == 2 )
 						{
-							irrevent.MouseInput.Event = EMIE_MOUSE_DOUBLE_CLICK;
+							irrevent.MouseInput.Event = (EMOUSE_INPUT_EVENT)(EMIE_LMOUSE_DOUBLE_CLICK + irrevent.MouseInput.Event-EMIE_LMOUSE_PRESSED_DOWN);
 							postEventFromUser(irrevent);
 						}
 						else if ( clicks == 3 )
 						{
-							irrevent.MouseInput.Event = EMIE_MOUSE_TRIPLE_CLICK;
+							irrevent.MouseInput.Event = (EMOUSE_INPUT_EVENT)(EMIE_LMOUSE_TRIPLE_CLICK + irrevent.MouseInput.Event-EMIE_LMOUSE_PRESSED_DOWN);
 							postEventFromUser(irrevent);
 						}
 					}
@@ -1722,9 +1726,9 @@ bool CIrrDeviceLinux::setGammaRamp( f32 red, f32 green, f32 blue, f32 brightness
 			XRRCrtcGamma *gamma = XRRGetCrtcGamma(display, screennr);
 			if (gamma)
 			{
-				*gamma->red=red;
-				*gamma->green=green;
-				*gamma->blue=blue;
+				*gamma->red=(u16)red;
+				*gamma->green=(u16)green;
+				*gamma->blue=(u16)blue;
 				XRRSetCrtcGamma(display, screennr, gamma);
 				XRRFreeGamma(gamma);
 				return true;
@@ -1845,6 +1849,40 @@ void CIrrDeviceLinux::copyToClipboard(const c8* text) const
 	XSetSelectionOwner (display, X_ATOM_CLIPBOARD, window, CurrentTime);
 	XFlush (display);
 #endif
+}
+
+#ifdef _IRR_COMPILE_WITH_X11_
+// return true if the passed event has the type passed in parameter arg
+Bool PredicateIsEventType(Display *display, XEvent *event, XPointer arg)
+{
+	if ( event && event->type == *(int*)arg )
+	{
+//		os::Printer::log("remove event:", core::stringc((int)arg).c_str(), ELL_INFORMATION);
+		return True;
+	}
+	return False;
+}
+#endif //_IRR_COMPILE_WITH_X11_
+
+//! Remove all messages pending in the system message loop
+void CIrrDeviceLinux::clearSystemMessages()
+{
+#ifdef _IRR_COMPILE_WITH_X11_
+	if (CreationParams.DriverType != video::EDT_NULL)
+	{
+		XEvent event;
+		int usrArg = ButtonPress;
+		while ( XCheckIfEvent(display, &event, PredicateIsEventType, XPointer(&usrArg)) == True ) 	{}
+		usrArg = ButtonRelease;
+		while ( XCheckIfEvent(display, &event, PredicateIsEventType, XPointer(&usrArg)) == True ) {}
+		usrArg = MotionNotify;
+		while ( XCheckIfEvent(display, &event, PredicateIsEventType, XPointer(&usrArg)) == True ) 	{}
+		usrArg = KeyRelease;
+		while ( XCheckIfEvent(display, &event, PredicateIsEventType, XPointer(&usrArg)) == True )	{}
+		usrArg = KeyPress;
+		while ( XCheckIfEvent(display, &event, PredicateIsEventType, XPointer(&usrArg)) == True )		{}
+	}
+#endif //_IRR_COMPILE_WITH_X11_
 }
 
 void CIrrDeviceLinux::initXAtoms()

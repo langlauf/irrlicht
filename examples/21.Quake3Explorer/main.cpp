@@ -21,7 +21,7 @@ Copyright 2006-2009 Burningwater, Thomas Alten
 
 #include "q3factory.h"
 #include "sound.h"
-#include <iostream>
+#include "driverChoice.h"
 
 /*
 	Game Data is used to hold Data which is needed to drive the game
@@ -29,7 +29,7 @@ Copyright 2006-2009 Burningwater, Thomas Alten
 struct GameData
 {
 	GameData ( const path &startupDir) :
-		retVal(0), createExDevice(0), Device(0), StartupDir(startupDir)
+		retVal(0), StartupDir(startupDir), createExDevice(0), Device(0)
 	{
 		setDefault ();
 	}
@@ -85,7 +85,7 @@ void GameData::setDefault ()
 	deviceParam.WindowSize.Width = 800;
 	deviceParam.WindowSize.Height = 600;
 	deviceParam.Fullscreen = false;
-	deviceParam.Bits = 32;
+	deviceParam.Bits = 24;
 	deviceParam.ZBufferBits = 16;
 	deviceParam.Vsync = false;
 	deviceParam.AntiAlias = false;
@@ -1040,12 +1040,14 @@ void CQuake3EventHandler::LoadMap ( const stringw &mapName, s32 collision )
 	IFileSystem *fs = Game->Device->getFileSystem();
 	ISceneManager *smgr = Game->Device->getSceneManager ();
 
-	IReadFile* file = fs->createMemoryReadFile ( &Game->loadParam, sizeof ( Game->loadParam ),
-													L"levelparameter.cfg", false);
+	IReadFile* file = fs->createMemoryReadFile(&Game->loadParam,
+				sizeof(Game->loadParam), L"levelparameter.cfg", false);
 
+	// load cfg file
 	smgr->getMesh( file );
 	file->drop ();
 
+	// load the actual map
 	Mesh = (IQ3LevelMesh*) smgr->getMesh(mapName);
 	if ( 0 == Mesh )
 		return;
@@ -1072,12 +1074,11 @@ void CQuake3EventHandler::LoadMap ( const stringw &mapName, s32 collision )
 	//s32 minimalNodes = b0 ? core::s32_max ( 2048, b0->getVertexCount() / 32 ) : 2048;
 	s32 minimalNodes = 2048;
 
-	MapParent = smgr->addMeshSceneNode( geometry );
-	//MapParent = smgr->addOctTreeSceneNode(geometry, 0, -1, minimalNodes);
+	MapParent = smgr->addOctreeSceneNode(geometry, 0, -1, minimalNodes);
 	MapParent->setName ( mapName );
 	if ( Meta )
 	{
-		selector = smgr->createOctTreeTriangleSelector( geometry,MapParent, minimalNodes);
+		selector = smgr->createOctreeTriangleSelector( geometry,MapParent, minimalNodes);
 		//selector = smgr->createTriangleSelector ( geometry, MapParent );
 		Meta->addTriangleSelector( selector);
 		selector->drop ();
@@ -1105,7 +1106,6 @@ void CQuake3EventHandler::LoadMap ( const stringw &mapName, s32 collision )
 	if ( BulletParent )
 		BulletParent->setName ( "Bullet Container" );
 
-
 	/*
 		now construct SceneNodes for each Shader
 		The Objects are stored in the quake mesh E_Q3_MESH_ITEMS
@@ -1116,12 +1116,10 @@ void CQuake3EventHandler::LoadMap ( const stringw &mapName, s32 collision )
 	Q3ShaderFactory ( Game->loadParam, Game->Device, Mesh, E_Q3_MESH_FOG,FogParent, 0, false );
 	Q3ShaderFactory ( Game->loadParam, Game->Device, Mesh, E_Q3_MESH_UNRESOLVED,UnresolvedParent, Meta, true );
 
-
 	/*
 		Now construct Models from Entity List
 	*/
 	Q3ModelFactory ( Game->loadParam, Game->Device, Mesh, ItemParent, false );
-
 }
 
 /*
@@ -1142,7 +1140,7 @@ void CQuake3EventHandler::addSceneTreeItem( ISceneNode * parent, IGUITreeViewNod
 			case ESNT_CAMERA: imageIndex = 1; break;
 			case ESNT_EMPTY: imageIndex = 2; break;
 			case ESNT_MESH: imageIndex = 3; break;
-			case ESNT_OCT_TREE: imageIndex = 3; break;
+			case ESNT_OCTREE: imageIndex = 3; break;
 			case ESNT_ANIMATED_MESH: imageIndex = 4; break;
 			case ESNT_SKY_BOX: imageIndex = 5; break;
 			case ESNT_BILLBOARD: imageIndex = 6; break;
@@ -1193,7 +1191,6 @@ void CQuake3EventHandler::addSceneTreeItem( ISceneNode * parent, IGUITreeViewNod
 
 		addSceneTreeItem ( *it, node );
 	}
-
 }
 
 
@@ -1202,6 +1199,7 @@ void CQuake3EventHandler::CreatePlayers()
 {
 	Player[0].create ( Game->Device, Mesh, MapParent, Meta );
 }
+
 
 // Adds a skydome to the scene
 void CQuake3EventHandler::AddSky( u32 dome, const c8 *texture)
@@ -1237,28 +1235,16 @@ void CQuake3EventHandler::AddSky( u32 dome, const c8 *texture)
 	{
 		snprintf ( buf, 64, "%s.jpg", texture );
 		SkyNode = smgr->addSkyDomeSceneNode(
-			driver->getTexture( buf ),
-			32,32,
-			1.f,
-			1.f,
-			1000.f,
-			0,
-			11
-			);
+				driver->getTexture( buf ), 32,32,
+				1.f, 1.f, 1000.f, 0, 11);
 	}
 	else
 	if ( 2 == dome )
 	{
 		snprintf ( buf, 64, "%s.jpg", texture );
 		SkyNode = smgr->addSkyDomeSceneNode(
-			driver->getTexture( buf ),
-			16,8,
-			0.95f,
-			2.f,
-			1000.f,
-			0,
-			11
-			);
+				driver->getTexture( buf ), 16,8,
+				0.95f, 2.f, 1000.f, 0, 11);
 	}
 
 	if (SkyNode)
@@ -1266,7 +1252,6 @@ void CQuake3EventHandler::AddSky( u32 dome, const c8 *texture)
 	//SkyNode->getMaterial(0).ZBuffer = video::EMDF_DEPTH_LESS_EQUAL;
 
 	driver->setTextureCreationFlag(video::ETCF_CREATE_MIP_MAPS, oldMipMapState);
-
 }
 
 
@@ -1309,7 +1294,6 @@ void CQuake3EventHandler::SetGUIActive( s32 command)
 
 	Game->Device->getGUIEnvironment()->setFocus ( Game->guiActive ? gui.Window: 0 );
 }
-
 
 
 /*
@@ -1939,8 +1923,85 @@ void CQuake3EventHandler::Render()
 	if ( 0 == driver )
 		return;
 
-	driver->beginScene(true, true, SColor(0,0,0,0));
-	Game->Device->getSceneManager ()->drawAll();
+	// TODO: This does not work, yet.
+	const bool anaglyph=false;
+	if (anaglyph)
+	{
+		scene::ICameraSceneNode* cameraOld = Game->Device->getSceneManager()->getActiveCamera();
+		driver->beginScene(true, true, SColor(0,0,0,0));
+		driver->getOverrideMaterial().Material.ColorMask = ECP_NONE;
+		driver->getOverrideMaterial().EnableFlags  = EMF_COLOR_MASK;
+        driver->getOverrideMaterial().EnablePasses = ESNRP_SKY_BOX + 
+                                                     ESNRP_SOLID +
+                                                     ESNRP_TRANSPARENT +
+                                                     ESNRP_TRANSPARENT_EFFECT +
+                                                     ESNRP_SHADOW;
+		Game->Device->getSceneManager()->drawAll();
+		driver->clearZBuffer();
+
+		const vector3df oldPosition = cameraOld->getPosition();
+		const vector3df oldTarget   = cameraOld->getTarget();
+		const matrix4 startMatrix   = cameraOld->getAbsoluteTransformation();
+		const vector3df focusPoint  = (oldTarget -
+				cameraOld->getAbsolutePosition()).setLength(10000) +
+				cameraOld->getAbsolutePosition() ;
+
+		scene::ICameraSceneNode* camera = cameraOld;//Game->Device->getSceneManager()->addCameraSceneNode();
+
+		//Left eye...
+		vector3df pos;
+		matrix4   move;
+
+		move.setTranslation( vector3df(-1.5f,0.0f,0.0f) );
+		pos=(startMatrix*move).getTranslation();
+
+		driver->getOverrideMaterial().Material.ColorMask = ECP_RED;
+		driver->getOverrideMaterial().EnableFlags  = EMF_COLOR_MASK;
+		driver->getOverrideMaterial().EnablePasses = 
+				ESNRP_SKY_BOX|ESNRP_SOLID|ESNRP_TRANSPARENT|
+				ESNRP_TRANSPARENT_EFFECT|ESNRP_SHADOW;
+
+		camera->setPosition(pos);
+		camera->setTarget(focusPoint);
+
+		Game->Device->getSceneManager()->drawAll();
+		driver->clearZBuffer();
+
+		//Right eye...
+		move.setTranslation( vector3df(1.5f,0.0f,0.0f) );
+		pos=(startMatrix*move).getTranslation();
+
+		driver->getOverrideMaterial().Material.ColorMask = ECP_GREEN + ECP_BLUE;
+		driver->getOverrideMaterial().EnableFlags  = EMF_COLOR_MASK;
+		driver->getOverrideMaterial().EnablePasses = 
+				ESNRP_SKY_BOX|ESNRP_SOLID|ESNRP_TRANSPARENT|
+				ESNRP_TRANSPARENT_EFFECT|ESNRP_SHADOW;
+
+		camera->setPosition(pos);
+		camera->setTarget(focusPoint);
+
+		Game->Device->getSceneManager()->drawAll();
+
+		driver->getOverrideMaterial().Material.ColorMask=ECP_ALL;
+		driver->getOverrideMaterial().EnableFlags=0;
+		driver->getOverrideMaterial().EnablePasses=0;
+
+		if (camera != cameraOld)
+		{
+			Game->Device->getSceneManager()->setActiveCamera(cameraOld);
+			camera->remove();
+		}
+		else
+		{
+			camera->setPosition(oldPosition);
+			camera->setTarget(oldTarget);
+		}
+	}
+	else
+	{
+		driver->beginScene(true, true, SColor(0,0,0,0));
+		Game->Device->getSceneManager()->drawAll();
+	}
 	Game->Device->getGUIEnvironment()->drawAll();
 	driver->endScene();
 }
@@ -2099,23 +2160,10 @@ int IRRCALLCONV main(int argc, char* argv[])
 		if ( game.retVal == 0 )
 		{
 			game.setDefault ();
-			printf("Please select the driver you want for this example:\n"\
-				" (a) Direct3D 9.0c\n (b) Direct3D 8.1\n (c) OpenGL 1.5\n"\
-				" (d) Software Renderer\n (e) Burning's Video (TM) Thomas Alten\n"\
-				" (otherKey) exit\n\n");
-
-			char i = 'a';
-			std::cin >> i;
-
-			switch(i)
-			{
-				case 'a': game.deviceParam.DriverType = EDT_DIRECT3D9;break;
-				case 'b': game.deviceParam.DriverType = EDT_DIRECT3D8;break;
-				case 'c': game.deviceParam.DriverType = EDT_OPENGL;   break;
-				case 'd': game.deviceParam.DriverType = EDT_SOFTWARE; break;
-				case 'e': game.deviceParam.DriverType = EDT_BURNINGSVIDEO;break;
-				default: game.retVal = 3; break;
-			}
+			// ask user for driver
+			game.deviceParam.DriverType=driverChoiceConsole();
+			if (game.deviceParam.DriverType==video::EDT_COUNT)
+				game.retVal = 3;
 		}
 		runGame ( &game );
 	} while ( game.retVal < 3 );
@@ -2125,4 +2173,3 @@ int IRRCALLCONV main(int argc, char* argv[])
 
 /*
 **/
-

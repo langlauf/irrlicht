@@ -83,7 +83,8 @@ IAnimatedMesh* CDMFLoader::createMesh(io::IReadFile* file)
 	video::IVideoDriver* driver = SceneMgr->getVideoDriver();
 
 	//Load stringlist
-	StringList dmfRawFile(file);
+	StringList dmfRawFile;
+	LoadFromFile(file, dmfRawFile);
 
 	if (dmfRawFile.size()==0)
 		return 0;
@@ -95,13 +96,13 @@ IAnimatedMesh* CDMFLoader::createMesh(io::IReadFile* file)
 	dmfHeader header;
 
 	//load header
+	core::array<dmfMaterial> materiali;
 	if (GetDMFHeader(dmfRawFile, header))
 	{
 		//let's set ambient light
 		SceneMgr->setAmbientLight(header.dmfAmbient);
 
 		//let's create the correct number of materials, vertices and faces
-		core::array<dmfMaterial> materiali;
 		dmfVert *verts=new dmfVert[header.numVertices];
 		dmfFace *faces=new dmfFace[header.numFaces];
 
@@ -139,7 +140,7 @@ IAnimatedMesh* CDMFLoader::createMesh(io::IReadFile* file)
 		for (i = 0; i < header.numFaces; i++)
 		{
 #ifdef _IRR_DMF_DEBUG_
-//		os::Printer::log("Polygon with #vertices", core::stringc(faces[i].numVerts).c_str());
+		os::Printer::log("Polygon with #vertices", core::stringc(faces[i].numVerts).c_str());
 #endif
 			if (faces[i].numVerts < 3)
 				continue;
@@ -155,7 +156,7 @@ IAnimatedMesh* CDMFLoader::createMesh(io::IReadFile* file)
 			const bool use2TCoords = meshBuffer->Vertices_2TCoords.size() ||
 				materiali[faces[i].materialID].lightmapName.size();
 			if (use2TCoords && meshBuffer->Vertices_Standard.size())
-				meshBuffer->MoveTo_2TCoords();
+				meshBuffer->convertTo2TCoords();
 			const u32 base = meshBuffer->Vertices_2TCoords.size()?meshBuffer->Vertices_2TCoords.size():meshBuffer->Vertices_Standard.size();
 
 			// Add this face's verts
@@ -215,6 +216,33 @@ IAnimatedMesh* CDMFLoader::createMesh(io::IReadFile* file)
 			}
 		}
 
+		delete [] verts;
+		delete [] faces;
+	}
+
+	// delete all buffers without geometry in it.
+#ifdef _IRR_DMF_DEBUG_
+	os::Printer::log("Cleaning meshbuffers.");
+#endif
+	i = 0;
+	while(i < mesh->MeshBuffers.size())
+	{
+		if (mesh->MeshBuffers[i]->getVertexCount() == 0 ||
+			mesh->MeshBuffers[i]->getIndexCount() == 0)
+		{
+			// Meshbuffer is empty -- drop it
+			mesh->MeshBuffers[i]->drop();
+			mesh->MeshBuffers.erase(i);
+			materiali.erase(i);
+		}
+		else
+		{
+			i++;
+		}
+	}
+
+
+	{
 		//load textures and lightmaps in materials.
 		//don't worry if you receive a could not load texture, cause if you don't need
 		//a particular material in your scene it will be loaded and then destroyed.
@@ -230,7 +258,7 @@ IAnimatedMesh* CDMFLoader::createMesh(io::IReadFile* file)
 			path = FileSystem->getFileDir(file->getFileName());
 		path += ('/');
 
-		for (i=0; i<header.numMaterials; i++)
+		for (i=0; i<mesh->getMeshBufferCount(); i++)
 		{
 			//texture and lightmap
 			video::ITexture *tex = 0;
@@ -372,29 +400,6 @@ IAnimatedMesh* CDMFLoader::createMesh(io::IReadFile* file)
 
 			mat.setTexture(0, tex);
 			mat.setTexture(1, lig);
-		}
-
-		delete [] verts;
-		delete [] faces;
-	}
-
-	// delete all buffers without geometry in it.
-#ifdef _IRR_DMF_DEBUG_
-	os::Printer::log("Cleaning meshbuffers.");
-#endif
-	i = 0;
-	while(i < mesh->MeshBuffers.size())
-	{
-		if (mesh->MeshBuffers[i]->getVertexCount() == 0 ||
-			mesh->MeshBuffers[i]->getIndexCount() == 0)
-		{
-			// Meshbuffer is empty -- drop it
-			mesh->MeshBuffers[i]->drop();
-			mesh->MeshBuffers.erase(i);
-		}
-		else
-		{
-			i++;
 		}
 	}
 
