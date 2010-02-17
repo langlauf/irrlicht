@@ -87,6 +87,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "20.ManagedLights", "20.Mana
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "22.MaterialViewer", "22.MaterialViewer\MaterialViewer.vcproj", "{AFC223BD-4371-4A8B-A90B-0D338BD2DEBB}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "23.SMeshHandling", "23.SMeshHandling\SMeshHandling.vcproj", "{EB3B38EA-5CE7-4983-845B-880661E69D09}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -166,7 +174,9 @@ Global
 		{EB3B38EA-5CE7-4983-845B-880661E69D09}.Release.ActiveCfg = Release|Win32
 		{EB3B38EA-5CE7-4983-845B-880661E69D09}.Release.Build.0 = Release|Win32
 		{1AB9413E-4F53-42A3-8CB2-CB4BE22336D0}.Debug.ActiveCfg = Debug|Win32
+		{1AB9413E-4F53-42A3-8CB2-CB4BE22336D0}.Debug.Build.0 = Debug|Win32
 		{1AB9413E-4F53-42A3-8CB2-CB4BE22336D0}.Release.ActiveCfg = Release|Win32
+		{1AB9413E-4F53-42A3-8CB2-CB4BE22336D0}.Release.Build.0 = Release|Win32
 		{CDC4AAA9-72E1-4FFA-A04D-7EF59D8B97CD}.Debug.ActiveCfg = Debug|Win32
 		{CDC4AAA9-72E1-4FFA-A04D-7EF59D8B97CD}.Debug.Build.0 = Debug|Win32
 		{CDC4AAA9-72E1-4FFA-A04D-7EF59D8B97CD}.Release.ActiveCfg = Release|Win32
@@ -175,6 +185,14 @@ Global
 		{1AB9413E-4F53-42A3-8CB2-CB4BE22336D0}.Debug.Build.0 = Debug|Win32
 		{1AB9413E-4F53-42A3-8CB2-CB4BE22336D0}.Release.ActiveCfg = Release|Win32
 		{1AB9413E-4F53-42A3-8CB2-CB4BE22336D0}.Release.Build.0 = Release|Win32
+		{AFC223BD-4371-4A8B-A90B-0D338BD2DEBB}.Debug.ActiveCfg = Debug|Win32
+		{AFC223BD-4371-4A8B-A90B-0D338BD2DEBB}.Debug.Build.0 = Debug|Win32
+		{AFC223BD-4371-4A8B-A90B-0D338BD2DEBB}.Release.ActiveCfg = Release|Win32
+		{AFC223BD-4371-4A8B-A90B-0D338BD2DEBB}.Release.Build.0 = Release|Win32
+		{EB3B38EA-5CE7-4983-845B-880661E69D09}.Debug.ActiveCfg = Debug|Win32
+		{EB3B38EA-5CE7-4983-845B-880661E69D09}.Debug.Build.0 = Debug|Win32
+		{EB3B38EA-5CE7-4983-845B-880661E69D09}.Release.ActiveCfg = Release|Win32
+		{EB3B38EA-5CE7-4983-845B-880661E69D09}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection

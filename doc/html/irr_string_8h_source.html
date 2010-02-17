@@ -824,184 +824,186 @@
 <a name="l00916"></a><a class="code" href="classirr_1_1core_1_1string.html#ad17b090ba1d3aae9c2f7e641f084473b">00916</a>         <span class="keywordtype">void</span> <span class="keyword">remove</span>(<span class="keyword">const</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a> toRemove)
 <a name="l00917"></a>00917         {
 <a name="l00918"></a>00918                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> <a class="code" href="classirr_1_1core_1_1string.html#a062f23675d892012c7e8d5d4e92ecd00" title="Returns length of the string&amp;#39;s content.">size</a> = toRemove.size();
-<a name="l00919"></a>00919                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> pos = 0;
-<a name="l00920"></a>00920                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> found = 0;
-<a name="l00921"></a>00921                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;used; ++i)
-<a name="l00922"></a>00922                 {
-<a name="l00923"></a>00923                         <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> j = 0;
-<a name="l00924"></a>00924                         <span class="keywordflow">while</span> (j &lt; size)
-<a name="l00925"></a>00925                         {
-<a name="l00926"></a>00926                                 <span class="keywordflow">if</span> (<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i + j] != toRemove[j])
-<a name="l00927"></a>00927                                         <span class="keywordflow">break</span>;
-<a name="l00928"></a>00928                                 ++j;
-<a name="l00929"></a>00929                         }
-<a name="l00930"></a>00930                         <span class="keywordflow">if</span> (j == size)
-<a name="l00931"></a>00931                         {
-<a name="l00932"></a>00932                                 found += size;
-<a name="l00933"></a>00933                                 i += size - 1;
-<a name="l00934"></a>00934                                 <span class="keywordflow">continue</span>;
-<a name="l00935"></a>00935                         }
-<a name="l00936"></a>00936 
-<a name="l00937"></a>00937                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[pos++] = <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i];
-<a name="l00938"></a>00938                 }
-<a name="l00939"></a>00939                 used -= found;
-<a name="l00940"></a>00940                 <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[used] = 0;
-<a name="l00941"></a>00941         }
-<a name="l00942"></a>00942 
-<a name="l00943"></a>00943 
+<a name="l00919"></a>00919                 <span class="keywordflow">if</span> ( size == 0 )
+<a name="l00920"></a>00920                         <span class="keywordflow">return</span>;
+<a name="l00921"></a>00921                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> pos = 0;
+<a name="l00922"></a>00922                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> found = 0;
+<a name="l00923"></a>00923                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;used; ++i)
+<a name="l00924"></a>00924                 {
+<a name="l00925"></a>00925                         <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> j = 0;
+<a name="l00926"></a>00926                         <span class="keywordflow">while</span> (j &lt; size)
+<a name="l00927"></a>00927                         {
+<a name="l00928"></a>00928                                 <span class="keywordflow">if</span> (<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i + j] != toRemove[j])
+<a name="l00929"></a>00929                                         <span class="keywordflow">break</span>;
+<a name="l00930"></a>00930                                 ++j;
+<a name="l00931"></a>00931                         }
+<a name="l00932"></a>00932                         <span class="keywordflow">if</span> (j == size)
+<a name="l00933"></a>00933                         {
+<a name="l00934"></a>00934                                 found += size;
+<a name="l00935"></a>00935                                 i += size - 1;
+<a name="l00936"></a>00936                                 <span class="keywordflow">continue</span>;
+<a name="l00937"></a>00937                         }
+<a name="l00938"></a>00938 
+<a name="l00939"></a>00939                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[pos++] = <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i];
+<a name="l00940"></a>00940                 }
+<a name="l00941"></a>00941                 used -= found;
+<a name="l00942"></a>00942                 <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[used] = 0;
+<a name="l00943"></a>00943         }
+<a name="l00944"></a>00944 
 <a name="l00945"></a>00945 
-<a name="l00946"></a><a class="code" href="classirr_1_1core_1_1string.html#abad9a18958eec4edabbd8258b913d49b">00946</a>         <span class="keywordtype">void</span> <a class="code" href="classirr_1_1core_1_1string.html#abad9a18958eec4edabbd8258b913d49b" title="Removes characters from a string.">removeChars</a>(<span class="keyword">const</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a> &amp; characters)
-<a name="l00947"></a>00947         {
-<a name="l00948"></a>00948                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> pos = 0;
-<a name="l00949"></a>00949                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> found = 0;
-<a name="l00950"></a>00950                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;used; ++i)
-<a name="l00951"></a>00951                 {
-<a name="l00952"></a>00952                         <span class="comment">// Don&#39;t use characters.findFirst as it finds the \0,</span>
-<a name="l00953"></a>00953                         <span class="comment">// causing used to become incorrect.</span>
-<a name="l00954"></a>00954                         <span class="keywordtype">bool</span> docontinue = <span class="keyword">false</span>;
-<a name="l00955"></a>00955                         <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> j=0; j&lt;characters.<a class="code" href="classirr_1_1core_1_1string.html#a062f23675d892012c7e8d5d4e92ecd00" title="Returns length of the string&amp;#39;s content.">size</a>(); ++j)
-<a name="l00956"></a>00956                         {
-<a name="l00957"></a>00957                                 <span class="keywordflow">if</span> (characters[j] == <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i])
-<a name="l00958"></a>00958                                 {
-<a name="l00959"></a>00959                                         ++found;
-<a name="l00960"></a>00960                                         docontinue = <span class="keyword">true</span>;
-<a name="l00961"></a>00961                                         <span class="keywordflow">break</span>;
-<a name="l00962"></a>00962                                 }
-<a name="l00963"></a>00963                         }
-<a name="l00964"></a>00964                         <span class="keywordflow">if</span> (docontinue)
-<a name="l00965"></a>00965                                 <span class="keywordflow">continue</span>;
-<a name="l00966"></a>00966 
-<a name="l00967"></a>00967                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[pos++] = <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i];
-<a name="l00968"></a>00968                 }
-<a name="l00969"></a>00969                 used -= found;
-<a name="l00970"></a>00970                 <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[used] = 0;
-<a name="l00971"></a>00971         }
-<a name="l00972"></a>00972 
-<a name="l00973"></a>00973 
+<a name="l00947"></a>00947 
+<a name="l00948"></a><a class="code" href="classirr_1_1core_1_1string.html#abad9a18958eec4edabbd8258b913d49b">00948</a>         <span class="keywordtype">void</span> <a class="code" href="classirr_1_1core_1_1string.html#abad9a18958eec4edabbd8258b913d49b" title="Removes characters from a string.">removeChars</a>(<span class="keyword">const</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a> &amp; characters)
+<a name="l00949"></a>00949         {
+<a name="l00950"></a>00950                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> pos = 0;
+<a name="l00951"></a>00951                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> found = 0;
+<a name="l00952"></a>00952                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;used; ++i)
+<a name="l00953"></a>00953                 {
+<a name="l00954"></a>00954                         <span class="comment">// Don&#39;t use characters.findFirst as it finds the \0,</span>
+<a name="l00955"></a>00955                         <span class="comment">// causing used to become incorrect.</span>
+<a name="l00956"></a>00956                         <span class="keywordtype">bool</span> docontinue = <span class="keyword">false</span>;
+<a name="l00957"></a>00957                         <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> j=0; j&lt;characters.<a class="code" href="classirr_1_1core_1_1string.html#a062f23675d892012c7e8d5d4e92ecd00" title="Returns length of the string&amp;#39;s content.">size</a>(); ++j)
+<a name="l00958"></a>00958                         {
+<a name="l00959"></a>00959                                 <span class="keywordflow">if</span> (characters[j] == <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i])
+<a name="l00960"></a>00960                                 {
+<a name="l00961"></a>00961                                         ++found;
+<a name="l00962"></a>00962                                         docontinue = <span class="keyword">true</span>;
+<a name="l00963"></a>00963                                         <span class="keywordflow">break</span>;
+<a name="l00964"></a>00964                                 }
+<a name="l00965"></a>00965                         }
+<a name="l00966"></a>00966                         <span class="keywordflow">if</span> (docontinue)
+<a name="l00967"></a>00967                                 <span class="keywordflow">continue</span>;
+<a name="l00968"></a>00968 
+<a name="l00969"></a>00969                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[pos++] = <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i];
+<a name="l00970"></a>00970                 }
+<a name="l00971"></a>00971                 used -= found;
+<a name="l00972"></a>00972                 <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[used] = 0;
+<a name="l00973"></a>00973         }
+<a name="l00974"></a>00974 
 <a name="l00975"></a>00975 
-<a name="l00977"></a><a class="code" href="classirr_1_1core_1_1string.html#a4ff8317af3774b4eaf5ea9791c3dc3e9">00977</a>         <a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a>&amp; <a class="code" href="classirr_1_1core_1_1string.html#a4ff8317af3774b4eaf5ea9791c3dc3e9" title="Trims the string.">trim</a>(<span class="keyword">const</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a> &amp; whitespace = <span class="stringliteral">&quot; \t\n\r&quot;</span>)
-<a name="l00978"></a>00978         {
-<a name="l00979"></a>00979                 <span class="comment">// find start and end of the substring without the specified characters</span>
-<a name="l00980"></a>00980                 <span class="keyword">const</span> <a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> begin = <a class="code" href="classirr_1_1core_1_1string.html#acf5cff4f092de2773255909e69ca6630" title="Finds first position of a character not in a given list.">findFirstCharNotInList</a>(whitespace.c_str(), whitespace.used);
-<a name="l00981"></a>00981                 <span class="keywordflow">if</span> (begin == -1)
-<a name="l00982"></a>00982                         <span class="keywordflow">return</span> (*<span class="keyword">this</span>=<span class="stringliteral">&quot;&quot;</span>);
-<a name="l00983"></a>00983 
-<a name="l00984"></a>00984                 <span class="keyword">const</span> <a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> end = <a class="code" href="classirr_1_1core_1_1string.html#a6d4fd13ab20134c55f0b577d28de80ac" title="Finds last position of a character not in a given list.">findLastCharNotInList</a>(whitespace.c_str(), whitespace.used);
+<a name="l00977"></a>00977 
+<a name="l00979"></a><a class="code" href="classirr_1_1core_1_1string.html#a4ff8317af3774b4eaf5ea9791c3dc3e9">00979</a>         <a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a>&amp; <a class="code" href="classirr_1_1core_1_1string.html#a4ff8317af3774b4eaf5ea9791c3dc3e9" title="Trims the string.">trim</a>(<span class="keyword">const</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a> &amp; whitespace = <span class="stringliteral">&quot; \t\n\r&quot;</span>)
+<a name="l00980"></a>00980         {
+<a name="l00981"></a>00981                 <span class="comment">// find start and end of the substring without the specified characters</span>
+<a name="l00982"></a>00982                 <span class="keyword">const</span> <a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> begin = <a class="code" href="classirr_1_1core_1_1string.html#acf5cff4f092de2773255909e69ca6630" title="Finds first position of a character not in a given list.">findFirstCharNotInList</a>(whitespace.c_str(), whitespace.used);
+<a name="l00983"></a>00983                 <span class="keywordflow">if</span> (begin == -1)
+<a name="l00984"></a>00984                         <span class="keywordflow">return</span> (*<span class="keyword">this</span>=<span class="stringliteral">&quot;&quot;</span>);
 <a name="l00985"></a>00985 
-<a name="l00986"></a>00986                 <span class="keywordflow">return</span> (*<span class="keyword">this</span> = <a class="code" href="classirr_1_1core_1_1string.html#aa1690a37528bbc5449bc46e6502f47a1" title="Returns a substring.">subString</a>(begin, (end +1) - begin));
-<a name="l00987"></a>00987         }
-<a name="l00988"></a>00988 
-<a name="l00989"></a>00989 
+<a name="l00986"></a>00986                 <span class="keyword">const</span> <a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> end = <a class="code" href="classirr_1_1core_1_1string.html#a6d4fd13ab20134c55f0b577d28de80ac" title="Finds last position of a character not in a given list.">findLastCharNotInList</a>(whitespace.c_str(), whitespace.used);
+<a name="l00987"></a>00987 
+<a name="l00988"></a>00988                 <span class="keywordflow">return</span> (*<span class="keyword">this</span> = <a class="code" href="classirr_1_1core_1_1string.html#aa1690a37528bbc5449bc46e6502f47a1" title="Returns a substring.">subString</a>(begin, (end +1) - begin));
+<a name="l00989"></a>00989         }
+<a name="l00990"></a>00990 
 <a name="l00991"></a>00991 
-<a name="l00994"></a><a class="code" href="classirr_1_1core_1_1string.html#acbf7cf936f1f15f96ebe046ce0eddade">00994</a>         <span class="keywordtype">void</span> <a class="code" href="classirr_1_1core_1_1string.html#acbf7cf936f1f15f96ebe046ce0eddade" title="Erases a character from the string.">erase</a>(<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> index)
-<a name="l00995"></a>00995         {
-<a name="l00996"></a>00996                 <a class="code" href="irr_types_8h.html#a12f3b5fd18ca108f90c5c74db602267e" title="define a break macro for debugging.">_IRR_DEBUG_BREAK_IF</a>(index&gt;=used) <span class="comment">// access violation</span>
-<a name="l00997"></a>00997 
-<a name="l00998"></a>00998                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=index+1; i&lt;used; ++i)
-<a name="l00999"></a>00999                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i-1] = <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i];
-<a name="l01000"></a>01000 
-<a name="l01001"></a>01001                 --used;
-<a name="l01002"></a>01002         }
-<a name="l01003"></a>01003 
-<a name="l01005"></a><a class="code" href="classirr_1_1core_1_1string.html#a24cf2d676ba5f259872d8d5bed141a45">01005</a>         <span class="keywordtype">void</span> <a class="code" href="classirr_1_1core_1_1string.html#a24cf2d676ba5f259872d8d5bed141a45" title="verify the existing string.">validate</a>()
-<a name="l01006"></a>01006         {
-<a name="l01007"></a>01007                 <span class="comment">// terminate on existing null</span>
-<a name="l01008"></a>01008                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;allocated; ++i)
-<a name="l01009"></a>01009                 {
-<a name="l01010"></a>01010                         <span class="keywordflow">if</span> (<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i] == 0)
-<a name="l01011"></a>01011                         {
-<a name="l01012"></a>01012                                 used = i + 1;
-<a name="l01013"></a>01013                                 <span class="keywordflow">return</span>;
-<a name="l01014"></a>01014                         }
-<a name="l01015"></a>01015                 }
-<a name="l01016"></a>01016 
-<a name="l01017"></a>01017                 <span class="comment">// terminate</span>
-<a name="l01018"></a>01018                 <span class="keywordflow">if</span> ( allocated &gt; 0 )
-<a name="l01019"></a>01019                 {
-<a name="l01020"></a>01020                         used = allocated - 1;
-<a name="l01021"></a>01021                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[used] = 0;
-<a name="l01022"></a>01022                 }
-<a name="l01023"></a>01023                 <span class="keywordflow">else</span>
-<a name="l01024"></a>01024                 {
-<a name="l01025"></a>01025                         used = 0;
-<a name="l01026"></a>01026                 }
-<a name="l01027"></a>01027         }
-<a name="l01028"></a>01028 
-<a name="l01030"></a><a class="code" href="classirr_1_1core_1_1string.html#a547bd8190dcc4e668f853d4d02f322ae">01030</a>         T <a class="code" href="classirr_1_1core_1_1string.html#a547bd8190dcc4e668f853d4d02f322ae" title="gets the last char of a string or null">lastChar</a>()<span class="keyword"> const</span>
-<a name="l01031"></a>01031 <span class="keyword">        </span>{
-<a name="l01032"></a>01032                 <span class="keywordflow">return</span> used &gt; 1 ? <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[used-2] : 0;
-<a name="l01033"></a>01033         }
-<a name="l01034"></a>01034 
+<a name="l00993"></a>00993 
+<a name="l00996"></a><a class="code" href="classirr_1_1core_1_1string.html#acbf7cf936f1f15f96ebe046ce0eddade">00996</a>         <span class="keywordtype">void</span> <a class="code" href="classirr_1_1core_1_1string.html#acbf7cf936f1f15f96ebe046ce0eddade" title="Erases a character from the string.">erase</a>(<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> index)
+<a name="l00997"></a>00997         {
+<a name="l00998"></a>00998                 <a class="code" href="irr_types_8h.html#a12f3b5fd18ca108f90c5c74db602267e" title="define a break macro for debugging.">_IRR_DEBUG_BREAK_IF</a>(index&gt;=used) <span class="comment">// access violation</span>
+<a name="l00999"></a>00999 
+<a name="l01000"></a>01000                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=index+1; i&lt;used; ++i)
+<a name="l01001"></a>01001                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i-1] = <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i];
+<a name="l01002"></a>01002 
+<a name="l01003"></a>01003                 --used;
+<a name="l01004"></a>01004         }
+<a name="l01005"></a>01005 
+<a name="l01007"></a><a class="code" href="classirr_1_1core_1_1string.html#a24cf2d676ba5f259872d8d5bed141a45">01007</a>         <span class="keywordtype">void</span> <a class="code" href="classirr_1_1core_1_1string.html#a24cf2d676ba5f259872d8d5bed141a45" title="verify the existing string.">validate</a>()
+<a name="l01008"></a>01008         {
+<a name="l01009"></a>01009                 <span class="comment">// terminate on existing null</span>
+<a name="l01010"></a>01010                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;allocated; ++i)
+<a name="l01011"></a>01011                 {
+<a name="l01012"></a>01012                         <span class="keywordflow">if</span> (<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i] == 0)
+<a name="l01013"></a>01013                         {
+<a name="l01014"></a>01014                                 used = i + 1;
+<a name="l01015"></a>01015                                 <span class="keywordflow">return</span>;
+<a name="l01016"></a>01016                         }
+<a name="l01017"></a>01017                 }
+<a name="l01018"></a>01018 
+<a name="l01019"></a>01019                 <span class="comment">// terminate</span>
+<a name="l01020"></a>01020                 <span class="keywordflow">if</span> ( allocated &gt; 0 )
+<a name="l01021"></a>01021                 {
+<a name="l01022"></a>01022                         used = allocated - 1;
+<a name="l01023"></a>01023                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[used] = 0;
+<a name="l01024"></a>01024                 }
+<a name="l01025"></a>01025                 <span class="keywordflow">else</span>
+<a name="l01026"></a>01026                 {
+<a name="l01027"></a>01027                         used = 0;
+<a name="l01028"></a>01028                 }
+<a name="l01029"></a>01029         }
+<a name="l01030"></a>01030 
+<a name="l01032"></a><a class="code" href="classirr_1_1core_1_1string.html#a547bd8190dcc4e668f853d4d02f322ae">01032</a>         T <a class="code" href="classirr_1_1core_1_1string.html#a547bd8190dcc4e668f853d4d02f322ae" title="gets the last char of a string or null">lastChar</a>()<span class="keyword"> const</span>
+<a name="l01033"></a>01033 <span class="keyword">        </span>{
+<a name="l01034"></a>01034                 <span class="keywordflow">return</span> used &gt; 1 ? <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[used-2] : 0;
+<a name="l01035"></a>01035         }
 <a name="l01036"></a>01036 
-<a name="l01053"></a>01053         <span class="keyword">template</span>&lt;<span class="keyword">class</span> container&gt;
-<a name="l01054"></a><a class="code" href="classirr_1_1core_1_1string.html#ac9238f731542d224109fa3221b9c09a0">01054</a>         <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> <a class="code" href="classirr_1_1core_1_1string.html#ac9238f731542d224109fa3221b9c09a0" title="split string into parts.">split</a>(container&amp; ret, <span class="keyword">const</span> T* <span class="keyword">const</span> c, <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> count=1, <span class="keywordtype">bool</span> ignoreEmptyTokens=<span class="keyword">true</span>, <span class="keywordtype">bool</span> keepSeparators=<span class="keyword">false</span>)<span class="keyword"> const</span>
-<a name="l01055"></a>01055 <span class="keyword">        </span>{
-<a name="l01056"></a>01056                 <span class="keywordflow">if</span> (!c)
-<a name="l01057"></a>01057                         <span class="keywordflow">return</span> 0;
-<a name="l01058"></a>01058 
-<a name="l01059"></a>01059                 <span class="keyword">const</span> <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> oldSize=ret.size();
-<a name="l01060"></a>01060                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> lastpos = 0;
-<a name="l01061"></a>01061                 <span class="keywordtype">bool</span> lastWasSeparator = <span class="keyword">false</span>;
-<a name="l01062"></a>01062                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;used; ++i)
-<a name="l01063"></a>01063                 {
-<a name="l01064"></a>01064                         <span class="keywordtype">bool</span> foundSeparator = <span class="keyword">false</span>;
-<a name="l01065"></a>01065                         <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> j=0; j&lt;count; ++j)
-<a name="l01066"></a>01066                         {
-<a name="l01067"></a>01067                                 <span class="keywordflow">if</span> (<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i] == c[j])
-<a name="l01068"></a>01068                                 {
-<a name="l01069"></a>01069                                         <span class="keywordflow">if</span> ((!ignoreEmptyTokens || i - lastpos != 0) &amp;&amp;
-<a name="l01070"></a>01070                                                         !lastWasSeparator)
-<a name="l01071"></a>01071                                                 ret.push_back(<a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a>(&amp;<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[lastpos], i - lastpos));
-<a name="l01072"></a>01072                                         foundSeparator = <span class="keyword">true</span>;
-<a name="l01073"></a>01073                                         lastpos = (keepSeparators ? i : i + 1);
-<a name="l01074"></a>01074                                         <span class="keywordflow">break</span>;
-<a name="l01075"></a>01075                                 }
-<a name="l01076"></a>01076                         }
-<a name="l01077"></a>01077                         lastWasSeparator = foundSeparator;
-<a name="l01078"></a>01078                 }
-<a name="l01079"></a>01079                 <span class="keywordflow">if</span> ((used - 1) &gt; lastpos)
-<a name="l01080"></a>01080                         ret.<a class="code" href="classirr_1_1core_1_1array.html#ad2c9dff8592b95c25c59f5383fc633fe" title="Adds an element at back of array.">push_back</a>(<a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a>(&amp;<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[lastpos], (used - 1) - lastpos));
-<a name="l01081"></a>01081                 <span class="keywordflow">return</span> ret.size()-oldSize;
-<a name="l01082"></a>01082         }
-<a name="l01083"></a>01083 
-<a name="l01084"></a>01084 <span class="keyword">private</span>:
+<a name="l01038"></a>01038 
+<a name="l01055"></a>01055         <span class="keyword">template</span>&lt;<span class="keyword">class</span> container&gt;
+<a name="l01056"></a><a class="code" href="classirr_1_1core_1_1string.html#ac9238f731542d224109fa3221b9c09a0">01056</a>         <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> <a class="code" href="classirr_1_1core_1_1string.html#ac9238f731542d224109fa3221b9c09a0" title="split string into parts.">split</a>(container&amp; ret, <span class="keyword">const</span> T* <span class="keyword">const</span> c, <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> count=1, <span class="keywordtype">bool</span> ignoreEmptyTokens=<span class="keyword">true</span>, <span class="keywordtype">bool</span> keepSeparators=<span class="keyword">false</span>)<span class="keyword"> const</span>
+<a name="l01057"></a>01057 <span class="keyword">        </span>{
+<a name="l01058"></a>01058                 <span class="keywordflow">if</span> (!c)
+<a name="l01059"></a>01059                         <span class="keywordflow">return</span> 0;
+<a name="l01060"></a>01060 
+<a name="l01061"></a>01061                 <span class="keyword">const</span> <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> oldSize=ret.size();
+<a name="l01062"></a>01062                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> lastpos = 0;
+<a name="l01063"></a>01063                 <span class="keywordtype">bool</span> lastWasSeparator = <span class="keyword">false</span>;
+<a name="l01064"></a>01064                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;used; ++i)
+<a name="l01065"></a>01065                 {
+<a name="l01066"></a>01066                         <span class="keywordtype">bool</span> foundSeparator = <span class="keyword">false</span>;
+<a name="l01067"></a>01067                         <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> j=0; j&lt;count; ++j)
+<a name="l01068"></a>01068                         {
+<a name="l01069"></a>01069                                 <span class="keywordflow">if</span> (<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i] == c[j])
+<a name="l01070"></a>01070                                 {
+<a name="l01071"></a>01071                                         <span class="keywordflow">if</span> ((!ignoreEmptyTokens || i - lastpos != 0) &amp;&amp;
+<a name="l01072"></a>01072                                                         !lastWasSeparator)
+<a name="l01073"></a>01073                                                 ret.push_back(<a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a>(&amp;<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[lastpos], i - lastpos));
+<a name="l01074"></a>01074                                         foundSeparator = <span class="keyword">true</span>;
+<a name="l01075"></a>01075                                         lastpos = (keepSeparators ? i : i + 1);
+<a name="l01076"></a>01076                                         <span class="keywordflow">break</span>;
+<a name="l01077"></a>01077                                 }
+<a name="l01078"></a>01078                         }
+<a name="l01079"></a>01079                         lastWasSeparator = foundSeparator;
+<a name="l01080"></a>01080                 }
+<a name="l01081"></a>01081                 <span class="keywordflow">if</span> ((used - 1) &gt; lastpos)
+<a name="l01082"></a>01082                         ret.<a class="code" href="classirr_1_1core_1_1array.html#ad2c9dff8592b95c25c59f5383fc633fe" title="Adds an element at back of array.">push_back</a>(<a class="code" href="classirr_1_1core_1_1string.html">string&lt;T,TAlloc&gt;</a>(&amp;<a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[lastpos], (used - 1) - lastpos));
+<a name="l01083"></a>01083                 <span class="keywordflow">return</span> ret.size()-oldSize;
+<a name="l01084"></a>01084         }
 <a name="l01085"></a>01085 
-<a name="l01087"></a>01087         <span class="keywordtype">void</span> reallocate(<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> new_size)
-<a name="l01088"></a>01088         {
-<a name="l01089"></a>01089                 T* old_array = <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>;
-<a name="l01090"></a>01090 
-<a name="l01091"></a>01091                 <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a> = allocator.allocate(new_size); <span class="comment">//new T[new_size];</span>
-<a name="l01092"></a>01092                 allocated = new_size;
-<a name="l01093"></a>01093 
-<a name="l01094"></a>01094                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> amount = used &lt; new_size ? used : new_size;
-<a name="l01095"></a>01095                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;amount; ++i)
-<a name="l01096"></a>01096                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i] = old_array[i];
-<a name="l01097"></a>01097 
-<a name="l01098"></a>01098                 <span class="keywordflow">if</span> (allocated &lt; used)
-<a name="l01099"></a>01099                         used = allocated;
-<a name="l01100"></a>01100 
-<a name="l01101"></a>01101                 allocator.deallocate(old_array); <span class="comment">// delete [] old_array;</span>
-<a name="l01102"></a>01102         }
-<a name="l01103"></a>01103 
-<a name="l01104"></a>01104         <span class="comment">//--- member variables</span>
+<a name="l01086"></a>01086 <span class="keyword">private</span>:
+<a name="l01087"></a>01087 
+<a name="l01089"></a>01089         <span class="keywordtype">void</span> reallocate(<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> new_size)
+<a name="l01090"></a>01090         {
+<a name="l01091"></a>01091                 T* old_array = <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>;
+<a name="l01092"></a>01092 
+<a name="l01093"></a>01093                 <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a> = allocator.allocate(new_size); <span class="comment">//new T[new_size];</span>
+<a name="l01094"></a>01094                 allocated = new_size;
+<a name="l01095"></a>01095 
+<a name="l01096"></a>01096                 <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> amount = used &lt; new_size ? used : new_size;
+<a name="l01097"></a>01097                 <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;amount; ++i)
+<a name="l01098"></a>01098                         <a class="code" href="classirr_1_1core_1_1array.html" title="Self reallocating template array (like stl vector) with additional features.">array</a>[i] = old_array[i];
+<a name="l01099"></a>01099 
+<a name="l01100"></a>01100                 <span class="keywordflow">if</span> (allocated &lt; used)
+<a name="l01101"></a>01101                         used = allocated;
+<a name="l01102"></a>01102 
+<a name="l01103"></a>01103                 allocator.deallocate(old_array); <span class="comment">// delete [] old_array;</span>
+<a name="l01104"></a>01104         }
 <a name="l01105"></a>01105 
-<a name="l01106"></a>01106         T* array;
-<a name="l01107"></a>01107         <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> allocated;
-<a name="l01108"></a>01108         <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> used;
-<a name="l01109"></a>01109         TAlloc allocator;
-<a name="l01110"></a>01110 };
-<a name="l01111"></a>01111 
-<a name="l01112"></a>01112 
-<a name="l01114"></a><a class="code" href="namespaceirr_1_1core.html#ade1071a878633f2f6d8a75c5d11fec19">01114</a> <span class="keyword">typedef</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;c8&gt;</a> <a class="code" href="classirr_1_1core_1_1string.html">stringc</a>;
-<a name="l01115"></a>01115 
-<a name="l01117"></a><a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2">01117</a> <span class="keyword">typedef</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;wchar_t&gt;</a> <a class="code" href="classirr_1_1core_1_1string.html">stringw</a>;
-<a name="l01118"></a>01118 
-<a name="l01119"></a>01119 
-<a name="l01120"></a>01120 } <span class="comment">// end namespace core</span>
-<a name="l01121"></a>01121 } <span class="comment">// end namespace irr</span>
-<a name="l01122"></a>01122 
-<a name="l01123"></a>01123 <span class="preprocessor">#endif</span>
-<a name="l01124"></a>01124 <span class="preprocessor"></span>
+<a name="l01106"></a>01106         <span class="comment">//--- member variables</span>
+<a name="l01107"></a>01107 
+<a name="l01108"></a>01108         T* array;
+<a name="l01109"></a>01109         <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> allocated;
+<a name="l01110"></a>01110         <a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> used;
+<a name="l01111"></a>01111         TAlloc allocator;
+<a name="l01112"></a>01112 };
+<a name="l01113"></a>01113 
+<a name="l01114"></a>01114 
+<a name="l01116"></a><a class="code" href="namespaceirr_1_1core.html#ade1071a878633f2f6d8a75c5d11fec19">01116</a> <span class="keyword">typedef</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;c8&gt;</a> <a class="code" href="classirr_1_1core_1_1string.html">stringc</a>;
+<a name="l01117"></a>01117 
+<a name="l01119"></a><a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2">01119</a> <span class="keyword">typedef</span> <a class="code" href="classirr_1_1core_1_1string.html">string&lt;wchar_t&gt;</a> <a class="code" href="classirr_1_1core_1_1string.html">stringw</a>;
+<a name="l01120"></a>01120 
+<a name="l01121"></a>01121 
+<a name="l01122"></a>01122 } <span class="comment">// end namespace core</span>
+<a name="l01123"></a>01123 } <span class="comment">// end namespace irr</span>
+<a name="l01124"></a>01124 
+<a name="l01125"></a>01125 <span class="preprocessor">#endif</span>
+<a name="l01126"></a>01126 <span class="preprocessor"></span>
 </pre></div></div>
 <hr size="1">
 <address style="align: right;">
@@ -1012,7 +1014,7 @@
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Jan 31 16:45:17 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Feb 14 13:06:57 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>

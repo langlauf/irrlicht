@@ -1704,6 +1704,7 @@ CQuake3EventHandler::~CQuake3EventHandler ()
 
         node-&gt;setMaterialFlag(<a class="code" href="namespaceirr_1_1video.html#a8a3bc00ae8137535b9fbc5f40add70d3acea597a2692b8415486a464a7f954d34" title="Will this material be lighted? Default: true.">EMF_LIGHTING</a>, <span class="keyword">false</span>);
         node-&gt;setMaterialTexture(0, Game-&gt;Device-&gt;getVideoDriver()-&gt;getTexture(<span class="stringliteral">&quot;fireball.bmp&quot;</span>));
+        node-&gt;setMaterialFlag(<a class="code" href="namespaceirr_1_1video.html#a8a3bc00ae8137535b9fbc5f40add70d3a4bc03b7b9dd19e577bf909313ea62510" title="May be written to the zbuffer or is it readonly. Default: true.">video::EMF_ZWRITE_ENABLE</a>, <span class="keyword">false</span>);
         node-&gt;setMaterialType(<a class="code" href="namespaceirr_1_1video.html#ac8e9b6c66f7cebabd1a6d30cbc5430f1a1b5a814c4466aca2943ff056003a50d1" title="A transparent material.">EMT_TRANSPARENT_ADD_COLOR</a>);
 
         <a class="code" href="namespaceirr.html#a0277be98d67dc26ff93b1a6a1d086b07" title="32 bit floating point variable.">f32</a> length = (<a class="code" href="namespaceirr.html#a0277be98d67dc26ff93b1a6a1d086b07" title="32 bit floating point variable.">f32</a>)(end - start).getLength();
@@ -1817,6 +1818,7 @@ CQuake3EventHandler::~CQuake3EventHandler ()
                         anim-&gt;drop();
 
                         pas-&gt;setMaterialFlag(<a class="code" href="namespaceirr_1_1video.html#a8a3bc00ae8137535b9fbc5f40add70d3acea597a2692b8415486a464a7f954d34" title="Will this material be lighted? Default: true.">video::EMF_LIGHTING</a>, <span class="keyword">false</span>);
+                        pas-&gt;setMaterialFlag(<a class="code" href="namespaceirr_1_1video.html#a8a3bc00ae8137535b9fbc5f40add70d3a4bc03b7b9dd19e577bf909313ea62510" title="May be written to the zbuffer or is it readonly. Default: true.">video::EMF_ZWRITE_ENABLE</a>, <span class="keyword">false</span>);
                         pas-&gt;setMaterialType(<a class="code" href="namespaceirr_1_1video.html#ac8e9b6c66f7cebabd1a6d30cbc5430f1a26529b1cf18ec4d8073809f6bd15ebbb" title="Makes the material transparent based on the vertex alpha value.">video::EMT_TRANSPARENT_VERTEX_ALPHA</a> );
                         pas-&gt;setMaterialTexture(0, Game-&gt;Device-&gt;getVideoDriver()-&gt;getTexture( smoke[g].texture ));
                 }
@@ -2089,7 +2091,7 @@ CQuake3EventHandler::~CQuake3EventHandler ()
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Jan 31 16:45:20 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Feb 14 13:07:00 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>

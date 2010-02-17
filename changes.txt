@@ -1,3 +1,21 @@
+----------------
+Changes in 1.7.1
+
+ - Fix string::remove which got in an endless loop when remove was called with an empty string (found and fixed by Ulf)
+
+ - Correctly release the GLSL shaders
+
+ - Make sure we only release an X11 atom when it was actually created
+
+ - Fix aabbox collision test, which not only broke the collision test routines, but also frustum culling, octree tests, etc.
+
+ - Fix compilation problem under OSX due to wrong glProgramParameteri usage
+
+ - mem leak in OBJ loader fixed
+
+ - Removed some default parameters to reduce ambigious situations
+ 
+----------------
 Changes in 1.7
 
  - Implement minimize and deminimize under OSX.

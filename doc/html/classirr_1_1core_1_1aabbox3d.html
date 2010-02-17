@@ -59,7 +59,7 @@
 <tr><td class="memItemLeft" align="right" valign="top">T&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1core_1_1aabbox3d.html#ad948446d174e97e25d843ef0cd71a7a1">getVolume</a> () const </td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Get the volume enclosed by the box in cubed units.  <a href="#ad948446d174e97e25d843ef0cd71a7a1"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1core_1_1aabbox3d.html#a5d3d9d09354c4c362625dab7a15dcedb">intersectsWithBox</a> (const <a class="el" href="classirr_1_1core_1_1aabbox3d.html">aabbox3d</a>&lt; T &gt; &amp;other) const </td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Determines if the box intersects with another box.  <a href="#a5d3d9d09354c4c362625dab7a15dcedb"></a><br/></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Determines if the axis-aligned box intersects with another axis-aligned box.  <a href="#a5d3d9d09354c4c362625dab7a15dcedb"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1core_1_1aabbox3d.html#a7e252d09fdc83431955f48156ca2ae5c">intersectsWithLine</a> (const <a class="el" href="classirr_1_1core_1_1vector3d.html">vector3d</a>&lt; T &gt; &amp;linemiddle, const <a class="el" href="classirr_1_1core_1_1vector3d.html">vector3d</a>&lt; T &gt; &amp;linevect, T halflength) const </td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Tests if the box intersects with a line.  <a href="#a7e252d09fdc83431955f48156ca2ae5c"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1core_1_1aabbox3d.html#a34923d0c727e92df84906f256277e503">intersectsWithLine</a> (const <a class="el" href="classirr_1_1core_1_1line3d.html">line3d</a>&lt; T &gt; &amp;line) const </td></tr>
@@ -380,7 +380,7 @@ template&lt;class T&gt; </div>
 </dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>Returns ISREL3D_FRONT if the box is in front of the plane, ISREL3D_BACK if the box is behind the plane, and ISREL3D_CLIPPED if it is on both sides of the plane. </dd></dl>
 
-<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00271">271</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
+<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00273">273</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
 
 </div>
 </div>
@@ -568,7 +568,7 @@ template&lt;class T&gt; </div>
 </div>
 <div class="memdoc">
 
-<p>Determines if the box intersects with another box. </p>
+<p>Determines if the axis-aligned box intersects with another axis-aligned box. </p>
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>other,:</em>&nbsp;</td><td>Other box to check a intersection with. </td></tr>
@@ -577,7 +577,7 @@ template&lt;class T&gt; </div>
 </dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>True if there is an intersection with the other box, otherwise false. </dd></dl>
 
-<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00221">221</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
+<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00222">222</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
 
 </div>
 </div>
@@ -625,9 +625,9 @@ template&lt;class T&gt; </div>
 </dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>True if there is an intersection, else false. </dd></dl>
 
-<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00240">240</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
+<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00242">242</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
 
-<p>Referenced by <a class="el" href="aabbox3d_8h_source.html#l00240">irr::core::aabbox3d&lt; f32 &gt;::intersectsWithLine()</a>.</p>
+<p>Referenced by <a class="el" href="aabbox3d_8h_source.html#l00242">irr::core::aabbox3d&lt; f32 &gt;::intersectsWithLine()</a>.</p>
 
 </div>
 </div>
@@ -658,7 +658,7 @@ template&lt;class T&gt; </div>
 </dl>
 <dl class="return"><dt><b>Returns:</b></dt><dd>True if there is an intersection , else false. </dd></dl>
 
-<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00229">229</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
+<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00231">231</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
 
 </div>
 </div>
@@ -1001,7 +1001,7 @@ template&lt;class T&gt; </div>
 
 <p>The far edge. </p>
 
-<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00307">307</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
+<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00309">309</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
 
 <p>Referenced by <a class="el" href="aabbox3d_8h_source.html#l00021">irr::core::aabbox3d&lt; f32 &gt;::aabbox3d()</a>, <a class="el" href="aabbox3d_8h_source.html#l00082">irr::core::aabbox3d&lt; f32 &gt;::addInternalPoint()</a>, <a class="el" href="aabbox3d_8h_source.html#l00110">irr::core::aabbox3d&lt; f32 &gt;::isEmpty()</a>, <a class="el" href="aabbox3d_8h_source.html#l00190">irr::core::aabbox3d&lt; f32 &gt;::isPointInside()</a>, <a class="el" href="triangle3d_8h_source.html#l00054">irr::core::triangle3d&lt; T &gt;::isTotalOutsideBox()</a>, <a class="el" href="aabbox3d_8h_source.html#l00047">irr::core::aabbox3d&lt; f32 &gt;::reset()</a>, <a class="el" href="matrix4_8h_source.html#l01122">irr::core::CMatrix4&lt; T &gt;::transformBox()</a>, and <a class="el" href="matrix4_8h_source.html#l01136">irr::core::CMatrix4&lt; T &gt;::transformBoxEx()</a>.</p>
 
@@ -1022,9 +1022,9 @@ template&lt;class T&gt; </div>
 
 <p>The near edge. </p>
 
-<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00304">304</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
+<p>Definition at line <a class="el" href="aabbox3d_8h_source.html#l00306">306</a> of file <a class="el" href="aabbox3d_8h_source.html">aabbox3d.h</a>.</p>
 
-<p>Referenced by <a class="el" href="aabbox3d_8h_source.html#l00021">irr::core::aabbox3d&lt; f32 &gt;::aabbox3d()</a>, <a class="el" href="aabbox3d_8h_source.html#l00082">irr::core::aabbox3d&lt; f32 &gt;::addInternalPoint()</a>, <a class="el" href="aabbox3d_8h_source.html#l00179">irr::core::aabbox3d&lt; f32 &gt;::getInterpolated()</a>, <a class="el" href="aabbox3d_8h_source.html#l00229">irr::core::aabbox3d&lt; f32 &gt;::intersectsWithLine()</a>, <a class="el" href="aabbox3d_8h_source.html#l00110">irr::core::aabbox3d&lt; f32 &gt;::isEmpty()</a>, <a class="el" href="aabbox3d_8h_source.html#l00212">irr::core::aabbox3d&lt; f32 &gt;::isFullInside()</a>, <a class="el" href="aabbox3d_8h_source.html#l00190">irr::core::aabbox3d&lt; f32 &gt;::isPointInside()</a>, <a class="el" href="aabbox3d_8h_source.html#l00201">irr::core::aabbox3d&lt; f32 &gt;::isPointTotalInside()</a>, <a class="el" href="triangle3d_8h_source.html#l00054">irr::core::triangle3d&lt; T &gt;::isTotalOutsideBox()</a>, <a class="el" href="aabbox3d_8h_source.html#l00047">irr::core::aabbox3d&lt; f32 &gt;::reset()</a>, <a class="el" href="matrix4_8h_source.html#l01122">irr::core::CMatrix4&lt; T &gt;::transformBox()</a>, and <a class="el" href="matrix4_8h_source.html#l01136">irr::core::CMatrix4&lt; T &gt;::transformBoxEx()</a>.</p>
+<p>Referenced by <a class="el" href="aabbox3d_8h_source.html#l00021">irr::core::aabbox3d&lt; f32 &gt;::aabbox3d()</a>, <a class="el" href="aabbox3d_8h_source.html#l00082">irr::core::aabbox3d&lt; f32 &gt;::addInternalPoint()</a>, <a class="el" href="aabbox3d_8h_source.html#l00179">irr::core::aabbox3d&lt; f32 &gt;::getInterpolated()</a>, <a class="el" href="aabbox3d_8h_source.html#l00110">irr::core::aabbox3d&lt; f32 &gt;::isEmpty()</a>, <a class="el" href="aabbox3d_8h_source.html#l00212">irr::core::aabbox3d&lt; f32 &gt;::isFullInside()</a>, <a class="el" href="aabbox3d_8h_source.html#l00190">irr::core::aabbox3d&lt; f32 &gt;::isPointInside()</a>, <a class="el" href="aabbox3d_8h_source.html#l00201">irr::core::aabbox3d&lt; f32 &gt;::isPointTotalInside()</a>, <a class="el" href="triangle3d_8h_source.html#l00054">irr::core::triangle3d&lt; T &gt;::isTotalOutsideBox()</a>, <a class="el" href="aabbox3d_8h_source.html#l00047">irr::core::aabbox3d&lt; f32 &gt;::reset()</a>, <a class="el" href="matrix4_8h_source.html#l01122">irr::core::CMatrix4&lt; T &gt;::transformBox()</a>, and <a class="el" href="matrix4_8h_source.html#l01136">irr::core::CMatrix4&lt; T &gt;::transformBoxEx()</a>.</p>
 
 </div>
 </div>
@@ -1041,7 +1041,7 @@ template&lt;class T&gt; </div>
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Jan 31 16:45:23 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Feb 14 13:07:03 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>
