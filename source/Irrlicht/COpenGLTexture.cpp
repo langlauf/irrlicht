@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2010 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -381,10 +381,10 @@ void* COpenGLTexture::lock(bool readOnly, u32 mipmapLevel)
 					++i;
 				}
 				while (i != mipmapLevel);
-				image = new CImage(ECF_A8R8G8B8, core::dimension2du(width,height));
+				MipImage = image = new CImage(ECF_A8R8G8B8, core::dimension2du(width,height));
 			}
 			else
-				image = new CImage(ECF_A8R8G8B8, ImageSize);
+				Image = image = new CImage(ECF_A8R8G8B8, ImageSize);
 			ColorFormat = ECF_A8R8G8B8;
 		}
 		if (!image)

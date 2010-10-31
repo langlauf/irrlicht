@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2010 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 // Code contributed by skreamz
@@ -100,7 +100,7 @@ bool CArchiveLoaderPAK::isALoadableFileFormat(io::IReadFile* file) const
 	PAK Reader
 */
 CPakReader::CPakReader(IReadFile* file, bool ignoreCase, bool ignorePaths)
-: CFileList(file ? file->getFileName() : "", ignoreCase, ignorePaths), File(file)
+: CFileList((file ? file->getFileName() : io::path("")), ignoreCase, ignorePaths), File(file)
 {
 #ifdef _DEBUG
 	setDebugName("CPakReader");
@@ -130,13 +130,13 @@ const IFileList* CPakReader::getFileList() const
 bool CPakReader::scanLocalHeader()
 {
 	SPAKFileHeader header;
-		
+
 	// Read and validate the header
 	File->read(&header, sizeof(header));
 	if (!isHeaderValid(header))
 		return false;
 
-	// Seek to the table of contents	
+	// Seek to the table of contents
 #ifdef __BIG_ENDIAN__
 	header.offset = os::Byteswap::byteswap(header.offset);
 	header.length = os::Byteswap::byteswap(header.length);

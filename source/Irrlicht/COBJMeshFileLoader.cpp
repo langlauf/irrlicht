@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2010 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -813,7 +813,7 @@ u32 COBJMeshFileLoader::copyWord(c8* outBuf, const c8* const inBuf, u32 outBufLe
 	for (u32 j=0; j<length; ++j)
 		outBuf[j] = inBuf[j];
 
-	outBuf[i] = 0;
+	outBuf[length] = 0;
 	return length;
 }
 

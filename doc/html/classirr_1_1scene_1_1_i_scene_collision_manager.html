@@ -303,7 +303,7 @@ Inheritance diagram for irr::scene::ISceneCollisionManager:</div>
 
 <p>Perform a ray/box and ray/triangle collision check on a heirarchy of scene nodes. </p>
 <p>This checks all scene nodes under the specified one, first by ray/bounding box, and then by accurate ray/triangle collision, finding the nearest collision, and the scene node containg it. It returns the node hit, and (via output parameters) the position of the collision, and the triangle that was hit.</p>
-<p>All scene nodes in the hierarchy tree under the specified node are checked. Only notes that are visible, with an ID that matches at least one bit in the supplied bitmask, and which have a triangle selector are considered as candidates for being hit. You do not have to build a meta triangle selector; the individual triangle selectors of each candidate scene node are used automatically.</p>
+<p>All scene nodes in the hierarchy tree under the specified node are checked. Only nodes that are visible, with an ID that matches at least one bit in the supplied bitmask, and which have a triangle selector are considered as candidates for being hit. You do not have to build a meta triangle selector; the individual triangle selectors of each candidate scene node are used automatically.</p>
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>ray,:</em>&nbsp;</td><td>Line with which collisions are tested. </td></tr>
@@ -518,7 +518,7 @@ Inheritance diagram for irr::scene::ISceneCollisionManager:</div>
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Feb 14 13:07:11 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Oct 24 12:42:07 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>

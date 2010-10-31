@@ -263,13 +263,13 @@
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>vertexShaderProgram,:</em>&nbsp;</td><td>String containing the source of the vertex shader program. This can be 0 if no vertex program shall be used. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>vertexShaderEntryPointName,:</em>&nbsp;</td><td>Name of the entry function of the vertexShaderProgram </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>vertexShaderEntryPointName,:</em>&nbsp;</td><td>Name of the entry function of the vertexShaderProgram (p.e. "main") </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>vsCompileTarget,:</em>&nbsp;</td><td>Vertex shader version the high level shader shall be compiled to. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>pixelShaderProgram,:</em>&nbsp;</td><td>String containing the source of the pixel shader program. This can be 0 if no pixel shader shall be used. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>pixelShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the pixelShaderEntryPointName </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>pixelShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the pixelShaderProgram (p.e. "main") </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>psCompileTarget,:</em>&nbsp;</td><td>Pixel shader version the high level shader shall be compiled to. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>geometryShaderProgram,:</em>&nbsp;</td><td>String containing the source of the geometry shader program. This can be 0 if no geometry shader shall be used. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>geometryShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the geometryShaderEntryPointName </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>geometryShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the geometryShaderProgram (p.e. "main") </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>gsCompileTarget,:</em>&nbsp;</td><td>Geometry shader version the high level shader shall be compiled to. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>inType</em>&nbsp;</td><td>Type of vertices passed to geometry shader </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>outType</em>&nbsp;</td><td>Type of vertices created by geometry shader </td></tr>
@@ -471,10 +471,10 @@
     <tr><td valign="top"></td><td valign="top"><em>vertexShaderEntryPointName,:</em>&nbsp;</td><td>Name of the entry function of the vertexShaderProgram </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>vsCompileTarget,:</em>&nbsp;</td><td>Vertex shader version the high level shader shall be compiled to. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>pixelShaderProgram,:</em>&nbsp;</td><td>Text file handle containing the source of the pixel shader program. Set to 0 if no pixel shader shall be created. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>pixelShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the pixelShaderEntryPointName </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>pixelShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the pixelShaderProgram (p.e. "main") </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>psCompileTarget,:</em>&nbsp;</td><td>Pixel shader version the high level shader shall be compiled to. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>geometryShaderProgram,:</em>&nbsp;</td><td>Text file handle containing the source of the geometry shader program. Set to 0 if no geometry shader shall be created. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>geometryShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the geometryShaderEntryPointName </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>geometryShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the geometryShaderProgram (p.e. "main") </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>gsCompileTarget,:</em>&nbsp;</td><td>Geometry shader version the high level shader shall be compiled to. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>inType</em>&nbsp;</td><td>Type of vertices passed to geometry shader </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>outType</em>&nbsp;</td><td>Type of vertices created by geometry shader </td></tr>
@@ -671,13 +671,13 @@
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>vertexShaderProgramFileName,:</em>&nbsp;</td><td>Text file containing the source of the vertex shader program. Set to empty string if no vertex shader shall be created. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>vertexShaderEntryPointName,:</em>&nbsp;</td><td>Name of the entry function of the vertexShaderProgram </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>vertexShaderEntryPointName,:</em>&nbsp;</td><td>Name of the entry function of the vertexShaderProgram (p.e. "main") </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>vsCompileTarget,:</em>&nbsp;</td><td>Vertex shader version the high level shader shall be compiled to. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>pixelShaderProgramFileName,:</em>&nbsp;</td><td>Text file containing the source of the pixel shader program. Set to empty string if no pixel shader shall be created. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>pixelShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the pixelShaderEntryPointName </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>pixelShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the pixelShaderProgram (p.e. "main") </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>psCompileTarget,:</em>&nbsp;</td><td>Pixel shader version the high level shader shall be compiled to. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>geometryShaderProgramFileName,:</em>&nbsp;</td><td>String containing the source of the geometry shader program. Set to empty string if no geometry shader shall be created. </td></tr>
-    <tr><td valign="top"></td><td valign="top"><em>geometryShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the geometryShaderEntryPointName </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>geometryShaderProgramFileName,:</em>&nbsp;</td><td>Name of the source of the geometry shader program. Set to empty string if no geometry shader shall be created. </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>geometryShaderEntryPointName,:</em>&nbsp;</td><td>Entry name of the function of the geometryShaderProgram (p.e. "main") </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>gsCompileTarget,:</em>&nbsp;</td><td>Geometry shader version the high level shader shall be compiled to. </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>inType</em>&nbsp;</td><td>Type of vertices passed to geometry shader </td></tr>
     <tr><td valign="top"></td><td valign="top"><em>outType</em>&nbsp;</td><td>Type of vertices created by geometry shader </td></tr>
@@ -890,7 +890,7 @@
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Feb 14 13:07:14 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Oct 24 12:42:09 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>

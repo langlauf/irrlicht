@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2010 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -24,7 +24,7 @@ namespace scene
         |  /      |  /
         |/        | /
         0------11,1/
-       000       100       
+       000       100
 	*/
 
 //! constructor
@@ -190,13 +190,14 @@ ISceneNode* CCubeSceneNode::clone(ISceneNode* newParent, ISceneManager* newManag
 	if (!newManager)
 		newManager = SceneManager;
 
-	CCubeSceneNode* nb = new CCubeSceneNode(Size, newParent, 
+	CCubeSceneNode* nb = new CCubeSceneNode(Size, newParent,
 		newManager, ID, RelativeTranslation);
 
 	nb->cloneMembers(this, newManager);
 	nb->getMaterial(0) = getMaterial(0);
 
-	nb->drop();
+	if ( newParent )
+		nb->drop();
 	return nb;
 }
 

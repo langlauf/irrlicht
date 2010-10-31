@@ -51,7 +51,7 @@ Inheritance diagram for irr::scene::ISceneNodeAnimatorCollisionResponse:</div>
 <tr><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classirr_1_1core_1_1vector3d.html">core::vector3df</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1scene_1_1_i_scene_node_animator_collision_response.html#acb39b68d18f721960ac73dc158968479">getCollisionPoint</a> () const =0</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the last point of collision.  <a href="#acb39b68d18f721960ac73dc158968479"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classirr_1_1core_1_1vector3d.html">core::vector3df</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1scene_1_1_i_scene_node_animator_collision_response.html#a788542083dda874c63e278891535a9f4">getCollisionResultPosition</a> (void) const =0</td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the position that the target node will be moved to, unless the collision is consumed in a callback).  <a href="#a788542083dda874c63e278891535a9f4"></a><br/></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the position that the target node will be moved to, unless the collision is consumed in a callback.  <a href="#a788542083dda874c63e278891535a9f4"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="classirr_1_1core_1_1triangle3d.html">core::triangle3df</a> &amp;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1scene_1_1_i_scene_node_animator_collision_response.html#abb9d0576446a64e9944ef15a04722591">getCollisionTriangle</a> () const =0</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Returns the last triangle that caused a collision.  <a href="#abb9d0576446a64e9944ef15a04722591"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="classirr_1_1core_1_1vector3d.html">core::vector3df</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1scene_1_1_i_scene_node_animator_collision_response.html#a92965919db3dfbaab2d1f4987a2c52c1">getEllipsoidRadius</a> () const =0</td></tr>
@@ -204,7 +204,7 @@ Inheritance diagram for irr::scene::ISceneNodeAnimatorCollisionResponse:</div>
 </div>
 <div class="memdoc">
 
-<p>Returns the position that the target node will be moved to, unless the collision is consumed in a callback). </p>
+<p>Returns the position that the target node will be moved to, unless the collision is consumed in a callback. </p>
 <p>If you have a collision callback registered, and it consumes the collision, then the node will ignore the collision and will not stop at this position. Instead, it will move fully to the position that caused the collision to occur. </p>
 
 </div>
@@ -569,7 +569,7 @@ Inheritance diagram for irr::scene::ISceneNodeAnimatorCollisionResponse:</div>
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Feb 14 13:07:12 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Oct 24 12:42:08 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>

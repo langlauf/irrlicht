@@ -96,8 +96,10 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
         GUI_ID_BUTTON_SHOW_TOOLBOX,
         GUI_ID_BUTTON_SELECT_ARCHIVE,
 
+        GUI_ID_ANIMATION_INFO,
+
         <span class="comment">// And some magic numbers</span>
-        MAX_FRAMERATE = 1000,
+        MAX_FRAMERATE = 80,
         DEFAULT_FRAMERATE = 30
 };
 </pre></div><p>Toggle between various cameras </p>
@@ -113,7 +115,7 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
         Device-&gt;getSceneManager()-&gt;setActiveCamera(newActive);
 }
 </pre></div><p>Set the skin transparency by changing the alpha values of all skin-colors </p>
-<div class="fragment"><pre class="fragment"><span class="keywordtype">void</span> SetSkinTransparency(<a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> alpha, <a class="code" href="classirr_1_1gui_1_1_i_g_u_i_skin.html" title="A skin modifies the look of the GUI elements.">irr::gui::IGUISkin</a> * skin)
+<div class="fragment"><pre class="fragment"><span class="keywordtype">void</span> setSkinTransparency(<a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> alpha, <a class="code" href="classirr_1_1gui_1_1_i_g_u_i_skin.html" title="A skin modifies the look of the GUI elements.">irr::gui::IGUISkin</a> * skin)
 {
         <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> i=0; i&lt;<a class="code" href="namespaceirr_1_1gui.html#abd15860fde29833c48daff5f95d5467aaf340f49e2e0827c0f06fdf65098554af">irr::gui::EGDC_COUNT</a> ; ++i)
         {
@@ -123,7 +125,7 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
         }
 }
 </pre></div><p>Update the display of the model scaling </p>
-<div class="fragment"><pre class="fragment"><span class="keywordtype">void</span> UpdateScaleInfo(scene::ISceneNode* model)
+<div class="fragment"><pre class="fragment"><span class="keywordtype">void</span> updateScaleInfo(scene::ISceneNode* model)
 {
         IGUIElement* toolboxWnd = Device-&gt;getGUIEnvironment()-&gt;getRootGUIElement()-&gt;getElementFromId(GUI_ID_DIALOG_ROOT_WINDOW, <span class="keyword">true</span>);
         <span class="keywordflow">if</span> (!toolboxWnd)
@@ -155,9 +157,9 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
 {
         <span class="comment">// modify the name if it a .pk3 file</span>
 
-        <a class="code" href="namespaceirr_1_1core.html#ade1071a878633f2f6d8a75c5d11fec19" title="Typedef for character strings.">core::stringc</a> filename(fn);
+        <a class="code" href="namespaceirr_1_1io.html#ab1bdc45edb3f94d8319c02bc0f840ee1" title="Type used for all file system related strings.">io::path</a> filename(fn);
 
-        <a class="code" href="namespaceirr_1_1core.html#ade1071a878633f2f6d8a75c5d11fec19" title="Typedef for character strings.">core::stringc</a> extension;
+        <a class="code" href="namespaceirr_1_1io.html#ab1bdc45edb3f94d8319c02bc0f840ee1" title="Type used for all file system related strings.">io::path</a> extension;
         <a class="code" href="namespaceirr_1_1core.html#abebbe8b229dc865ebeb9bb0fd367d6ea" title="get the filename extension from a file path">core::getFileNameExtension</a>(extension, filename);
         extension.make_lower();
 
@@ -239,7 +241,7 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
         <span class="keywordflow">if</span> (menu)
                 <span class="keywordflow">for</span>(<span class="keywordtype">int</span> item = 1; item &lt; 6; ++item)
                         menu-&gt;setItemChecked(item, <span class="keyword">false</span>);
-        UpdateScaleInfo(Model);
+        updateScaleInfo(Model);
 }
 </pre></div><p>Finally, the third function creates a toolbox window. In this simple mesh viewer, this toolbox only contains a tab control with three edit boxes for changing the scale of the displayed model. </p>
 <div class="fragment"><pre class="fragment"><span class="keywordtype">void</span> createToolBox()
@@ -266,7 +268,7 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
                         core::rect&lt;s32&gt;(10,20,60,45), <span class="keyword">false</span>, <span class="keyword">false</span>, t1);
         env-&gt;addStaticText(L<span class="stringliteral">&quot;X:&quot;</span>, core::rect&lt;s32&gt;(22,48,40,66), <span class="keyword">false</span>, <span class="keyword">false</span>, t1);
         env-&gt;addEditBox(L<span class="stringliteral">&quot;1.0&quot;</span>, core::rect&lt;s32&gt;(40,46,130,66), <span class="keyword">true</span>, t1, GUI_ID_X_SCALE);
-        env-&gt;addStaticText(L<span class="stringliteral">&quot;Y:&quot;</span>, core::rect&lt;s32&gt;(22,82,40,GUI_ID_OPEN_MODEL), <span class="keyword">false</span>, <span class="keyword">false</span>, t1);
+        env-&gt;addStaticText(L<span class="stringliteral">&quot;Y:&quot;</span>, core::rect&lt;s32&gt;(22,82,40,96), <span class="keyword">false</span>, <span class="keyword">false</span>, t1);
         env-&gt;addEditBox(L<span class="stringliteral">&quot;1.0&quot;</span>, core::rect&lt;s32&gt;(40,76,130,96), <span class="keyword">true</span>, t1, GUI_ID_Y_SCALE);
         env-&gt;addStaticText(L<span class="stringliteral">&quot;Z:&quot;</span>, core::rect&lt;s32&gt;(22,108,40,126), <span class="keyword">false</span>, <span class="keyword">false</span>, t1);
         env-&gt;addEditBox(L<span class="stringliteral">&quot;1.0&quot;</span>, core::rect&lt;s32&gt;(40,106,130,126), <span class="keyword">true</span>, t1, GUI_ID_Z_SCALE);
@@ -277,7 +279,7 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
         env-&gt;addButton(core::rect&lt;s32&gt;(65,20,95,40), t1, GUI_ID_BUTTON_SCALE_MUL10, L<span class="stringliteral">&quot;* 10&quot;</span>);
         env-&gt;addButton(core::rect&lt;s32&gt;(100,20,130,40), t1, GUI_ID_BUTTON_SCALE_DIV10, L<span class="stringliteral">&quot;* 0.1&quot;</span>);
 
-        UpdateScaleInfo(Model);
+        updateScaleInfo(Model);
 
         <span class="comment">// add transparency control</span>
         env-&gt;addStaticText(L<span class="stringliteral">&quot;GUI Transparency Control:&quot;</span>,
@@ -288,17 +290,43 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
         scrollbar-&gt;setPos(255);
 
         <span class="comment">// add framerate control</span>
+        env-&gt;addStaticText(L<span class="stringliteral">&quot;:&quot;</span>, core::rect&lt;s32&gt;(10,240,150,265), <span class="keyword">true</span>, <span class="keyword">false</span>, t1);
         env-&gt;addStaticText(L<span class="stringliteral">&quot;Framerate:&quot;</span>,
-                        core::rect&lt;s32&gt;(10,240,150,265), <span class="keyword">true</span>, <span class="keyword">false</span>, t1);
+                        core::rect&lt;s32&gt;(12,240,75,265), <span class="keyword">false</span>, <span class="keyword">false</span>, t1);
+        env-&gt;addStaticText(L<span class="stringliteral">&quot;&quot;</span>, core::rect&lt;s32&gt;(75,240,200,265), <span class="keyword">false</span>, <span class="keyword">false</span>, t1,
+                        GUI_ID_ANIMATION_INFO);
         scrollbar = env-&gt;addScrollBar(<span class="keyword">true</span>,
                         core::rect&lt;s32&gt;(10,265,150,280), t1, GUI_ID_SKIN_ANIMATION_FPS);
         scrollbar-&gt;setMax(MAX_FRAMERATE);
         scrollbar-&gt;setMin(-MAX_FRAMERATE);
         scrollbar-&gt;setPos(DEFAULT_FRAMERATE);
+        scrollbar-&gt;setSmallStep(1);
+}
 
-        <span class="comment">// bring irrlicht engine logo to front, because it</span>
-        <span class="comment">// now may be below the newly created toolbox</span>
-        root-&gt;bringToFront(root-&gt;getElementFromId(666, <span class="keyword">true</span>));
+<span class="keywordtype">void</span> updateToolBox()
+{
+        IGUIEnvironment* env = Device-&gt;getGUIEnvironment();
+        IGUIElement* root = env-&gt;getRootGUIElement();
+        IGUIElement* dlg = root-&gt;getElementFromId(GUI_ID_DIALOG_ROOT_WINDOW, <span class="keyword">true</span>);
+        <span class="keywordflow">if</span> (!dlg )
+                <span class="keywordflow">return</span>;
+
+        <span class="comment">// update the info we have about the animation of the model</span>
+        IGUIStaticText *  aniInfo = (IGUIStaticText *)(dlg-&gt;getElementFromId(GUI_ID_ANIMATION_INFO, <span class="keyword">true</span>));
+        <span class="keywordflow">if</span> (aniInfo)
+        {
+                <span class="keywordflow">if</span> ( Model &amp;&amp; <a class="code" href="namespaceirr_1_1scene.html#acad3d7ef92a9807d391ba29120f3b7bda073d7fe9dfd49f24cb13bfae56d8d3b6" title="Animated Mesh Scene Node.">scene::ESNT_ANIMATED_MESH</a> == Model-&gt;getType() )
+                {
+                        scene::IAnimatedMeshSceneNode* animatedModel = (scene::IAnimatedMeshSceneNode*)Model;
+
+                        <a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2" title="Typedef for wide character strings.">core::stringw</a> str( (<a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a>)<a class="code" href="namespaceirr_1_1core.html#a894a901069c34298987761c5f3d74f1f">core::round_</a>(animatedModel-&gt;getAnimationSpeed()) );
+                        str += L<span class="stringliteral">&quot; Frame: &quot;</span>;
+                        str += <a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2" title="Typedef for wide character strings.">core::stringw</a>((<a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a>)animatedModel-&gt;getFrameNr());
+                        aniInfo-&gt;setText(str.c_str());
+                }
+                <span class="keywordflow">else</span>
+                        aniInfo-&gt;setText(L<span class="stringliteral">&quot;&quot;</span>);
+        }
 }
 </pre></div><p>To get all the events sent by the GUI Elements, we need to create an event receiver. This one is really simple. If an event occurs, it checks the id of the caller and the event type, and starts an action based on these values. For example, if a menu item with id GUI_ID_OPEN_MODEL was selected, if opens a file-open-dialog. </p>
 <div class="fragment"><pre class="fragment"><span class="keyword">class </span>MyEventReceiver : <span class="keyword">public</span> IEventReceiver
@@ -341,7 +369,7 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
                                 <span class="keywordflow">if</span> (<span class="keywordtype">id</span> == GUI_ID_SKIN_TRANSPARENCY)
                                 {
                                         <span class="keyword">const</span> <a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> pos = ((IGUIScrollBar*)event.GUIEvent.Caller)-&gt;getPos();
-                                        SetSkinTransparency(pos, env-&gt;getSkin());
+                                        setSkinTransparency(pos, env-&gt;getSkin());
                                 }
                                 <span class="comment">// control animation speed</span>
                                 <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keywordtype">id</span> == GUI_ID_SKIN_ANIMATION_FPS)
@@ -381,18 +409,18 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
 
                                                 <span class="keywordflow">if</span> (Model)
                                                         Model-&gt;setScale(scale);
-                                                UpdateScaleInfo(Model);
+                                                updateScaleInfo(Model);
                                         }
                                         <span class="keywordflow">break</span>;
                                 <span class="keywordflow">case</span> GUI_ID_BUTTON_SCALE_MUL10:
                                         <span class="keywordflow">if</span> (Model)
                                                 Model-&gt;setScale(Model-&gt;getScale()*10.f);
-                                        UpdateScaleInfo(Model);
+                                        updateScaleInfo(Model);
                                         <span class="keywordflow">break</span>;
                                 <span class="keywordflow">case</span> GUI_ID_BUTTON_SCALE_DIV10:
                                         <span class="keywordflow">if</span> (Model)
                                                 Model-&gt;setScale(Model-&gt;getScale()*0.1f);
-                                        UpdateScaleInfo(Model);
+                                        updateScaleInfo(Model);
                                         <span class="keywordflow">break</span>;
                                 <span class="keywordflow">case</span> GUI_ID_BUTTON_OPEN_MODEL:
                                         env-&gt;addFileOpenDialog(L<span class="stringliteral">&quot;Please select a model file to open&quot;</span>);
@@ -739,7 +767,7 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
         image = driver-&gt;getTexture(<span class="stringliteral">&quot;help.png&quot;</span>);
         bar-&gt;addButton(GUI_ID_BUTTON_SHOW_ABOUT, 0, L<span class="stringliteral">&quot;Open Help&quot;</span>, image, 0, <span class="keyword">false</span>, <span class="keyword">true</span>);
 
-        <span class="comment">// create a combobox with some senseless texts</span>
+        <span class="comment">// create a combobox for texture filters</span>
 
         gui::IGUIComboBox* box = env-&gt;addComboBox(core::rect&lt;s32&gt;(250,4,350,23), bar, GUI_ID_TEXTUREFILTER);
         box-&gt;addItem(L<span class="stringliteral">&quot;No filtering&quot;</span>);
@@ -828,12 +856,14 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
 
                         driver-&gt;endScene();
 
+                        <span class="comment">// update information about current frame-rate</span>
                         <a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2" title="Typedef for wide character strings.">core::stringw</a> str(L<span class="stringliteral">&quot;FPS: &quot;</span>);
                         str.append(<a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2" title="Typedef for wide character strings.">core::stringw</a>(driver-&gt;getFPS()));
                         str += L<span class="stringliteral">&quot; Tris: &quot;</span>;
                         str.append(<a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2" title="Typedef for wide character strings.">core::stringw</a>(driver-&gt;getPrimitiveCountDrawn()));
                         fpstext-&gt;setText(str.c_str());
 
+                        <span class="comment">// update information about the active camera</span>
                         scene::ICameraSceneNode* cam = Device-&gt;getSceneManager()-&gt;getActiveCamera();
                         str = L<span class="stringliteral">&quot;Pos: &quot;</span>;
                         str.append(<a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2" title="Typedef for wide character strings.">core::stringw</a>(cam-&gt;getPosition().X));
@@ -848,6 +878,9 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
                         str += L<span class="stringliteral">&quot; &quot;</span>;
                         str.append(<a class="code" href="namespaceirr_1_1core.html#aef83fafbb1b36fcce44c07c9be23a7f2" title="Typedef for wide character strings.">core::stringw</a>(cam-&gt;getTarget().Z));
                         postext-&gt;setText(str.c_str());
+
+                        <span class="comment">// update the tool dialog</span>
+                        updateToolBox();
                 }
                 <span class="keywordflow">else</span>
                         Device-&gt;yield();
@@ -866,7 +899,7 @@ scene::ICameraSceneNode* Camera[2] = {0, 0};
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Feb 14 13:06:59 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Oct 24 12:41:59 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>

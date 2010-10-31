@@ -165,11 +165,12 @@
 <tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#a3f9bf2240c47d3f99b86f83f9123aa9d">IRRCALLCONV</a></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#aa93137544a73eaa2563931a1e665862d">IRRLICHT_API</a></td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Set FPU settings.  <a href="#aa93137544a73eaa2563931a1e665862d"></a><br/></td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#a8eee87830586d48bc5921ded2775c3a3">IRRLICHT_SDK_VERSION</a>&nbsp;&nbsp;&nbsp;&quot;1.7.1&quot;</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#a8eee87830586d48bc5921ded2775c3a3">IRRLICHT_SDK_VERSION</a>&nbsp;&nbsp;&nbsp;&quot;1.7.2&quot;</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#a6151c23fff5ce8cab48350152c549ef3">IRRLICHT_VERSION_MAJOR</a>&nbsp;&nbsp;&nbsp;1</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Irrlicht SDK Version.  <a href="#a6151c23fff5ce8cab48350152c549ef3"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#a525cde277e65e7457d04a8611b7f7f7f">IRRLICHT_VERSION_MINOR</a>&nbsp;&nbsp;&nbsp;7</td></tr>
-<tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#ad592993084de4a67d10b82e6ff498b30">IRRLICHT_VERSION_REVISION</a>&nbsp;&nbsp;&nbsp;1</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#ad592993084de4a67d10b82e6ff498b30">IRRLICHT_VERSION_REVISION</a>&nbsp;&nbsp;&nbsp;2</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="_irr_compile_config_8h.html#a86c55bc36e46045b27d29ef2d2f41c4c">IRRLICHT_VERSION_SVN</a>&nbsp;&nbsp;&nbsp;-beta</td></tr>
 </table>
 <hr/><h2>Define Documentation</h2>
 <a class="anchor" id="aff7fe8f0e0b5cd08441c185e69d1be51"></a><!-- doxytag: member="IrrCompileConfig.h::__IRR_COMPILE_WITH_MOUNT_ARCHIVE_LOADER_" ref="aff7fe8f0e0b5cd08441c185e69d1be51" args="" -->
@@ -803,7 +804,7 @@
 <div class="memdoc">
 
 <p>Define _IRR_COMPILE_WITH_OPENGL_ to compile the Irrlicht engine with OpenGL. </p>
-<p>Define _IRR_COMPILE_WITH_DIRECT3D_8_ and _IRR_COMPILE_WITH_DIRECT3D_9_ to compile the Irrlicht engine with Direct3D8 and/or DIRECT3D9. If you only want to use the software device or opengl this can be useful. This switch is mostly disabled because people do not get the g++ compiler compile directX header files, and directX is only available on windows platforms. If you are using Dev-Cpp, and want to compile this using a DX dev pack, you can define _IRR_COMPILE_WITH_DX9_DEV_PACK_. So you simply need to add something like this to the compiler settings: -DIRR_COMPILE_WITH_DX9_DEV_PACK and this to the linker settings: -ld3dx9 -ld3dx8</p>
+<p>Define _IRR_COMPILE_WITH_DIRECT3D_8_ and _IRR_COMPILE_WITH_DIRECT3D_9_ to compile the Irrlicht engine with Direct3D8 and/or DIRECT3D9. If you only want to use the software device or opengl you can disable those defines. This switch is mostly disabled because people do not get the g++ compiler compile directX header files, and directX is only available on Windows platforms. If you are using Dev-Cpp, and want to compile this using a DX dev pack, you can define _IRR_COMPILE_WITH_DX9_DEV_PACK_. So you simply need to add something like this to the compiler settings: -DIRR_COMPILE_WITH_DX9_DEV_PACK and this to the linker settings: -ld3dx9 -ld3dx8</p>
 <p>Microsoft have chosen to remove D3D8 headers from their recent DXSDKs, and so D3D8 support is now disabled by default. If you really want to build with D3D8 support, then you will have to source a DXSDK with the appropriate headers, e.g. Summer 2004. This is a Microsoft issue, not an Irrlicht one. If you do not wish the engine to be compiled with OpenGL, comment this define out. </p>
 
 <p>Definition at line <a class="el" href="_irr_compile_config_8h_source.html#l00128">128</a> of file <a class="el" href="_irr_compile_config_8h_source.html">IrrCompileConfig.h</a>.</p>
@@ -1436,7 +1437,7 @@
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define IRRLICHT_SDK_VERSION&nbsp;&nbsp;&nbsp;&quot;1.7.1&quot;</td>
+          <td class="memname">#define IRRLICHT_SDK_VERSION&nbsp;&nbsp;&nbsp;&quot;1.7.2&quot;</td>
         </tr>
       </table>
 </div>
@@ -1483,13 +1484,28 @@
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">#define IRRLICHT_VERSION_REVISION&nbsp;&nbsp;&nbsp;1</td>
+          <td class="memname">#define IRRLICHT_VERSION_REVISION&nbsp;&nbsp;&nbsp;2</td>
         </tr>
       </table>
 </div>
 <div class="memdoc">
 
 <p>Definition at line <a class="el" href="_irr_compile_config_8h_source.html#l00011">11</a> of file <a class="el" href="_irr_compile_config_8h_source.html">IrrCompileConfig.h</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a86c55bc36e46045b27d29ef2d2f41c4c"></a><!-- doxytag: member="IrrCompileConfig.h::IRRLICHT_VERSION_SVN" ref="a86c55bc36e46045b27d29ef2d2f41c4c" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define IRRLICHT_VERSION_SVN&nbsp;&nbsp;&nbsp;-beta</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Definition at line <a class="el" href="_irr_compile_config_8h_source.html#l00014">14</a> of file <a class="el" href="_irr_compile_config_8h_source.html">IrrCompileConfig.h</a>.</p>
 
 </div>
 </div>
@@ -1503,7 +1519,7 @@
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Feb 14 13:06:59 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Oct 24 12:41:58 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>

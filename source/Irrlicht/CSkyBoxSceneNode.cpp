@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2010 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
@@ -252,7 +252,8 @@ ISceneNode* CSkyBoxSceneNode::clone(ISceneNode* newParent, ISceneManager* newMan
 	for (u32 i=0; i<6; ++i)
 		nb->Material[i] = Material[i];
 
-	nb->drop();
+	if ( newParent )
+		nb->drop();
 	return nb;
 }
 

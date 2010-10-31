@@ -81,7 +81,7 @@
 <a name="l00067"></a>00067                         <a class="code" href="classirr_1_1video_1_1_s_color.html" title="Class representing a 32 bit ARGB color.">video::SColor</a> high) : Threshold(threshold), Low(low), High(high) {}
 <a name="l00068"></a><a class="code" href="classirr_1_1scene_1_1_s_vertex_color_threshold_manipulator.html#a22a91ea06c4fbd08d3ce8541e83a6e04">00068</a>                 <span class="keywordtype">void</span> <a class="code" href="classirr_1_1scene_1_1_s_vertex_color_threshold_manipulator.html#a22a91ea06c4fbd08d3ce8541e83a6e04">operator()</a>(<a class="code" href="structirr_1_1video_1_1_s3_d_vertex.html" title="standard vertex used by the Irrlicht engine.">video::S3DVertex</a>&amp; vertex)<span class="keyword"> const</span>
 <a name="l00069"></a>00069 <span class="keyword">                </span>{
-<a name="l00070"></a>00070                         vertex.<a class="code" href="structirr_1_1video_1_1_s3_d_vertex.html#a7b94948eda32f0a86512aafb311967e6" title="Color.">Color</a> = (vertex.<a class="code" href="structirr_1_1video_1_1_s3_d_vertex.html#a7b94948eda32f0a86512aafb311967e6" title="Color.">Color</a>.getAverage()&gt;Threshold)?High:Low;
+<a name="l00070"></a>00070                         vertex.<a class="code" href="structirr_1_1video_1_1_s3_d_vertex.html#a7b94948eda32f0a86512aafb311967e6" title="Color.">Color</a> = ((<a class="code" href="namespaceirr.html#a646874f69af8ff87fc10201b0254a761" title="8 bit unsigned variable.">u8</a>)vertex.<a class="code" href="structirr_1_1video_1_1_s3_d_vertex.html#a7b94948eda32f0a86512aafb311967e6" title="Color.">Color</a>.getAverage()&gt;Threshold)?High:Low;
 <a name="l00071"></a>00071                 }
 <a name="l00072"></a>00072         <span class="keyword">private</span>:
 <a name="l00073"></a>00073                 <a class="code" href="namespaceirr.html#a646874f69af8ff87fc10201b0254a761" title="8 bit unsigned variable.">u8</a> Threshold;
@@ -297,7 +297,7 @@
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Feb 14 13:06:58 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Oct 24 12:41:58 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>

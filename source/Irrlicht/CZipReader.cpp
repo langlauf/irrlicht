@@ -1,14 +1,21 @@
-// Copyright (C) 2002-2009 Nikolaus Gebhardt
+// Copyright (C) 2002-2010 Nikolaus Gebhardt
 // This file is part of the "Irrlicht Engine".
 // For conditions of distribution and use, see copyright notice in irrlicht.h
 
 #include "CZipReader.h"
 
+#include "os.h"
+
+// This method is used for error output from bzip2.
+extern "C" void bz_internal_error(int errorCode)
+{
+	irr::os::Printer::log("Error in bzip2 handling", irr::core::stringc(errorCode), irr::ELL_ERROR);
+}
+
 #ifdef __IRR_COMPILE_WITH_ZIP_ARCHIVE_LOADER_
 
 #include "CFileList.h"
 #include "CReadFile.h"
-#include "os.h"
 #include "coreutil.h"
 
 #include "IrrCompileConfig.h"
@@ -32,14 +39,6 @@
 	#ifdef _IRR_COMPILE_WITH_LZMA_
 	#include "lzma/LzmaDec.h"
 	#endif
-#endif
-
-#ifdef BZ_NO_STDIO
-// This method is used for error output from bzip2.
-extern "C" void bz_internal_error(int errorCode)
-{
-	irr::os::Printer::log("Error in bzip2 handling", irr::core::stringc(errorCode), irr::ELL_ERROR);
-}
 #endif
 
 namespace irr
@@ -139,7 +138,7 @@ bool CArchiveLoaderZIP::isALoadableFileFormat(io::IReadFile* file) const
 // -----------------------------------------------------------------------------
 
 CZipReader::CZipReader(IReadFile* file, bool ignoreCase, bool ignorePaths, bool isGZip)
- : CFileList(file ? file->getFileName() : "", ignoreCase, ignorePaths), File(file), IsGZip(isGZip)
+ : CFileList((file ? file->getFileName() : io::path("")), ignoreCase, ignorePaths), File(file), IsGZip(isGZip)
 {
 	#ifdef _DEBUG
 	setDebugName("CZipReader");

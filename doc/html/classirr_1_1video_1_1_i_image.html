@@ -51,7 +51,7 @@ Inheritance diagram for irr::video::IImage:</div>
 <tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1video_1_1_i_image.html#a651c196f681a105fabfb5ff4f6b28682">copyToScalingBoxFilter</a> (<a class="el" href="classirr_1_1video_1_1_i_image.html">IImage</a> *target, <a class="el" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6">s32</a> bias=0, bool blend=false)=0</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">copies this surface into another, scaling it to fit, appyling a box filter  <a href="#a651c196f681a105fabfb5ff4f6b28682"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1video_1_1_i_image.html#a7dd1e5dd19cb35be17c2fa00e38a193d">copyToWithAlpha</a> (<a class="el" href="classirr_1_1video_1_1_i_image.html">IImage</a> *target, const core::position2d&lt; <a class="el" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6">s32</a> &gt; &amp;pos, const <a class="el" href="classirr_1_1core_1_1rect.html">core::rect</a>&lt; <a class="el" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6">s32</a> &gt; &amp;sourceRect, const <a class="el" href="classirr_1_1video_1_1_s_color.html">SColor</a> &amp;color, const <a class="el" href="classirr_1_1core_1_1rect.html">core::rect</a>&lt; <a class="el" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6">s32</a> &gt; *clipRect=0)=0</td></tr>
-<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">copies this surface into another, using the alpha mask, an cliprect and a color to add with  <a href="#a7dd1e5dd19cb35be17c2fa00e38a193d"></a><br/></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">copies this surface into another, using the alpha mask and cliprect and a color to add with  <a href="#a7dd1e5dd19cb35be17c2fa00e38a193d"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1video_1_1_i_image.html#a04973e101790130f611c4c6790e5b352">fill</a> (const <a class="el" href="classirr_1_1video_1_1_s_color.html">SColor</a> &amp;color)=0</td></tr>
 <tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">fills the surface with black or white  <a href="#a04973e101790130f611c4c6790e5b352"></a><br/></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804">u32</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="classirr_1_1video_1_1_i_image.html#a36d4f895245543080f24f99dd89930fb">getAlphaMask</a> () const =0</td></tr>
@@ -312,7 +312,7 @@ Inheritance diagram for irr::video::IImage:</div>
 </div>
 <div class="memdoc">
 
-<p>copies this surface into another, using the alpha mask, an cliprect and a color to add with </p>
+<p>copies this surface into another, using the alpha mask and cliprect and a color to add with </p>
 
 </div>
 </div>
@@ -615,7 +615,7 @@ Inheritance diagram for irr::video::IImage:</div>
 <div class="memdoc">
 
 <p>test if the color format is only viable for RenderTarget textures </p>
-<p>Since we don't have support for e.g. floating point iimage formats one should test if the color format can be used for arbitrary usage, or if it is restricted to RTTs. </p>
+<p>Since we don't have support for e.g. floating point <a class="el" href="classirr_1_1video_1_1_i_image.html" title="Interface for software image data.">IImage</a> formats one should test if the color format can be used for arbitrary usage, or if it is restricted to RTTs. </p>
 
 <p>Definition at line <a class="el" href="_i_image_8h_source.html#l00179">179</a> of file <a class="el" href="_i_image_8h_source.html">IImage.h</a>.</p>
 
@@ -718,7 +718,7 @@ Inheritance diagram for irr::video::IImage:</div>
     <td width="0"> <div align="left"><small><a href="http://irrlicht.sourceforge.net" target="_blank"><img src="irrlicht.png" alt="The Irrlicht Engine" align="middle" border=0 width=88 height=31></a></small></div></td>
     <td> <div align="left"><small><em><font size="2">The <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
         Engine</a> Documentation &copy; 2003-2010 by Nikolaus Gebhardt. Generated 
-        on Sun Feb 14 13:07:14 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
+        on Sun Oct 24 12:42:09 2010 by <a href="http://www.doxygen.org" target="_blank">Doxygen</a> 
         (1.6.2)</font></em></small></div></td>
   </tr>
 </table>
