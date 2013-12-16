@@ -349,7 +349,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
             str += driver-&gt;getName();
             str += <span class="stringliteral">&quot;] FPS:&quot;</span>;
             str += fps;
-            str += <span class="stringliteral">&quot; Cull:&quot;</span>;
+<span class="preprocessor">#ifdef _IRR_SCENEMANAGER_DEBUG          </span>
+<span class="preprocessor"></span>            str += <span class="stringliteral">&quot; Cull:&quot;</span>;
             str += attr-&gt;getAttributeAsInt(<span class="stringliteral">&quot;calls&quot;</span>);
             str += <span class="stringliteral">&quot;/&quot;</span>;
             str += attr-&gt;getAttributeAsInt(<span class="stringliteral">&quot;culled&quot;</span>);
@@ -359,8 +360,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
             str += attr-&gt;getAttributeAsInt(<span class="stringliteral">&quot;drawn_transparent&quot;</span>);
             str += <span class="stringliteral">&quot;/&quot;</span>;
             str += attr-&gt;getAttributeAsInt(<span class="stringliteral">&quot;drawn_transparent_effect&quot;</span>);
-
-            device-&gt;setWindowCaption(str.c_str());
+<span class="preprocessor">#endif</span>
+<span class="preprocessor"></span>            device-&gt;setWindowCaption(str.c_str());
             lastFPS = fps;
         }
     }
@@ -390,7 +391,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
     <li class="footer">
 <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
-Engine</a> Documentation &copy; 2003-2012 by Nikolaus Gebhardt. Generated on Tue Nov 6 2012 11:06:01 for Irrlicht 3D Engine by
+Engine</a> Documentation &copy; 2003-2012 by Nikolaus Gebhardt. Generated on Sun Nov 17 2013 20:18:41 for Irrlicht 3D Engine by
 <a href="http://www.doxygen.org/index.html" target="_blank">Doxygen</a> 1.7.5.1 </li>
    </ul>
  </div>

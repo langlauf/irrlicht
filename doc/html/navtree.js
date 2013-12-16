@@ -43,6 +43,7 @@ var NAVTREE =
       [ "irr::core::map< KeyType, ValueType >::ConstIterator", "classirr_1_1core_1_1map_1_1_const_iterator.html", null ],
       [ "irr::scene::CVertexBuffer", "classirr_1_1scene_1_1_c_vertex_buffer.html", null ],
       [ "irr::core::dimension2d< T >", "classirr_1_1core_1_1dimension2d.html", null ],
+      [ "irr::core::FloatIntUnion32", "unionirr_1_1core_1_1_float_int_union32.html", null ],
       [ "irr::scene::IAnimatedMesh", "classirr_1_1scene_1_1_i_animated_mesh.html", null ],
       [ "irr::scene::IAnimatedMeshMD2", "classirr_1_1scene_1_1_i_animated_mesh_m_d2.html", null ],
       [ "irr::scene::IAnimatedMeshMD3", "classirr_1_1scene_1_1_i_animated_mesh_m_d3.html", null ],
@@ -267,6 +268,7 @@ var NAVTREE =
       [ "irr::core::list< T >::ConstIterator", "classirr_1_1core_1_1list_1_1_const_iterator.html", null ],
       [ "irr::core::map< KeyType, ValueType >::ConstIterator", "classirr_1_1core_1_1map_1_1_const_iterator.html", null ],
       [ "irr::core::dimension2d< T >", "classirr_1_1core_1_1dimension2d.html", null ],
+      [ "irr::core::FloatIntUnion32", "unionirr_1_1core_1_1_float_int_union32.html", null ],
       [ "irr::IEventReceiver", "classirr_1_1_i_event_receiver.html", [
         [ "irr::gui::IGUIElement", "classirr_1_1gui_1_1_i_g_u_i_element.html", [
           [ "irr::gui::IGUIButton", "classirr_1_1gui_1_1_i_g_u_i_button.html", null ],

@@ -2010,7 +2010,8 @@ CQuake3EventHandler::~CQuake3EventHandler ()
         IVideoDriver * driver = Game-&gt;Device-&gt;getVideoDriver();
 
         IAttributes * attr = smgr-&gt;getParameters();
-        swprintf ( msg, 128,
+<span class="preprocessor">#ifdef _IRR_SCENEMANAGER_DEBUG                  </span>
+<span class="preprocessor"></span>        swprintf ( msg, 128,
             L<span class="stringliteral">&quot;Q3 %s [%ls], FPS:%03d Tri:%.03fm Cull %d/%d nodes (%d,%d,%d)&quot;</span>,
             Game-&gt;CurrentMapName.c_str(),
             driver-&gt;getName(),
@@ -2022,7 +2023,16 @@ CQuake3EventHandler::~CQuake3EventHandler ()
             attr-&gt;getAttributeAsInt ( <span class="stringliteral">&quot;drawn_transparent&quot;</span> ),
             attr-&gt;getAttributeAsInt ( <span class="stringliteral">&quot;drawn_transparent_effect&quot;</span> )
             );
-        Game-&gt;Device-&gt;setWindowCaption( msg );
+<span class="preprocessor">#else</span>
+<span class="preprocessor"></span>swprintf ( msg, 128,
+            L<span class="stringliteral">&quot;Q3 %s [%ls], FPS:%03d Tri:%.03fm&quot;</span>,
+            Game-&gt;CurrentMapName.c_str(),
+            driver-&gt;getName(),
+            driver-&gt;getFPS (),
+            (<a class="code" href="namespaceirr.html#a0277be98d67dc26ff93b1a6a1d086b07" title="32 bit floating point variable.">f32</a>) driver-&gt;getPrimitiveCountDrawn( 0 ) * ( 1.f / 1000000.f )
+            );      
+<span class="preprocessor">#endif      </span>
+<span class="preprocessor"></span>        Game-&gt;Device-&gt;setWindowCaption( msg );
 
         swprintf ( msg, 128,
                     L<span class="stringliteral">&quot;%03d fps, F1 GUI on/off, F2 respawn, F3-F6 toggle Nodes, F7 Collision on/off&quot;</span>
@@ -2170,7 +2180,7 @@ CQuake3EventHandler::~CQuake3EventHandler ()
 
     <li class="footer">
 <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
-Engine</a> Documentation &copy; 2003-2012 by Nikolaus Gebhardt. Generated on Tue Nov 6 2012 11:06:01 for Irrlicht 3D Engine by
+Engine</a> Documentation &copy; 2003-2012 by Nikolaus Gebhardt. Generated on Sun Nov 17 2013 20:18:41 for Irrlicht 3D Engine by
 <a href="http://www.doxygen.org/index.html" target="_blank">Doxygen</a> 1.7.5.1 </li>
    </ul>
  </div>

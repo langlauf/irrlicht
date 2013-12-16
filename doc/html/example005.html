@@ -125,6 +125,16 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     GUI_ID_FILE_OPEN_BUTTON,
     GUI_ID_TRANSPARENCY_SCROLL_BAR
 };
+</pre></div><p>Set the skin transparency by changing the alpha values of all skin-colors </p>
+<div class="fragment"><pre class="fragment"><span class="keywordtype">void</span> setSkinTransparency(<a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> alpha, <a class="code" href="classirr_1_1gui_1_1_i_g_u_i_skin.html" title="A skin modifies the look of the GUI elements.">irr::gui::IGUISkin</a> * skin)
+{
+    <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> i=0; i&lt;<a class="code" href="namespaceirr_1_1gui.html#abd15860fde29833c48daff5f95d5467aaf340f49e2e0827c0f06fdf65098554af">irr::gui::EGDC_COUNT</a> ; ++i)
+    {
+        video::SColor col = skin-&gt;<a class="code" href="classirr_1_1gui_1_1_i_g_u_i_skin.html#ad1afa2e5e34c30e0cbfb85b1dee2dbe3" title="returns default color">getColor</a>((<a class="code" href="namespaceirr_1_1gui.html#abd15860fde29833c48daff5f95d5467a" title="Enumeration for skin colors.">EGUI_DEFAULT_COLOR</a>)i);
+        col.setAlpha(alpha);
+        skin-&gt;<a class="code" href="classirr_1_1gui_1_1_i_g_u_i_skin.html#ab9782296ba881872207a0915a81d7807" title="sets a default color">setColor</a>((<a class="code" href="namespaceirr_1_1gui.html#abd15860fde29833c48daff5f95d5467a" title="Enumeration for skin colors.">EGUI_DEFAULT_COLOR</a>)i, col);
+    }
+}
 </pre></div><p>The Event Receiver is not only capable of getting keyboard and mouse input events, but also events of the graphical user interface (gui). There are events for almost everything: Button click, Listbox selection change, events that say that a element was hovered and so on. To be able to react to some of these events, we create an event receiver. We only react to gui events, and if it's such an event, we get the id of the caller (the gui element which caused the event) and get the pointer to the gui environment. </p>
 <div class="fragment"><pre class="fragment"><span class="keyword">class </span>MyEventReceiver : <span class="keyword">public</span> IEventReceiver
 {
@@ -145,14 +155,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
                 <span class="keywordflow">if</span> (<span class="keywordtype">id</span> == GUI_ID_TRANSPARENCY_SCROLL_BAR)
                 {
                     <a class="code" href="namespaceirr.html#ac66849b7a6ed16e30ebede579f9b47c6" title="32 bit signed variable.">s32</a> pos = ((IGUIScrollBar*)event.GUIEvent.Caller)-&gt;getPos();
-                    
-                    <span class="keywordflow">for</span> (<a class="code" href="namespaceirr.html#a0416a53257075833e7002efd0a18e804" title="32 bit unsigned variable.">u32</a> i=0; i&lt;<a class="code" href="namespaceirr_1_1gui.html#abd15860fde29833c48daff5f95d5467aaf340f49e2e0827c0f06fdf65098554af">EGDC_COUNT</a> ; ++i)
-                    {
-                        SColor col = env-&gt;getSkin()-&gt;getColor((<a class="code" href="namespaceirr_1_1gui.html#abd15860fde29833c48daff5f95d5467a" title="Enumeration for skin colors.">EGUI_DEFAULT_COLOR</a>)i);
-                        col.setAlpha(pos);
-                        env-&gt;getSkin()-&gt;setColor((<a class="code" href="namespaceirr_1_1gui.html#abd15860fde29833c48daff5f95d5467a" title="Enumeration for skin colors.">EGUI_DEFAULT_COLOR</a>)i, col);
-                    }
-                    
+                    setSkinTransparency(pos, env-&gt;getSkin());
                 }
                 <span class="keywordflow">break</span>;
 </pre></div><p>If a button was clicked, it could be one of 'our' three buttons. If it is the first, we shut down the engine. If it is the second, we create a little window with some text on it. We also add a string to the list box to log what happened. And if it is the third button, we create a file open dialog, and add also this as string to the list box. That's all for the event receiver. </p>
@@ -239,7 +242,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     IGUIEnvironment* env = device-&gt;getGUIEnvironment();
 </pre></div><p>To make the font a little bit nicer, we load an external font and set it as the new default font in the skin. To keep the standard font for tool tip text, we set it to the built-in font. </p>
 <div class="fragment"><pre class="fragment">    IGUISkin* skin = env-&gt;getSkin();
-    IGUIFont* font = env-&gt;getFont(<span class="stringliteral">&quot;../../media/fonthaettenschweiler.bmp&quot;</span>);
+    IGUIFont* font = env-&gt;<a class="code" href="classirr_1_1gui_1_1_i_g_u_i_skin.html#ab1b2623d04688c4dfe106ca407171d6e" title="returns the default font">getFont</a>(<span class="stringliteral">&quot;../../media/fonthaettenschweiler.bmp&quot;</span>);
     <span class="keywordflow">if</span> (font)
         skin-&gt;setFont(font);
 
@@ -256,6 +259,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
     IGUIScrollBar* scrollbar = env-&gt;addScrollBar(<span class="keyword">true</span>,
             rect&lt;s32&gt;(150, 45, 350, 60), 0, GUI_ID_TRANSPARENCY_SCROLL_BAR);
     scrollbar-&gt;setMax(255);
+    scrollbar-&gt;setPos(255);
+    setSkinTransparency( scrollbar-&gt;getPos(), env-&gt;getSkin());
 
     <span class="comment">// set scrollbar position to alpha value of an arbitrary element</span>
     scrollbar-&gt;setPos(env-&gt;getSkin()-&gt;getColor(<a class="code" href="namespaceirr_1_1gui.html#abd15860fde29833c48daff5f95d5467aab60eb00de0efde8c5a948ab15d9aa0a7" title="Window background.">EGDC_WINDOW</a>).getAlpha());
@@ -314,7 +319,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
     <li class="footer">
 <a href="http://irrlicht.sourceforge.net" target="_blank">Irrlicht 
-Engine</a> Documentation &copy; 2003-2012 by Nikolaus Gebhardt. Generated on Tue Nov 6 2012 11:06:01 for Irrlicht 3D Engine by
+Engine</a> Documentation &copy; 2003-2012 by Nikolaus Gebhardt. Generated on Sun Nov 17 2013 20:18:41 for Irrlicht 3D Engine by
 <a href="http://www.doxygen.org/index.html" target="_blank">Doxygen</a> 1.7.5.1 </li>
    </ul>
  </div>
