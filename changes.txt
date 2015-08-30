@@ -1,3 +1,28 @@
+--------------------------
+Changes in 1.8.2 (30.8.2015)
+
+ - Add VS2013 project files
+ - Fix compiling with IRR_LINUX_XCURSOR_
+ - Fix compiling with NO_IRR_COMPILE_WITH_LIBJPEG_  (thx to anontypist for report and patch).
+ - Fix compiling on GCC5 on MinGW (thanks to Slipxy for finding the bug and to osense for reporting it).
+ - Fix loading of .X and .B3D models with non-normalized quaternion rotations (thanks to JLouisB for a test-model).
+ - Fix compiling on Free BSD (thanks to leper for reporting and patch)
+ - Fix bug with multiple SetPixelFormat calls. (reported and fixed by anontypist)
+ - Fix bug related to memory release in PNG image loader. Thanks elephoenix for it.
+ - Fix crash in CGUIListBox when users pressed end key folled by any other key in an empty, focused list box (thanks at porcus for report and patch).
+ - Fix use of enabling defines for wal2 (halflife) image loader. Thanks to hendu for noticing.
+ - Fix userClipPlane test by inserting the stabilizeScreenBackground call
+ - Demo enables antialiasing now correct (thanks to Mel for noticing).
+ - Update glext.h (bug #429)
+ - Example 22 no longer select a random texture after loading a new texture (thanks at mongoose7 for reporting).
+ - Fix bug in IGUISkin serialization which messed up serialization of the button-pressed offsets (thanks at Midnight for reporting).
+ - IGUIStaticText::getTextHeight returns now the correct height for texts with newlines even WordWrap is not set.
+ - Crashfix for CGUIEditBox. CGUIEditBox::setMultiLine must break text when changed or other functions like getTextDimension can crash afterward for strings with newline characters.
+ - CGUIEditBox and the GUI-Editor now convert pasted text correctly using mbstowcs.
+ - C::B project files work again on newer Linux-distributions which have cleaned up their dev-lib dependencies.
+ - Makefile for the new IrrFontTool links now correctly to libfontconfig
+
+--------------------------
 Changes in 1.8.1 (17.11.2013)
 
  - Improved OpenGL performance under OSX (Thanks devonsoft for reporting).
